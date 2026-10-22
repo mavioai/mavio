@@ -10,6 +10,8 @@ import (
 
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
+	playbackv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
@@ -20,7 +22,10 @@ import (
 // serverSettingsState is the state of the sections of the server's
 // settings: General, API Keys and Transcoding.
 type serverSettingsState struct {
-	settings    task[*systemv1.GetServerSettingsResponse]
+	settings    task[*systemv1.GeneralSettings]
+	transcode   task[*playbackv1.GetTranscodingSettingsResponse]
+	outbound    task[*systemv1.OutboundProxies]
+	catalogs    task[[]string]
 	plugins     task[[]*systemv1.Plugin]
 	keys        task[[]*authv1.ApiKey]
 	general     generalForm
@@ -42,7 +47,7 @@ type generalDraft struct {
 
 // generalForm is the General section's draft, as loaded and as edited.
 type generalForm struct {
-	from         *systemv1.ServerSettings // the settings drafted from
+	from         *systemv1.GeneralSettings // the settings drafted from
 	draft, saved generalDraft
 	notice       string
 	err          error
@@ -51,7 +56,7 @@ type generalForm struct {
 // transcodingDraft is the Transcoding section as edited: the fields of
 // TranscodingSettings, numbers as the inputs edit them.
 type transcodingDraft struct {
-	acceleration              systemv1.HardwareAcceleration
+	acceleration              playbackv1.HardwareAcceleration
 	hardwareEncoding          bool
 	preset                    string
 	avcCRF, hevcCRF, threads  float64
@@ -65,7 +70,7 @@ type transcodingDraft struct {
 
 // transcodingForm is the Transcoding section's draft.
 type transcodingForm struct {
-	from         *systemv1.ServerSettings
+	from         *playbackv1.TranscodingSettings
 	draft, saved transcodingDraft
 	notice       string
 	err          error
@@ -90,32 +95,36 @@ func (a *App) pluginService(id string) systemv1connect.PluginManagementServiceCl
 	return systemv1connect.NewPluginManagementServiceClient(a.connectHTTP(), serverURL(id))
 }
 
-// serverSettings loads the settings of the server chosen.
-func (a *App) serverSettings() *task[*systemv1.GetServerSettingsResponse] {
+func (a *App) playbackService(id string) playbackv1connect.PlaybackServiceClient {
+	return playbackv1connect.NewPlaybackServiceClient(a.connectHTTP(), serverURL(id))
+}
+
+// generalSettings loads the general settings of the server chosen.
+func (a *App) generalSettings() *task[*systemv1.GeneralSettings] {
 	ss := &a.settingsState.admin.server
-	return adminTask(a, &ss.settings, "server-settings", func(ctx context.Context, s string) (*systemv1.GetServerSettingsResponse, error) {
-		return a.systemService(s).GetServerSettings(ctx, &systemv1.GetServerSettingsRequest{})
+	return adminTask(a, &ss.settings, "general-settings", func(ctx context.Context, s string) (*systemv1.GeneralSettings, error) {
+		res, err := a.systemService(s).GetGeneralSettings(ctx, &systemv1.GetGeneralSettingsRequest{})
+		return res.GetSettings(), err
 	})
 }
 
-// updateServerSettings applies change to the settings the server has
-// now, so that what other sections changed in the meantime is kept, in
-// the background; done takes its error on the main thread.
-func (a *App) updateServerSettings(change func(s *systemv1.ServerSettings), done func(err error)) {
+// transcodingSettings loads the transcoding settings of the server
+// chosen, with the accelerations its ffmpeg supports.
+func (a *App) transcodingSettings() *task[*playbackv1.GetTranscodingSettingsResponse] {
+	ss := &a.settingsState.admin.server
+	return adminTask(a, &ss.transcode, "transcoding-settings", func(ctx context.Context, s string) (*playbackv1.GetTranscodingSettingsResponse, error) {
+		return a.playbackService(s).GetTranscodingSettings(ctx, &playbackv1.GetTranscodingSettingsRequest{})
+	})
+}
+
+// saveSettings runs save, which replaces a group of the server's
+// settings, in the background; done takes its error on the main thread.
+func (a *App) saveSettings(save func(ctx context.Context, server string) error, done func(err error)) {
 	ss := &a.settingsState.admin.server
 	ss.busy = "save"
-	client := a.systemService(a.chosenServer().GetId())
+	server := a.chosenServer().GetId()
 	go func() {
-		err := func() error {
-			res, err := client.GetServerSettings(a.ctx, &systemv1.GetServerSettingsRequest{})
-			if err != nil {
-				return err
-			}
-			s := res.GetSettings()
-			change(s)
-			_, err = client.UpdateServerSettings(a.ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: s}.Build())
-			return err
-		}()
+		err := save(a.ctx, server)
 		a.opts.Update(func() {
 			ss.busy = ""
 			if err == nil {
@@ -147,7 +156,7 @@ func (a *App) saveRow(c *ui.Context, changed bool, notice string, err error, sav
 	})
 }
 
-func generalDraftOf(s *systemv1.ServerSettings) generalDraft {
+func generalDraftOf(s *systemv1.GeneralSettings) generalDraft {
 	n := s.GetNetwork()
 	return generalDraft{
 		name: n.GetServerName(), language: s.GetMetadata().GetPreferredLanguage(), country: s.GetMetadata().GetCountry(),
@@ -164,11 +173,11 @@ func (a *App) generalSection(c *ui.Context) {
 	ss := &a.settingsState.admin.server
 	f := &ss.general
 	sectionHeader(c, style.T(c, "settings.general"), "")
-	t := a.serverSettings()
+	t := a.generalSettings()
 	if taskStatus(c, t, func() { ss.settings.key = "" }, nil) {
 		return
 	}
-	if s := t.value.GetSettings(); s != f.from && (f.from == nil || f.draft == f.saved) {
+	if s := t.value; s != f.from && (f.from == nil || f.draft == f.saved) {
 		f.from, f.draft, f.saved = s, generalDraftOf(s), generalDraftOf(s)
 	}
 	d := &f.draft
@@ -268,21 +277,19 @@ func (a *App) generalSection(c *ui.Context) {
 	a.saveRow(c, changed, f.notice, f.err, func() {
 		draft := *d
 		f.err = nil
-		a.updateServerSettings(func(s *systemv1.ServerSettings) {
-			if !s.HasNetwork() {
-				s.SetNetwork(&systemv1.NetworkSettings{})
-			}
-			n := s.GetNetwork()
-			n.SetServerName(strings.TrimSpace(draft.name))
-			n.SetBaseUrl(strings.TrimSpace(draft.baseURL))
-			n.SetHttpsPort(int32(draft.httpsPort))
-			n.SetCertificatePath(strings.TrimSpace(draft.certificate))
-			n.SetKeyPath(strings.TrimSpace(draft.key))
-			n.SetLocalDiscovery(draft.discovery)
-			n.SetRelay(draft.relay)
-			s.SetMetadata(systemv1.MetadataSettings_builder{PreferredLanguage: new(draft.language), Country: new(draft.country)}.Build())
-			s.SetSessionIdleDays(int32(draft.idleDays))
-			s.SetPasswordResetPlugin(draft.resetPlugin)
+		settings := systemv1.GeneralSettings_builder{
+			Network: systemv1.NetworkSettings_builder{
+				ServerName: new(strings.TrimSpace(draft.name)), BaseUrl: new(strings.TrimSpace(draft.baseURL)), HttpsPort: new(int32(draft.httpsPort)),
+				CertificatePath: new(strings.TrimSpace(draft.certificate)), KeyPath: new(strings.TrimSpace(draft.key)),
+				LocalDiscovery: new(draft.discovery), Relay: new(draft.relay),
+			}.Build(),
+			Metadata:            systemv1.MetadataSettings_builder{PreferredLanguage: new(draft.language), Country: new(draft.country)}.Build(),
+			SessionIdleDays:     new(int32(draft.idleDays)),
+			PasswordResetPlugin: new(draft.resetPlugin),
+		}.Build()
+		a.saveSettings(func(ctx context.Context, server string) error {
+			_, err := a.systemService(server).UpdateGeneralSettings(ctx, systemv1.UpdateGeneralSettingsRequest_builder{Settings: settings}.Build())
+			return err
 		}, func(err error) {
 			f.err = err
 			if err == nil {
@@ -293,10 +300,10 @@ func (a *App) generalSection(c *ui.Context) {
 }
 
 // accelerationTitles name the hardware accelerations.
-var accelerationTitles = map[systemv1.HardwareAcceleration]string{
-	systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_AUTO:         "transcoding.accelerationAuto",
-	systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_NONE:         "transcoding.accelerationNone",
-	systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_VIDEOTOOLBOX: "VideoToolbox",
+var accelerationTitles = map[playbackv1.HardwareAcceleration]string{
+	playbackv1.HardwareAcceleration_HARDWARE_ACCELERATION_AUTO:         "transcoding.accelerationAuto",
+	playbackv1.HardwareAcceleration_HARDWARE_ACCELERATION_NONE:         "transcoding.accelerationNone",
+	playbackv1.HardwareAcceleration_HARDWARE_ACCELERATION_VIDEOTOOLBOX: "VideoToolbox",
 }
 
 var (
@@ -306,8 +313,7 @@ var (
 	deinterlacers  = []string{"yadif", "bwdif"}
 )
 
-func transcodingDraftOf(s *systemv1.ServerSettings) transcodingDraft {
-	t := s.GetTranscoding()
+func transcodingDraftOf(t *playbackv1.TranscodingSettings) transcodingDraft {
 	return transcodingDraft{
 		acceleration: t.GetHardwareAcceleration(), hardwareEncoding: t.GetHardwareEncoding(), preset: t.GetEncoderPreset(),
 		avcCRF: float64(t.GetH264Crf()), hevcCRF: float64(t.GetH265Crf()), threads: float64(t.GetThreads()),
@@ -318,8 +324,8 @@ func transcodingDraftOf(s *systemv1.ServerSettings) transcodingDraft {
 }
 
 // settings returns the TranscodingSettings of a draft.
-func (d transcodingDraft) settings() *systemv1.TranscodingSettings {
-	return systemv1.TranscodingSettings_builder{
+func (d transcodingDraft) settings() *playbackv1.TranscodingSettings {
+	return playbackv1.TranscodingSettings_builder{
 		HardwareAcceleration: new(d.acceleration), HardwareEncoding: new(d.hardwareEncoding), EncoderPreset: new(d.preset),
 		H264Crf: new(int32(d.avcCRF)), H265Crf: new(int32(d.hevcCRF)), Threads: new(int32(d.threads)),
 		TonemapAlgorithm: new(d.tonemap), TonemapRange: new(d.tonemapRange), TonemapDesat: new(d.tonemapDesat), TonemapPeak: new(d.tonemapPeak),
@@ -350,8 +356,8 @@ func (a *App) transcodingSection(c *ui.Context) {
 	ss := &a.settingsState.admin.server
 	f := &ss.transcoding
 	sectionHeader(c, style.T(c, "settings.transcoding"), style.T(c, "transcoding.message"))
-	t := a.serverSettings()
-	if taskStatus(c, t, func() { ss.settings.key = "" }, nil) {
+	t := a.transcodingSettings()
+	if taskStatus(c, t, func() { ss.transcode.key = "" }, nil) {
 		return
 	}
 	if s := t.value.GetSettings(); s != f.from && (f.from == nil || f.draft == f.saved) {
@@ -367,9 +373,9 @@ func (a *App) transcodingSection(c *ui.Context) {
 		g.row(style.T(c, "transcoding.acceleration"), style.T(c, "transcoding.accelerationDetail"), nil, func() {
 			offered := slices.Clone(t.value.GetAvailableHardwareAccelerations())
 			if len(offered) == 0 {
-				offered = []systemv1.HardwareAcceleration{systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_AUTO, systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_NONE}
+				offered = []playbackv1.HardwareAcceleration{playbackv1.HardwareAcceleration_HARDWARE_ACCELERATION_AUTO, playbackv1.HardwareAcceleration_HARDWARE_ACCELERATION_NONE}
 			}
-			if !slices.Contains(offered, d.acceleration) && d.acceleration != systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_UNSPECIFIED {
+			if !slices.Contains(offered, d.acceleration) && d.acceleration != playbackv1.HardwareAcceleration_HARDWARE_ACCELERATION_UNSPECIFIED {
 				offered = append(offered, d.acceleration)
 			}
 			labels := make([]string, len(offered))
@@ -387,7 +393,7 @@ func (a *App) transcodingSection(c *ui.Context) {
 				d.acceleration = offered[i]
 			}
 		})
-		if d.acceleration != systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_NONE {
+		if d.acceleration != playbackv1.HardwareAcceleration_HARDWARE_ACCELERATION_NONE {
 			g.switchRow(style.T(c, "transcoding.hardwareEncoding"), style.T(c, "transcoding.hardwareEncodingDetail"), &d.hardwareEncoding)
 		}
 	})
@@ -427,7 +433,10 @@ func (a *App) transcodingSection(c *ui.Context) {
 	a.saveRow(c, changed, f.notice, f.err, func() {
 		draft := *d
 		f.err = nil
-		a.updateServerSettings(func(s *systemv1.ServerSettings) { s.SetTranscoding(draft.settings()) }, func(err error) {
+		a.saveSettings(func(ctx context.Context, server string) error {
+			_, err := a.playbackService(server).UpdateTranscodingSettings(ctx, playbackv1.UpdateTranscodingSettingsRequest_builder{Settings: draft.settings()}.Build())
+			return err
+		}, func(err error) {
 			f.err = err
 			if err == nil {
 				f.saved, f.notice = draft, "transcoding.saved"

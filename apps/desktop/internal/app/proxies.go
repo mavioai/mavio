@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/egoist/mygo/ui"
+	"google.golang.org/protobuf/proto"
 
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
@@ -398,11 +399,14 @@ var outboundRequests = []struct {
 func (a *App) serverRequests(c *ui.Context, list []*systemv1.Proxy) {
 	ps := &a.settingsState.admin.proxies
 	ss := &a.settingsState.admin.server
-	t := a.serverSettings()
+	t := adminTask(a, &ss.outbound, "outbound-proxies", func(ctx context.Context, s string) (*systemv1.OutboundProxies, error) {
+		res, err := a.proxyService(s).GetOutboundProxies(ctx, &systemv1.GetOutboundProxiesRequest{})
+		return res.GetProxies(), err
+	})
 	if !t.loaded || t.err != nil {
 		return
 	}
-	current := t.value.GetSettings().GetNetwork().GetProxies()
+	current := t.value
 	footer := style.T(c, "proxies.serverRequestsFooter")
 	if ps.chooseErr != nil {
 		footer = errorMessage(c, ps.chooseErr)
@@ -427,15 +431,11 @@ func (a *App) serverRequests(c *ui.Context, list []*systemv1.Proxy) {
 					ps.choosing = map[string]string{}
 				}
 				ps.choosing[r.key] = id
-				a.updateServerSettings(func(s *systemv1.ServerSettings) {
-					if !s.HasNetwork() {
-						s.SetNetwork(&systemv1.NetworkSettings{})
-					}
-					n := s.GetNetwork()
-					if !n.HasProxies() {
-						n.SetProxies(&systemv1.OutboundProxies{})
-					}
-					r.set(n.GetProxies(), id)
+				proxies := proto.CloneOf(current)
+				r.set(proxies, id)
+				a.saveSettings(func(ctx context.Context, server string) error {
+					_, err := a.proxyService(server).UpdateOutboundProxies(ctx, systemv1.UpdateOutboundProxiesRequest_builder{Proxies: proxies}.Build())
+					return err
 				}, func(err error) {
 					delete(ps.choosing, r.key)
 					ps.chooseErr = err

@@ -100,8 +100,8 @@ func (s *fakeStorage) ListRemotes(context.Context, *storagev1.ListRemotesRequest
 }
 
 func (s *fakeStorage) ListFolders(_ context.Context, r *storagev1.ListFoldersRequest) (*storagev1.ListFoldersResponse, error) {
-	if r.GetPath() == "rclone:drive:" {
-		return storagev1.ListFoldersResponse_builder{Folders: []string{"rclone:drive:films"}}.Build(), nil
+	if r.GetPath() == "remote:drive:" {
+		return storagev1.ListFoldersResponse_builder{Folders: []string{"remote:drive:films"}}.Build(), nil
 	}
 	return &storagev1.ListFoldersResponse{}, nil
 }

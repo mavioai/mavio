@@ -29,7 +29,7 @@ type fakeAcquisition struct {
 	formats     []*acquisitionv1.CustomFormat
 	delays      []*acquisitionv1.DelayProfile
 	releases    []*acquisitionv1.ReleaseProfile
-	mappings    []*acquisitionv1.RemotePathMapping
+	settings    *acquisitionv1.AcquisitionSettings
 	ids         int
 }
 
@@ -65,9 +65,10 @@ func (f *fakeCore) handleAcquisition(mux *http.ServeMux) {
 			Id: new("d-default"), Default: new(true), EnableUsenet: new(true), EnableTorrent: new(true),
 			PreferredProtocol: new(acquisitionv1.DownloadProtocol_DOWNLOAD_PROTOCOL_USENET), TorrentDelay: durationpb.New(30 * time.Minute),
 		}.Build()},
-		mappings: []*acquisitionv1.RemotePathMapping{acquisitionv1.RemotePathMapping_builder{
-			Id: new("m1"), Host: new("seedbox"), RemotePath: new("/data/"), LocalPath: new("/mnt/seedbox/"),
-		}.Build()},
+		settings: acquisitionv1.AcquisitionSettings_builder{
+			CompletedDownloadHandling: new(true), CopyUsingHardlinks: new(true), ImportExtraFiles: new(true), ExtraFileExtensions: []string{"srt", "nfo"},
+			MinimumFreeSpace: new(int32(100)), RecycleBin: new(""), RecycleBinCleanupDays: new(int32(7)),
+		}.Build(),
 	}
 	mux.Handle(acquisitionv1connect.NewProfileServiceHandler(f.acq))
 	mux.Handle(acquisitionv1connect.NewReleaseServiceHandler(fakeIndexers{}))
@@ -284,26 +285,17 @@ func (s *fakeAcquisition) DeleteReleaseProfile(_ context.Context, r *acquisition
 	return &acquisitionv1.DeleteReleaseProfileResponse{}, nil
 }
 
-func (s *fakeAcquisition) ListRemotePathMappings(context.Context, *acquisitionv1.ListRemotePathMappingsRequest) (*acquisitionv1.ListRemotePathMappingsResponse, error) {
+func (s *fakeAcquisition) GetAcquisitionSettings(context.Context, *acquisitionv1.GetAcquisitionSettingsRequest) (*acquisitionv1.GetAcquisitionSettingsResponse, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return acquisitionv1.ListRemotePathMappingsResponse_builder{Mappings: slices.Clone(s.mappings)}.Build(), nil
+	return acquisitionv1.GetAcquisitionSettingsResponse_builder{Settings: proto.CloneOf(s.settings)}.Build(), nil
 }
 
-func (s *fakeAcquisition) CreateRemotePathMapping(_ context.Context, r *acquisitionv1.CreateRemotePathMappingRequest) (*acquisitionv1.CreateRemotePathMappingResponse, error) {
+func (s *fakeAcquisition) UpdateAcquisitionSettings(_ context.Context, r *acquisitionv1.UpdateAcquisitionSettingsRequest) (*acquisitionv1.UpdateAcquisitionSettingsResponse, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	m := proto.CloneOf(r.GetMapping())
-	m.SetId(s.nextID("m"))
-	s.mappings = append(s.mappings, m)
-	return acquisitionv1.CreateRemotePathMappingResponse_builder{Mapping: m}.Build(), nil
-}
-
-func (s *fakeAcquisition) DeleteRemotePathMapping(_ context.Context, r *acquisitionv1.DeleteRemotePathMappingRequest) (*acquisitionv1.DeleteRemotePathMappingResponse, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.mappings = deleteByID(s.mappings, r.GetId(), (*acquisitionv1.RemotePathMapping).GetId)
-	return &acquisitionv1.DeleteRemotePathMappingResponse{}, nil
+	s.settings = proto.CloneOf(r.GetSettings())
+	return acquisitionv1.UpdateAcquisitionSettingsResponse_builder{Settings: proto.CloneOf(s.settings)}.Build(), nil
 }
 
 // replaceByID replaces the entry of list with v's ID by v, and reports

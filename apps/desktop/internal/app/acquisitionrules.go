@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -372,7 +371,7 @@ func (a *App) entryButtons(g *settingsGroup, valid bool, save, remove func()) {
 				save()
 			}
 			if linkButton(c, style.T(c, "action.cancel")).Clicked() {
-				st.editing, st.adding = nil, false
+				st.editing = nil
 			}
 			if remove != nil {
 				if st.removing {
@@ -737,66 +736,4 @@ func (a *App) releaseForm(g *settingsGroup, id string, indexers []*acquisitionv1
 		}
 	}
 	a.entryButtons(g, len(required)+len(ignored) > 0, save, remove)
-}
-
-// mappingDraft is a remote path mapping being added.
-type mappingDraft struct{ host, remote, local string }
-
-// localPath is the pattern of an absolute path of the server's.
-var localPath = regexp.MustCompile(`^(/|[A-Za-z]:[\\/])`)
-
-func (a *App) remotePathMappingsPage(c *ui.Context) {
-	st := &a.settingsState.admin.acquisition
-	a.backTo(c, style.T(c, "settings.acquisition"), acquisitionPath("", ""))
-	sectionHeader(c, style.T(c, "acquisition.mappings"), style.T(c, "rules.mappingsMessage"))
-	t := adminTask(a, &st.mappings, "remote-path-mappings", func(ctx context.Context, s string) ([]*acquisitionv1.RemotePathMapping, error) {
-		res, err := a.profileService(s).ListRemotePathMappings(ctx, &acquisitionv1.ListRemotePathMappingsRequest{})
-		return res.GetMappings(), err
-	})
-	add := func() {
-		if !st.adding && linkButton(c, style.T(c, "rules.add")).Clicked() {
-			st.adding, st.err = true, nil
-		}
-	}
-	groupWith(c, "mappings", style.T(c, "acquisition.mappings"), add, "", func(g *settingsGroup) {
-		for _, m := range t.value {
-			id := m.GetId()
-			g.row(m.GetHost(), m.GetRemotePath()+" → "+m.GetLocalPath(), nil, func() {
-				if dangerButton(c, style.T(c, "rules.remove"), st.busy == "remove-"+id) {
-					a.acquisitionAction("remove-"+id, func(ctx context.Context, s string) error {
-						_, err := a.profileService(s).DeleteRemotePathMapping(ctx, acquisitionv1.DeleteRemotePathMappingRequest_builder{Id: &id}.Build())
-						return err
-					}, nil)
-				}
-			})
-		}
-		if st.adding {
-			d := &st.mapping
-			text := func(value *string, label, detail, placeholder string) {
-				g.row(label, detail, nil, func() {
-					ui.TextInput(c, value).Width(288).Label(label).Placeholder(placeholder)
-				})
-			}
-			text(&d.host, style.T(c, "rules.host"), style.T(c, "rules.hostDetail"), "192.168.1.10")
-			text(&d.remote, style.T(c, "rules.remotePath"), style.T(c, "rules.remotePathDetail"), "/downloads/")
-			text(&d.local, style.T(c, "rules.localPath"), style.T(c, "rules.localPathDetail"), "/mnt/downloads/")
-			host, remote, local := strings.TrimSpace(d.host), strings.TrimSpace(d.remote), strings.TrimSpace(d.local)
-			a.entryButtons(g, host != "" && remote != "" && localPath.MatchString(local), func() {
-				m := acquisitionv1.RemotePathMapping_builder{Host: &host, RemotePath: &remote, LocalPath: &local}.Build()
-				a.acquisitionAction("save", func(ctx context.Context, s string) error {
-					_, err := a.profileService(s).CreateRemotePathMapping(ctx, acquisitionv1.CreateRemotePathMappingRequest_builder{Mapping: m}.Build())
-					return err
-				}, func() { st.adding, st.mapping = false, mappingDraft{} })
-			}, nil)
-		}
-		switch {
-		case t.err != nil:
-			g.note(errorMessage(c, t.err), true)
-		case t.loaded && len(t.value) == 0 && !st.adding:
-			g.note(style.T(c, "rules.noMappings"), false)
-		}
-		if st.err != nil && !st.adding {
-			g.note(errorMessage(c, st.err), true)
-		}
-	})
 }

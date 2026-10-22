@@ -4,8 +4,11 @@ import (
 	"cmp"
 	"context"
 	"encoding/json"
+	"maps"
 	"net/url"
+	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -667,12 +670,18 @@ func (a *App) pluginCatalogs(c *ui.Context) {
 	ss := &a.settingsState.admin.server
 	a.backTo(c, style.T(c, "settings.plugins"), pluginsPath("", false))
 	sectionHeader(c, style.T(c, "plugins.catalogs"), style.T(c, "plugins.catalogsMessage"))
-	t := a.serverSettings()
-	list := t.value.GetSettings().GetPluginCatalogs()
+	t := adminTask(a, &ss.catalogs, "plugin-catalogs", func(ctx context.Context, s string) ([]string, error) {
+		res, err := a.pluginService(s).GetPluginCatalogs(ctx, &systemv1.GetPluginCatalogsRequest{})
+		return res.GetUrls(), err
+	})
+	list := t.value
 	busy := ss.busy != ""
 	set := func(urls []string, done func()) {
 		st.err = nil
-		a.updateServerSettings(func(s *systemv1.ServerSettings) { s.SetPluginCatalogs(urls) }, func(err error) {
+		a.saveSettings(func(ctx context.Context, server string) error {
+			_, err := a.pluginService(server).UpdatePluginCatalogs(ctx, systemv1.UpdatePluginCatalogsRequest_builder{Urls: urls}.Build())
+			return err
+		}, func(err error) {
 			st.err = err
 			if err == nil && done != nil {
 				done()
@@ -728,7 +737,37 @@ type pluginConfigState struct {
 	// once confirmed, of the dependency named recreatingName.
 	recreating     *string
 	recreatingName string
+	// places are the server's folders each managed dependency mounts and
+	// the port it publishes for peers, as edited, by name.
+	places map[string]*containerPlaces
 }
+
+// containerPlaces are a managed container dependency's folders and peer
+// port as edited, and the container they were drafted from.
+type containerPlaces struct {
+	from     *systemv1.PluginContainer
+	folders  map[string]string
+	peerPort string
+}
+
+func containerPlacesOf(p *systemv1.PluginContainer) *containerPlaces {
+	return &containerPlaces{from: p, folders: maps.Clone(p.GetFolders()), peerPort: strconv.FormatUint(uint64(p.GetPeerPort()), 10)}
+}
+
+// changed tells whether the places differ from those saved.
+func (x *containerPlaces) changed() bool {
+	d := x.from.GetDependency()
+	for _, f := range d.GetFolders() {
+		if strings.TrimSpace(x.folders[f.GetName()]) != x.from.GetFolders()[f.GetName()] {
+			return true
+		}
+	}
+	return d.GetPeerPort() > 0 && x.peerPort != strconv.FormatUint(uint64(x.from.GetPeerPort()), 10)
+}
+
+// absoluteFolder is the pattern of a folder of the server a container
+// mounts.
+var absoluteFolder = regexp.MustCompile(`^(/|[A-Za-z]:[\\/])`)
 
 // jsonText returns a configuration's JSON as compared: keys sorted, an
 // empty configuration as {}.
@@ -921,12 +960,23 @@ func (a *App) containerDependency(c *ui.Context, id string, p *systemv1.PluginCo
 		}
 	}
 	busy := st.busy == name
-	set := func(m pluginv1.ContainerMode, address string, useGPU bool, proxy *string) {
+	if st.places == nil {
+		st.places = map[string]*containerPlaces{}
+	}
+	places := st.places[name]
+	if places == nil || places.from != p && !places.changed() {
+		places = containerPlacesOf(p)
+		st.places[name] = places
+	}
+	set := func(m pluginv1.ContainerMode, address string, useGPU bool, proxy *string, with ...func(*systemv1.SetPluginContainerRequest_builder)) {
 		server := a.chosenServer().GetId()
 		st.busy, st.containerErr[name] = name, nil
 		req := systemv1.SetPluginContainerRequest_builder{PluginId: &id, Name: &name, Mode: &m, UseGpu: &useGPU, Proxy: proxy}
 		if address != "" {
 			req.Address = &address
+		}
+		for _, f := range with {
+			f(&req)
 		}
 		go func() {
 			_, err := a.pluginService(server).SetPluginContainer(a.ctx, req.Build())
@@ -974,7 +1024,9 @@ func (a *App) containerDependency(c *ui.Context, id string, p *systemv1.PluginCo
 			if selectOf(c, &l, labels).Label(style.T(c, "plugins.containerMode")).Disabled(busy).Changed() {
 				m := modes[slices.Index(labels, l)]
 				st.chosen[name] = m
-				if m != pluginv1.ContainerMode_CONTAINER_MODE_EXTERNAL {
+				// One whose folders are not chosen yet runs once they are saved.
+				foldersSet := !slices.ContainsFunc(d.GetFolders(), func(f *pluginv1.ContainerFolder) bool { return p.GetFolders()[f.GetName()] == "" })
+				if m != pluginv1.ContainerMode_CONTAINER_MODE_EXTERNAL && (m != pluginv1.ContainerMode_CONTAINER_MODE_MANAGED || foldersSet) {
 					gpuOn := m == pluginv1.ContainerMode_CONTAINER_MODE_MANAGED && (d.GetGpu() == pluginv1.GpuSupport_GPU_SUPPORT_REQUIRED || useGPU)
 					set(m, "", gpuOn, nil)
 				}
@@ -987,6 +1039,22 @@ func (a *App) containerDependency(c *ui.Context, id string, p *systemv1.PluginCo
 				if ui.Switch(c, &on).Label(style.T(c, "plugins.containerUseGpu")).Disabled(busy || d.GetGpu() == pluginv1.GpuSupport_GPU_SUPPORT_REQUIRED).Changed() {
 					set(pluginv1.ContainerMode_CONTAINER_MODE_MANAGED, "", on, nil)
 				}
+			})
+		}
+		if managed && (len(d.GetFolders()) > 0 || d.GetPeerPort() > 0) {
+			a.containerPlaces(g, d, places, mode == pluginv1.ContainerMode_CONTAINER_MODE_MANAGED, busy, func() {
+				folders := map[string]string{}
+				for _, f := range d.GetFolders() {
+					folders[f.GetName()] = strings.TrimSpace(places.folders[f.GetName()])
+				}
+				gpuOn := d.GetGpu() == pluginv1.GpuSupport_GPU_SUPPORT_REQUIRED || useGPU
+				set(pluginv1.ContainerMode_CONTAINER_MODE_MANAGED, "", gpuOn, nil, func(r *systemv1.SetPluginContainerRequest_builder) {
+					r.Folders = folders
+					if d.GetPeerPort() > 0 {
+						port, _ := strconv.ParseUint(places.peerPort, 10, 16)
+						r.PeerPort = new(uint32(port))
+					}
+				})
 			})
 		}
 		if managed && mode == pluginv1.ContainerMode_CONTAINER_MODE_MANAGED {
@@ -1091,5 +1159,52 @@ func containerCommands(g *settingsGroup, title string, cmds *systemv1.ContainerC
 			note(style.T(c, "plugins.containerCompose"))
 		}
 		code(cmds.GetCompose())
+	})
+}
+
+// containerPlaces adds the server's folders a managed dependency mounts
+// and the port it publishes for peers, saved together; running tells
+// whether it runs managed already, when Save takes only changes.
+func (a *App) containerPlaces(g *settingsGroup, d *pluginv1.ContainerDependency, x *containerPlaces, running, busy bool, save func()) {
+	c := g.c
+	colors := style.Colors(c)
+	if len(d.GetFolders()) > 0 {
+		g.note(style.T(c, "plugins.containerFoldersHint"), false)
+	}
+	for _, f := range d.GetFolders() {
+		g.divider()
+		ui.Column(c.Key("folder-"+f.GetName())).Padding(10, 16).Gap(6).Children(func() {
+			ui.Row(c).Gap(4).Wrap().Children(func() {
+				style.Text(ui.Text(c, f.GetPath()), style.Type(c).Callout).Font("SF Mono, Menlo, monospace").TextColor(style.Color(colors.TextPrimary))
+				if f.GetDescription() != "" {
+					style.Text(ui.Text(c, "· "+f.GetDescription()), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary))
+				}
+			})
+			v := x.folders[f.GetName()]
+			ui.TextInput(c, &v).FillWidth().Label(f.GetPath()).Placeholder(style.T(c, "plugins.containerFolderPath"))
+			if x.folders == nil {
+				x.folders = map[string]string{}
+			}
+			x.folders[f.GetName()] = v
+		})
+	}
+	portValid := true
+	if d.GetPeerPort() > 0 {
+		n, err := strconv.ParseUint(x.peerPort, 10, 32)
+		portValid = err == nil && n <= 65535
+		g.row(style.T(c, "plugins.containerPeerPort"), style.T(c, "plugins.containerPeerPortDetail"), nil, func() {
+			in := ui.TextInput(c, &x.peerPort).Width(96).Label(style.T(c, "plugins.containerPeerPort"))
+			if !portValid {
+				in.Border(1, style.Color(colors.Danger))
+			}
+		})
+	}
+	valid := portValid && !slices.ContainsFunc(d.GetFolders(), func(f *pluginv1.ContainerFolder) bool {
+		return !absoluteFolder.MatchString(strings.TrimSpace(x.folders[f.GetName()]))
+	})
+	g.block(func() {
+		if smallButton(c, style.T(c, "action.save"), !valid || (running && !x.changed()) || busy) {
+			save()
+		}
 	})
 }

@@ -847,17 +847,30 @@ func (f *schemaForm) jsonField(path string, value any, set func(any)) {
 	})
 }
 
-// itemTitle returns the title of an object in a list: its name or ID,
-// else its place.
-func itemTitle(c *ui.Context, v any, i int) string {
+// itemTitle returns the title of an object of schema s in a list: its
+// name or ID, the name of the option when a source's option is that, else
+// its place.
+func (f *schemaForm) itemTitle(s *schema, v any, i int) string {
 	if o, ok := v.(map[string]any); ok {
 		for _, k := range []string{"name", "id", "definition", "kind", "host"} {
-			if s, ok := o[k].(string); ok && s != "" {
-				return s
+			x, ok := o[k].(string)
+			if !ok || x == "" {
+				continue
 			}
+			for _, p := range s.properties {
+				if p.name != k || p.schema.options == nil {
+					continue
+				}
+				for _, opt := range f.options(p.schema.options.Source) {
+					if jsonEqual(opt.GetValue(), x) && opt.GetName() != "" {
+						return opt.GetName()
+					}
+				}
+			}
+			return x
 		}
 	}
-	return style.T(c, "schema.item", "number", strconv.Itoa(i+1))
+	return style.T(f.c, "schema.item", "number", strconv.Itoa(i+1))
 }
 
 // objectList builds the objects of a list, as cards that open to their
@@ -873,7 +886,7 @@ func (f *schemaForm) objectList(path string, s *schema, value []any, set func([]
 			// list's length key them, so that removing one draws the rest
 			// anew.
 			ui.Column(c.Key(fmt.Sprintf("%d/%d", i, len(value)))).Radius(12).Border(1, style.Color(colors.Border)).Clip().Children(func() {
-				title := itemTitle(c, v, i)
+				title := f.itemTitle(s, v, i)
 				ui.Row(c).Padding(6, 12).Gap(8).AlignItems(ui.Center).Children(func() {
 					b := ui.ButtonBase(c).MinHeight(36).Grow(1).MinWidth(0).Gap(8).AlignItems(ui.Center).Justify(ui.Start).Label(title)
 					b.Children(func() {

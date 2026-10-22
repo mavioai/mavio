@@ -57,20 +57,20 @@ type remoteForm struct {
 	confirming bool // asks before deleting the remote
 }
 
-// offlineState is the state of the download clients of offline downloads:
-// the client edited, by its index, the list's length for a new one.
+// offlineState is the state of a remote's offline downloads: the
+// response drafted from, the draft, and whether removing them is asked.
 type offlineState struct {
-	list     task[[]*storagev1.OfflineClient]
-	editing  *int
-	draft    clientDraft
-	busy     bool
-	err      error
-	removing bool
+	downloads task[*storagev1.GetOfflineDownloadsResponse]
+	from      *storagev1.GetOfflineDownloadsResponse
+	draft     offlineDraft
+	busy      bool
+	err       error
+	stopping  bool
 }
 
-// clientDraft is a download client as edited; tags as typed.
-type clientDraft struct {
-	id, name, folder, tags        string
+// offlineDraft is a remote's offline downloads as edited; tags as typed.
+type offlineDraft struct {
+	folder, tags                  string
 	enabled                       bool
 	priority                      float64
 	removeCompleted, removeFailed bool
@@ -119,7 +119,6 @@ func (a *App) storageSection(c *ui.Context, r *ui.Route) {
 
 func (a *App) storageList(c *ui.Context) {
 	ss := &a.settingsState.admin.storage
-	colors := style.Colors(c)
 	sectionHeader(c, style.T(c, "settings.storage"), style.T(c, "storage.message"))
 	status := a.storageStatus()
 	disks := adminTask(a, &ss.disks, "disks", func(ctx context.Context, s string) ([]*storagev1.Disk, error) {
@@ -161,37 +160,12 @@ func (a *App) storageList(c *ui.Context) {
 			}
 		})
 	}
-	group(c, "rclone", style.T(c, "storage.rclone"), "", func(g *settingsGroup) {
-		s := status.value
-		g.row(style.T(c, "storage.status"), "", nil, func() {
-			color, text := style.Color(colors.Fill), "…"
-			switch {
-			case status.err != nil:
-				color, text = style.Color(colors.Danger), errorMessage(c, status.err)
-			case !status.loaded:
-			case available:
-				color, text = ui.RGB(0x34, 0xC7, 0x59), style.T(c, "storage.available")
-			default:
-				color, text = style.Color(colors.Danger), cmpOr(s.GetError(), style.T(c, "storage.unavailable"))
-			}
-			ui.Row(c).Gap(8).AlignItems(ui.Center).MinWidth(0).Children(func() {
-				dot(c, color)
-				secondaryText(c, text)
-			})
+	// Without rclone there are no remotes; the Overview tells of it.
+	if status.loaded && status.err == nil && !available {
+		group(c, "remotes", style.T(c, "storage.remotes"), "", func(g *settingsGroup) {
+			g.note(cmpOr(status.value.GetError(), style.T(c, "storage.unavailable")), true)
 		})
-		if s.GetVersion() != "" {
-			g.row(style.T(c, "storage.version"), "", nil, func() { secondaryText(c, s.GetVersion()) })
-		}
-		// Whose rcd it is tells only of one reached.
-		if available {
-			detail, value := style.T(c, "storage.externalDetail"), style.T(c, "storage.external")
-			if s.GetManaged() {
-				detail, value = style.T(c, "storage.managedDetail"), style.T(c, "storage.managed")
-			}
-			g.row(style.T(c, "storage.rcd"), detail, nil, func() { secondaryText(c, value) })
-		}
-	})
-	a.offlineClients(c, remotes)
+	}
 }
 
 // diskKinds are the tile and name of each kind of disk.
@@ -290,7 +264,7 @@ func (a *App) remoteRow(g *settingsGroup, r *storagev1.Remote, kind string) {
 	colors := style.Colors(c)
 	name := r.GetName()
 	root := adminTask(a, taskIn(&ss.roots, name), "root", func(ctx context.Context, s string) ([]string, error) {
-		path := "rclone:" + name + ":"
+		path := "remote:" + name + ":"
 		res, err := a.storageService(s).ListFolders(ctx, storagev1.ListFoldersRequest_builder{Path: &path}.Build())
 		return res.GetFolders(), err
 	}, name)
@@ -643,7 +617,7 @@ func (a *App) remotePage(c *ui.Context, name string) {
 	ss := &a.settingsState.admin.storage
 	f := &ss.form
 	if f.remote != name {
-		*f = remoteForm{remote: name, path: "rclone:" + name + ":"}
+		*f = remoteForm{remote: name, path: "remote:" + name + ":"}
 	}
 	a.backTo(c, style.T(c, "settings.storage"), storagePath(""))
 	remotes, providers := a.storageRemotes(), a.storageProviders()
@@ -669,6 +643,7 @@ func (a *App) remotePage(c *ui.Context, name string) {
 	if j := slices.IndexFunc(providers.value, func(p *storagev1.Provider) bool { return p.GetName() == remote.GetType() }); j >= 0 {
 		a.remoteForm(c, remote, providers.value[j])
 	}
+	a.offlineDownloads(c, name)
 	a.remoteFolders(c, name)
 	ui.Row(c).Gap(12).AlignItems(ui.Center).Children(func() {
 		if dangerButton(c, style.T(c, "storage.remove"), f.busy != "") {
@@ -1010,7 +985,7 @@ func (a *App) remoteFolders(c *ui.Context, name string) {
 	ss := &a.settingsState.admin.storage
 	f := &ss.form
 	colors := style.Colors(c)
-	root := "rclone:" + name + ":"
+	root := "remote:" + name + ":"
 	path := f.path
 	t := adminTask(a, taskIn(&ss.folders, path), "folders", func(ctx context.Context, s string) ([]string, error) {
 		res, err := a.storageService(s).ListFolders(ctx, storagev1.ListFoldersRequest_builder{Path: &path}.Build())
@@ -1068,186 +1043,120 @@ func (a *App) remoteFolders(c *ui.Context, name string) {
 	})
 }
 
-func clientDraftOf(o *storagev1.OfflineClient) clientDraft {
-	return clientDraft{
-		id: o.GetId(), name: o.GetName(), folder: o.GetFolder(), tags: strings.Join(o.GetTags(), ", "),
+func offlineDraftOf(o *storagev1.OfflineDownloads) offlineDraft {
+	return offlineDraft{
+		folder: o.GetFolder(), tags: strings.Join(o.GetTags(), ", "),
 		enabled: o.GetEnabled(), priority: float64(o.GetPriority()),
 		removeCompleted: o.GetRemoveCompletedDownloads(), removeFailed: o.GetRemoveFailedDownloads(),
 	}
 }
 
-func (d clientDraft) client() *storagev1.OfflineClient {
-	var tags []string
-	for t := range strings.SplitSeq(d.tags, ",") {
-		if t = strings.TrimSpace(t); t != "" {
-			tags = append(tags, t)
-		}
-	}
-	return storagev1.OfflineClient_builder{
-		Id: new(strings.TrimSpace(d.id)), Name: new(strings.TrimSpace(d.name)), Enabled: new(d.enabled),
-		Priority: new(int32(max(1, d.priority))), Folder: new(strings.TrimSpace(d.folder)), Tags: tags,
-		RemoveCompletedDownloads: new(d.removeCompleted), RemoveFailedDownloads: new(d.removeFailed),
+func (d offlineDraft) settings() *storagev1.OfflineDownloads {
+	return storagev1.OfflineDownloads_builder{
+		Enabled: new(d.enabled), Priority: new(int32(max(1, d.priority))), Folder: new(strings.TrimSpace(d.folder)),
+		Tags: splitList(d.tags, ","), RemoveCompletedDownloads: new(d.removeCompleted), RemoveFailedDownloads: new(d.removeFailed),
 	}.Build()
 }
 
-var notID = regexp.MustCompile(`[^a-z0-9_-]+`)
-
-// idFor returns an ID for a client named so, unique among the others.
-func idFor(name string, taken []string) string {
-	base := strings.Trim(notID.ReplaceAllString(strings.ToLower(name), "-"), "-")
-	if base == "" {
-		base = "offline"
+// validOfflineFolder tells whether f is a folder below a remote's root:
+// relative, without "." or "..".
+func validOfflineFolder(f string) bool {
+	for p := range strings.SplitSeq(strings.Trim(strings.TrimSpace(f), "/"), "/") {
+		if p == "" || p == "." || p == ".." || strings.Contains(p, `\`) {
+			return false
+		}
 	}
-	id := base
-	for i := 2; slices.Contains(taken, id); i++ {
-		id = fmt.Sprintf("%s-%d", base, i)
-	}
-	return id
+	return true
 }
 
-// offlineClients builds the download clients of offline downloads: cloud
-// drives that download magnet links into a folder of their remote.
-func (a *App) offlineClients(c *ui.Context, remotes []*storagev1.Remote) {
+// offlineDownloads builds a remote's offline downloads, shown when its
+// backend makes them: the drive downloads magnet links itself into a
+// folder of the remote, as a download client named after the remote.
+func (a *App) offlineDownloads(c *ui.Context, remote string) {
 	off := &a.settingsState.admin.storage.offline
-	colors := style.Colors(c)
-	t := adminTask(a, &off.list, "offline", func(ctx context.Context, s string) ([]*storagev1.OfflineClient, error) {
-		res, err := a.storageService(s).ListOfflineClients(ctx, &storagev1.ListOfflineClientsRequest{})
-		return res.GetClients(), err
+	t := adminTask(a, &off.downloads, "offline/"+remote, func(ctx context.Context, s string) (*storagev1.GetOfflineDownloadsResponse, error) {
+		return a.storageService(s).GetOfflineDownloads(ctx, storagev1.GetOfflineDownloadsRequest_builder{Remote: &remote}.Build())
 	})
-	list := t.value
-	edit := func(i int, d clientDraft) {
-		off.editing, off.draft, off.err, off.removing = &i, d, nil, false
+	if t.err != nil {
+		dangerText(c, errorMessage(c, t.err))
+		return
 	}
-	control := func() {
-		if off.editing == nil && t.loaded && t.err == nil && linkButton(c, style.T(c, "storage.addOffline")).Clicked() {
-			edit(len(list), clientDraft{enabled: true, priority: 1, removeCompleted: true})
-		}
+	if !t.value.GetSupported() {
+		return
 	}
-	groupWith(c, "offline", style.T(c, "storage.offline"), control, style.T(c, "storage.offlineFooter"), func(g *settingsGroup) {
-		for i, o := range list {
-			if off.editing != nil && *off.editing == i {
-				a.clientForm(g, list, i, remotes)
-				continue
-			}
-			color := ui.RGB(0x8E, 0x8E, 0x93)
-			if o.GetEnabled() {
-				color = ui.RGB(0x34, 0xC7, 0x59)
-			}
-			parts := []string{o.GetFolder()}
-			if !o.GetEnabled() {
-				parts = append(parts, style.T(c, "storage.disabled"))
-			}
-			if len(o.GetTags()) > 0 {
-				parts = append(parts, strings.Join(o.GetTags(), ", "))
-			}
-			g.divider()
-			b := ui.ButtonBase(c.Key(o.GetId())).MinHeight(52).Padding(10, 16).Gap(12).AlignItems(ui.Center).Justify(ui.Start).
-				Label(o.GetName()).Disabled(off.editing != nil)
-			if b.Hovered() && off.editing == nil {
-				b.Background(style.Color(colors.Fill))
-			}
-			b.Children(func() {
-				sectionTile(c, "downloads", color)
-				ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-					style.Text(ui.Text(c, o.GetName()), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).MaxLines(1)
-					style.Text(ui.Text(c, strings.Join(parts, " · ")), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).MaxLines(1)
-				})
-			})
-			if b.Clicked() && off.editing == nil {
-				edit(i, clientDraftOf(o))
-			}
-		}
-		if off.editing != nil && *off.editing == len(list) {
-			a.clientForm(g, list, len(list), remotes)
-		}
-		switch {
-		case t.err != nil:
-			g.note(errorMessage(c, t.err), true)
-		case t.loaded && len(list) == 0 && off.editing == nil:
-			g.note(style.T(c, "storage.noOffline"), false)
-		}
-	})
-}
-
-// offlineFolder is the pattern of offline downloads' folders.
-var offlineFolder = regexp.MustCompile(`^rclone:[^:/\\]+:`)
-
-// clientForm adds the form of the download client at i of list, a new
-// one at its length.
-func (a *App) clientForm(g *settingsGroup, list []*storagev1.OfflineClient, i int, remotes []*storagev1.Remote) {
-	c := g.c
-	off := &a.settingsState.admin.storage.offline
-	d := &off.draft
-	isNew := i == len(list)
-	text := func(value *string, label, detail, placeholder string) {
-		g.row(label, detail, nil, func() {
-			ui.TextInput(c, value).Width(288).Label(label).Placeholder(placeholder)
-		})
+	settings := t.value.GetSettings()
+	if off.from != t.value && (off.from == nil || off.draft == offlineDraftOf(off.from.GetSettings())) {
+		off.from, off.draft, off.stopping = t.value, offlineDraftOf(settings), false
 	}
-	folder := "rclone:pikpak:downloads"
-	if len(remotes) > 0 {
-		folder = "rclone:" + remotes[0].GetName() + ":downloads"
-	}
-	text(&d.name, style.T(c, "storage.offlineName"), "", "PikPak")
-	text(&d.folder, style.T(c, "storage.offlineFolder"), style.T(c, "storage.offlineFolderDetail"), folder)
-	text(&d.tags, style.T(c, "storage.offlineTags"), style.T(c, "storage.offlineTagsDetail"), "")
-	g.row(style.T(c, "storage.offlinePriority"), style.T(c, "storage.offlinePriorityDetail"), nil, func() {
-		ui.NumberInput(c, &d.priority, 1, 50, 1).Label(style.T(c, "storage.offlinePriority"))
-	})
-	g.switchRow(style.T(c, "storage.offlineEnabled"), "", &d.enabled)
-	g.switchRow(style.T(c, "storage.removeCompleted"), "", &d.removeCompleted)
-	g.switchRow(style.T(c, "storage.removeFailed"), "", &d.removeFailed)
-	save := func(next []*storagev1.OfflineClient) {
+	update := func(next *storagev1.OfflineDownloads) {
 		off.busy, off.err = true, nil
 		server := a.chosenServer().GetId()
 		go func() {
-			_, err := a.storageService(server).SetOfflineClients(a.ctx, storagev1.SetOfflineClientsRequest_builder{Clients: next}.Build())
+			_, err := a.storageService(server).UpdateOfflineDownloads(a.ctx, storagev1.UpdateOfflineDownloadsRequest_builder{Remote: &remote, Settings: next}.Build())
 			a.opts.Update(func() {
 				off.busy, off.err = false, err
 				if err == nil {
-					off.editing = nil
+					off.stopping = false
 					a.settingsState.admin.reload++
 				}
 			})
 		}()
 	}
-	valid := strings.TrimSpace(d.name) != "" && offlineFolder.MatchString(strings.TrimSpace(d.folder))
-	g.block(func() {
-		ui.Row(c).Gap(12).AlignItems(ui.Center).Wrap().Children(func() {
-			label := style.T(c, "action.save")
-			if off.busy {
-				label = "…"
-			}
-			if ui.PrimaryButton(c, label).Disabled(!valid || off.busy).Clicked() {
-				draft := *d
-				next := slices.Clone(list)
-				if isNew {
-					var taken []string
-					for _, o := range list {
-						taken = append(taken, o.GetId())
+	busy := func(label string) string {
+		if off.busy {
+			return "…"
+		}
+		return label
+	}
+	group(c, "offline", style.T(c, "storage.offline"), style.T(c, "storage.offlineRemoteFooter"), func(g *settingsGroup) {
+		if settings == nil {
+			g.block(func() {
+				ui.Row(c).Gap(12).AlignItems(ui.Center).Wrap().Children(func() {
+					if ui.Button(c, busy(style.T(c, "storage.offlineSetUp"))).Disabled(off.busy).Clicked() {
+						update(storagev1.OfflineDownloads_builder{Enabled: new(true), Priority: new(int32(1)), RemoveCompletedDownloads: new(true)}.Build())
 					}
-					draft.id = idFor(d.name, taken)
-					next = append(next, draft.client())
-				} else {
-					next[i] = draft.client()
+					if off.err != nil {
+						dangerText(c, errorMessage(c, off.err))
+					}
+				})
+			})
+			return
+		}
+		d := &off.draft
+		g.switchRow(style.T(c, "storage.offlineEnabled"), "", &d.enabled)
+		g.row(style.T(c, "storage.offlineDownloadFolder"), style.T(c, "storage.offlineFolderBelow"), nil, func() {
+			in := ui.TextInput(c, &d.folder).Width(288).Label(style.T(c, "storage.offlineDownloadFolder")).Placeholder("downloads")
+			if !validOfflineFolder(d.folder) && strings.TrimSpace(d.folder) != "" {
+				in.Border(1, style.Color(style.Colors(c).Danger))
+			}
+		})
+		g.row(style.T(c, "storage.offlineTags"), style.T(c, "storage.offlineTagsDetail"), nil, func() {
+			ui.TextInput(c, &d.tags).Width(288).Label(style.T(c, "storage.offlineTags"))
+		})
+		g.row(style.T(c, "storage.offlinePriority"), style.T(c, "storage.offlinePriorityDetail"), nil, func() {
+			ui.NumberInput(c, &d.priority, 1, 50, 1).Label(style.T(c, "storage.offlinePriority"))
+		})
+		g.switchRow(style.T(c, "storage.removeCompleted"), "", &d.removeCompleted)
+		g.switchRow(style.T(c, "storage.removeFailed"), "", &d.removeFailed)
+		changed := *d != offlineDraftOf(settings)
+		valid := strings.TrimSpace(d.folder) == "" || validOfflineFolder(d.folder)
+		g.block(func() {
+			ui.Row(c).Gap(12).AlignItems(ui.Center).Wrap().Children(func() {
+				if ui.PrimaryButton(c, busy(style.T(c, "action.save"))).Disabled(!changed || !valid || off.busy).Clicked() {
+					update(d.settings())
 				}
-				save(next)
-			}
-			if linkButton(c, style.T(c, "action.cancel")).Clicked() {
-				off.editing = nil
-			}
-			if !isNew {
-				if off.removing {
+				if off.stopping {
 					if dangerButton(c, style.T(c, "storage.removeOfflineConfirm"), off.busy) {
-						save(slices.Delete(slices.Clone(list), i, i+1))
+						update(nil)
 					}
-				} else if dangerButton(c, style.T(c, "storage.removeOffline"), false) {
-					off.removing = true
+					secondaryText(c, style.T(c, "storage.removeOfflineDetail"))
+				} else if dangerButton(c, style.T(c, "storage.offlineStop"), false) {
+					off.stopping = true
 				}
-			}
-			if off.err != nil {
-				dangerText(c, errorMessage(c, off.err))
-			}
+				if off.err != nil {
+					dangerText(c, errorMessage(c, off.err))
+				}
+			})
 		})
 	})
 }

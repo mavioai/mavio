@@ -79,3 +79,16 @@ func (s *fakeProxies) TestProxy(context.Context, *systemv1.TestProxyRequest) (*s
 		ExitIp: new("203.0.113.7"), Country: new("JP"),
 	}.Build(), nil
 }
+
+func (s *fakeProxies) GetOutboundProxies(context.Context, *systemv1.GetOutboundProxiesRequest) (*systemv1.GetOutboundProxiesResponse, error) {
+	s.f.mu.Lock()
+	defer s.f.mu.Unlock()
+	return systemv1.GetOutboundProxiesResponse_builder{Proxies: proto.CloneOf(s.f.outbound)}.Build(), nil
+}
+
+func (s *fakeProxies) UpdateOutboundProxies(_ context.Context, r *systemv1.UpdateOutboundProxiesRequest) (*systemv1.UpdateOutboundProxiesResponse, error) {
+	s.f.mu.Lock()
+	defer s.f.mu.Unlock()
+	s.f.outbound = proto.CloneOf(r.GetProxies())
+	return systemv1.UpdateOutboundProxiesResponse_builder{Proxies: proto.CloneOf(s.f.outbound)}.Build(), nil
+}

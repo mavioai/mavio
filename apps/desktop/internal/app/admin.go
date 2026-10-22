@@ -259,6 +259,7 @@ func (a *App) overviewSection(c *ui.Context) {
 			})
 			if f[0] == style.T(c, "overview.ffmpeg") {
 				a.containerEngineRow(g)
+				a.rcloneRow(g)
 			}
 		}
 	})
@@ -280,6 +281,42 @@ func (a *App) containerEngineRow(g *settingsGroup) {
 			style.Text(ui.Text(c, engine), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End).Selectable()
 			if endpoint != "" {
 				style.Text(ui.Text(c, endpoint), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End).Selectable()
+			}
+		})
+	})
+}
+
+// rcloneRow adds whether the server reaches rclone, its version, and
+// whose rcd it is.
+func (a *App) rcloneRow(g *settingsGroup) {
+	c := g.c
+	colors := style.Colors(c)
+	status := a.storageStatus()
+	s := status.value
+	color, text := style.Color(colors.Danger), cmpOr(s.GetError(), style.T(c, "storage.unavailable"))
+	switch {
+	case !status.loaded:
+		color, text = style.Color(colors.Fill), "…"
+	case status.err != nil:
+		text = errorMessage(c, status.err)
+	case s.GetAvailable():
+		color, text = ui.RGB(0x34, 0xC7, 0x59), style.T(c, "storage.available")
+		if s.GetVersion() != "" {
+			text += " · " + s.GetVersion()
+		}
+	}
+	g.row(style.T(c, "overview.rclone"), "", nil, func() {
+		ui.Column(c).AlignItems(ui.End).MaxWidth(480).Children(func() {
+			ui.Row(c).Gap(8).AlignItems(ui.Center).MinWidth(0).Children(func() {
+				dot(c, color)
+				style.Text(ui.Text(c, text), style.Type(c).Callout).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End).Selectable()
+			})
+			if s.GetAvailable() {
+				whose := style.T(c, "overview.rcloneExternal")
+				if s.GetManaged() {
+					whose = style.T(c, "overview.rcloneManaged")
+				}
+				style.Text(ui.Text(c, whose), style.Type(c).Footnote).TextColor(style.Color(colors.TextSecondary)).TextAlign(ui.End)
 			}
 		})
 	})

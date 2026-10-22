@@ -26,11 +26,22 @@ type fakeDownloads struct {
 	failed    []string
 	imported  []*acquisitionv1.ManualImportRequest
 	grabbed   []string // the releases grabbed, by item and title
+	// paths are qBittorrent's folders and where the server reads them.
+	paths []*acquisitionv1.DownloadClientPath
 }
 
 func newFakeDownloads() *fakeDownloads {
 	now := time.Now()
 	return &fakeDownloads{
+		paths: []*acquisitionv1.DownloadClientPath{
+			acquisitionv1.DownloadClientPath_builder{
+				RemotePath: new("/downloads/"), LocalPath: new("/mnt/seedbox/"), RootFolder: new(true), Readable: new(true),
+				LinkLibraryPaths: []string{"/media/movies"},
+			}.Build(),
+			acquisitionv1.DownloadClientPath_builder{
+				RemotePath: new("/incomplete/"), SuggestedPath: new("/mnt/incomplete/"), Error: new("not found"),
+			}.Build(),
+		},
 		queue: []*acquisitionv1.QueueItem{
 			acquisitionv1.QueueItem_builder{
 				Id: new("q1"), ItemId: new("dune"), ItemName: new("Dune"), Title: new("Dune.2021.1080p.BluRay.x265-GRP"), IndexerName: new("Nyaa"),
@@ -69,6 +80,35 @@ func (*fakeDownloads) ListDownloadClients(context.Context, *acquisitionv1.ListDo
 			Protocol: new(acquisitionv1.DownloadProtocol_DOWNLOAD_PROTOCOL_TORRENT),
 		}.Build(),
 	}}.Build(), nil
+}
+
+func (s *fakeDownloads) GetDownloadClientPaths(context.Context, *acquisitionv1.GetDownloadClientPathsRequest) (*acquisitionv1.GetDownloadClientPathsResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return acquisitionv1.GetDownloadClientPathsResponse_builder{Paths: slices.Clone(s.paths)}.Build(), nil
+}
+
+// UpdateDownloadClientPaths keeps the paths given, which the server reads
+// from then on, and the root folder.
+func (s *fakeDownloads) UpdateDownloadClientPaths(_ context.Context, r *acquisitionv1.UpdateDownloadClientPathsRequest) (*acquisitionv1.UpdateDownloadClientPathsResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var next []*acquisitionv1.DownloadClientPath
+	for _, p := range s.paths {
+		if p.GetRootFolder() && !slices.ContainsFunc(r.GetPaths(), func(x *acquisitionv1.DownloadClientPath) bool { return x.GetRemotePath() == p.GetRemotePath() }) {
+			next = append(next, acquisitionv1.DownloadClientPath_builder{RemotePath: new(p.GetRemotePath()), RootFolder: new(true)}.Build())
+		}
+	}
+	for _, p := range r.GetPaths() {
+		root := slices.ContainsFunc(s.paths, func(x *acquisitionv1.DownloadClientPath) bool {
+			return x.GetRootFolder() && x.GetRemotePath() == p.GetRemotePath()
+		})
+		next = append(next, acquisitionv1.DownloadClientPath_builder{
+			RemotePath: new(p.GetRemotePath()), LocalPath: new(p.GetLocalPath()), RootFolder: new(root), Readable: new(true),
+		}.Build())
+	}
+	s.paths = next
+	return acquisitionv1.UpdateDownloadClientPathsResponse_builder{Paths: slices.Clone(next)}.Build(), nil
 }
 
 func (s *fakeDownloads) ListQueue(_ context.Context, r *acquisitionv1.ListQueueRequest) (*acquisitionv1.ListQueueResponse, error) {

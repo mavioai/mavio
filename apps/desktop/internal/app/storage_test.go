@@ -19,7 +19,7 @@ func TestStorage(t *testing.T) {
 			}
 		}
 	}
-	core := func() (remotes []*storagev1.Remote, offline []*storagev1.OfflineClient, answers []string) {
+	core := func() (remotes []*storagev1.Remote, offline map[string]*storagev1.OfflineDownloads, answers []string) {
 		h.core.mu.Lock()
 		defer h.core.mu.Unlock()
 		return h.core.remotes, h.core.offline, h.core.answers
@@ -34,22 +34,39 @@ func TestStorage(t *testing.T) {
 	}
 	ss := &h.app.settingsState.admin.storage
 
-	// The disks, the remotes and rclone.
+	// The disks and the remotes.
 	h.app.router.Push("/settings/storage")
 	h.settle()
 	want("Macintosh HD", "SSD · apfs", "900 GB of 1 TB used", "/Volumes/nas", "Network share · smbfs", "Did not answer",
-		"drive", "Google Drive", "500 GB of 2 TB used", "Running", "External", "No offline download clients.")
-
-	// An offline download client.
-	h.click("Add")
-	ss.offline.draft.name, ss.offline.draft.folder = "PikPak", "rclone:drive:downloads"
-	h.settle()
-	h.click("Save")
-	if _, offline, _ := core(); len(offline) != 1 || offline[0].GetId() != "pikpak" || offline[0].GetPriority() != 1 {
-		t.Errorf("offline = %v, want PikPak as pikpak, of priority 1", offline)
-	}
-	want("PikPak", "rclone:drive:downloads")
+		"drive", "Google Drive", "500 GB of 2 TB used")
 	h.save(shots, "settings-storage")
+
+	// A remote's offline downloads: set up, then into another folder.
+	h.app.router.Push(storagePath("drive"))
+	h.settle()
+	h.click("Use for Offline Downloads")
+	if _, offline, _ := core(); !offline["drive"].GetEnabled() || offline["drive"].GetPriority() != 1 {
+		t.Errorf("offline = %v, want drive's on, of priority 1", offline)
+	}
+	want("Download Folder", "Remove Offline Downloads")
+	ss.offline.draft.folder = "media/incoming"
+	h.settle()
+	h.save(shots, "settings-storage-offline")
+	// The first Save is the remote's: the offline downloads' is left of
+	// their Remove.
+	r, _ := h.tt.Find("Remove Offline Downloads")
+	h.tt.ClickAt(r.X-40, r.Y+r.H/2)
+	h.settle()
+	if _, offline, _ := core(); offline["drive"].GetFolder() != "media/incoming" {
+		t.Errorf("offline = %v, want drive's into media/incoming", offline)
+	}
+	h.click("Remove Offline Downloads")
+	h.click("Remove for Good")
+	if _, offline, _ := core(); offline["drive"] != nil {
+		t.Errorf("offline = %v, want drive's removed", offline)
+	}
+	h.app.router.Push("/settings/storage")
+	h.settle()
 
 	// A new remote of a required setting.
 	h.click("Add Remote")

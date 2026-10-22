@@ -31,7 +31,8 @@ type acquisitionState struct {
 	formats     task[[]*acquisitionv1.CustomFormat]
 	delays      task[[]*acquisitionv1.DelayProfile]
 	releases    task[[]*acquisitionv1.ReleaseProfile]
-	mappings    task[[]*acquisitionv1.RemotePathMapping]
+	settings    task[*acquisitionv1.AcquisitionSettings]
+	paths       task[*acquisitionv1.GetDownloadClientPathsResponse]
 
 	page  string                                     // the page the form is of, its query
 	kind  int                                        // the index of the kind whose qualities are shown
@@ -44,8 +45,8 @@ type acquisitionState struct {
 	editing *string // the ID of the delay or release profile edited, "new" for a new one
 	delay   delayDraft
 	release releaseDraft
-	adding  bool // a remote path mapping
-	mapping mappingDraft
+	options optionsForm
+	folders *folderDrafts // the download client's folders edited
 
 	busy       string
 	notice     string
@@ -209,7 +210,7 @@ func (a *App) acquisitionSection(c *ui.Context, r *ui.Route) {
 	page, id := r.Query("acquisition"), r.Query("id")
 	if k := page + "/" + id; st.page != k {
 		st.page, st.sizes, st.profile, st.profile0, st.format, st.format0 = k, nil, nil, nil, nil, nil
-		st.editing, st.adding, st.notice, st.err, st.confirming, st.removing = nil, false, "", nil, false, false
+		st.editing, st.folders, st.options, st.notice, st.err, st.confirming, st.removing = nil, nil, optionsForm{}, "", nil, false, false
 	}
 	switch page {
 	case "profile":
@@ -224,8 +225,10 @@ func (a *App) acquisitionSection(c *ui.Context, r *ui.Route) {
 		a.delayProfilesPage(c)
 	case "releases":
 		a.releaseProfilesPage(c)
-	case "mappings":
-		a.remotePathMappingsPage(c)
+	case "client":
+		a.downloadClientPage(c, id)
+	case "options":
+		a.acquisitionOptionsPage(c)
 	default:
 		a.acquisitionList(c)
 	}
@@ -282,9 +285,21 @@ func (a *App) acquisitionList(c *ui.Context) {
 	group(c, "clients", style.T(c, "acquisition.clients"), style.T(c, "acquisition.clientsFooter"), func(g *settingsGroup) {
 		for _, x := range clients.value.GetClients() {
 			failure := leftOut(c, x.GetEnabled(), x.GetFailure(), x.GetDisabledUntil())
-			g.link(x.GetPluginId()+"/"+x.GetId(), "downloads", tileColor(x.GetEnabled(), failure, ui.RGB(0x34, 0xC7, 0x59)), x.GetName(),
-				joinDetail(pluginName(x.GetPluginId()), protocolTitle(c, x.GetProtocol()),
-					style.T(c, "acquisition.priority", "priority", x.GetPriority()), failure), false)
+			offline := x.GetPluginId() == offlineProvider
+			provider := pluginName(x.GetPluginId())
+			if offline {
+				provider = style.T(c, "storage.offline")
+			}
+			if g.link(x.GetPluginId()+"/"+x.GetId(), "downloads", tileColor(x.GetEnabled(), failure, ui.RGB(0x34, 0xC7, 0x59)), x.GetName(),
+				joinDetail(provider, protocolTitle(c, x.GetProtocol()),
+					style.T(c, "acquisition.priority", "priority", x.GetPriority()), failure), true) {
+				// A remote's offline downloads are set on the remote's page.
+				if offline {
+					a.router.Push(storagePath(x.GetId()))
+				} else {
+					a.router.Push(acquisitionPath("client", x.GetPluginId()+"/"+x.GetId()))
+				}
+			}
 		}
 		failures := clients.value.GetFailures()
 		for _, plugin := range slices.Sorted(func(yield func(string) bool) {
@@ -345,9 +360,13 @@ func (a *App) acquisitionList(c *ui.Context) {
 			{"formats", "filter", ui.RGB(0xAF, 0x52, 0xDE), "formats"},
 			{"delays", "pending", ui.RGB(0xFF, 0x95, 0x00), "delays"},
 			{"releases", "sort", ui.RGB(0x00, 0x7A, 0xFF), "releases"},
-			{"mappings", "folder", ui.RGB(0x30, 0xB0, 0xC7), "mappings"},
+			{"options", "settings", ui.RGB(0x8E, 0x8E, 0x93), "options.options"},
 		} {
-			if g.link(l.page, l.icon, l.color, style.T(c, "acquisition."+l.title), style.T(c, "acquisition."+l.title+"Detail"), true) {
+			title := l.title
+			if !strings.Contains(title, ".") {
+				title = "acquisition." + title
+			}
+			if g.link(l.page, l.icon, l.color, style.T(c, title), style.T(c, title+"Detail"), true) {
 				a.router.Push(acquisitionPath(l.page, ""))
 			}
 		}

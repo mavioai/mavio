@@ -122,3 +122,16 @@ func (s *fakePlugins) SetPluginContainer(_ context.Context, r *systemv1.SetPlugi
 	s.f.plugins.cacheMode = r.GetMode()
 	return &systemv1.SetPluginContainerResponse{}, nil
 }
+
+func (s *fakePlugins) GetPluginCatalogs(context.Context, *systemv1.GetPluginCatalogsRequest) (*systemv1.GetPluginCatalogsResponse, error) {
+	s.f.mu.Lock()
+	defer s.f.mu.Unlock()
+	return systemv1.GetPluginCatalogsResponse_builder{Urls: slices.Clone(s.f.catalogs)}.Build(), nil
+}
+
+func (s *fakePlugins) UpdatePluginCatalogs(_ context.Context, r *systemv1.UpdatePluginCatalogsRequest) (*systemv1.UpdatePluginCatalogsResponse, error) {
+	s.f.mu.Lock()
+	defer s.f.mu.Unlock()
+	s.f.catalogs = slices.Clone(r.GetUrls())
+	return systemv1.UpdatePluginCatalogsResponse_builder{Urls: slices.Clone(s.f.catalogs)}.Build(), nil
+}

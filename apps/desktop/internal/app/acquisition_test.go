@@ -38,7 +38,7 @@ func TestAcquisition(t *testing.T) {
 	h.settle()
 	want("Nyaa", "TMDB · Torrent · Public · Priority 25", "Broken", "TMDB · Torrent · Priority 25 · Left out until in 3 hours: timed out",
 		"dev.mavio.prowlarr: not reached", "qBittorrent", "Mail · Torrent · Priority 1 · Off", "HD-1080p", "Upgrades",
-		"Quality Profiles: Series", "Quality Definitions", "Custom Formats", "Delay Profiles", "Release Profiles", "Remote Path Mappings")
+		"Quality Profiles: Series", "Quality Definitions", "Custom Formats", "Delay Profiles", "Release Profiles", "Options")
 	h.save(shots, "settings-acquisition")
 
 	// A profile, allowing the best quality.
@@ -138,14 +138,36 @@ func TestAcquisition(t *testing.T) {
 	h.click("Save")
 	want("No CAM", "2 ignored")
 
-	// Remote path mappings.
-	h.app.router.Push(acquisitionPath("mappings", ""))
+	// A download client's folders: one the server reads, and one it
+	// cannot, which takes the folder suggested.
+	h.app.router.Push("/settings/acquisition")
 	h.settle()
-	want("seedbox", "/data/ → /mnt/seedbox/")
-	h.click("Delete")
+	h.click("qBittorrent")
+	path(acquisitionPath("client", "dev.mavio.mail/q"))
+	want("Client Settings", "/downloads/", "Readable", "· Hard links to /media/movies", "/incomplete/", "not found")
+	h.click("Use /mnt/incomplete/")
+	h.save(shots, "settings-acquisition-client")
+	h.click("Save")
+	h.settle()
+	dl := h.core.downloads
+	dl.mu.Lock()
+	if n := len(dl.paths); n != 2 || dl.paths[1].GetLocalPath() != "/mnt/incomplete/" || !dl.paths[0].GetRootFolder() {
+		t.Errorf("paths = %v, want /incomplete/ read at /mnt/incomplete/ and the root folder kept", dl.paths)
+	}
+	dl.mu.Unlock()
+
+	// The options.
+	h.app.router.Push(acquisitionPath("options", ""))
+	h.settle()
+	want("Naming", "Importing")
+	h.save(shots, "settings-acquisition-options")
+	st.options.draft.SetMinimumFreeSpace(200)
+	h.settle()
+	h.click("Save")
+	want("Saved.")
 	locked(func() {
-		if n := len(acq.mappings); n != 0 {
-			t.Errorf("len(mappings) = %d, want = 0", n)
+		if got := acq.settings.GetMinimumFreeSpace(); got != 200 || !acq.settings.GetCopyUsingHardlinks() {
+			t.Errorf("settings = %v, want a minimum free space of 200 and the rest kept", acq.settings)
 		}
 	})
 }

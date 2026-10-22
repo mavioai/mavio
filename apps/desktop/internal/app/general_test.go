@@ -5,6 +5,7 @@ import (
 
 	"github.com/egoist/mygo/ui"
 
+	playbackv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 )
 
@@ -18,10 +19,10 @@ func TestServerSettings(t *testing.T) {
 			}
 		}
 	}
-	settings := func() *systemv1.ServerSettings {
+	settings := func() (*systemv1.GeneralSettings, *playbackv1.TranscodingSettings) {
 		h.core.mu.Lock()
 		defer h.core.mu.Unlock()
-		return h.core.serverSettings
+		return h.core.general, h.core.transcoding
 	}
 	ss := &h.app.settingsState.admin.server
 
@@ -37,11 +38,8 @@ func TestServerSettings(t *testing.T) {
 	h.save(shots, "settings-general")
 	h.click("Save")
 	want("Saved.")
-	if s := settings(); s.GetNetwork().GetServerName() != "Den" || s.GetPasswordResetPlugin() != "dev.mavio.mail" || s.GetNetwork().GetHttpsPort() != 8920 {
+	if s, _ := settings(); s.GetNetwork().GetServerName() != "Den" || s.GetPasswordResetPlugin() != "dev.mavio.mail" || s.GetNetwork().GetHttpsPort() != 8920 {
 		t.Errorf("settings = %v, want the name Den, the reset plugin and HTTPS on 8920", s)
-	}
-	if !settings().GetTranscoding().GetHardwareEncoding() {
-		t.Errorf("saving General changed transcoding")
 	}
 
 	// Transcoding.
@@ -52,7 +50,7 @@ func TestServerSettings(t *testing.T) {
 	h.save(shots, "settings-transcoding")
 	h.click("Save")
 	want("Saved.")
-	if tr := settings().GetTranscoding(); !tr.GetCropBlackBorders() || tr.GetH264Crf() != 23 || settings().GetNetwork().GetServerName() != "Den" {
+	if s, tr := settings(); !tr.GetCropBlackBorders() || tr.GetH264Crf() != 23 || s.GetNetwork().GetServerName() != "Den" {
 		t.Errorf("transcoding = %v, want borders cropped and the rest kept", tr)
 	}
 

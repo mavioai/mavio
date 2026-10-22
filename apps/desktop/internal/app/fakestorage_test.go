@@ -5,6 +5,8 @@ import (
 	"maps"
 	"slices"
 
+	"google.golang.org/protobuf/proto"
+
 	"connectrpc.com/connect"
 
 	storagev1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1"
@@ -107,15 +109,25 @@ func (s *fakeStorage) GetRemoteUsage(_ context.Context, r *storagev1.GetRemoteUs
 	return storagev1.GetRemoteUsageResponse_builder{TotalBytes: new(int64(2e12)), UsedBytes: new(int64(5e11))}.Build(), nil
 }
 
-func (s *fakeStorage) ListOfflineClients(context.Context, *storagev1.ListOfflineClientsRequest) (*storagev1.ListOfflineClientsResponse, error) {
+// GetOfflineDownloads tells that drive makes offline downloads.
+func (s *fakeStorage) GetOfflineDownloads(_ context.Context, r *storagev1.GetOfflineDownloadsRequest) (*storagev1.GetOfflineDownloadsResponse, error) {
 	s.f.mu.Lock()
 	defer s.f.mu.Unlock()
-	return storagev1.ListOfflineClientsResponse_builder{Clients: slices.Clone(s.f.offline)}.Build(), nil
+	return storagev1.GetOfflineDownloadsResponse_builder{
+		Supported: new(r.GetRemote() == "drive"), Settings: proto.CloneOf(s.f.offline[r.GetRemote()]),
+	}.Build(), nil
 }
 
-func (s *fakeStorage) SetOfflineClients(_ context.Context, r *storagev1.SetOfflineClientsRequest) (*storagev1.SetOfflineClientsResponse, error) {
+func (s *fakeStorage) UpdateOfflineDownloads(_ context.Context, r *storagev1.UpdateOfflineDownloadsRequest) (*storagev1.UpdateOfflineDownloadsResponse, error) {
 	s.f.mu.Lock()
 	defer s.f.mu.Unlock()
-	s.f.offline = slices.Clone(r.GetClients())
-	return &storagev1.SetOfflineClientsResponse{}, nil
+	if s.f.offline == nil {
+		s.f.offline = map[string]*storagev1.OfflineDownloads{}
+	}
+	if !r.HasSettings() {
+		delete(s.f.offline, r.GetRemote())
+		return &storagev1.UpdateOfflineDownloadsResponse{}, nil
+	}
+	s.f.offline[r.GetRemote()] = proto.CloneOf(r.GetSettings())
+	return storagev1.UpdateOfflineDownloadsResponse_builder{Settings: proto.CloneOf(r.GetSettings())}.Build(), nil
 }

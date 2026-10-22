@@ -61,7 +61,7 @@ func TestLibraries(t *testing.T) {
 
 	// Adding one, of a folder browsed to and one of a remote.
 	h.click("Add Library")
-	want("Drives", "rclone:drive:")
+	want("Drives", "remote:drive:")
 	h.click("/")
 	h.click("media")
 	want("anime", "movies", "Up")
@@ -70,7 +70,7 @@ func TestLibraries(t *testing.T) {
 	h.click("Up")
 	h.click("Up")
 	h.click("Up")
-	h.click("rclone:drive:")
+	h.click("remote:drive:")
 	want("films")
 	h.click("films")
 	h.click("Add This Folder")
@@ -86,9 +86,9 @@ func TestLibraries(t *testing.T) {
 	h.settle()
 	want("Anime", "Seek Thumbnails")
 	l := library("new-lib")
-	if l == nil || !slices.Equal(l.GetPaths(), []string{"/media/anime", "rclone:drive:films"}) || l.GetKind() != libraryv1.LibraryKind_LIBRARY_KIND_SHOWS ||
+	if l == nil || !slices.Equal(l.GetPaths(), []string{"/media/anime", "remote:drive:films"}) || l.GetKind() != libraryv1.LibraryKind_LIBRARY_KIND_SHOWS ||
 		l.GetScanInterval().AsDuration() != 12*time.Hour {
-		t.Errorf("library = %v, want = Anime of shows in /media/anime and rclone:drive:films, scanned every 12 hours", l)
+		t.Errorf("library = %v, want = Anime of shows in /media/anime and remote:drive:films, scanned every 12 hours", l)
 	}
 	h.save(shots, "settings-library")
 }

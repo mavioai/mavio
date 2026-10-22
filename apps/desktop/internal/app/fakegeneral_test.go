@@ -9,6 +9,8 @@ import (
 
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
+	playbackv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 )
@@ -27,17 +29,28 @@ type fakeAuth struct {
 	f *fakeCore
 }
 
-// fakeServerSettings are the settings a fake server starts with.
-func fakeServerSettings() *systemv1.ServerSettings {
-	return systemv1.ServerSettings_builder{
-		Transcoding: systemv1.TranscodingSettings_builder{
-			HardwareAcceleration: new(systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_AUTO), HardwareEncoding: new(true),
-			H264Crf: new(int32(23)), H265Crf: new(int32(28)), TonemapAlgorithm: new("bt2390"), TonemapRange: new("auto"),
-			TonemapDesat: new(0.0), DeinterlaceMethod: new("yadif"), DownmixBoost: new(2.0),
-		}.Build(),
+// fakeGeneralSettings are the general settings a fake server starts with.
+func fakeGeneralSettings() *systemv1.GeneralSettings {
+	return systemv1.GeneralSettings_builder{
 		Network:         systemv1.NetworkSettings_builder{ServerName: new("Living Room"), LocalDiscovery: new(true)}.Build(),
 		SessionIdleDays: new(int32(90)),
 	}.Build()
+}
+
+// fakeTranscodingSettings are the transcoding settings a fake server
+// starts with.
+func fakeTranscodingSettings() *playbackv1.TranscodingSettings {
+	return playbackv1.TranscodingSettings_builder{
+		HardwareAcceleration: new(playbackv1.HardwareAcceleration_HARDWARE_ACCELERATION_AUTO), HardwareEncoding: new(true),
+		H264Crf: new(int32(23)), H265Crf: new(int32(28)), TonemapAlgorithm: new("bt2390"), TonemapRange: new("auto"),
+		TonemapDesat: new(0.0), DeinterlaceMethod: new("yadif"), DownmixBoost: new(2.0),
+	}.Build()
+}
+
+// fakePlayback serves the server's transcoding settings.
+type fakePlayback struct {
+	playbackv1connect.UnimplementedPlaybackServiceHandler
+	f *fakeCore
 }
 
 // fakeApiKeyList are the API keys a fake server starts with.
@@ -47,23 +60,36 @@ func fakeApiKeyList() []*authv1.ApiKey {
 	}
 }
 
-func (s *fakeSystem) GetServerSettings(context.Context, *systemv1.GetServerSettingsRequest) (*systemv1.GetServerSettingsResponse, error) {
+func (s *fakeSystem) GetGeneralSettings(context.Context, *systemv1.GetGeneralSettingsRequest) (*systemv1.GetGeneralSettingsResponse, error) {
 	s.f.mu.Lock()
 	defer s.f.mu.Unlock()
-	return systemv1.GetServerSettingsResponse_builder{
-		Settings: proto.CloneOf(s.f.serverSettings),
-		AvailableHardwareAccelerations: []systemv1.HardwareAcceleration{
-			systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_AUTO, systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_NONE,
-			systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_VIDEOTOOLBOX,
+	return systemv1.GetGeneralSettingsResponse_builder{Settings: proto.CloneOf(s.f.general)}.Build(), nil
+}
+
+func (s *fakeSystem) UpdateGeneralSettings(_ context.Context, r *systemv1.UpdateGeneralSettingsRequest) (*systemv1.UpdateGeneralSettingsResponse, error) {
+	s.f.mu.Lock()
+	defer s.f.mu.Unlock()
+	s.f.general = proto.CloneOf(r.GetSettings())
+	return systemv1.UpdateGeneralSettingsResponse_builder{Settings: proto.CloneOf(s.f.general)}.Build(), nil
+}
+
+func (s *fakePlayback) GetTranscodingSettings(context.Context, *playbackv1.GetTranscodingSettingsRequest) (*playbackv1.GetTranscodingSettingsResponse, error) {
+	s.f.mu.Lock()
+	defer s.f.mu.Unlock()
+	return playbackv1.GetTranscodingSettingsResponse_builder{
+		Settings: proto.CloneOf(s.f.transcoding),
+		AvailableHardwareAccelerations: []playbackv1.HardwareAcceleration{
+			playbackv1.HardwareAcceleration_HARDWARE_ACCELERATION_AUTO, playbackv1.HardwareAcceleration_HARDWARE_ACCELERATION_NONE,
+			playbackv1.HardwareAcceleration_HARDWARE_ACCELERATION_VIDEOTOOLBOX,
 		},
 	}.Build(), nil
 }
 
-func (s *fakeSystem) UpdateServerSettings(_ context.Context, r *systemv1.UpdateServerSettingsRequest) (*systemv1.UpdateServerSettingsResponse, error) {
+func (s *fakePlayback) UpdateTranscodingSettings(_ context.Context, r *playbackv1.UpdateTranscodingSettingsRequest) (*playbackv1.UpdateTranscodingSettingsResponse, error) {
 	s.f.mu.Lock()
 	defer s.f.mu.Unlock()
-	s.f.serverSettings = proto.CloneOf(r.GetSettings())
-	return systemv1.UpdateServerSettingsResponse_builder{Settings: proto.CloneOf(s.f.serverSettings)}.Build(), nil
+	s.f.transcoding = proto.CloneOf(r.GetSettings())
+	return playbackv1.UpdateTranscodingSettingsResponse_builder{Settings: proto.CloneOf(s.f.transcoding)}.Build(), nil
 }
 
 func (s *fakeAuth) ListApiKeys(context.Context, *authv1.ListApiKeysRequest) (*authv1.ListApiKeysResponse, error) {

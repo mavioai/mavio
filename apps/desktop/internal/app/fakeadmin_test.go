@@ -12,6 +12,7 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
 	storagev1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1/storagev1connect"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
@@ -52,12 +53,13 @@ func (f *fakeCore) handleAdmin(mux *http.ServeMux) {
 	mux.Handle(systemv1connect.NewPluginManagementServiceHandler(&fakePlugins{f: f}))
 	mux.Handle(authv1connect.NewAuthServiceHandler(&fakeAuth{f: f}))
 	mux.Handle(systemv1connect.NewProxyServiceHandler(&fakeProxies{f: f}))
+	mux.Handle(playbackv1connect.NewPlaybackServiceHandler(&fakePlayback{f: f}))
 	f.backups = newFakeBackups()
 	f.plugins = newFakePluginState()
 	mux.Handle(systemv1connect.NewBackupServiceHandler(f.backups))
 	f.handleAcquisition(mux)
 	f.libraries = fakeLibraryList()
-	f.serverSettings = fakeServerSettings()
+	f.general, f.transcoding = fakeGeneralSettings(), fakeTranscodingSettings()
 	f.apiKeys = fakeApiKeyList()
 	f.proxies = fakeProxyList()
 	f.remotes = []*storagev1.Remote{storagev1.Remote_builder{Name: new("drive"), Type: new("drive")}.Build()}

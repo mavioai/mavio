@@ -636,7 +636,7 @@ func (a *App) folderPicker(c *ui.Context, server string, chosen []string, choose
 		loaded  bool
 		err     error
 	)
-	if strings.HasPrefix(path, "rclone:") {
+	if strings.HasPrefix(path, "remote:") {
 		t := load(a, taskIn(&ls.folders, path), key("folders", server, path, a.generation), func(ctx context.Context) ([]string, error) {
 			res, err := a.storageService(server).ListFolders(ctx, storagev1.ListFoldersRequest_builder{Path: &path}.Build())
 			return res.GetFolders(), err
@@ -650,7 +650,7 @@ func (a *App) folderPicker(c *ui.Context, server string, chosen []string, choose
 			folders = append(folders, folder{p, p[strings.LastIndex(p, sep)+1:]})
 		}
 		switch {
-		case regexp.MustCompile(`^rclone:[^:]*:$`).MatchString(path):
+		case regexp.MustCompile(`^remote:[^:]*:$`).MatchString(path):
 			parent = ""
 		case strings.Contains(path, "/"):
 			parent = path[:strings.LastIndex(path, "/")]
@@ -680,7 +680,7 @@ func (a *App) folderPicker(c *ui.Context, server string, chosen []string, choose
 					return res.GetRemotes(), err
 				})
 				for _, r := range remotes.value {
-					p := "rclone:" + r.GetName() + ":"
+					p := "remote:" + r.GetName() + ":"
 					folders = append(folders, folder{p, p})
 				}
 			}
