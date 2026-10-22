@@ -20,24 +20,30 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -65,12 +71,14 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.LocalPinnableContainer
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -489,6 +497,9 @@ fun MavioSwitch(checked: Boolean, onChange: ((Boolean) -> Unit)?) {
     )
 }
 
+/** The fewest choices a phone searches in a sheet instead of a menu. */
+private const val CHOICE_SEARCH_FROM = 16
+
 /**
  * A setting chosen from a menu, showing its choice: on a television the
  * menu of choices opens below it with focus on the chosen one. Without a
@@ -529,7 +540,7 @@ fun <T> ChoiceRow(label: String, choices: List<Pair<T, String>>, chosen: T, deta
                         )
                         MavioIcon(R.drawable.ic_selector, size = 16.dp, tint = theme.colors.textSecondary)
                     }
-                    if (!tv) {
+                    if (!tv && choices.size < CHOICE_SEARCH_FROM) {
                         DropdownMenu(open, onDismissRequest = { open = false }) {
                             choices.forEach { (value, text) ->
                                 ChoiceItem(text, value == chosen) {
@@ -540,6 +551,20 @@ fun <T> ChoiceRow(label: String, choices: List<Pair<T, String>>, chosen: T, deta
                         }
                     }
                 }
+            }
+        }
+        // A long list opens in a sheet searching its choices, as the web
+        // UI's popup does; the row stays composed while it is open, though
+        // the keyboard pushes it out of its list.
+        val pinnable = LocalPinnableContainer.current
+        DisposableEffect(open) {
+            val pinned = if (open) pinnable?.pin() else null
+            onDispose { pinned?.release() }
+        }
+        if (open && !tv && choices.size >= CHOICE_SEARCH_FROM) {
+            SearchedChoices(label, choices, chosen, { open = false }) {
+                open = false
+                onChoose(it)
             }
         }
         // The television's opens below the row, at its right.
@@ -556,6 +581,29 @@ fun <T> ChoiceRow(label: String, choices: List<Pair<T, String>>, chosen: T, deta
                 ) {
                     close()
                     onChoose(it)
+                }
+            }
+        }
+    }
+}
+
+/** A sheet of [choices] under [label] and a field searching them, by name. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun <T> SearchedChoices(label: String, choices: List<Pair<T, String>>, chosen: T, onDismiss: () -> Unit, onChoose: (T) -> Unit) {
+    var query by remember { mutableStateOf("") }
+    val q = query.trim().lowercase()
+    val shown = if (q.isEmpty()) choices else choices.filter { it.second.lowercase().contains(q) }
+    ModalBottomSheet(onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = theme.colors.background) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = theme.layout.margin), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
+            if (label.isNotEmpty()) Text(label, style = theme.type.headline.text)
+            SettingsField(query, { query = it }, null, placeholder = stringResource(R.string.nav_search))
+            if (shown.isEmpty()) {
+                Text(stringResource(R.string.schema_no_matches), style = theme.type.callout.text, color = theme.colors.textSecondary)
+            }
+            LazyColumn(Modifier.fillMaxWidth().imePadding(), contentPadding = PaddingValues(bottom = MavioSpacing.s24)) {
+                items(shown, key = { it.first.toString() }) { (value, text) ->
+                    ChoiceItem(text, value == chosen) { onChoose(value) }
                 }
             }
         }
