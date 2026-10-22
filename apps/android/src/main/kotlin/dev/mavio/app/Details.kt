@@ -56,7 +56,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -85,6 +84,7 @@ import dev.mavio.ui.Artwork
 import dev.mavio.ui.CatalogRow
 import dev.mavio.ui.CircleButton
 import dev.mavio.ui.FactList
+import dev.mavio.ui.ItemRatings
 import dev.mavio.ui.ItemCard
 import dev.mavio.ui.LocalDiscover
 import dev.mavio.ui.LocalTheme
@@ -95,9 +95,10 @@ import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.ProgressBar
 import dev.mavio.ui.PullToRefresh
 import dev.mavio.ui.R
-import dev.mavio.ui.RatingCard
 import dev.mavio.ui.Shelf
 import dev.mavio.ui.StatusView
+import dev.mavio.ui.TitleRatings
+import dev.mavio.ui.WatchProviders
 import dev.mavio.ui.aboutFacts
 import dev.mavio.ui.blurAvailable
 import dev.mavio.ui.crewOrder
@@ -111,11 +112,13 @@ import dev.mavio.ui.pageTitle
 import dev.mavio.ui.range
 import dev.mavio.ui.rememberReload
 import dev.mavio.ui.resolution
+import dev.mavio.ui.shownRatings
 import dev.mavio.ui.shownRole
 import dev.mavio.ui.sizeText
 import dev.mavio.ui.surround
 import dev.mavio.ui.text
 import dev.mavio.ui.theme
+import dev.mavio.ui.titleRatings
 import dev.mavio.ui.versionName
 import java.time.Duration
 import java.time.Instant
@@ -1118,11 +1121,30 @@ private fun AboutSection(details: Details, source: Source?) {
     val tags = if (card.kind == CardKind.EPISODE || card.kind == CardKind.SEASON) emptyList() else details.tags
     var allStudios by rememberSaveable { mutableStateOf(false) }
     val studiosKey = stringResource(if (inSeries) R.string.item_networks else R.string.item_studio)
-    val facts = aboutFacts(details, studiosKey, allStudios)
     val media = source?.let { mediaFacts(it, context) }.orEmpty()
     val community = details.communityRating?.takeIf { it > 0f }
     val critic = details.criticRating?.takeIf { it > 0f }
-    if (crew.isEmpty() && tags.isEmpty() && details.links.isEmpty() && facts.isEmpty() && media.isEmpty() && community == null && critic == null) return
+    // A movie or series links elsewhere with the logos of its discovered
+    // title; anything else as the library tells.
+    val kind = when (card.kind) {
+        CardKind.MOVIE -> MediaKind.MEDIA_KIND_MOVIE
+        CardKind.SERIES -> MediaKind.MEDIA_KIND_SERIES
+        else -> null
+    }
+    val tmdbId = kind?.let { details.externalIds["tmdb"]?.toIntOrNull() } ?: 0
+    val serverId = LocalDiscover.current.discovery?.serverId
+    val titled = kind != null && tmdbId > 0 && serverId != null && !details.offline
+    val title = if (titled) discoveredTitle(serverId, kind.number, tmdbId).value?.getOrNull()?.takeIf { it.hasTitle() }?.title else null
+    val ratings = if (titled) titleRatings(serverId, kind, tmdbId) else null
+    val (siteLinks, links) = if (titled) emptyList<ExternalLink>() to emptyList() else itemLinks(details.links)
+    val score = title?.takeIf { it.voteCount > 0 }?.communityRating
+    val facts = aboutFacts(details, studiosKey, allStudios, title)
+    val streaming = title?.watchProvidersList.orEmpty()
+    if (crew.isEmpty() && tags.isEmpty() && links.isEmpty() && siteLinks.isEmpty() && !titled && facts.isEmpty() && media.isEmpty() &&
+        community == null && critic == null && streaming.isEmpty()
+    ) {
+        return
+    }
     Column(
         Modifier.padding(start = theme.layout.margin, end = theme.layout.margin, top = MavioSpacing.s32, bottom = MavioSpacing.s16),
         verticalArrangement = Arrangement.spacedBy(MavioSpacing.s32),
@@ -1173,9 +1195,9 @@ private fun AboutSection(details: Details, source: Source?) {
                 }
             }
         }
-        if (details.links.isNotEmpty()) {
+        if (links.isNotEmpty()) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
-                details.links.forEach { link ->
+                links.forEach { link ->
                     Row(
                         Modifier
                             .clip(CircleShape)
@@ -1191,26 +1213,24 @@ private fun AboutSection(details: Details, source: Source?) {
                 }
             }
         }
-        if (community != null || critic != null) {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12)) {
-                community?.let {
-                    RatingCard(stringResource(R.string.item_community_rating), "/ 10") {
-                        MavioIcon(R.drawable.ic_rating_fill, size = 22.dp, tint = Color(0xFFFFD60A))
-                        Text(String.format(LocalLocale.current.platformLocale, "%.1f", it), style = theme.type.title2.text, fontWeight = FontWeight.Bold)
-                    }
-                }
-                critic?.let {
-                    RatingCard(stringResource(R.string.item_critic_rating), null) {
-                        Text("${Math.round(it)}%", style = theme.type.title2.text, fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
+        if (titled || siteLinks.isNotEmpty()) {
+            ExternalLinks(
+                if (titled) titleLinks(kind, tmdbId, details.externalIds["imdb"].orEmpty(), details.externalIds["tvdb"].orEmpty(), ratings.orEmpty()) else siteLinks,
+                modifier = Modifier.fillMaxWidth(),
+                start = true,
+            )
         }
-        val links = mapOf(
+        // A title's ratings once asked, else the library's.
+        if (ratings != null && (shownRatings(ratings).isNotEmpty() || score != null)) {
+            TitleRatings(kind!!, tmdbId, ratings, score, start = true)
+        } else if ((!titled || ratings != null) && (community != null || critic != null)) {
+            ItemRatings(community, critic)
+        }
+        val narrowings = mapOf(
             stringResource(R.string.item_genres) to details.genres.map { g -> g to narrowed(details) { genre = g } },
             studiosKey to (if (allStudios) details.studios else details.studios.take(MIN_ITEM_STUDIOS)).map { st -> st to narrowed(details) { studio = st } },
         )
-        FactList(facts, links) { key ->
+        FactList(facts, narrowings) { key ->
             if (key == studiosKey && details.studios.size > MIN_ITEM_STUDIOS) {
                 Text(
                     stringResource(if (allStudios) R.string.action_show_less else R.string.discover_show_more),
@@ -1220,6 +1240,7 @@ private fun AboutSection(details: Details, source: Source?) {
                 )
             }
         }
+        WatchProviders(streaming)
         FactList(media, emptyMap()) {}
     }
 }

@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -41,7 +42,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import dev.mavio.admin.AdminPage
-import dev.mavio.ui.ConfirmDialog
 import dev.mavio.admin.deviceName
 import dev.mavio.admin.reason
 import dev.mavio.core.AppModel
@@ -66,6 +66,7 @@ import dev.mavio.core.reportableKinds
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.CircleButton
+import dev.mavio.ui.ConfirmDialog
 import dev.mavio.ui.MavioButton
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.MavioSwitch
@@ -112,26 +113,25 @@ internal fun MoreMenu(model: AppModel, details: Details) {
         }
     }
     val own = card.kind == CardKind.PLAYLIST || (card.kind == CardKind.COLLECTION && admin)
-    val entries = buildList {
-        if (card.kind in playableKinds) {
-            add(ItemDialog.PlayOn)
-            add(ItemDialog.Together)
-        }
-        if (listable(card.kind)) add(ItemDialog.Playlist)
-        if (card.kind in reportableKinds && mayReport) add(ItemDialog.Report)
-        if (listable(card.kind) && admin) add(ItemDialog.Collection)
+    // The entries in groups, separated, as the web UI's: playing, adding to
+    // lists, metadata, reporting, and renaming or deleting a list, the deletion last.
+    val groups = listOf(
+        if (card.kind in playableKinds) listOf(ItemDialog.PlayOn, ItemDialog.Together) else emptyList(),
+        if (listable(card.kind)) listOfNotNull(ItemDialog.Playlist, ItemDialog.Collection.takeIf { admin }) else emptyList(),
         if (admin && card.kind != CardKind.PLAYLIST) {
-            add(ItemDialog.Edit)
-            if (card.kind in identifiableKinds) add(ItemDialog.Identify)
-            if (card.kind != CardKind.COLLECTION) add(ItemDialog.Refresh)
-            add(ItemDialog.Images)
-        }
-        if (own) {
-            add(ItemDialog.Rename)
-            add(ItemDialog.Delete)
-        }
-    }
-    if (entries.isEmpty()) return
+            listOfNotNull(
+                ItemDialog.Edit,
+                ItemDialog.Images,
+                ItemDialog.Identify.takeIf { card.kind in identifiableKinds },
+                ItemDialog.Refresh.takeIf { card.kind != CardKind.COLLECTION },
+            )
+        } else {
+            emptyList()
+        },
+        if (card.kind in reportableKinds && mayReport) listOf(ItemDialog.Report) else emptyList(),
+        if (own) listOf(ItemDialog.Rename, ItemDialog.Delete) else emptyList(),
+    ).filter { it.isNotEmpty() }
+    if (groups.isEmpty()) return
     val navigator = LocalNavigator.current
     var open by remember { mutableStateOf(false) }
     var dialog by remember { mutableStateOf<ItemDialog?>(null) }
@@ -140,25 +140,29 @@ internal fun MoreMenu(model: AppModel, details: Details) {
     Box {
         CircleButton(R.drawable.ic_more, stringResource(R.string.lists_more), { open = true })
         DropdownMenu(open, onDismissRequest = { open = false }, containerColor = theme.colors.surfaceOverlay) {
-            entries.forEach { e ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            stringResource(e.label),
-                            style = theme.type.callout.text,
-                            color = if (e == ItemDialog.Delete) theme.colors.danger else theme.colors.textPrimary,
-                        )
-                    },
-                    onClick = {
-                        open = false
-                        when (e) {
-                            ItemDialog.Edit -> navigator.open(Route.EditMetadata(card.serverId, card.itemId))
-                            ItemDialog.Identify -> navigator.open(Route.Identify(card.serverId, card.itemId))
-                            ItemDialog.Images -> navigator.open(Route.ItemImages(card.serverId, card.itemId))
-                            else -> dialog = e
-                        }
-                    },
-                )
+            groups.forEachIndexed { i, group ->
+                if (i > 0) HorizontalDivider(Modifier.padding(vertical = MavioSpacing.s4), color = theme.colors.border)
+                group.forEach { e ->
+                    DropdownMenuItem(
+                        text = {
+                            // Plain names, without the ellipsis some strings end in.
+                            Text(
+                                stringResource(e.label).removeSuffix("…"),
+                                style = theme.type.callout.text,
+                                color = if (e == ItemDialog.Delete) theme.colors.danger else theme.colors.textPrimary,
+                            )
+                        },
+                        onClick = {
+                            open = false
+                            when (e) {
+                                ItemDialog.Edit -> navigator.open(Route.EditMetadata(card.serverId, card.itemId))
+                                ItemDialog.Identify -> navigator.open(Route.Identify(card.serverId, card.itemId))
+                                ItemDialog.Images -> navigator.open(Route.ItemImages(card.serverId, card.itemId))
+                                else -> dialog = e
+                            }
+                        },
+                    )
+                }
             }
         }
     }

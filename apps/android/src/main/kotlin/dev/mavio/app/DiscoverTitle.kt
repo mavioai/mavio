@@ -50,7 +50,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
@@ -83,6 +82,8 @@ import dev.mavio.ui.R
 import dev.mavio.ui.Reload
 import dev.mavio.ui.Shelf
 import dev.mavio.ui.StatusView
+import dev.mavio.ui.TitleRatings
+import dev.mavio.ui.WatchProviders
 import dev.mavio.ui.Wordmark
 import dev.mavio.ui.blurAvailable
 import dev.mavio.ui.countryText
@@ -102,18 +103,17 @@ import dev.mavio.ui.seasonName
 import dev.mavio.ui.sized
 import dev.mavio.ui.statusLabel
 import dev.mavio.ui.text
+import dev.mavio.ui.titleRatings
 import dev.mavio.ui.theme
 import dev.mavio.ui.titleCredits
 import java.util.Locale
 import mavio.acquisition.v1.Discover.GetCollectionResponse
-import mavio.acquisition.v1.Discover.GetRatingsResponse
 import mavio.acquisition.v1.Discover.GetSeasonResponse
 import mavio.acquisition.v1.Discover.GetTitleResponse
 import mavio.acquisition.v1.Discover.SeasonStatus
 import mavio.acquisition.v1.Discover.Title
 import mavio.acquisition.v1.Profile.MediaKind
 import mavio.acquisition.v1.getCollectionRequest
-import mavio.acquisition.v1.getRatingsRequest
 import mavio.acquisition.v1.getSeasonRequest
 import mavio.acquisition.v1.getTitleRequest
 import mavio.library.v1.ItemOuterClass.CreditKind
@@ -124,7 +124,7 @@ import mavio.plugin.v1.Ratings.RatingSource
 
 /** A discovered title as GetTitle answers, null while it is on its way. */
 @Composable
-private fun discoveredTitle(serverId: String, mediaKind: Int, tmdbId: Int, reload: Reload) = discovered(
+internal fun discoveredTitle(serverId: String, mediaKind: Int, tmdbId: Int, reload: Reload? = null) = discovered(
     serverId,
     "GetTitle",
     remember(mediaKind, tmdbId) {
@@ -601,7 +601,16 @@ private fun TitleFacts(serverId: String, title: Title, modifier: Modifier) {
     var allStudios by rememberSaveable { mutableStateOf(false) }
     val colors = theme.colors
     val rows = mutableListOf<@Composable () -> Unit>()
-    rows += { TitleRatings(serverId, title) }
+    val ratings = titleRatings(serverId, title.mediaKind, title.tmdbId)
+    rows += {
+        TitleRatings(
+            title.mediaKind,
+            title.tmdbId,
+            ratings.orEmpty(),
+            title.communityRating.takeIf { title.voteCount > 0 },
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+        )
+    }
     if (title.originalTitle.isNotEmpty() && title.originalLanguage != discoverLanguage) {
         rows += { Fact(stringResource(R.string.item_original_title)) { FactValue(title.originalTitle) } }
     }
@@ -673,25 +682,16 @@ private fun TitleFacts(serverId: String, title: Title, modifier: Modifier) {
             }
         }
     }
-    if (title.watchProvidersCount > 0) {
-        rows += {
-            Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
-                Text(stringResource(R.string.item_streaming), style = theme.type.callout.text, fontWeight = FontWeight.SemiBold)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s12), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8)) {
-                    title.watchProvidersList.forEach { p ->
-                        if (p.logoUrl.isNotEmpty()) {
-                            Artwork(p.logoUrl, Modifier.size(32.dp).clip(RoundedCornerShape(6.dp)), contentDescription = p.name)
-                        } else {
-                            Text(p.name, style = theme.type.footnote.text)
-                        }
-                    }
-                }
-            }
-        }
-    }
+    if (title.watchProvidersCount > 0) rows += { WatchProviders(title.watchProvidersList, Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)) }
     rows += {
         ExternalLinks(
-            titleLinks(title, titleRatings(serverId, title)),
+            titleLinks(
+                title.mediaKind,
+                title.tmdbId,
+                title.externalIdsMap["imdb"].orEmpty(),
+                title.externalIdsMap["tvdb"]?.ifEmpty { null } ?: title.tvdbId.takeIf { it > 0 }?.toString().orEmpty(),
+                ratings.orEmpty(),
+            ),
             if (title.itemId.isNotEmpty()) ({ navigator.open(Route.Item(serverId, title.itemId)) }) else null,
             Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
             start = true,
@@ -717,14 +717,12 @@ private fun TitleFacts(serverId: String, title: Title, modifier: Modifier) {
 internal data class ExternalLink(val name: String, val url: String, val logo: Int, val width: Dp = 32.dp, val mono: Boolean = false)
 
 /** The sites linking a title elsewhere, as Seerr's, Rotten Tomatoes' once its [ratings] tell its page. */
-private fun titleLinks(title: Title, ratings: List<Rating>): List<ExternalLink> {
-    val series = title.mediaKind == MediaKind.MEDIA_KIND_SERIES
-    val imdb = title.externalIdsMap["imdb"].orEmpty()
-    val tvdb = title.externalIdsMap["tvdb"]?.ifEmpty { null } ?: title.tvdbId.takeIf { it > 0 }?.toString().orEmpty()
+internal fun titleLinks(kind: MediaKind, tmdbId: Int, imdb: String, tvdb: String, ratings: List<Rating>): List<ExternalLink> {
+    val series = kind == MediaKind.MEDIA_KIND_SERIES
     val language = Locale.getDefault().toLanguageTag()
     val rt = ratings.firstOrNull { it.source != RatingSource.RATING_SOURCE_IMDB && it.url.isNotEmpty() }?.url
     return listOfNotNull(
-        ExternalLink("TMDB", "https://www.themoviedb.org/${if (series) "tv" else "movie"}/${title.tmdbId}?language=$language", R.drawable.service_tmdb),
+        ExternalLink("TMDB", "https://www.themoviedb.org/${if (series) "tv" else "movie"}/$tmdbId?language=$language", R.drawable.service_tmdb),
         if (series && tvdb.isNotEmpty()) ExternalLink("TVDB", "https://www.thetvdb.com/dereferrer/series/$tvdb", R.drawable.service_tvdb, 36.dp, mono = true) else null,
         if (imdb.isNotEmpty()) ExternalLink("IMDb", "https://www.imdb.com/title/$imdb", R.drawable.service_imdb) else null,
         rt?.let { ExternalLink("Rotten Tomatoes", it, R.drawable.service_rt, 56.dp) },
@@ -734,9 +732,20 @@ private fun titleLinks(title: Title, ratings: List<Rating>): List<ExternalLink> 
         } else {
             null
         },
-        if (!series) ExternalLink("Letterboxd", "https://letterboxd.com/tmdb/${title.tmdbId}", R.drawable.service_letterboxd) else null,
+        if (!series) ExternalLink("Letterboxd", "https://letterboxd.com/tmdb/$tmdbId", R.drawable.service_letterboxd) else null,
     )
 }
+
+/** The sites an item links with a logo, by the name the library gives them. */
+private val siteLogos = mapOf(
+    "TMDB" to ExternalLink("TMDB", "", R.drawable.service_tmdb),
+    "TheTVDB" to ExternalLink("TheTVDB", "", R.drawable.service_tvdb, 36.dp, mono = true),
+    "IMDb" to ExternalLink("IMDb", "", R.drawable.service_imdb),
+)
+
+/** An item's [links] elsewhere: those to sites with a logo as logos, and the others. */
+internal fun itemLinks(links: List<dev.mavio.core.ExternalLink>): Pair<List<ExternalLink>, List<dev.mavio.core.ExternalLink>> =
+    links.mapNotNull { l -> siteLogos[l.name]?.copy(url = l.url) } to links.filter { it.name !in siteLogos }
 
 /**
  * The logos linking a title or person elsewhere, as Seerr's, faint, centered
@@ -775,66 +784,6 @@ internal fun ExternalLinks(
                 colorFilter = if (l.mono) ColorFilter.tint(theme.colors.textPrimary) else null,
             )
         }
-    }
-}
-
-/** A title's ratings, as its ratings and its links show them. */
-@Composable
-private fun titleRatings(serverId: String, title: Title): List<Rating> {
-    val result by discovered(
-        serverId,
-        "GetRatings",
-        remember(title.tmdbId) {
-            getRatingsRequest {
-                mediaKind = title.mediaKind
-                tmdbId = title.tmdbId
-            }
-        },
-        GetRatingsResponse::parseFrom,
-    )
-    return result?.getOrNull()?.ratingsList.orEmpty()
-}
-
-/** Rotten Tomatoes' least fresh score, and least upright audience score. */
-private const val FRESH_SCORE = 60.0
-
-/** A title's ratings as Seerr's: Rotten Tomatoes' and IMDb's, then TMDB's score, each opening its page. */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun TitleRatings(serverId: String, title: Title) {
-    val uri = LocalUriHandler.current
-    val ratings = titleRatings(serverId, title)
-    val order = listOf(RatingSource.RATING_SOURCE_ROTTEN_TOMATOES_CRITICS, RatingSource.RATING_SOURCE_ROTTEN_TOMATOES_AUDIENCE, RatingSource.RATING_SOURCE_IMDB)
-    val shown = order.mapNotNull { s -> ratings.firstOrNull { it.source == s } }
-    val language = LocalLocale.current.platformLocale.toLanguageTag()
-    val series = title.mediaKind == MediaKind.MEDIA_KIND_SERIES
-    FlowRow(
-        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16, Alignment.CenterHorizontally),
-        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s4),
-    ) {
-        shown.forEach { r ->
-            val (label, score) = when (r.source) {
-                RatingSource.RATING_SOURCE_IMDB -> "IMDb" to String.format(Locale.getDefault(), "%.1f", r.score)
-                RatingSource.RATING_SOURCE_ROTTEN_TOMATOES_CRITICS ->
-                    (if (r.score >= FRESH_SCORE) "🍅" else "🟢") to "${Math.round(r.score)}%"
-                else -> (if (r.score >= FRESH_SCORE) "🍿" else "🥀") to "${Math.round(r.score)}%"
-            }
-            RatingLink(label, score) { if (r.url.isNotEmpty()) runCatching { uri.openUri(r.url) } }
-        }
-        if (title.voteCount > 0) {
-            RatingLink("TMDB", "${Math.round(title.communityRating * 10)}%") {
-                runCatching { uri.openUri("https://www.themoviedb.org/${if (series) "tv" else "movie"}/${title.tmdbId}?language=$language") }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RatingLink(label: String, score: String, onClick: () -> Unit) {
-    Row(Modifier.clickable(onClick = onClick), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, style = theme.type.footnote.text, fontWeight = FontWeight.Bold, color = theme.colors.textSecondary)
-        Text(score, style = theme.type.callout.text, fontWeight = FontWeight.SemiBold)
     }
 }
 
