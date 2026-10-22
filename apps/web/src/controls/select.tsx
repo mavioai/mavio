@@ -139,7 +139,7 @@ function SearchSelect<T extends string>({
             <div className="mb-1 px-1 pt-0.5">
               <div className="relative">
                 <Icon name="search" size={16} className="pointer-events-none absolute inset-y-0 start-2.5 my-auto text-text-secondary" />
-                <Combobox.Input aria-label={label} placeholder={t("nav.search")} className={`${input} ps-8`} />
+                <Combobox.Input aria-label={label} placeholder={t("nav.search")} className={`${input} ps-8 desk:ps-8`} />
               </div>
             </div>
             <Combobox.Empty className="px-2.5 py-2 type-callout text-text-secondary empty:hidden">{t("schema.noMatches")}</Combobox.Empty>
@@ -293,7 +293,7 @@ export function Picker({
                 }
               : undefined
           }
-          className={`${input} pe-9`}
+          className={`${input} pe-9 desk:pe-9`}
         />
         <Combobox.Trigger aria-label={label} className="absolute inset-y-0 end-0 flex w-9 items-center justify-center text-text-secondary">
           <Icon name="expand" size={14} />
@@ -309,7 +309,7 @@ export function Picker({
               <div className="mb-1 px-1 pt-0.5">
                 <div className="relative">
                   <Icon name="search" size={16} className="pointer-events-none absolute inset-y-0 start-2.5 my-auto text-text-secondary" />
-                  <Combobox.Input aria-label={label} placeholder={labels.search} className={`${input} ps-8`} />
+                  <Combobox.Input aria-label={label} placeholder={labels.search} className={`${input} ps-8 desk:ps-8`} />
                 </div>
               </div>
             )}

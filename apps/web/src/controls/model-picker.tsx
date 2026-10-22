@@ -103,7 +103,7 @@ export function ModelPicker({
           <Combobox.Popup className={`${popup} flex w-[var(--anchor-width)] max-w-[calc(100vw-32px)] flex-col`}>
             <div className="relative mb-1 px-1 pt-0.5">
               <Icon name="search" size={16} className="pointer-events-none absolute inset-y-0 start-3.5 my-auto text-text-secondary" />
-              <Combobox.Input aria-label={label} placeholder={labels.search} className={`${input} ps-8`} />
+              <Combobox.Input aria-label={label} placeholder={labels.search} className={`${input} ps-8 desk:ps-8`} />
             </div>
             <Combobox.Empty className="px-2.5 py-2 type-callout text-text-secondary empty:hidden">{labels.empty}</Combobox.Empty>
             <Rows list={list} />

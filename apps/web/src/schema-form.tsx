@@ -461,7 +461,7 @@ function TextField({
         aria-label={label}
         required={required}
         autoComplete={secret ? "new-password" : "off"}
-        className={`${input} ${secret ? "pr-10" : ""}`}
+        className={`${input} ${secret ? "pr-10 desk:pr-10" : ""}`}
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
