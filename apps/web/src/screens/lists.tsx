@@ -81,8 +81,8 @@ export function MoreMenu({ server, item, className, iconSize, phone }: { server:
           i > 0 && <MenuSeparator key={`separator-${i}`} />,
           ...group.map(([d, label]) => (
             <MenuItem key={d} danger={d === "delete"} onClick={() => setDialog(d)}>
-              {/* Each entry but the deletion asks more in a dialog. */}
-              {d === "delete" || label.endsWith("…") ? label : `${label}…`}
+              {/* Plain names, without the ellipsis some strings end in. */}
+              {label.replace(/…$/, "")}
             </MenuItem>
           )),
         ])}
