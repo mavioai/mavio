@@ -41,7 +41,9 @@
                 column.widthAnchor.constraint(lessThanOrEqualToConstant: theme.isTV ? 1100 : 900),
             ])
             let fill = column.leadingAnchor.constraint(equalTo: holder.leadingAnchor, constant: margin)
-            fill.priority = .defaultHigh
+            // Below the window's own size, which it must not change: a wide
+            // window keeps its width and centers the column.
+            fill.priority = .dragThatCannotResizeWindow
             fill.isActive = true
             if !heading.isEmpty { head.widthAnchor.constraint(equalTo: column.widthAnchor).isActive = true }
             page = ScrollPage([])
