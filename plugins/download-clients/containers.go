@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mavioai/mavio/libs/plugin/guest"
@@ -62,6 +63,32 @@ var containerFilled = map[string]bool{
 	"host": true, "port": true, "use_ssl": true, "url_base": true,
 	"username": true, "password": true, "api_key": true,
 }
+
+// containerFolder is where the containers put downloads, the folder the
+// manifest mounts; the folders of the containers' directory settings are
+// in it.
+const containerFolder = "/downloads/"
+
+// containerDefinition returns a definition as its containers' clients
+// take it: without the settings the containers fill in, and with folders
+// in the containers' folder.
+func containerDefinition(d client.Definition) client.Definition {
+	var fields []client.Field
+	for _, f := range d.Fields {
+		if containerFilled[f.Name] {
+			continue
+		}
+		if directorySetting(f.Name) {
+			f.Prefix = containerFolder
+		}
+		fields = append(fields, f)
+	}
+	d.Fields = fields
+	return d
+}
+
+// directorySetting reports whether a setting is a folder downloads go in.
+func directorySetting(name string) bool { return strings.HasSuffix(name, "_directory") }
 
 // containerClientID is the ID of the client of a container dependency.
 func containerClientID(name string) string { return "container-" + name }
@@ -153,9 +180,13 @@ func (p *plugin) containerConfig(cc containerClientConfig, spec containerClient,
 			return clientConfig{}, def, fmt.Errorf("settings: %w", err)
 		}
 		for k, v := range given {
-			if !containerFilled[k] {
-				settings[k] = v
+			if containerFilled[k] {
+				continue
 			}
+			if dir, ok := v.(string); ok && directorySetting(k) && dir != "" && !strings.HasPrefix(dir, containerFolder) {
+				return clientConfig{}, def, fmt.Errorf("setting %s: %q is not in %s", k, dir, containerFolder)
+			}
+			settings[k] = v
 		}
 	}
 	settings["host"], settings["port"], settings["use_ssl"] = u.Hostname(), port, u.Scheme == "https"

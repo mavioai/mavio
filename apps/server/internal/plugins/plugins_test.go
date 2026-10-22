@@ -301,13 +301,15 @@ func TestSettingsSchema(t *testing.T) {
 		}.Build(),
 		pluginv1.SettingField_builder{Name: proto.String("note"), Label: proto.String("Note"), Type: pluginv1.SettingFieldType_SETTING_FIELD_TYPE_INFO.Enum()}.Build(),
 		pluginv1.SettingField_builder{Name: proto.String("flags"), Label: proto.String("Flags"), Type: pluginv1.SettingFieldType_SETTING_FIELD_TYPE_TAG.Enum()}.Build(),
+		pluginv1.SettingField_builder{Name: proto.String("dir"), Label: proto.String("Directory"), Type: &text, Prefix: proto.String("/downloads/")}.Build(),
 	}
 	want := `{"type":"object","properties":{` +
 		`"base_url":{"title":"URL","type":"string","default":"https://a.b"},` +
 		`"api_key":{"title":"API Key","description":"<key> & more","type":"string","writeOnly":true},` +
 		`"sort":{"title":"Sort","oneOf":[{"const":0,"title":"Date"}]},` +
 		`"note":{"title":"Note","readOnly":true},` +
-		`"flags":{"title":"Flags","type":"array","items":{"type":"string"}}}}`
+		`"flags":{"title":"Flags","type":"array","items":{"type":"string"}},` +
+		`"dir":{"title":"Directory","type":"string","x-mavio-prefix":"/downloads/"}}}`
 	if got := plugins.SettingsSchema(fields); got != want {
 		t.Errorf("SettingsSchema() = %s, want = %s", got, want)
 	}

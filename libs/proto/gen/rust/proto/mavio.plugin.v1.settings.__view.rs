@@ -35,6 +35,12 @@ pub struct SettingFieldView<'a> {
     ///
     /// Field 8: `secret`
     pub secret: ::core::option::Option<bool>,
+    /// The fixed beginning of a text setting, such as a folder its path must
+    /// be in, which clients show before what the administrator types; the
+    /// value holds both, and stays empty while nothing is typed.
+    ///
+    /// Field 9: `prefix`
+    pub prefix: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for SettingFieldView<'a> {
@@ -118,6 +124,13 @@ impl<'a> ::buffa::MessageView<'a> for SettingFieldView<'a> {
                 )?;
                 view.secret = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.prefix = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             6u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -172,6 +185,7 @@ impl<'a> ::buffa::MessageView<'a> for SettingFieldView<'a> {
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
             advanced: self.advanced,
             secret: self.secret,
+            prefix: self.prefix.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -212,6 +226,9 @@ impl<'a> ::buffa::ViewEncode<'a> for SettingFieldView<'a> {
         if self.secret.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.prefix {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -251,6 +268,9 @@ impl<'a> ::buffa::ViewEncode<'a> for SettingFieldView<'a> {
         }
         if let Some(v) = self.secret {
             ::buffa::types::put_bool_field(8u32, v, buf);
+        }
+        if let Some(ref v) = self.prefix {
+            ::buffa::types::put_string_field(9u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -398,6 +418,15 @@ impl SettingFieldOwnedView {
     #[must_use]
     pub fn secret(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().secret
+    }
+    /// The fixed beginning of a text setting, such as a folder its path must
+    /// be in, which clients show before what the administrator types; the
+    /// value holds both, and stays empty while nothing is typed.
+    ///
+    /// Field 9: `prefix`
+    #[must_use]
+    pub fn prefix(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().prefix
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<SettingFieldView<'static>>>

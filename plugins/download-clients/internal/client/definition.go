@@ -45,6 +45,9 @@ type Field struct {
 	Advanced bool
 	// Secret settings, such as passwords, are never shown back.
 	Secret bool
+	// Prefix is the fixed beginning of a text setting, shown before what
+	// is typed; the value holds both.
+	Prefix string
 }
 
 // Option is a choice of a select.

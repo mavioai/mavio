@@ -110,6 +110,31 @@ func TestContainerClients(t *testing.T) {
 	}
 }
 
+// TestContainerDirectories checks that the folders of a container's
+// client are in the container's folder.
+func TestContainerDirectories(t *testing.T) {
+	p, err := newPlugin(slog.New(slog.DiscardHandler), "test", t.TempDir(), http.DefaultClient, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dep := pluginv1.ContainerStatus_builder{Name: proto.String("transmission"), Address: proto.String("http://127.0.0.1:49002")}.Build()
+	for _, tc := range []struct {
+		settings string
+		ok       bool
+	}{
+		{`{}`, true},
+		{`{"movie_directory":""}`, true},
+		{`{"movie_directory":"/downloads/movies","tv_directory":"/downloads/tv"}`, true},
+		{`{"movie_directory":"/data/movies"}`, false},
+		{`{"tv_directory":"/downloadsx"}`, false},
+	} {
+		cc := containerClientConfig{Name: "transmission", Settings: json.RawMessage(tc.settings)}
+		if _, _, err := p.containerConfig(cc, containerClients["transmission"], dep); (err == nil) != tc.ok {
+			t.Errorf("containerConfig(%s): got = %v, want = ok %v", tc.settings, err, tc.ok)
+		}
+	}
+}
+
 // TestContainerDefinitions checks that the clients of the containers are
 // listed by name with the settings the containers do not fill in.
 func TestContainerDefinitions(t *testing.T) {
@@ -130,6 +155,12 @@ func TestContainerDefinitions(t *testing.T) {
 				t.Errorf("%s: field %s, which the container fills in", d.GetId(), f.GetName())
 			}
 			fields = append(fields, f.GetName())
+			if want := map[bool]string{true: containerFolder}[directorySetting(f.GetName())]; f.GetPrefix() != want {
+				t.Errorf("%s: field %s has prefix %q, want = %q", d.GetId(), f.GetName(), f.GetPrefix(), want)
+			}
+		}
+		if d.GetId() == "transmission" && !slices.Contains(fields, "movie_directory") {
+			t.Errorf("transmission: fields = %v, want = movie_directory among them", fields)
 		}
 		if !slices.Contains(fields, "movie_category") {
 			t.Errorf("%s: fields = %v, want = movie_category among them", d.GetId(), fields)
@@ -159,6 +190,11 @@ func TestManifestContainers(t *testing.T) {
 		}
 		if err != nil {
 			t.Fatal(err)
+		}
+		for _, f := range c.GetFolders() {
+			if f.GetPath()+"/" != containerFolder {
+				t.Errorf("container %s: folder %s, want = %s", name, f.GetPath(), containerFolder)
+			}
 		}
 		if cmd := c.GetCommand(); len(cmd) != 4 || cmd[3] != string(script) {
 			t.Errorf("container %s: command does not run containers/%s.py as it is; copy it into manifest.json", name, name)

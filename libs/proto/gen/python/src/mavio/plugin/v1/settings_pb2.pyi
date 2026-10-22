@@ -27,7 +27,7 @@ SETTING_FIELD_TYPE_INFO: SettingFieldType
 SETTING_FIELD_TYPE_TAG: SettingFieldType
 
 class SettingField(_message.Message):
-    __slots__ = ("name", "label", "help_text", "type", "default_json", "options", "advanced", "secret")
+    __slots__ = ("name", "label", "help_text", "type", "default_json", "options", "advanced", "secret", "prefix")
     NAME_FIELD_NUMBER: _ClassVar[int]
     LABEL_FIELD_NUMBER: _ClassVar[int]
     HELP_TEXT_FIELD_NUMBER: _ClassVar[int]
@@ -36,6 +36,7 @@ class SettingField(_message.Message):
     OPTIONS_FIELD_NUMBER: _ClassVar[int]
     ADVANCED_FIELD_NUMBER: _ClassVar[int]
     SECRET_FIELD_NUMBER: _ClassVar[int]
+    PREFIX_FIELD_NUMBER: _ClassVar[int]
     name: str
     label: str
     help_text: str
@@ -44,7 +45,8 @@ class SettingField(_message.Message):
     options: _containers.RepeatedCompositeFieldContainer[SettingFieldOption]
     advanced: bool
     secret: bool
-    def __init__(self, name: _Optional[str] = ..., label: _Optional[str] = ..., help_text: _Optional[str] = ..., type: _Optional[_Union[SettingFieldType, str]] = ..., default_json: _Optional[str] = ..., options: _Optional[_Iterable[_Union[SettingFieldOption, _Mapping]]] = ..., advanced: _Optional[bool] = ..., secret: _Optional[bool] = ...) -> None: ...
+    prefix: str
+    def __init__(self, name: _Optional[str] = ..., label: _Optional[str] = ..., help_text: _Optional[str] = ..., type: _Optional[_Union[SettingFieldType, str]] = ..., default_json: _Optional[str] = ..., options: _Optional[_Iterable[_Union[SettingFieldOption, _Mapping]]] = ..., advanced: _Optional[bool] = ..., secret: _Optional[bool] = ..., prefix: _Optional[str] = ...) -> None: ...
 
 class SettingFieldOption(_message.Message):
     __slots__ = ("value_json", "label")

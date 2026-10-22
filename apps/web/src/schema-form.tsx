@@ -6,7 +6,8 @@
 // no shape the form knows, such as an object of arbitrary keys, as JSON.
 // Properties the server generates are left out; a switch needing a
 // container dependency (x-mavio-requires-container) stays off until the
-// dependency is set up.
+// dependency is set up; a text value with a fixed beginning
+// (x-mavio-prefix) shows it before what is typed.
 import { createContext, type ReactNode, useContext, useState } from "react";
 
 import { Tip } from "./controls/tooltip.tsx";
@@ -36,6 +37,8 @@ export interface Schema {
   "x-mavio-options"?: OptionsSpec;
   /** The sibling property whose value names the container dependency a switch needs on. */
   "x-mavio-requires-container"?: string;
+  /** The fixed beginning of a text value, shown before what is typed; the value holds both. */
+  "x-mavio-prefix"?: string;
 }
 
 /** Where a property's values come from, and the sibling properties a chosen option fills. */
@@ -374,6 +377,17 @@ function Property({
     case "enum":
     case "string":
       if (choices(s)) return head(<EnumField label={labelOf(name, s)} schema={s} required={required} value={value} onChange={onChange} />);
+      if (s["x-mavio-prefix"])
+        return head(
+          <div className="w-full sm:w-80">
+            <PrefixedField
+              label={labelOf(name, s)}
+              prefix={s["x-mavio-prefix"]}
+              value={typeof value === "string" ? value : ""}
+              onChange={(v) => onChange(v === "" && !required ? undefined : v)}
+            />
+          </div>,
+        );
       return head(
         <div className="w-full sm:w-80">
           <TextField
@@ -478,6 +492,28 @@ function TextField({
           </button>
         </Tip>
       )}
+    </div>
+  );
+}
+
+/**
+ * A text input after a fixed beginning, as an address after "http://":
+ * the value is the beginning and what is typed, and empty while nothing is.
+ */
+function PrefixedField({ label, prefix, value, onChange }: { label: string; prefix: string; value: string; onChange: (v: string) => void }) {
+  const typed = value.startsWith(prefix) ? value.slice(prefix.length) : value;
+  return (
+    <div className="flex min-h-9 w-full min-w-0 overflow-hidden rounded-md border border-border bg-surface focus-within:border-focus desk:min-h-7">
+      <span aria-hidden className="flex shrink-0 items-center border-r border-border bg-fill px-3 font-mono type-body text-text-secondary select-none desk:px-2">
+        {prefix}
+      </span>
+      <input
+        aria-label={`${label} (${prefix})`}
+        autoComplete="off"
+        className="min-w-0 flex-1 bg-transparent px-3 type-body text-on-background placeholder:text-text-tertiary focus:outline-none desk:px-2"
+        value={typed}
+        onChange={(e) => onChange(e.target.value === "" ? "" : prefix + e.target.value.replace(/^\/+/, ""))}
+      />
     </div>
   );
 }

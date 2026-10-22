@@ -59,25 +59,21 @@ func (p *plugin) ListDownloadClientDefinitions(_ context.Context, req *pluginv1.
 			if !ok {
 				continue
 			}
-			out = append(out, definitionProto(name, containerClientName(d), d, func(f client.Field) bool { return !containerFilled[f.Name] }))
+			out = append(out, definitionProto(name, containerClientName(d), containerDefinition(d)))
 		}
 		return pluginv1.ListDownloadClientDefinitionsResponse_builder{Definitions: out}.Build(), nil
 	}
 	out := make([]*pluginv1.DownloadClientDefinition, 0, len(p.defs))
 	for _, d := range p.defs {
-		out = append(out, definitionProto(d.ID, d.Name, d, func(client.Field) bool { return true }))
+		out = append(out, definitionProto(d.ID, d.Name, d))
 	}
 	return pluginv1.ListDownloadClientDefinitionsResponse_builder{Definitions: out}.Build(), nil
 }
 
-// definitionProto returns a definition under an ID and name, with the
-// fields keep keeps.
-func definitionProto(id, name string, d client.Definition, keep func(client.Field) bool) *pluginv1.DownloadClientDefinition {
+// definitionProto returns a definition under an ID and name.
+func definitionProto(id, name string, d client.Definition) *pluginv1.DownloadClientDefinition {
 	fields := make([]*pluginv1.SettingField, 0, len(d.Fields))
 	for _, f := range d.Fields {
-		if !keep(f) {
-			continue
-		}
 		var opts []*pluginv1.SettingFieldOption
 		for _, o := range f.Options {
 			opts = append(opts, pluginv1.SettingFieldOption_builder{ValueJson: proto.String(jsonValue(o.Value)), Label: proto.String(o.Label)}.Build())
@@ -86,6 +82,7 @@ func definitionProto(id, name string, d client.Definition, keep func(client.Fiel
 			Name: proto.String(f.Name), Label: proto.String(f.Label), HelpText: proto.String(f.HelpText),
 			Type: fieldTypes[f.Type].Enum(), DefaultJson: proto.String(jsonValue(f.Default)),
 			Options: opts, Advanced: proto.Bool(f.Advanced), Secret: proto.Bool(f.Secret),
+			Prefix: proto.String(f.Prefix),
 		}.Build())
 	}
 	return pluginv1.DownloadClientDefinition_builder{
