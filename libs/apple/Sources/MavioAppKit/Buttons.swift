@@ -16,10 +16,10 @@
             case secondary
             /// An icon in a circle filled with `color.fill`.
             case circle
-            /// The main action over artwork, glass until it is focused or
-            /// hovered, as the web UI's Play.
+            /// The main action over artwork, as the web UI's Play: white with
+            /// black content; on the television glass until it is focused.
             case artworkPrimary
-            /// Another action over artwork: white over glass.
+            /// Another action over artwork: white content over glass.
             case artworkSecondary
             /// An icon in a circle of glass over artwork.
             case artworkCircle
@@ -47,7 +47,8 @@
         public var selected = false { didSet { restyle() } }
 
         /// A button of a kind showing title and icon, either optional;
-        /// large is the 36 pt height of a page's main actions.
+        /// large is the 36 pt height of a page's main actions, over artwork
+        /// the web UI's 44 with its semibold headline.
         public init(
             _ title: String? = nil, icon: String? = nil, kind: Kind = .secondary, large: Bool = false,
             theme: Theme = .desktop, action: (@MainActor () -> Void)? = nil
@@ -56,11 +57,16 @@
             self.theme = theme
             onPress = action
             box = Box()
-            titleLabel = .label(title ?? "", theme.isTV ? theme.fonts.headline : theme.fonts.body)
+            let artwork = large && (kind == .artworkPrimary || kind == .artworkSecondary)
+            titleLabel = .label(title ?? "", theme.isTV || artwork ? theme.fonts.headline : theme.fonts.body)
+            if artwork && !theme.isTV {
+                titleLabel.font = .systemFont(ofSize: theme.fonts.headline.size, weight: .semibold)
+            }
             titleLabel.isHidden = title == nil
             let round = kind == .circle || kind == .artworkCircle
-            let iconSize: CGFloat = theme.isTV ? 32 : (round ? 18 : 16)
-            iconView = icon.map { IconView($0, size: iconSize) }
+            let iconSize: CGFloat = theme.isTV ? 32 : (round ? 18 : artwork ? 20 : 16)
+            // The web UI fills the main action's icon over artwork, as Play's.
+            iconView = icon.map { IconView($0, fill: artwork && kind == .artworkPrimary, size: iconSize) }
             stack = .horizontal([iconView, titleLabel].compactMap(\.self), spacing: MavioSpacing.s8)
             super.init(frame: .zero)
             translatesAutoresizingMaskIntoConstraints = false
@@ -76,13 +82,15 @@
             }
             addFilling(box)
             addSubview(stack)
-            let height: CGFloat = theme.isTV ? 64 : (large ? 36 : 28)
+            let height: CGFloat = theme.isTV ? 64 : (artwork ? 44 : large ? 36 : 28)
             let padded = kind != .link && kind != .destructive && kind != .plain
             if round {
                 size(width: theme.isTV ? 72 : (large ? 44 : 32), height: theme.isTV ? 72 : (large ? 44 : 32))
                 stack.center(in: self)
             } else {
-                let side = padded ? (theme.isTV ? MavioSpacing.s32 : (large ? MavioSpacing.s16 : 12)) : 0
+                let side =
+                    padded
+                    ? (theme.isTV ? MavioSpacing.s32 : artwork ? MavioSpacing.s24 : large ? MavioSpacing.s16 : 12) : 0
                 NSLayoutConstraint.activate([
                     stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
                     stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
@@ -97,6 +105,9 @@
                 snug.isActive = true
             }
             titleLabel.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+            // As wide as its content unless what holds it says so: a row
+            // with room to give does not stretch it.
+            stack.setHuggingPriority(.defaultHigh, for: .horizontal)
             setAccessibilityElement(true)
             setAccessibilityRole(.button)
             setAccessibilityLabel(title ?? icon)
@@ -146,14 +157,12 @@
                 (background, foreground) = (c.button, c.onButton)
             case .secondary, .circle:
                 (background, foreground) = (selected ? c.fillSelected : c.fill, c.textPrimary)
+            case .artworkPrimary where tv:
+                (background, foreground, glassShown) = (.white.withAlphaComponent(0.2), .white, true)
             case .artworkPrimary:
-                if hovering || isFocused {
-                    (background, foreground) = (.white, .black)
-                } else {
-                    (background, foreground, glassShown) = (.white.withAlphaComponent(0.16), .white, true)
-                }
+                (background, foreground) = (hovering ? .white.withAlphaComponent(0.9) : .white, .black)
             case .artworkSecondary, .artworkCircle:
-                (background, foreground, glassShown) = (.white.withAlphaComponent(0.16), .white, true)
+                (background, foreground, glassShown) = (.white.withAlphaComponent(hovering ? 0.3 : 0.2), .white, true)
             case .link:
                 (background, foreground) = (nil, c.accentText)
             case .destructive:
@@ -171,9 +180,16 @@
             if !isEnabled { foreground = c.textDisabled }
             box.fill = background
             let round = kind == .circle || kind == .artworkCircle
-            box.radius = round || tv ? 999 : (kind == .primary || kind == .secondary ? MavioRadius.md : 0)
+            // Over artwork the web UI's 10 pt corners.
+            let corner: CGFloat =
+                switch kind {
+                case .primary, .secondary: MavioRadius.md
+                case .artworkPrimary, .artworkSecondary: 10
+                default: 0
+                }
+            box.radius = round || tv ? 999 : corner
             glass?.isHidden = !glassShown
-            glass?.layer?.cornerRadius = round || tv ? 999 : MavioRadius.md
+            glass?.layer?.cornerRadius = round || tv ? 999 : corner
             titleLabel.textColor = foreground
             iconView?.contentTintColor = foreground
             alphaValue = pressed ? 0.8 : (isEnabled ? 1 : 0.6)
