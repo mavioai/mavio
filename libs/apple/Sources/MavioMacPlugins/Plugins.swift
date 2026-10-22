@@ -140,9 +140,9 @@
         func loadCatalogs() async {
             do {
                 let list = try await model.call(
-                    server, Procedure.system("GetServerSettings"), Mavio_System_V1_GetServerSettingsRequest(),
-                    as: Mavio_System_V1_GetServerSettingsResponse.self
-                ).settings.pluginCatalogs
+                    server, Procedure.plugins("GetPluginCatalogs"), Mavio_System_V1_GetPluginCatalogsRequest(),
+                    as: Mavio_System_V1_GetPluginCatalogsResponse.self
+                ).urls
                 if catalogs != list { catalogs = list }
                 if catalogsFailure != nil { catalogsFailure = nil }
             } catch is CancellationError {
@@ -151,18 +151,13 @@
             }
         }
 
-        /// Replaces the catalogs' URLs, keeping the other settings.
+        /// Replaces the catalogs' URLs.
         func setCatalogs(_ urls: [String]) async throws {
-            var settings = try await model.call(
-                server, Procedure.system("GetServerSettings"), Mavio_System_V1_GetServerSettingsRequest(),
-                as: Mavio_System_V1_GetServerSettingsResponse.self
-            ).settings
-            settings.pluginCatalogs = urls
-            var request = Mavio_System_V1_UpdateServerSettingsRequest()
-            request.settings = settings
+            var request = Mavio_System_V1_UpdatePluginCatalogsRequest()
+            request.urls = urls
             _ = try await model.call(
-                server, Procedure.system("UpdateServerSettings"), request,
-                as: Mavio_System_V1_UpdateServerSettingsResponse.self)
+                server, Procedure.plugins("UpdatePluginCatalogs"), request,
+                as: Mavio_System_V1_UpdatePluginCatalogsResponse.self)
         }
     }
 

@@ -9,6 +9,8 @@
         private var info: Mavio_System_V1_GetSystemInfoResponse?
         private var serving: Bool?
         private var runtime: Mavio_System_V1_ContainerRuntime?
+        private var rclone: Mavio_Storage_V1_GetStatusResponse?
+        private var rcloneFailure: String?
         private var samples: [Mavio_System_V1_LoadSample] = []
         private var failure: String?
         private var loadFailure: String?
@@ -74,6 +76,7 @@
                         MavioStrings.overviewContainerEngine,
                         accessory: NSStackView.vertical(lines, spacing: 2, alignment: .trailing), theme: theme))
             }
+            rows.append(rcloneRow())
             if let start = info?.startTime.time {
                 rows.append(
                     valueRow(
@@ -83,6 +86,38 @@
             }
             if let failure { rows.append(note(failure, failed: true)) }
             serverSection.setRows(rows)
+        }
+
+        /// rclone: whether the server reaches it, its version, and whose rcd
+        /// it is.
+        private func rcloneRow() -> NSView {
+            let color =
+                rclone == nil && rcloneFailure == nil
+                ? theme.colors.fill : rclone?.available == true ? NSColor(hex: 0x34C759) : theme.colors.danger
+            let text: String =
+                if let rcloneFailure {
+                    rcloneFailure
+                } else if let rclone {
+                    rclone.available
+                        ? [MavioStrings.storageAvailable, rclone.version].filter { !$0.isEmpty }.joined(
+                            separator: " · ")
+                        : rclone.error.isEmpty ? MavioStrings.storageUnavailable : rclone.error
+                } else {
+                    "…"
+                }
+            let status = NSTextField.label(text, theme.fonts.body, color: theme.colors.textSecondary, lines: 0)
+            status.alignment = .right
+            var lines: [NSView] = [NSStackView.horizontal([dot(color), status], spacing: MavioSpacing.s8)]
+            if let rclone, rclone.available {
+                let whose = NSTextField.label(
+                    rclone.managed ? MavioStrings.overviewRcloneManaged : MavioStrings.overviewRcloneExternal,
+                    theme.fonts.footnote, color: theme.colors.textSecondary)
+                whose.alignment = .right
+                lines.append(whose)
+            }
+            return FormRow(
+                MavioStrings.overviewRclone, accessory: NSStackView.vertical(lines, spacing: 2, alignment: .trailing),
+                theme: theme)
         }
 
         private func renderLoad() {
@@ -112,6 +147,15 @@
             }
             serving = await health.map { $0.status == .serving } ?? false
             runtime = await engine?.runtime
+            do {
+                rclone = try await client.call(
+                    id, Procedure.storage("GetStatus"), Mavio_Storage_V1_GetStatusRequest(),
+                    as: Mavio_Storage_V1_GetStatusResponse.self)
+                rcloneFailure = nil
+            } catch is CancellationError {
+            } catch {
+                rcloneFailure = error.reason
+            }
             renderServer()
         }
 

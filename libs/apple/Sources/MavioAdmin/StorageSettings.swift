@@ -2,8 +2,8 @@ import MavioKit
 import MavioUI
 import SwiftUI
 
-/// Storage (docs/clients.md §6.3.10): the disks of the server's computer,
-/// the rclone the server runs or reaches, and its remotes — added with a
+/// Storage (docs/clients.md §6.3.10): the disks of the server's computer
+/// and the remotes of the rclone the server runs or reaches — added with a
 /// kind's settings and the questions their configuration asks, such as
 /// authorizing a cloud drive — and their folders. The download clients of
 /// cloud drives' offline downloads feed acquisition and are left out
@@ -67,30 +67,10 @@ struct StorageView: View {
                     Text(MavioStrings.storageRemotesFooter)
                 }
             }
-            Section(MavioStrings.storageRclone) {
-                LabeledContent(MavioStrings.storageStatus) {
-                    HStack(spacing: MavioSpacing.s8) {
-                        Circle()
-                            .fill(
-                                status == nil && statusFailure == nil
-                                    ? theme.colors.fill : available ? Color(hex: 0x34C759) : theme.colors.danger
-                            )
-                            .frame(width: 8, height: 8)
-                        Text(statusText).multilineTextAlignment(.trailing)
-                    }
-                }
-                if let status, !status.version.isEmpty {
-                    LabeledContent(MavioStrings.storageVersion, value: status.version)
-                }
-                if let status, available {
-                    LabeledContent {
-                        Text(status.managed ? MavioStrings.storageManaged : MavioStrings.storageExternal)
-                    } label: {
-                        RowLabel(
-                            label: MavioStrings.storageRcd,
-                            detail: status.managed
-                                ? MavioStrings.storageManagedDetail : MavioStrings.storageExternalDetail)
-                    }
+            // Without rclone there are no remotes; Overview tells of it.
+            if !available, status != nil || statusFailure != nil {
+                Section(MavioStrings.storageRemotes) {
+                    Text(statusText).foregroundStyle(theme.colors.danger)
                 }
             }
         }
@@ -163,7 +143,7 @@ extension AppModel {
         ).remotes.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
-    /// The folders in a folder of a remote, "rclone:<remote>:<path>".
+    /// The folders in a folder of a remote, "remote:<remote>:<path>".
     fileprivate func remoteFolders(_ server: ServerRecord, _ path: String) async throws -> [String] {
         var request = Mavio_Storage_V1_ListFoldersRequest()
         request.path = path
@@ -331,7 +311,7 @@ private struct RemoteRow: View {
         .task(id: remote.name) {
             async let u: Void = loadUsage()
             do {
-                _ = try await model.remoteFolders(server, "rclone:\(remote.name):")
+                _ = try await model.remoteFolders(server, "remote:\(remote.name):")
                 reached = ""
             } catch is CancellationError {
             } catch {
@@ -846,7 +826,7 @@ private struct RemoteFolders: View {
     @State private var folders: [String]?
     @State private var failure: String?
 
-    private var root: String { "rclone:\(remote):" }
+    private var root: String { "remote:\(remote):" }
 
     var body: some View {
         let here = path.isEmpty ? root : path

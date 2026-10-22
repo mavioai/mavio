@@ -663,6 +663,51 @@ public nonisolated enum Mavio_Playback_V1_TranscodeReason: SwiftProtobuf.Enum, S
 
 }
 
+/// HardwareAcceleration is the hardware transcodes decode and encode on.
+public nonisolated enum Mavio_Playback_V1_HardwareAcceleration: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+  case unspecified // = 0
+
+  /// What the server's ffmpeg and hardware support, if anything.
+  case auto // = 1
+  case none // = 2
+  case videotoolbox // = 3
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .auto
+    case 2: self = .none
+    case 3: self = .videotoolbox
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .auto: return 1
+    case .none: return 2
+    case .videotoolbox: return 3
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Mavio_Playback_V1_HardwareAcceleration] = [
+    .unspecified,
+    .auto,
+    .none,
+    .videotoolbox,
+  ]
+
+}
+
 /// ClientCapabilities describes what a client can play: which containers and
 /// codecs it plays directly, which formats it can receive transcodes in, the
 /// limits of its decoders and how it shows subtitles.
@@ -1689,6 +1734,253 @@ public nonisolated struct Mavio_Playback_V1_ListMediaSourcesResponse: Sendable {
   public init() {}
 }
 
+/// TranscodingSettings steer transcodes.
+public nonisolated struct Mavio_Playback_V1_TranscodingSettings: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var hardwareAcceleration: Mavio_Playback_V1_HardwareAcceleration {
+    get {_hardwareAcceleration ?? .unspecified}
+    set {_hardwareAcceleration = newValue}
+  }
+  /// Returns true if `hardwareAcceleration` has been explicitly set.
+  public var hasHardwareAcceleration: Bool {self._hardwareAcceleration != nil}
+  /// Clears the value of `hardwareAcceleration`. Subsequent reads from it will return its default value.
+  public mutating func clearHardwareAcceleration() {self._hardwareAcceleration = nil}
+
+  public var hardwareEncoding: Bool {
+    get {_hardwareEncoding ?? false}
+    set {_hardwareEncoding = newValue}
+  }
+  /// Returns true if `hardwareEncoding` has been explicitly set.
+  public var hasHardwareEncoding: Bool {self._hardwareEncoding != nil}
+  /// Clears the value of `hardwareEncoding`. Subsequent reads from it will return its default value.
+  public mutating func clearHardwareEncoding() {self._hardwareEncoding = nil}
+
+  /// "", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium",
+  /// "slow", "slower" or "veryslow"; empty picks one by the source.
+  public var encoderPreset: String {
+    get {_encoderPreset ?? String()}
+    set {_encoderPreset = newValue}
+  }
+  /// Returns true if `encoderPreset` has been explicitly set.
+  public var hasEncoderPreset: Bool {self._encoderPreset != nil}
+  /// Clears the value of `encoderPreset`. Subsequent reads from it will return its default value.
+  public mutating func clearEncoderPreset() {self._encoderPreset = nil}
+
+  public var h264Crf: Int32 {
+    get {_h264Crf ?? 0}
+    set {_h264Crf = newValue}
+  }
+  /// Returns true if `h264Crf` has been explicitly set.
+  public var hasH264Crf: Bool {self._h264Crf != nil}
+  /// Clears the value of `h264Crf`. Subsequent reads from it will return its default value.
+  public mutating func clearH264Crf() {self._h264Crf = nil}
+
+  public var h265Crf: Int32 {
+    get {_h265Crf ?? 0}
+    set {_h265Crf = newValue}
+  }
+  /// Returns true if `h265Crf` has been explicitly set.
+  public var hasH265Crf: Bool {self._h265Crf != nil}
+  /// Clears the value of `h265Crf`. Subsequent reads from it will return its default value.
+  public mutating func clearH265Crf() {self._h265Crf = nil}
+
+  /// 0 lets ffmpeg decide.
+  public var threads: Int32 {
+    get {_threads ?? 0}
+    set {_threads = newValue}
+  }
+  /// Returns true if `threads` has been explicitly set.
+  public var hasThreads: Bool {self._threads != nil}
+  /// Clears the value of `threads`. Subsequent reads from it will return its default value.
+  public mutating func clearThreads() {self._threads = nil}
+
+  /// "bt2390", "hable", "mobius", "reinhard", "clip", "linear" or "gamma".
+  public var tonemapAlgorithm: String {
+    get {_tonemapAlgorithm ?? String()}
+    set {_tonemapAlgorithm = newValue}
+  }
+  /// Returns true if `tonemapAlgorithm` has been explicitly set.
+  public var hasTonemapAlgorithm: Bool {self._tonemapAlgorithm != nil}
+  /// Clears the value of `tonemapAlgorithm`. Subsequent reads from it will return its default value.
+  public mutating func clearTonemapAlgorithm() {self._tonemapAlgorithm = nil}
+
+  /// "auto", "tv" or "pc".
+  public var tonemapRange: String {
+    get {_tonemapRange ?? String()}
+    set {_tonemapRange = newValue}
+  }
+  /// Returns true if `tonemapRange` has been explicitly set.
+  public var hasTonemapRange: Bool {self._tonemapRange != nil}
+  /// Clears the value of `tonemapRange`. Subsequent reads from it will return its default value.
+  public mutating func clearTonemapRange() {self._tonemapRange = nil}
+
+  public var tonemapDesat: Double {
+    get {_tonemapDesat ?? 0}
+    set {_tonemapDesat = newValue}
+  }
+  /// Returns true if `tonemapDesat` has been explicitly set.
+  public var hasTonemapDesat: Bool {self._tonemapDesat != nil}
+  /// Clears the value of `tonemapDesat`. Subsequent reads from it will return its default value.
+  public mutating func clearTonemapDesat() {self._tonemapDesat = nil}
+
+  public var tonemapPeak: Double {
+    get {_tonemapPeak ?? 0}
+    set {_tonemapPeak = newValue}
+  }
+  /// Returns true if `tonemapPeak` has been explicitly set.
+  public var hasTonemapPeak: Bool {self._tonemapPeak != nil}
+  /// Clears the value of `tonemapPeak`. Subsequent reads from it will return its default value.
+  public mutating func clearTonemapPeak() {self._tonemapPeak = nil}
+
+  /// "yadif" or "bwdif".
+  public var deinterlaceMethod: String {
+    get {_deinterlaceMethod ?? String()}
+    set {_deinterlaceMethod = newValue}
+  }
+  /// Returns true if `deinterlaceMethod` has been explicitly set.
+  public var hasDeinterlaceMethod: Bool {self._deinterlaceMethod != nil}
+  /// Clears the value of `deinterlaceMethod`. Subsequent reads from it will return its default value.
+  public mutating func clearDeinterlaceMethod() {self._deinterlaceMethod = nil}
+
+  public var deinterlaceDoubleRate: Bool {
+    get {_deinterlaceDoubleRate ?? false}
+    set {_deinterlaceDoubleRate = newValue}
+  }
+  /// Returns true if `deinterlaceDoubleRate` has been explicitly set.
+  public var hasDeinterlaceDoubleRate: Bool {self._deinterlaceDoubleRate != nil}
+  /// Clears the value of `deinterlaceDoubleRate`. Subsequent reads from it will return its default value.
+  public mutating func clearDeinterlaceDoubleRate() {self._deinterlaceDoubleRate = nil}
+
+  public var downmixBoost: Double {
+    get {_downmixBoost ?? 0}
+    set {_downmixBoost = newValue}
+  }
+  /// Returns true if `downmixBoost` has been explicitly set.
+  public var hasDownmixBoost: Bool {self._downmixBoost != nil}
+  /// Clears the value of `downmixBoost`. Subsequent reads from it will return its default value.
+  public mutating func clearDownmixBoost() {self._downmixBoost = nil}
+
+  public var cropBlackBorders: Bool {
+    get {_cropBlackBorders ?? false}
+    set {_cropBlackBorders = newValue}
+  }
+  /// Returns true if `cropBlackBorders` has been explicitly set.
+  public var hasCropBlackBorders: Bool {self._cropBlackBorders != nil}
+  /// Clears the value of `cropBlackBorders`. Subsequent reads from it will return its default value.
+  public mutating func clearCropBlackBorders() {self._cropBlackBorders = nil}
+
+  /// Absolute folder for running transcodes; empty uses the folder the
+  /// server was started with.
+  public var transcodeDir: String {
+    get {_transcodeDir ?? String()}
+    set {_transcodeDir = newValue}
+  }
+  /// Returns true if `transcodeDir` has been explicitly set.
+  public var hasTranscodeDir: Bool {self._transcodeDir != nil}
+  /// Clears the value of `transcodeDir`. Subsequent reads from it will return its default value.
+  public mutating func clearTranscodeDir() {self._transcodeDir = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _hardwareAcceleration: Mavio_Playback_V1_HardwareAcceleration? = nil
+  fileprivate var _hardwareEncoding: Bool? = nil
+  fileprivate var _encoderPreset: String? = nil
+  fileprivate var _h264Crf: Int32? = nil
+  fileprivate var _h265Crf: Int32? = nil
+  fileprivate var _threads: Int32? = nil
+  fileprivate var _tonemapAlgorithm: String? = nil
+  fileprivate var _tonemapRange: String? = nil
+  fileprivate var _tonemapDesat: Double? = nil
+  fileprivate var _tonemapPeak: Double? = nil
+  fileprivate var _deinterlaceMethod: String? = nil
+  fileprivate var _deinterlaceDoubleRate: Bool? = nil
+  fileprivate var _downmixBoost: Double? = nil
+  fileprivate var _cropBlackBorders: Bool? = nil
+  fileprivate var _transcodeDir: String? = nil
+}
+
+public nonisolated struct Mavio_Playback_V1_GetTranscodingSettingsRequest: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+public nonisolated struct Mavio_Playback_V1_GetTranscodingSettingsResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var settings: Mavio_Playback_V1_TranscodingSettings {
+    get {_settings ?? Mavio_Playback_V1_TranscodingSettings()}
+    set {_settings = newValue}
+  }
+  /// Returns true if `settings` has been explicitly set.
+  public var hasSettings: Bool {self._settings != nil}
+  /// Clears the value of `settings`. Subsequent reads from it will return its default value.
+  public mutating func clearSettings() {self._settings = nil}
+
+  /// The accelerations this server's ffmpeg supports, AUTO and NONE
+  /// included.
+  public var availableHardwareAccelerations: [Mavio_Playback_V1_HardwareAcceleration] = []
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _settings: Mavio_Playback_V1_TranscodingSettings? = nil
+}
+
+public nonisolated struct Mavio_Playback_V1_UpdateTranscodingSettingsRequest: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var settings: Mavio_Playback_V1_TranscodingSettings {
+    get {_settings ?? Mavio_Playback_V1_TranscodingSettings()}
+    set {_settings = newValue}
+  }
+  /// Returns true if `settings` has been explicitly set.
+  public var hasSettings: Bool {self._settings != nil}
+  /// Clears the value of `settings`. Subsequent reads from it will return its default value.
+  public mutating func clearSettings() {self._settings = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _settings: Mavio_Playback_V1_TranscodingSettings? = nil
+}
+
+public nonisolated struct Mavio_Playback_V1_UpdateTranscodingSettingsResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var settings: Mavio_Playback_V1_TranscodingSettings {
+    get {_settings ?? Mavio_Playback_V1_TranscodingSettings()}
+    set {_settings = newValue}
+  }
+  /// Returns true if `settings` has been explicitly set.
+  public var hasSettings: Bool {self._settings != nil}
+  /// Clears the value of `settings`. Subsequent reads from it will return its default value.
+  public mutating func clearSettings() {self._settings = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _settings: Mavio_Playback_V1_TranscodingSettings? = nil
+}
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate nonisolated let _protobuf_package = "mavio.playback.v1"
@@ -1731,6 +2023,10 @@ nonisolated extension Mavio_Playback_V1_PlayMethod: SwiftProtobuf._ProtoNameProv
 
 nonisolated extension Mavio_Playback_V1_TranscodeReason: SwiftProtobuf._ProtoNameProviding {
   public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0TRANSCODE_REASON_UNSPECIFIED\0\u{1}TRANSCODE_REASON_CONTAINER_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_VIDEO_CODEC_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_AUDIO_CODEC_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_SUBTITLE_CODEC_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_AUDIO_IS_EXTERNAL\0\u{1}TRANSCODE_REASON_SECONDARY_AUDIO_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_VIDEO_PROFILE_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_VIDEO_LEVEL_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_VIDEO_RESOLUTION_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_VIDEO_BIT_DEPTH_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_VIDEO_FRAMERATE_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_REF_FRAMES_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_ANAMORPHIC_VIDEO_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_INTERLACED_VIDEO_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_AUDIO_CHANNELS_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_AUDIO_PROFILE_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_AUDIO_SAMPLE_RATE_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_AUDIO_BIT_DEPTH_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_CONTAINER_BITRATE_EXCEEDS_LIMIT\0\u{1}TRANSCODE_REASON_VIDEO_BITRATE_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_AUDIO_BITRATE_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_UNKNOWN_VIDEO_STREAM_INFO\0\u{1}TRANSCODE_REASON_UNKNOWN_AUDIO_STREAM_INFO\0\u{1}TRANSCODE_REASON_DIRECT_PLAY_ERROR\0\u{1}TRANSCODE_REASON_VIDEO_RANGE_TYPE_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_VIDEO_CODEC_TAG_NOT_SUPPORTED\0\u{1}TRANSCODE_REASON_STREAM_COUNT_EXCEEDS_LIMIT\0\u{1}TRANSCODE_REASON_VIDEO_ROTATION_NOT_SUPPORTED\0")
+}
+
+nonisolated extension Mavio_Playback_V1_HardwareAcceleration: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0HARDWARE_ACCELERATION_UNSPECIFIED\0\u{1}HARDWARE_ACCELERATION_AUTO\0\u{1}HARDWARE_ACCELERATION_NONE\0\u{1}HARDWARE_ACCELERATION_VIDEOTOOLBOX\0")
 }
 
 nonisolated extension Mavio_Playback_V1_ClientCapabilities: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
@@ -2736,6 +3032,236 @@ nonisolated extension Mavio_Playback_V1_ListMediaSourcesResponse: SwiftProtobuf.
 
   public static func ==(lhs: Mavio_Playback_V1_ListMediaSourcesResponse, rhs: Mavio_Playback_V1_ListMediaSourcesResponse) -> Bool {
     if lhs.mediaSources != rhs.mediaSources {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Playback_V1_TranscodingSettings: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".TranscodingSettings"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}hardware_acceleration\0\u{3}hardware_encoding\0\u{3}encoder_preset\0\u{3}h264_crf\0\u{3}h265_crf\0\u{1}threads\0\u{3}tonemap_algorithm\0\u{3}tonemap_range\0\u{3}tonemap_desat\0\u{3}tonemap_peak\0\u{3}deinterlace_method\0\u{3}deinterlace_double_rate\0\u{3}downmix_boost\0\u{3}crop_black_borders\0\u{3}transcode_dir\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self._hardwareAcceleration) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self._hardwareEncoding) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self._encoderPreset) }()
+      case 4: try { try decoder.decodeSingularInt32Field(value: &self._h264Crf) }()
+      case 5: try { try decoder.decodeSingularInt32Field(value: &self._h265Crf) }()
+      case 6: try { try decoder.decodeSingularInt32Field(value: &self._threads) }()
+      case 7: try { try decoder.decodeSingularStringField(value: &self._tonemapAlgorithm) }()
+      case 8: try { try decoder.decodeSingularStringField(value: &self._tonemapRange) }()
+      case 9: try { try decoder.decodeSingularDoubleField(value: &self._tonemapDesat) }()
+      case 10: try { try decoder.decodeSingularDoubleField(value: &self._tonemapPeak) }()
+      case 11: try { try decoder.decodeSingularStringField(value: &self._deinterlaceMethod) }()
+      case 12: try { try decoder.decodeSingularBoolField(value: &self._deinterlaceDoubleRate) }()
+      case 13: try { try decoder.decodeSingularDoubleField(value: &self._downmixBoost) }()
+      case 14: try { try decoder.decodeSingularBoolField(value: &self._cropBlackBorders) }()
+      case 15: try { try decoder.decodeSingularStringField(value: &self._transcodeDir) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._hardwareAcceleration {
+      try visitor.visitSingularEnumField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._hardwareEncoding {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 2)
+    } }()
+    try { if let v = self._encoderPreset {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 3)
+    } }()
+    try { if let v = self._h264Crf {
+      try visitor.visitSingularInt32Field(value: v, fieldNumber: 4)
+    } }()
+    try { if let v = self._h265Crf {
+      try visitor.visitSingularInt32Field(value: v, fieldNumber: 5)
+    } }()
+    try { if let v = self._threads {
+      try visitor.visitSingularInt32Field(value: v, fieldNumber: 6)
+    } }()
+    try { if let v = self._tonemapAlgorithm {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 7)
+    } }()
+    try { if let v = self._tonemapRange {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 8)
+    } }()
+    try { if let v = self._tonemapDesat {
+      try visitor.visitSingularDoubleField(value: v, fieldNumber: 9)
+    } }()
+    try { if let v = self._tonemapPeak {
+      try visitor.visitSingularDoubleField(value: v, fieldNumber: 10)
+    } }()
+    try { if let v = self._deinterlaceMethod {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 11)
+    } }()
+    try { if let v = self._deinterlaceDoubleRate {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 12)
+    } }()
+    try { if let v = self._downmixBoost {
+      try visitor.visitSingularDoubleField(value: v, fieldNumber: 13)
+    } }()
+    try { if let v = self._cropBlackBorders {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 14)
+    } }()
+    try { if let v = self._transcodeDir {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 15)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Playback_V1_TranscodingSettings, rhs: Mavio_Playback_V1_TranscodingSettings) -> Bool {
+    if lhs._hardwareAcceleration != rhs._hardwareAcceleration {return false}
+    if lhs._hardwareEncoding != rhs._hardwareEncoding {return false}
+    if lhs._encoderPreset != rhs._encoderPreset {return false}
+    if lhs._h264Crf != rhs._h264Crf {return false}
+    if lhs._h265Crf != rhs._h265Crf {return false}
+    if lhs._threads != rhs._threads {return false}
+    if lhs._tonemapAlgorithm != rhs._tonemapAlgorithm {return false}
+    if lhs._tonemapRange != rhs._tonemapRange {return false}
+    if lhs._tonemapDesat != rhs._tonemapDesat {return false}
+    if lhs._tonemapPeak != rhs._tonemapPeak {return false}
+    if lhs._deinterlaceMethod != rhs._deinterlaceMethod {return false}
+    if lhs._deinterlaceDoubleRate != rhs._deinterlaceDoubleRate {return false}
+    if lhs._downmixBoost != rhs._downmixBoost {return false}
+    if lhs._cropBlackBorders != rhs._cropBlackBorders {return false}
+    if lhs._transcodeDir != rhs._transcodeDir {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Playback_V1_GetTranscodingSettingsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetTranscodingSettingsRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    // Load everything into unknown fields
+    while try decoder.nextFieldNumber() != nil {}
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Playback_V1_GetTranscodingSettingsRequest, rhs: Mavio_Playback_V1_GetTranscodingSettingsRequest) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Playback_V1_GetTranscodingSettingsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetTranscodingSettingsResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}settings\0\u{3}available_hardware_accelerations\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._settings) }()
+      case 2: try { try decoder.decodeRepeatedEnumField(value: &self.availableHardwareAccelerations) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._settings {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    if !self.availableHardwareAccelerations.isEmpty {
+      try visitor.visitPackedEnumField(value: self.availableHardwareAccelerations, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Playback_V1_GetTranscodingSettingsResponse, rhs: Mavio_Playback_V1_GetTranscodingSettingsResponse) -> Bool {
+    if lhs._settings != rhs._settings {return false}
+    if lhs.availableHardwareAccelerations != rhs.availableHardwareAccelerations {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Playback_V1_UpdateTranscodingSettingsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".UpdateTranscodingSettingsRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}settings\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._settings) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._settings {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Playback_V1_UpdateTranscodingSettingsRequest, rhs: Mavio_Playback_V1_UpdateTranscodingSettingsRequest) -> Bool {
+    if lhs._settings != rhs._settings {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Playback_V1_UpdateTranscodingSettingsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".UpdateTranscodingSettingsResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}settings\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._settings) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._settings {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Playback_V1_UpdateTranscodingSettingsResponse, rhs: Mavio_Playback_V1_UpdateTranscodingSettingsResponse) -> Bool {
+    if lhs._settings != rhs._settings {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

@@ -122,57 +122,71 @@ extension AppModel {
     }
 }
 
-/// The server's settings as a page edits them: read, changed and saved,
-/// each change applied to the settings the server has when saving so that
-/// what other pages changed in the meantime is kept.
+/// A group of the server's settings as a page edits them: read, changed
+/// and saved whole, on the service of their domain.
 @MainActor @Observable
-private final class SettingsEditor {
-    let server: ServerRecord
-    private let model: AppModel
-    private(set) var saved: Mavio_System_V1_GetServerSettingsResponse?
+final class SettingsEditor<Settings: Equatable> {
+    private let read: @MainActor () async throws -> Settings
+    private let write: @MainActor (Settings) async throws -> Settings
+    private(set) var saved: Settings?
     var failure: String?
     var saving = false
     var notice: String?
 
-    init(server: ServerRecord, model: AppModel) {
-        self.server = server
-        self.model = model
+    /// An editor reading the group with read and replacing it with write,
+    /// which returns the group as saved.
+    init(
+        read: @escaping @MainActor () async throws -> Settings,
+        write: @escaping @MainActor (Settings) async throws -> Settings
+    ) {
+        self.read = read
+        self.write = write
     }
 
     func load() async {
         do {
-            saved = try await model.call(
-                server, Procedure.system("GetServerSettings"), Mavio_System_V1_GetServerSettingsRequest(),
-                as: Mavio_System_V1_GetServerSettingsResponse.self)
+            saved = try await read()
+            failure = nil
         } catch is CancellationError {
         } catch {
             failure = error.reason
         }
     }
 
-    /// Saves a change, saying so with the notice given.
-    func save(_ notice: String, _ change: @escaping (inout Mavio_System_V1_ServerSettings) -> Void) async -> Bool {
+    /// Saves the settings, saying so with the notice given.
+    func save(_ notice: String, _ settings: Settings) async -> Bool {
         saving = true
         failure = nil
         defer { saving = false }
         do {
-            var current = try await model.call(
-                server, Procedure.system("GetServerSettings"), Mavio_System_V1_GetServerSettingsRequest(),
-                as: Mavio_System_V1_GetServerSettingsResponse.self)
-            change(&current.settings)
-            var request = Mavio_System_V1_UpdateServerSettingsRequest()
-            request.settings = current.settings
-            let response = try await model.call(
-                server, Procedure.system("UpdateServerSettings"), request,
-                as: Mavio_System_V1_UpdateServerSettingsResponse.self)
-            current.settings = response.settings
-            saved = current
+            saved = try await write(settings)
             self.notice = notice
             return true
         } catch {
             failure = error.reason
             return false
         }
+    }
+}
+
+extension SettingsEditor where Settings == Mavio_System_V1_GeneralSettings {
+    /// The server's general settings.
+    static func general(_ model: AppModel, _ server: ServerRecord) -> SettingsEditor {
+        SettingsEditor(
+            read: {
+                try await model.call(
+                    server, Procedure.system("GetGeneralSettings"), Mavio_System_V1_GetGeneralSettingsRequest(),
+                    as: Mavio_System_V1_GetGeneralSettingsResponse.self
+                ).settings
+            },
+            write: {
+                var request = Mavio_System_V1_UpdateGeneralSettingsRequest()
+                request.settings = $0
+                return try await model.call(
+                    server, Procedure.system("UpdateGeneralSettings"), request,
+                    as: Mavio_System_V1_UpdateGeneralSettingsResponse.self
+                ).settings
+            })
     }
 }
 
@@ -185,7 +199,7 @@ struct GeneralView: View {
     let server: ServerRecord
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
-    @State private var editor: SettingsEditor?
+    @State private var editor: SettingsEditor<Mavio_System_V1_GeneralSettings>?
     @State private var draft = Draft()
     @State private var languages: [Choice] = []
     @State private var countries: [Choice] = []
@@ -208,7 +222,7 @@ struct GeneralView: View {
 
         init() {}
 
-        init(_ s: Mavio_System_V1_ServerSettings) {
+        init(_ s: Mavio_System_V1_GeneralSettings) {
             name = s.network.serverName
             language = s.metadata.preferredLanguage
             country = s.metadata.country
@@ -224,7 +238,7 @@ struct GeneralView: View {
 
         var valid: Bool { (1...3650).contains(idleDays) && (0...65535).contains(httpsPort) }
 
-        func apply(to s: inout Mavio_System_V1_ServerSettings) {
+        func apply(to s: inout Mavio_System_V1_GeneralSettings) {
             s.network.serverName = name.trimmingCharacters(in: .whitespaces)
             s.network.baseURL = baseURL.trimmingCharacters(in: .whitespaces)
             s.network.httpsPort = httpsPort
@@ -242,7 +256,7 @@ struct GeneralView: View {
     var body: some View {
         SettingsList {
             if let saved = editor?.saved {
-                form(saved.settings)
+                form(saved)
             } else if editor?.failure == nil {
                 ProgressView().frame(maxWidth: .infinity).listRowBackground(Color.clear)
             }
@@ -260,13 +274,13 @@ struct GeneralView: View {
                 ProgressView()
             } else if let saved = editor?.saved {
                 Button(MavioStrings.actionSave, action: save)
-                    .disabled(draft == Draft(saved.settings) || !draft.valid)
+                    .disabled(draft == Draft(saved) || !draft.valid)
             }
         }
         .task { await load() }
     }
 
-    @ViewBuilder private func form(_ settings: Mavio_System_V1_ServerSettings) -> some View {
+    @ViewBuilder private func form(_ settings: Mavio_System_V1_GeneralSettings) -> some View {
         Section {
             TextRow(label: MavioStrings.generalName, detail: MavioStrings.generalNameDetail, text: $draft.name)
             Picker(selection: $draft.language) {
@@ -336,10 +350,10 @@ struct GeneralView: View {
 
     private func load() async {
         if editor == nil {
-            let e = SettingsEditor(server: server, model: model)
+            let e = SettingsEditor.general(model, server)
             editor = e
             await e.load()
-            if let s = e.saved?.settings { draft = Draft(s) }
+            if let s = e.saved { draft = Draft(s) }
         }
         async let info = try? model.call(
             server, Procedure.auth("GetAuthInfo"), Mavio_Auth_V1_GetAuthInfoRequest(),
@@ -356,11 +370,10 @@ struct GeneralView: View {
 
     private func save() {
         guard let editor else { return }
-        let draft = draft
+        guard var settings = editor.saved else { return }
+        draft.apply(to: &settings)
         Task {
-            if await editor.save(MavioStrings.generalSaved, { draft.apply(to: &$0) }),
-                let s = editor.saved?.settings
-            {
+            if await editor.save(MavioStrings.generalSaved, settings), let s = editor.saved {
                 self.draft = Draft(s)
                 // The app names the server as it now calls itself.
                 await model.refreshServerInfo(server.id)
@@ -379,8 +392,9 @@ struct TranscodingView: View {
     let server: ServerRecord
     @Environment(AppModel.self) private var model
     @Environment(\.theme) private var theme
-    @State private var editor: SettingsEditor?
-    @State private var draft = Mavio_System_V1_TranscodingSettings()
+    @State private var editor: SettingsEditor<Mavio_Playback_V1_TranscodingSettings>?
+    @State private var available: [Mavio_Playback_V1_HardwareAcceleration] = []
+    @State private var draft = Mavio_Playback_V1_TranscodingSettings()
 
     private static let presets = [
         "ultrafast", "superfast", "veryfast", "faster", "fast", "medium", "slow", "slower", "veryslow",
@@ -410,15 +424,33 @@ struct TranscodingView: View {
                 ProgressView()
             } else if let saved = editor?.saved {
                 Button(MavioStrings.actionSave, action: save)
-                    .disabled(draft == saved.settings.transcoding || !valid)
+                    .disabled(draft == saved || !valid)
             }
         }
         .task {
             guard editor == nil else { return }
-            let e = SettingsEditor(server: server, model: model)
+            let model = model
+            let server = server
+            let e = SettingsEditor<Mavio_Playback_V1_TranscodingSettings>(
+                read: {
+                    let r = try await model.call(
+                        server, Procedure.playback("GetTranscodingSettings"),
+                        Mavio_Playback_V1_GetTranscodingSettingsRequest(),
+                        as: Mavio_Playback_V1_GetTranscodingSettingsResponse.self)
+                    available = r.availableHardwareAccelerations
+                    return r.settings
+                },
+                write: {
+                    var request = Mavio_Playback_V1_UpdateTranscodingSettingsRequest()
+                    request.settings = $0
+                    return try await model.call(
+                        server, Procedure.playback("UpdateTranscodingSettings"), request,
+                        as: Mavio_Playback_V1_UpdateTranscodingSettingsResponse.self
+                    ).settings
+                })
             editor = e
             await e.load()
-            if let s = e.saved?.settings { draft = s.transcoding }
+            if let s = e.saved { draft = s }
         }
     }
 
@@ -428,21 +460,21 @@ struct TranscodingView: View {
             && (0.5...3).contains(draft.downmixBoost)
     }
 
-    @ViewBuilder private func form(_ saved: Mavio_System_V1_GetServerSettingsResponse) -> some View {
+    @ViewBuilder private func form(_ saved: Mavio_Playback_V1_TranscodingSettings) -> some View {
         Section {
             Text(MavioStrings.transcodingMessage).type(theme.type.callout).foregroundStyle(theme.colors.textSecondary)
                 .listRowBackground(Color.clear)
         }
         Section(MavioStrings.transcodingHardware) {
             Picker(selection: $draft.hardwareAcceleration) {
-                ForEach(accelerations(saved.availableHardwareAccelerations), id: \.self) {
+                ForEach(accelerations(available), id: \.self) {
                     Text(Self.name($0)).tag($0)
                 }
             } label: {
                 RowLabel(
                     label: MavioStrings.transcodingAcceleration, detail: MavioStrings.transcodingAccelerationDetail)
             }
-            if draft.hardwareAcceleration != Mavio_System_V1_HardwareAcceleration.none {
+            if draft.hardwareAcceleration != Mavio_Playback_V1_HardwareAcceleration.none {
                 Toggle(isOn: $draft.hardwareEncoding) {
                     RowLabel(
                         label: MavioStrings.transcodingHardwareEncoding,
@@ -498,7 +530,7 @@ struct TranscodingView: View {
         } footer: {
             VStack(alignment: .leading, spacing: MavioSpacing.s8) {
                 Text(MavioStrings.transcodingFolderFooter)
-                if let notice = editor?.notice, draft == saved.settings.transcoding { Text(notice) }
+                if let notice = editor?.notice, draft == saved { Text(notice) }
             }
         }
     }
@@ -514,15 +546,15 @@ struct TranscodingView: View {
     }
 
     /// The accelerations offered: the server's, with the one chosen.
-    private func accelerations(_ available: [Mavio_System_V1_HardwareAcceleration])
-        -> [Mavio_System_V1_HardwareAcceleration]
+    private func accelerations(_ available: [Mavio_Playback_V1_HardwareAcceleration])
+        -> [Mavio_Playback_V1_HardwareAcceleration]
     {
-        var list = available.isEmpty ? [.auto, Mavio_System_V1_HardwareAcceleration.none] : available
+        var list = available.isEmpty ? [.auto, Mavio_Playback_V1_HardwareAcceleration.none] : available
         if !list.contains(draft.hardwareAcceleration) { list.append(draft.hardwareAcceleration) }
         return list.filter { $0 != .unspecified }
     }
 
-    private static func name(_ a: Mavio_System_V1_HardwareAcceleration) -> String {
+    private static func name(_ a: Mavio_Playback_V1_HardwareAcceleration) -> String {
         switch a {
         case .auto: MavioStrings.transcodingAccelerationAuto
         case .none: MavioStrings.transcodingAccelerationNone
@@ -536,10 +568,8 @@ struct TranscodingView: View {
         var draft = draft
         draft.transcodeDir = draft.transcodeDir.trimmingCharacters(in: .whitespaces)
         Task {
-            if await editor.save(MavioStrings.transcodingSaved, { $0.transcoding = draft }),
-                let s = editor.saved?.settings
-            {
-                self.draft = s.transcoding
+            if await editor.save(MavioStrings.transcodingSaved, draft), let s = editor.saved {
+                self.draft = s
             }
         }
     }

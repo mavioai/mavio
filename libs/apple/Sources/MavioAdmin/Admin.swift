@@ -286,6 +286,8 @@ struct OverviewView: View {
     @State private var samples: [Mavio_System_V1_LoadSample] = []
     @State private var failure: String?
     @State private var loadFailure: String?
+    @State private var rclone: Mavio_Storage_V1_GetStatusResponse?
+    @State private var rcloneFailure: String?
 
     var body: some View {
         SettingsList {
@@ -322,6 +324,30 @@ struct OverviewView: View {
                         }
                         .multilineTextAlignment(.trailing)
                     }
+                }
+                // rclone: whether the server reaches it, its version, and
+                // whose rcd it is.
+                LabeledContent(MavioStrings.overviewRclone) {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        HStack(spacing: MavioSpacing.s8) {
+                            Circle()
+                                .fill(
+                                    rclone == nil && rcloneFailure == nil
+                                        ? theme.colors.fill
+                                        : rclone?.available == true ? Color(hex: 0x34C759) : theme.colors.danger
+                                )
+                                .frame(width: 8, height: 8)
+                            Text(rcloneText)
+                        }
+                        if let rclone, rclone.available {
+                            Text(
+                                rclone.managed
+                                    ? MavioStrings.overviewRcloneManaged : MavioStrings.overviewRcloneExternal
+                            )
+                            .type(theme.type.footnote)
+                        }
+                    }
+                    .multilineTextAlignment(.trailing)
                 }
                 if let start = info?.startTime.time {
                     fact(
@@ -366,6 +392,15 @@ struct OverviewView: View {
         LabeledContent(label) { Text(value).selectable() }
     }
 
+    private var rcloneText: String {
+        if let rcloneFailure { return rcloneFailure }
+        guard let rclone else { return "…" }
+        guard rclone.available else {
+            return rclone.error.isEmpty ? MavioStrings.storageUnavailable : rclone.error
+        }
+        return [MavioStrings.storageAvailable, rclone.version].filter { !$0.isEmpty }.joined(separator: " · ")
+    }
+
     private func loadInfo() async {
         let client = model.client
         async let health = try? client.call(
@@ -384,6 +419,15 @@ struct OverviewView: View {
         }
         serving = await health.map { $0.status == .serving } ?? false
         runtime = await engine?.runtime
+        do {
+            rclone = try await client.call(
+                server.id, Procedure.storage("GetStatus"), Mavio_Storage_V1_GetStatusRequest(),
+                as: Mavio_Storage_V1_GetStatusResponse.self)
+            rcloneFailure = nil
+        } catch is CancellationError {
+        } catch {
+            rcloneFailure = error.reason
+        }
     }
 
     private func loadSamples() async {

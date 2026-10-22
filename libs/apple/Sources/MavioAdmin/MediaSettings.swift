@@ -607,7 +607,7 @@ private struct FolderPicker: View {
     @State private var folders: [(path: String, name: String)]?
     @State private var failure: String?
 
-    private var remote: Bool { path.hasPrefix("rclone:") }
+    private var remote: Bool { path.hasPrefix("remote:") }
 
     var body: some View {
         SettingsList {
@@ -702,12 +702,12 @@ private struct FolderPicker: View {
                 server, Procedure.storage("ListRemotes"), Mavio_Storage_V1_ListRemotesRequest(),
                 as: Mavio_Storage_V1_ListRemotesResponse.self)
         else { return [] }
-        return r.remotes.map { ("rclone:\($0.name):", "rclone:\($0.name):") }
+        return r.remotes.map { ("remote:\($0.name):", "remote:\($0.name):") }
     }
 
     /// The folder above a remote's: the remote's root, or the roots above it.
     private static func remoteParent(_ path: String) -> String {
-        let rest = path.dropFirst("rclone:".count)
+        let rest = path.dropFirst("remote:".count)
         guard let colon = rest.firstIndex(of: ":") else { return "" }
         let inside = rest[rest.index(after: colon)...]
         if inside.isEmpty { return "" }

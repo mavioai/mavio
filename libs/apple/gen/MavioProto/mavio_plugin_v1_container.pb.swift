@@ -176,7 +176,7 @@ public nonisolated enum Mavio_Plugin_V1_ContainerState: SwiftProtobuf.Enum, Swif
 /// container image, such as FlareSolverr. The server runs it on a
 /// container engine (managed) or reaches it at an address an administrator
 /// gives (external); the plugin sees only its address.
-public nonisolated struct Mavio_Plugin_V1_ContainerDependency: Sendable {
+public nonisolated struct Mavio_Plugin_V1_ContainerDependency: @unchecked Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -185,6 +185,219 @@ public nonisolated struct Mavio_Plugin_V1_ContainerDependency: Sendable {
   /// The container is named mavio-<plugin>-<name>, <plugin> being the last
   /// part of the plugin's ID.
   public var name: String {
+    get {_storage._name ?? String()}
+    set {_uniqueStorage()._name = newValue}
+  }
+  /// Returns true if `name` has been explicitly set.
+  public var hasName: Bool {_storage._name != nil}
+  /// Clears the value of `name`. Subsequent reads from it will return its default value.
+  public mutating func clearName() {_uniqueStorage()._name = nil}
+
+  /// What it is for, shown to administrators.
+  public var description_p: String {
+    get {_storage._description_p ?? String()}
+    set {_uniqueStorage()._description_p = newValue}
+  }
+  /// Returns true if `description_p` has been explicitly set.
+  public var hasDescription_p: Bool {_storage._description_p != nil}
+  /// Clears the value of `description_p`. Subsequent reads from it will return its default value.
+  public mutating func clearDescription_p() {_uniqueStorage()._description_p = nil}
+
+  /// Image reference with its digest, e.g.
+  /// "ghcr.io/flaresolverr/flaresolverr:v3.4.6@sha256:…".
+  public var image: String {
+    get {_storage._image ?? String()}
+    set {_uniqueStorage()._image = newValue}
+  }
+  /// Returns true if `image` has been explicitly set.
+  public var hasImage: Bool {_storage._image != nil}
+  /// Clears the value of `image`. Subsequent reads from it will return its default value.
+  public mutating func clearImage() {_uniqueStorage()._image = nil}
+
+  /// TCP port the service listens on in the container.
+  public var port: UInt32 {
+    get {_storage._port ?? 0}
+    set {_uniqueStorage()._port = newValue}
+  }
+  /// Returns true if `port` has been explicitly set.
+  public var hasPort: Bool {_storage._port != nil}
+  /// Clears the value of `port`. Subsequent reads from it will return its default value.
+  public mutating func clearPort() {_uniqueStorage()._port = nil}
+
+  /// HTTP path answering 2xx when the service is ready, e.g. "/health";
+  /// empty when the port accepting connections is enough.
+  public var healthPath: String {
+    get {_storage._healthPath ?? String()}
+    set {_uniqueStorage()._healthPath = newValue}
+  }
+  /// Returns true if `healthPath` has been explicitly set.
+  public var hasHealthPath: Bool {_storage._healthPath != nil}
+  /// Clears the value of `healthPath`. Subsequent reads from it will return its default value.
+  public mutating func clearHealthPath() {_uniqueStorage()._healthPath = nil}
+
+  /// Arguments replacing the image's command; empty keeps it.
+  public var command: [String] {
+    get {_storage._command}
+    set {_uniqueStorage()._command = newValue}
+  }
+
+  /// Environment variables. A value may hold "${secret:<key>}", a random
+  /// secret the server generates once for the dependency, "${address}",
+  /// the dependency's own address, "${peer_port}", the port peers reach
+  /// it at (peer_port), and "${uid}" and "${gid}", the user and group the
+  /// server runs as, for files in its folders the server can move and
+  /// hard link; command takes the same.
+  public var env: Dictionary<String,String> {
+    get {_storage._env}
+    set {_uniqueStorage()._env = newValue}
+  }
+
+  /// Named volumes by name, each mounted at the path given, e.g.
+  /// {"cache": "/root/.cache"}. The volume is mavio-<plugin>-<name>-<volume>.
+  public var volumes: Dictionary<String,String> {
+    get {_storage._volumes}
+    set {_uniqueStorage()._volumes = newValue}
+  }
+
+  /// Whether the service can use an NVIDIA GPU.
+  public var gpu: Mavio_Plugin_V1_GpuSupport {
+    get {_storage._gpu ?? .unspecified}
+    set {_uniqueStorage()._gpu = newValue}
+  }
+  /// Returns true if `gpu` has been explicitly set.
+  public var hasGpu: Bool {_storage._gpu != nil}
+  /// Clears the value of `gpu`. Subsequent reads from it will return its default value.
+  public mutating func clearGpu() {_uniqueStorage()._gpu = nil}
+
+  /// Image used with a GPU, by digest, when it is another than image.
+  public var gpuImage: String {
+    get {_storage._gpuImage ?? String()}
+    set {_uniqueStorage()._gpuImage = newValue}
+  }
+  /// Returns true if `gpuImage` has been explicitly set.
+  public var hasGpuImage: Bool {_storage._gpuImage != nil}
+  /// Clears the value of `gpuImage`. Subsequent reads from it will return its default value.
+  public mutating func clearGpuImage() {_uniqueStorage()._gpuImage = nil}
+
+  /// Memory limit of a managed container in MiB; 0 for none.
+  public var memoryMib: UInt32 {
+    get {_storage._memoryMib ?? 0}
+    set {_uniqueStorage()._memoryMib = newValue}
+  }
+  /// Returns true if `memoryMib` has been explicitly set.
+  public var hasMemoryMib: Bool {_storage._memoryMib != nil}
+  /// Clears the value of `memoryMib`. Subsequent reads from it will return its default value.
+  public mutating func clearMemoryMib() {_uniqueStorage()._memoryMib = nil}
+
+  /// CPU limit of a managed container in CPUs; 0 for none.
+  public var cpus: Double {
+    get {_storage._cpus ?? 0}
+    set {_uniqueStorage()._cpus = newValue}
+  }
+  /// Returns true if `cpus` has been explicitly set.
+  public var hasCpus: Bool {_storage._cpus != nil}
+  /// Clears the value of `cpus`. Subsequent reads from it will return its default value.
+  public mutating func clearCpus() {_uniqueStorage()._cpus = nil}
+
+  /// Whether the plugin cannot work without it. Optional dependencies stay
+  /// unset until an administrator chooses.
+  public var required: Bool {
+    get {_storage._required ?? false}
+    set {_uniqueStorage()._required = newValue}
+  }
+  /// Returns true if `required` has been explicitly set.
+  public var hasRequired: Bool {_storage._required != nil}
+  /// Clears the value of `required`. Subsequent reads from it will return its default value.
+  public mutating func clearRequired() {_uniqueStorage()._required = nil}
+
+  /// Whether the service reaches services on the server's host, such as a
+  /// proxy on its loopback interface, by the name host.docker.internal:
+  /// Docker maps it to the host (host-gateway), Docker Desktop and Podman
+  /// name it themselves. On Linux, a service on the host must listen
+  /// beyond its loopback interface to be reached.
+  public var hostAccess: Bool {
+    get {_storage._hostAccess ?? false}
+    set {_uniqueStorage()._hostAccess = newValue}
+  }
+  /// Returns true if `hostAccess` has been explicitly set.
+  public var hasHostAccess: Bool {_storage._hostAccess != nil}
+  /// Clears the value of `hostAccess`. Subsequent reads from it will return its default value.
+  public mutating func clearHostAccess() {_uniqueStorage()._hostAccess = nil}
+
+  /// Whether a managed container reaches sites only directly, for a service
+  /// given the proxy of each request, such as a challenge solver: the server
+  /// offers no proxy choice for it and sends its requests through none.
+  public var direct: Bool {
+    get {_storage._direct ?? false}
+    set {_uniqueStorage()._direct = newValue}
+  }
+  /// Returns true if `direct` has been explicitly set.
+  public var hasDirect: Bool {_storage._direct != nil}
+  /// Clears the value of `direct`. Subsequent reads from it will return its default value.
+  public mutating func clearDirect() {_uniqueStorage()._direct = nil}
+
+  /// Whether a managed container's NO_PROXY lists IPv4 blocks alone, for a
+  /// service whose HTTP library fails on IPv6 ones, such as Python's httpx
+  /// on fc00::/7; single addresses such as ::1 stay.
+  public var noProxyIpv4Only: Bool {
+    get {_storage._noProxyIpv4Only ?? false}
+    set {_uniqueStorage()._noProxyIpv4Only = newValue}
+  }
+  /// Returns true if `noProxyIpv4Only` has been explicitly set.
+  public var hasNoProxyIpv4Only: Bool {_storage._noProxyIpv4Only != nil}
+  /// Clears the value of `noProxyIpv4Only`. Subsequent reads from it will return its default value.
+  public mutating func clearNoProxyIpv4Only() {_uniqueStorage()._noProxyIpv4Only = nil}
+
+  /// Folders of the server an administrator chooses, each mounted at its
+  /// path, such as the folder a download client puts downloads in, which
+  /// the server then reads.
+  public var folders: [Mavio_Plugin_V1_ContainerFolder] {
+    get {_storage._folders}
+    set {_uniqueStorage()._folders = newValue}
+  }
+
+  /// A port peers connect to from outside, such as a BitTorrent client's:
+  /// a managed container publishes it on every interface of the host, TCP
+  /// and UDP, at the number an administrator chooses, this one by default,
+  /// which "${peer_port}" gives the service. 0 for none.
+  public var peerPort: UInt32 {
+    get {_storage._peerPort ?? 0}
+    set {_uniqueStorage()._peerPort = newValue}
+  }
+  /// Returns true if `peerPort` has been explicitly set.
+  public var hasPeerPort: Bool {_storage._peerPort != nil}
+  /// Clears the value of `peerPort`. Subsequent reads from it will return its default value.
+  public mutating func clearPeerPort() {_uniqueStorage()._peerPort = nil}
+
+  /// The program replacing the image's entrypoint, such as "/bin/sh" for a
+  /// command that prepares the container before running the image's own;
+  /// empty keeps it.
+  public var entrypoint: String {
+    get {_storage._entrypoint ?? String()}
+    set {_uniqueStorage()._entrypoint = newValue}
+  }
+  /// Returns true if `entrypoint` has been explicitly set.
+  public var hasEntrypoint: Bool {_storage._entrypoint != nil}
+  /// Clears the value of `entrypoint`. Subsequent reads from it will return its default value.
+  public mutating func clearEntrypoint() {_uniqueStorage()._entrypoint = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _storage = _StorageClass.defaultInstance
+}
+
+/// ContainerFolder is a folder of the server mounted in a container
+/// dependency.
+public nonisolated struct Mavio_Plugin_V1_ContainerFolder: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Identifier within the dependency: lowercase letters, digits and
+  /// dashes.
+  public var name: String {
     get {_name ?? String()}
     set {_name = newValue}
   }
@@ -192,6 +405,16 @@ public nonisolated struct Mavio_Plugin_V1_ContainerDependency: Sendable {
   public var hasName: Bool {self._name != nil}
   /// Clears the value of `name`. Subsequent reads from it will return its default value.
   public mutating func clearName() {self._name = nil}
+
+  /// The absolute path it is mounted at in the container.
+  public var path: String {
+    get {_path ?? String()}
+    set {_path = newValue}
+  }
+  /// Returns true if `path` has been explicitly set.
+  public var hasPath: Bool {self._path != nil}
+  /// Clears the value of `path`. Subsequent reads from it will return its default value.
+  public mutating func clearPath() {self._path = nil}
 
   /// What it is for, shown to administrators.
   public var description_p: String {
@@ -203,156 +426,13 @@ public nonisolated struct Mavio_Plugin_V1_ContainerDependency: Sendable {
   /// Clears the value of `description_p`. Subsequent reads from it will return its default value.
   public mutating func clearDescription_p() {self._description_p = nil}
 
-  /// Image reference with its digest, e.g.
-  /// "ghcr.io/flaresolverr/flaresolverr:v3.4.6@sha256:…".
-  public var image: String {
-    get {_image ?? String()}
-    set {_image = newValue}
-  }
-  /// Returns true if `image` has been explicitly set.
-  public var hasImage: Bool {self._image != nil}
-  /// Clears the value of `image`. Subsequent reads from it will return its default value.
-  public mutating func clearImage() {self._image = nil}
-
-  /// TCP port the service listens on in the container.
-  public var port: UInt32 {
-    get {_port ?? 0}
-    set {_port = newValue}
-  }
-  /// Returns true if `port` has been explicitly set.
-  public var hasPort: Bool {self._port != nil}
-  /// Clears the value of `port`. Subsequent reads from it will return its default value.
-  public mutating func clearPort() {self._port = nil}
-
-  /// HTTP path answering 2xx when the service is ready, e.g. "/health";
-  /// empty when the port accepting connections is enough.
-  public var healthPath: String {
-    get {_healthPath ?? String()}
-    set {_healthPath = newValue}
-  }
-  /// Returns true if `healthPath` has been explicitly set.
-  public var hasHealthPath: Bool {self._healthPath != nil}
-  /// Clears the value of `healthPath`. Subsequent reads from it will return its default value.
-  public mutating func clearHealthPath() {self._healthPath = nil}
-
-  /// Arguments replacing the image's command; empty keeps it.
-  public var command: [String] = []
-
-  /// Environment variables. A value may hold "${secret:<key>}", a random
-  /// secret the server generates once for the dependency, and
-  /// "${address}", the dependency's own address.
-  public var env: Dictionary<String,String> = [:]
-
-  /// Named volumes by name, each mounted at the path given, e.g.
-  /// {"cache": "/root/.cache"}. The volume is mavio-<plugin>-<name>-<volume>.
-  public var volumes: Dictionary<String,String> = [:]
-
-  /// Whether the service can use an NVIDIA GPU.
-  public var gpu: Mavio_Plugin_V1_GpuSupport {
-    get {_gpu ?? .unspecified}
-    set {_gpu = newValue}
-  }
-  /// Returns true if `gpu` has been explicitly set.
-  public var hasGpu: Bool {self._gpu != nil}
-  /// Clears the value of `gpu`. Subsequent reads from it will return its default value.
-  public mutating func clearGpu() {self._gpu = nil}
-
-  /// Image used with a GPU, by digest, when it is another than image.
-  public var gpuImage: String {
-    get {_gpuImage ?? String()}
-    set {_gpuImage = newValue}
-  }
-  /// Returns true if `gpuImage` has been explicitly set.
-  public var hasGpuImage: Bool {self._gpuImage != nil}
-  /// Clears the value of `gpuImage`. Subsequent reads from it will return its default value.
-  public mutating func clearGpuImage() {self._gpuImage = nil}
-
-  /// Memory limit of a managed container in MiB; 0 for none.
-  public var memoryMib: UInt32 {
-    get {_memoryMib ?? 0}
-    set {_memoryMib = newValue}
-  }
-  /// Returns true if `memoryMib` has been explicitly set.
-  public var hasMemoryMib: Bool {self._memoryMib != nil}
-  /// Clears the value of `memoryMib`. Subsequent reads from it will return its default value.
-  public mutating func clearMemoryMib() {self._memoryMib = nil}
-
-  /// CPU limit of a managed container in CPUs; 0 for none.
-  public var cpus: Double {
-    get {_cpus ?? 0}
-    set {_cpus = newValue}
-  }
-  /// Returns true if `cpus` has been explicitly set.
-  public var hasCpus: Bool {self._cpus != nil}
-  /// Clears the value of `cpus`. Subsequent reads from it will return its default value.
-  public mutating func clearCpus() {self._cpus = nil}
-
-  /// Whether the plugin cannot work without it. Optional dependencies stay
-  /// unset until an administrator chooses.
-  public var required: Bool {
-    get {_required ?? false}
-    set {_required = newValue}
-  }
-  /// Returns true if `required` has been explicitly set.
-  public var hasRequired: Bool {self._required != nil}
-  /// Clears the value of `required`. Subsequent reads from it will return its default value.
-  public mutating func clearRequired() {self._required = nil}
-
-  /// Whether the service reaches services on the server's host, such as a
-  /// proxy on its loopback interface, by the name host.docker.internal:
-  /// Docker maps it to the host (host-gateway), Docker Desktop and Podman
-  /// name it themselves. On Linux, a service on the host must listen
-  /// beyond its loopback interface to be reached.
-  public var hostAccess: Bool {
-    get {_hostAccess ?? false}
-    set {_hostAccess = newValue}
-  }
-  /// Returns true if `hostAccess` has been explicitly set.
-  public var hasHostAccess: Bool {self._hostAccess != nil}
-  /// Clears the value of `hostAccess`. Subsequent reads from it will return its default value.
-  public mutating func clearHostAccess() {self._hostAccess = nil}
-
-  /// Whether a managed container reaches sites only directly, for a service
-  /// given the proxy of each request, such as a challenge solver: the server
-  /// offers no proxy choice for it and sends its requests through none.
-  public var direct: Bool {
-    get {_direct ?? false}
-    set {_direct = newValue}
-  }
-  /// Returns true if `direct` has been explicitly set.
-  public var hasDirect: Bool {self._direct != nil}
-  /// Clears the value of `direct`. Subsequent reads from it will return its default value.
-  public mutating func clearDirect() {self._direct = nil}
-
-  /// Whether a managed container's NO_PROXY lists IPv4 blocks alone, for a
-  /// service whose HTTP library fails on IPv6 ones, such as Python's httpx
-  /// on fc00::/7; single addresses such as ::1 stay.
-  public var noProxyIpv4Only: Bool {
-    get {_noProxyIpv4Only ?? false}
-    set {_noProxyIpv4Only = newValue}
-  }
-  /// Returns true if `noProxyIpv4Only` has been explicitly set.
-  public var hasNoProxyIpv4Only: Bool {self._noProxyIpv4Only != nil}
-  /// Clears the value of `noProxyIpv4Only`. Subsequent reads from it will return its default value.
-  public mutating func clearNoProxyIpv4Only() {self._noProxyIpv4Only = nil}
-
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
 
   fileprivate var _name: String? = nil
+  fileprivate var _path: String? = nil
   fileprivate var _description_p: String? = nil
-  fileprivate var _image: String? = nil
-  fileprivate var _port: UInt32? = nil
-  fileprivate var _healthPath: String? = nil
-  fileprivate var _gpu: Mavio_Plugin_V1_GpuSupport? = nil
-  fileprivate var _gpuImage: String? = nil
-  fileprivate var _memoryMib: UInt32? = nil
-  fileprivate var _cpus: Double? = nil
-  fileprivate var _required: Bool? = nil
-  fileprivate var _hostAccess: Bool? = nil
-  fileprivate var _direct: Bool? = nil
-  fileprivate var _noProxyIpv4Only: Bool? = nil
 }
 
 /// ContainerStatus is how a container dependency is reached and whether it
@@ -430,6 +510,11 @@ public nonisolated struct Mavio_Plugin_V1_ContainerStatus: Sendable {
   /// Clears the value of `queued`. Subsequent reads from it will return its default value.
   public mutating func clearQueued() {self._queued = nil}
 
+  /// The secrets the server generated for it, by key, which its
+  /// environment names "${secret:<key>}", for the plugin to sign in with;
+  /// only HostService.ListContainers tells them.
+  public var secrets: Dictionary<String,String> = [:]
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -484,7 +569,203 @@ nonisolated extension Mavio_Plugin_V1_ContainerState: SwiftProtobuf._ProtoNamePr
 
 nonisolated extension Mavio_Plugin_V1_ContainerDependency: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ContainerDependency"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}description\0\u{1}image\0\u{1}port\0\u{3}health_path\0\u{1}command\0\u{1}env\0\u{1}volumes\0\u{1}gpu\0\u{3}gpu_image\0\u{3}memory_mib\0\u{1}cpus\0\u{1}required\0\u{3}host_access\0\u{1}direct\0\u{3}no_proxy_ipv4_only\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}description\0\u{1}image\0\u{1}port\0\u{3}health_path\0\u{1}command\0\u{1}env\0\u{1}volumes\0\u{1}gpu\0\u{3}gpu_image\0\u{3}memory_mib\0\u{1}cpus\0\u{1}required\0\u{3}host_access\0\u{1}direct\0\u{3}no_proxy_ipv4_only\0\u{1}folders\0\u{3}peer_port\0\u{1}entrypoint\0")
+
+  fileprivate class _StorageClass {
+    var _name: String? = nil
+    var _description_p: String? = nil
+    var _image: String? = nil
+    var _port: UInt32? = nil
+    var _healthPath: String? = nil
+    var _command: [String] = []
+    var _env: Dictionary<String,String> = [:]
+    var _volumes: Dictionary<String,String> = [:]
+    var _gpu: Mavio_Plugin_V1_GpuSupport? = nil
+    var _gpuImage: String? = nil
+    var _memoryMib: UInt32? = nil
+    var _cpus: Double? = nil
+    var _required: Bool? = nil
+    var _hostAccess: Bool? = nil
+    var _direct: Bool? = nil
+    var _noProxyIpv4Only: Bool? = nil
+    var _folders: [Mavio_Plugin_V1_ContainerFolder] = []
+    var _peerPort: UInt32? = nil
+    var _entrypoint: String? = nil
+
+      // This property is used as the initial default value for new instances of the type.
+      // The type itself is protecting the reference to its storage via CoW semantics.
+      // This will force a copy to be made of this reference when the first mutation occurs;
+      // hence, it is safe to mark this as `nonisolated(unsafe)`.
+      static nonisolated(unsafe) let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _name = source._name
+      _description_p = source._description_p
+      _image = source._image
+      _port = source._port
+      _healthPath = source._healthPath
+      _command = source._command
+      _env = source._env
+      _volumes = source._volumes
+      _gpu = source._gpu
+      _gpuImage = source._gpuImage
+      _memoryMib = source._memoryMib
+      _cpus = source._cpus
+      _required = source._required
+      _hostAccess = source._hostAccess
+      _direct = source._direct
+      _noProxyIpv4Only = source._noProxyIpv4Only
+      _folders = source._folders
+      _peerPort = source._peerPort
+      _entrypoint = source._entrypoint
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularStringField(value: &_storage._name) }()
+        case 2: try { try decoder.decodeSingularStringField(value: &_storage._description_p) }()
+        case 3: try { try decoder.decodeSingularStringField(value: &_storage._image) }()
+        case 4: try { try decoder.decodeSingularUInt32Field(value: &_storage._port) }()
+        case 5: try { try decoder.decodeSingularStringField(value: &_storage._healthPath) }()
+        case 6: try { try decoder.decodeRepeatedStringField(value: &_storage._command) }()
+        case 7: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufString>.self, value: &_storage._env) }()
+        case 8: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufString>.self, value: &_storage._volumes) }()
+        case 9: try { try decoder.decodeSingularEnumField(value: &_storage._gpu) }()
+        case 10: try { try decoder.decodeSingularStringField(value: &_storage._gpuImage) }()
+        case 11: try { try decoder.decodeSingularUInt32Field(value: &_storage._memoryMib) }()
+        case 12: try { try decoder.decodeSingularDoubleField(value: &_storage._cpus) }()
+        case 13: try { try decoder.decodeSingularBoolField(value: &_storage._required) }()
+        case 14: try { try decoder.decodeSingularBoolField(value: &_storage._hostAccess) }()
+        case 15: try { try decoder.decodeSingularBoolField(value: &_storage._direct) }()
+        case 16: try { try decoder.decodeSingularBoolField(value: &_storage._noProxyIpv4Only) }()
+        case 17: try { try decoder.decodeRepeatedMessageField(value: &_storage._folders) }()
+        case 18: try { try decoder.decodeSingularUInt32Field(value: &_storage._peerPort) }()
+        case 19: try { try decoder.decodeSingularStringField(value: &_storage._entrypoint) }()
+        default: break
+        }
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      try { if let v = _storage._name {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+      } }()
+      try { if let v = _storage._description_p {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+      } }()
+      try { if let v = _storage._image {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 3)
+      } }()
+      try { if let v = _storage._port {
+        try visitor.visitSingularUInt32Field(value: v, fieldNumber: 4)
+      } }()
+      try { if let v = _storage._healthPath {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 5)
+      } }()
+      if !_storage._command.isEmpty {
+        try visitor.visitRepeatedStringField(value: _storage._command, fieldNumber: 6)
+      }
+      if !_storage._env.isEmpty {
+        try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufString>.self, value: _storage._env, fieldNumber: 7)
+      }
+      if !_storage._volumes.isEmpty {
+        try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufString>.self, value: _storage._volumes, fieldNumber: 8)
+      }
+      try { if let v = _storage._gpu {
+        try visitor.visitSingularEnumField(value: v, fieldNumber: 9)
+      } }()
+      try { if let v = _storage._gpuImage {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 10)
+      } }()
+      try { if let v = _storage._memoryMib {
+        try visitor.visitSingularUInt32Field(value: v, fieldNumber: 11)
+      } }()
+      try { if let v = _storage._cpus {
+        try visitor.visitSingularDoubleField(value: v, fieldNumber: 12)
+      } }()
+      try { if let v = _storage._required {
+        try visitor.visitSingularBoolField(value: v, fieldNumber: 13)
+      } }()
+      try { if let v = _storage._hostAccess {
+        try visitor.visitSingularBoolField(value: v, fieldNumber: 14)
+      } }()
+      try { if let v = _storage._direct {
+        try visitor.visitSingularBoolField(value: v, fieldNumber: 15)
+      } }()
+      try { if let v = _storage._noProxyIpv4Only {
+        try visitor.visitSingularBoolField(value: v, fieldNumber: 16)
+      } }()
+      if !_storage._folders.isEmpty {
+        try visitor.visitRepeatedMessageField(value: _storage._folders, fieldNumber: 17)
+      }
+      try { if let v = _storage._peerPort {
+        try visitor.visitSingularUInt32Field(value: v, fieldNumber: 18)
+      } }()
+      try { if let v = _storage._entrypoint {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 19)
+      } }()
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Plugin_V1_ContainerDependency, rhs: Mavio_Plugin_V1_ContainerDependency) -> Bool {
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._name != rhs_storage._name {return false}
+        if _storage._description_p != rhs_storage._description_p {return false}
+        if _storage._image != rhs_storage._image {return false}
+        if _storage._port != rhs_storage._port {return false}
+        if _storage._healthPath != rhs_storage._healthPath {return false}
+        if _storage._command != rhs_storage._command {return false}
+        if _storage._env != rhs_storage._env {return false}
+        if _storage._volumes != rhs_storage._volumes {return false}
+        if _storage._gpu != rhs_storage._gpu {return false}
+        if _storage._gpuImage != rhs_storage._gpuImage {return false}
+        if _storage._memoryMib != rhs_storage._memoryMib {return false}
+        if _storage._cpus != rhs_storage._cpus {return false}
+        if _storage._required != rhs_storage._required {return false}
+        if _storage._hostAccess != rhs_storage._hostAccess {return false}
+        if _storage._direct != rhs_storage._direct {return false}
+        if _storage._noProxyIpv4Only != rhs_storage._noProxyIpv4Only {return false}
+        if _storage._folders != rhs_storage._folders {return false}
+        if _storage._peerPort != rhs_storage._peerPort {return false}
+        if _storage._entrypoint != rhs_storage._entrypoint {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Plugin_V1_ContainerFolder: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ContainerFolder"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}path\0\u{1}description\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -493,21 +774,8 @@ nonisolated extension Mavio_Plugin_V1_ContainerDependency: SwiftProtobuf.Message
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self._name) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self._description_p) }()
-      case 3: try { try decoder.decodeSingularStringField(value: &self._image) }()
-      case 4: try { try decoder.decodeSingularUInt32Field(value: &self._port) }()
-      case 5: try { try decoder.decodeSingularStringField(value: &self._healthPath) }()
-      case 6: try { try decoder.decodeRepeatedStringField(value: &self.command) }()
-      case 7: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufString>.self, value: &self.env) }()
-      case 8: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufString>.self, value: &self.volumes) }()
-      case 9: try { try decoder.decodeSingularEnumField(value: &self._gpu) }()
-      case 10: try { try decoder.decodeSingularStringField(value: &self._gpuImage) }()
-      case 11: try { try decoder.decodeSingularUInt32Field(value: &self._memoryMib) }()
-      case 12: try { try decoder.decodeSingularDoubleField(value: &self._cpus) }()
-      case 13: try { try decoder.decodeSingularBoolField(value: &self._required) }()
-      case 14: try { try decoder.decodeSingularBoolField(value: &self._hostAccess) }()
-      case 15: try { try decoder.decodeSingularBoolField(value: &self._direct) }()
-      case 16: try { try decoder.decodeSingularBoolField(value: &self._noProxyIpv4Only) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self._path) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self._description_p) }()
       default: break
       }
     }
@@ -521,71 +789,19 @@ nonisolated extension Mavio_Plugin_V1_ContainerDependency: SwiftProtobuf.Message
     try { if let v = self._name {
       try visitor.visitSingularStringField(value: v, fieldNumber: 1)
     } }()
-    try { if let v = self._description_p {
+    try { if let v = self._path {
       try visitor.visitSingularStringField(value: v, fieldNumber: 2)
     } }()
-    try { if let v = self._image {
+    try { if let v = self._description_p {
       try visitor.visitSingularStringField(value: v, fieldNumber: 3)
-    } }()
-    try { if let v = self._port {
-      try visitor.visitSingularUInt32Field(value: v, fieldNumber: 4)
-    } }()
-    try { if let v = self._healthPath {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 5)
-    } }()
-    if !self.command.isEmpty {
-      try visitor.visitRepeatedStringField(value: self.command, fieldNumber: 6)
-    }
-    if !self.env.isEmpty {
-      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufString>.self, value: self.env, fieldNumber: 7)
-    }
-    if !self.volumes.isEmpty {
-      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufString>.self, value: self.volumes, fieldNumber: 8)
-    }
-    try { if let v = self._gpu {
-      try visitor.visitSingularEnumField(value: v, fieldNumber: 9)
-    } }()
-    try { if let v = self._gpuImage {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 10)
-    } }()
-    try { if let v = self._memoryMib {
-      try visitor.visitSingularUInt32Field(value: v, fieldNumber: 11)
-    } }()
-    try { if let v = self._cpus {
-      try visitor.visitSingularDoubleField(value: v, fieldNumber: 12)
-    } }()
-    try { if let v = self._required {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 13)
-    } }()
-    try { if let v = self._hostAccess {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 14)
-    } }()
-    try { if let v = self._direct {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 15)
-    } }()
-    try { if let v = self._noProxyIpv4Only {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 16)
     } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Mavio_Plugin_V1_ContainerDependency, rhs: Mavio_Plugin_V1_ContainerDependency) -> Bool {
+  public static func ==(lhs: Mavio_Plugin_V1_ContainerFolder, rhs: Mavio_Plugin_V1_ContainerFolder) -> Bool {
     if lhs._name != rhs._name {return false}
+    if lhs._path != rhs._path {return false}
     if lhs._description_p != rhs._description_p {return false}
-    if lhs._image != rhs._image {return false}
-    if lhs._port != rhs._port {return false}
-    if lhs._healthPath != rhs._healthPath {return false}
-    if lhs.command != rhs.command {return false}
-    if lhs.env != rhs.env {return false}
-    if lhs.volumes != rhs.volumes {return false}
-    if lhs._gpu != rhs._gpu {return false}
-    if lhs._gpuImage != rhs._gpuImage {return false}
-    if lhs._memoryMib != rhs._memoryMib {return false}
-    if lhs._cpus != rhs._cpus {return false}
-    if lhs._required != rhs._required {return false}
-    if lhs._hostAccess != rhs._hostAccess {return false}
-    if lhs._direct != rhs._direct {return false}
-    if lhs._noProxyIpv4Only != rhs._noProxyIpv4Only {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -593,7 +809,7 @@ nonisolated extension Mavio_Plugin_V1_ContainerDependency: SwiftProtobuf.Message
 
 nonisolated extension Mavio_Plugin_V1_ContainerStatus: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ContainerStatus"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}mode\0\u{1}address\0\u{1}state\0\u{1}error\0\u{1}progress\0\u{1}queued\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}mode\0\u{1}address\0\u{1}state\0\u{1}error\0\u{1}progress\0\u{1}queued\0\u{1}secrets\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -608,6 +824,7 @@ nonisolated extension Mavio_Plugin_V1_ContainerStatus: SwiftProtobuf.Message, Sw
       case 5: try { try decoder.decodeSingularStringField(value: &self._error) }()
       case 6: try { try decoder.decodeSingularDoubleField(value: &self._progress) }()
       case 7: try { try decoder.decodeSingularBoolField(value: &self._queued) }()
+      case 8: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufString>.self, value: &self.secrets) }()
       default: break
       }
     }
@@ -639,6 +856,9 @@ nonisolated extension Mavio_Plugin_V1_ContainerStatus: SwiftProtobuf.Message, Sw
     try { if let v = self._queued {
       try visitor.visitSingularBoolField(value: v, fieldNumber: 7)
     } }()
+    if !self.secrets.isEmpty {
+      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufString>.self, value: self.secrets, fieldNumber: 8)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -650,6 +870,7 @@ nonisolated extension Mavio_Plugin_V1_ContainerStatus: SwiftProtobuf.Message, Sw
     if lhs._error != rhs._error {return false}
     if lhs._progress != rhs._progress {return false}
     if lhs._queued != rhs._queued {return false}
+    if lhs.secrets != rhs.secrets {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

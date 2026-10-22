@@ -129,9 +129,22 @@ public nonisolated struct Mavio_Plugin_V1_ListDownloadClientDefinitionsRequest: 
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// Whether to list the clients of the provider's container dependencies
+  /// instead of its definitions.
+  public var containers: Bool {
+    get {_containers ?? false}
+    set {_containers = newValue}
+  }
+  /// Returns true if `containers` has been explicitly set.
+  public var hasContainers: Bool {self._containers != nil}
+  /// Clears the value of `containers`. Subsequent reads from it will return its default value.
+  public mutating func clearContainers() {self._containers = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
+
+  fileprivate var _containers: Bool? = nil
 }
 
 public nonisolated struct Mavio_Plugin_V1_ListDownloadClientDefinitionsResponse: Sendable {
@@ -338,8 +351,8 @@ public nonisolated struct Mavio_Plugin_V1_DownloadClient: Sendable {
   /// Clears the value of `prefersTorrentFile`. Subsequent reads from it will return its default value.
   public mutating func clearPrefersTorrentFile() {self._prefersTorrentFile = nil}
 
-  /// The host the client runs on, which remote path mappings are kept by;
-  /// empty for clients that are folders.
+  /// The host the client runs on, by which the server suggests where it
+  /// reads the client's folders; empty for clients that are folders.
   public var host: String {
     get {_host ?? String()}
     set {_host = newValue}
@@ -352,6 +365,18 @@ public nonisolated struct Mavio_Plugin_V1_DownloadClient: Sendable {
   /// The client's tags: a movie or series with tags only uses the clients
   /// sharing one of them, else those without tags, as Radarr's.
   public var tags: [String] = []
+
+  /// The plugin's container dependency the client runs in, whose folders'
+  /// paths in the container the server maps to where it chose them;
+  /// empty for none.
+  public var container: String {
+    get {_container ?? String()}
+    set {_container = newValue}
+  }
+  /// Returns true if `container` has been explicitly set.
+  public var hasContainer: Bool {self._container != nil}
+  /// Clears the value of `container`. Subsequent reads from it will return its default value.
+  public mutating func clearContainer() {self._container = nil}
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -369,6 +394,7 @@ public nonisolated struct Mavio_Plugin_V1_DownloadClient: Sendable {
   fileprivate var _failure: String? = nil
   fileprivate var _prefersTorrentFile: Bool? = nil
   fileprivate var _host: String? = nil
+  fileprivate var _container: String? = nil
 }
 
 public nonisolated struct Mavio_Plugin_V1_TestDownloadClientRequest: Sendable {
@@ -835,8 +861,8 @@ public nonisolated struct Mavio_Plugin_V1_Download: @unchecked Sendable {
   /// Clears the value of `seedRatio`. Subsequent reads from it will return its default value.
   public mutating func clearSeedRatio() {_uniqueStorage()._seedRatio = nil}
 
-  /// Where the download's files are, as the client sees them: remote path
-  /// mappings of the client's host apply.
+  /// Where the download's files are, as the client sees them: the
+  /// client's download path mappings apply.
   public var outputPath: String {
     get {_storage._outputPath ?? String()}
     set {_uniqueStorage()._outputPath = newValue}
@@ -1174,18 +1200,33 @@ nonisolated extension Mavio_Plugin_V1_DownloadStatus: SwiftProtobuf._ProtoNamePr
 
 nonisolated extension Mavio_Plugin_V1_ListDownloadClientDefinitionsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ListDownloadClientDefinitionsRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}containers\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    // Load everything into unknown fields
-    while try decoder.nextFieldNumber() != nil {}
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self._containers) }()
+      default: break
+      }
+    }
   }
 
   public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._containers {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 1)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: Mavio_Plugin_V1_ListDownloadClientDefinitionsRequest, rhs: Mavio_Plugin_V1_ListDownloadClientDefinitionsRequest) -> Bool {
+    if lhs._containers != rhs._containers {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1326,7 +1367,7 @@ nonisolated extension Mavio_Plugin_V1_ListDownloadClientsResponse: SwiftProtobuf
 
 nonisolated extension Mavio_Plugin_V1_DownloadClient: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DownloadClient"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{3}definition_id\0\u{1}protocol\0\u{1}enabled\0\u{1}priority\0\u{3}remove_completed_downloads\0\u{3}remove_failed_downloads\0\u{3}disabled_until\0\u{1}failure\0\u{3}prefers_torrent_file\0\u{1}host\0\u{1}tags\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{3}definition_id\0\u{1}protocol\0\u{1}enabled\0\u{1}priority\0\u{3}remove_completed_downloads\0\u{3}remove_failed_downloads\0\u{3}disabled_until\0\u{1}failure\0\u{3}prefers_torrent_file\0\u{1}host\0\u{1}tags\0\u{1}container\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1347,6 +1388,7 @@ nonisolated extension Mavio_Plugin_V1_DownloadClient: SwiftProtobuf.Message, Swi
       case 11: try { try decoder.decodeSingularBoolField(value: &self._prefersTorrentFile) }()
       case 12: try { try decoder.decodeSingularStringField(value: &self._host) }()
       case 13: try { try decoder.decodeRepeatedStringField(value: &self.tags) }()
+      case 14: try { try decoder.decodeSingularStringField(value: &self._container) }()
       default: break
       }
     }
@@ -1396,6 +1438,9 @@ nonisolated extension Mavio_Plugin_V1_DownloadClient: SwiftProtobuf.Message, Swi
     if !self.tags.isEmpty {
       try visitor.visitRepeatedStringField(value: self.tags, fieldNumber: 13)
     }
+    try { if let v = self._container {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 14)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1413,6 +1458,7 @@ nonisolated extension Mavio_Plugin_V1_DownloadClient: SwiftProtobuf.Message, Swi
     if lhs._prefersTorrentFile != rhs._prefersTorrentFile {return false}
     if lhs._host != rhs._host {return false}
     if lhs.tags != rhs.tags {return false}
+    if lhs._container != rhs._container {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

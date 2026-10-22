@@ -1221,6 +1221,295 @@ public nonisolated struct Mavio_Acquisition_V1_UnblockCollectionResponse: Sendab
   public init() {}
 }
 
+/// RequestSettings are the defaults of users' requests and where approved
+/// requests are acquired.
+public nonisolated struct Mavio_Acquisition_V1_RequestSettings: @unchecked Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The request permissions new users get.
+  public var defaultRequestMovies: Bool {
+    get {_storage._defaultRequestMovies ?? false}
+    set {_uniqueStorage()._defaultRequestMovies = newValue}
+  }
+  /// Returns true if `defaultRequestMovies` has been explicitly set.
+  public var hasDefaultRequestMovies: Bool {_storage._defaultRequestMovies != nil}
+  /// Clears the value of `defaultRequestMovies`. Subsequent reads from it will return its default value.
+  public mutating func clearDefaultRequestMovies() {_uniqueStorage()._defaultRequestMovies = nil}
+
+  public var defaultRequestSeries: Bool {
+    get {_storage._defaultRequestSeries ?? false}
+    set {_uniqueStorage()._defaultRequestSeries = newValue}
+  }
+  /// Returns true if `defaultRequestSeries` has been explicitly set.
+  public var hasDefaultRequestSeries: Bool {_storage._defaultRequestSeries != nil}
+  /// Clears the value of `defaultRequestSeries`. Subsequent reads from it will return its default value.
+  public mutating func clearDefaultRequestSeries() {_uniqueStorage()._defaultRequestSeries = nil}
+
+  public var defaultAutoApproveMovies: Bool {
+    get {_storage._defaultAutoApproveMovies ?? false}
+    set {_uniqueStorage()._defaultAutoApproveMovies = newValue}
+  }
+  /// Returns true if `defaultAutoApproveMovies` has been explicitly set.
+  public var hasDefaultAutoApproveMovies: Bool {_storage._defaultAutoApproveMovies != nil}
+  /// Clears the value of `defaultAutoApproveMovies`. Subsequent reads from it will return its default value.
+  public mutating func clearDefaultAutoApproveMovies() {_uniqueStorage()._defaultAutoApproveMovies = nil}
+
+  public var defaultAutoApproveSeries: Bool {
+    get {_storage._defaultAutoApproveSeries ?? false}
+    set {_uniqueStorage()._defaultAutoApproveSeries = newValue}
+  }
+  /// Returns true if `defaultAutoApproveSeries` has been explicitly set.
+  public var hasDefaultAutoApproveSeries: Bool {_storage._defaultAutoApproveSeries != nil}
+  /// Clears the value of `defaultAutoApproveSeries`. Subsequent reads from it will return its default value.
+  public mutating func clearDefaultAutoApproveSeries() {_uniqueStorage()._defaultAutoApproveSeries = nil}
+
+  public var defaultReportIssues: Bool {
+    get {_storage._defaultReportIssues ?? false}
+    set {_uniqueStorage()._defaultReportIssues = newValue}
+  }
+  /// Returns true if `defaultReportIssues` has been explicitly set.
+  public var hasDefaultReportIssues: Bool {_storage._defaultReportIssues != nil}
+  /// Clears the value of `defaultReportIssues`. Subsequent reads from it will return its default value.
+  public mutating func clearDefaultReportIssues() {_uniqueStorage()._defaultReportIssues = nil}
+
+  /// The quotas of users without their own: requests of movies, or seasons
+  /// of series, in the last days; a limit of 0 is unlimited, 0 days all
+  /// time.
+  public var movieQuotaLimit: Int32 {
+    get {_storage._movieQuotaLimit ?? 0}
+    set {_uniqueStorage()._movieQuotaLimit = newValue}
+  }
+  /// Returns true if `movieQuotaLimit` has been explicitly set.
+  public var hasMovieQuotaLimit: Bool {_storage._movieQuotaLimit != nil}
+  /// Clears the value of `movieQuotaLimit`. Subsequent reads from it will return its default value.
+  public mutating func clearMovieQuotaLimit() {_uniqueStorage()._movieQuotaLimit = nil}
+
+  public var movieQuotaDays: Int32 {
+    get {_storage._movieQuotaDays ?? 0}
+    set {_uniqueStorage()._movieQuotaDays = newValue}
+  }
+  /// Returns true if `movieQuotaDays` has been explicitly set.
+  public var hasMovieQuotaDays: Bool {_storage._movieQuotaDays != nil}
+  /// Clears the value of `movieQuotaDays`. Subsequent reads from it will return its default value.
+  public mutating func clearMovieQuotaDays() {_uniqueStorage()._movieQuotaDays = nil}
+
+  public var seriesQuotaLimit: Int32 {
+    get {_storage._seriesQuotaLimit ?? 0}
+    set {_uniqueStorage()._seriesQuotaLimit = newValue}
+  }
+  /// Returns true if `seriesQuotaLimit` has been explicitly set.
+  public var hasSeriesQuotaLimit: Bool {_storage._seriesQuotaLimit != nil}
+  /// Clears the value of `seriesQuotaLimit`. Subsequent reads from it will return its default value.
+  public mutating func clearSeriesQuotaLimit() {_uniqueStorage()._seriesQuotaLimit = nil}
+
+  public var seriesQuotaDays: Int32 {
+    get {_storage._seriesQuotaDays ?? 0}
+    set {_uniqueStorage()._seriesQuotaDays = newValue}
+  }
+  /// Returns true if `seriesQuotaDays` has been explicitly set.
+  public var hasSeriesQuotaDays: Bool {_storage._seriesQuotaDays != nil}
+  /// Clears the value of `seriesQuotaDays`. Subsequent reads from it will return its default value.
+  public mutating func clearSeriesQuotaDays() {_uniqueStorage()._seriesQuotaDays = nil}
+
+  /// The movie library and quality profile approved movies are added to;
+  /// empty, approvals fail.
+  public var movieLibraryID: String {
+    get {_storage._movieLibraryID ?? String()}
+    set {_uniqueStorage()._movieLibraryID = newValue}
+  }
+  /// Returns true if `movieLibraryID` has been explicitly set.
+  public var hasMovieLibraryID: Bool {_storage._movieLibraryID != nil}
+  /// Clears the value of `movieLibraryID`. Subsequent reads from it will return its default value.
+  public mutating func clearMovieLibraryID() {_uniqueStorage()._movieLibraryID = nil}
+
+  public var movieQualityProfileID: String {
+    get {_storage._movieQualityProfileID ?? String()}
+    set {_uniqueStorage()._movieQualityProfileID = newValue}
+  }
+  /// Returns true if `movieQualityProfileID` has been explicitly set.
+  public var hasMovieQualityProfileID: Bool {_storage._movieQualityProfileID != nil}
+  /// Clears the value of `movieQualityProfileID`. Subsequent reads from it will return its default value.
+  public mutating func clearMovieQualityProfileID() {_uniqueStorage()._movieQualityProfileID = nil}
+
+  public var minimumAvailability: Mavio_Acquisition_V1_MinimumAvailability {
+    get {_storage._minimumAvailability ?? .unspecified}
+    set {_uniqueStorage()._minimumAvailability = newValue}
+  }
+  /// Returns true if `minimumAvailability` has been explicitly set.
+  public var hasMinimumAvailability: Bool {_storage._minimumAvailability != nil}
+  /// Clears the value of `minimumAvailability`. Subsequent reads from it will return its default value.
+  public mutating func clearMinimumAvailability() {_uniqueStorage()._minimumAvailability = nil}
+
+  /// The show library and quality profile approved series are added to;
+  /// empty, approvals fail.
+  public var seriesLibraryID: String {
+    get {_storage._seriesLibraryID ?? String()}
+    set {_uniqueStorage()._seriesLibraryID = newValue}
+  }
+  /// Returns true if `seriesLibraryID` has been explicitly set.
+  public var hasSeriesLibraryID: Bool {_storage._seriesLibraryID != nil}
+  /// Clears the value of `seriesLibraryID`. Subsequent reads from it will return its default value.
+  public mutating func clearSeriesLibraryID() {_uniqueStorage()._seriesLibraryID = nil}
+
+  public var seriesQualityProfileID: String {
+    get {_storage._seriesQualityProfileID ?? String()}
+    set {_uniqueStorage()._seriesQualityProfileID = newValue}
+  }
+  /// Returns true if `seriesQualityProfileID` has been explicitly set.
+  public var hasSeriesQualityProfileID: Bool {_storage._seriesQualityProfileID != nil}
+  /// Clears the value of `seriesQualityProfileID`. Subsequent reads from it will return its default value.
+  public mutating func clearSeriesQualityProfileID() {_uniqueStorage()._seriesQualityProfileID = nil}
+
+  public var seasonFolder: Bool {
+    get {_storage._seasonFolder ?? false}
+    set {_uniqueStorage()._seasonFolder = newValue}
+  }
+  /// Returns true if `seasonFolder` has been explicitly set.
+  public var hasSeasonFolder: Bool {_storage._seasonFolder != nil}
+  /// Clears the value of `seasonFolder`. Subsequent reads from it will return its default value.
+  public mutating func clearSeasonFolder() {_uniqueStorage()._seasonFolder = nil}
+
+  public var monitorNewItems: Mavio_Acquisition_V1_NewItemMonitor {
+    get {_storage._monitorNewItems ?? .unspecified}
+    set {_uniqueStorage()._monitorNewItems = newValue}
+  }
+  /// Returns true if `monitorNewItems` has been explicitly set.
+  public var hasMonitorNewItems: Bool {_storage._monitorNewItems != nil}
+  /// Clears the value of `monitorNewItems`. Subsequent reads from it will return its default value.
+  public mutating func clearMonitorNewItems() {_uniqueStorage()._monitorNewItems = nil}
+
+  /// Allow requesting specials, season 0.
+  public var specials: Bool {
+    get {_storage._specials ?? false}
+    set {_uniqueStorage()._specials = newValue}
+  }
+  /// Returns true if `specials` has been explicitly set.
+  public var hasSpecials: Bool {_storage._specials != nil}
+  /// Clears the value of `specials`. Subsequent reads from it will return its default value.
+  public mutating func clearSpecials() {_uniqueStorage()._specials = nil}
+
+  /// The show library and quality profile approved anime series are added
+  /// to, as Seerr's anime settings of Sonarr; empty uses those of series.
+  /// Anime series are numbered absolutely either way.
+  public var animeLibraryID: String {
+    get {_storage._animeLibraryID ?? String()}
+    set {_uniqueStorage()._animeLibraryID = newValue}
+  }
+  /// Returns true if `animeLibraryID` has been explicitly set.
+  public var hasAnimeLibraryID: Bool {_storage._animeLibraryID != nil}
+  /// Clears the value of `animeLibraryID`. Subsequent reads from it will return its default value.
+  public mutating func clearAnimeLibraryID() {_uniqueStorage()._animeLibraryID = nil}
+
+  public var animeQualityProfileID: String {
+    get {_storage._animeQualityProfileID ?? String()}
+    set {_uniqueStorage()._animeQualityProfileID = newValue}
+  }
+  /// Returns true if `animeQualityProfileID` has been explicitly set.
+  public var hasAnimeQualityProfileID: Bool {_storage._animeQualityProfileID != nil}
+  /// Clears the value of `animeQualityProfileID`. Subsequent reads from it will return its default value.
+  public mutating func clearAnimeQualityProfileID() {_uniqueStorage()._animeQualityProfileID = nil}
+
+  /// Keywords of discovery providers, as "<plugin>/<keyword>", whose movies
+  /// and series the blocklisted tags job blocklists weekly, as Seerr's
+  /// blocklistedTags.
+  public var blocklistedTags: [String] {
+    get {_storage._blocklistedTags}
+    set {_uniqueStorage()._blocklistedTags = newValue}
+  }
+
+  /// How many pages of each order of a keyword's titles the job
+  /// blocklists, 0–250; 0 for 50.
+  public var blocklistedTagsLimit: Int32 {
+    get {_storage._blocklistedTagsLimit ?? 0}
+    set {_uniqueStorage()._blocklistedTagsLimit = newValue}
+  }
+  /// Returns true if `blocklistedTagsLimit` has been explicitly set.
+  public var hasBlocklistedTagsLimit: Bool {_storage._blocklistedTagsLimit != nil}
+  /// Clears the value of `blocklistedTagsLimit`. Subsequent reads from it will return its default value.
+  public mutating func clearBlocklistedTagsLimit() {_uniqueStorage()._blocklistedTagsLimit = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _storage = _StorageClass.defaultInstance
+}
+
+public nonisolated struct Mavio_Acquisition_V1_GetRequestSettingsRequest: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+public nonisolated struct Mavio_Acquisition_V1_GetRequestSettingsResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var settings: Mavio_Acquisition_V1_RequestSettings {
+    get {_settings ?? Mavio_Acquisition_V1_RequestSettings()}
+    set {_settings = newValue}
+  }
+  /// Returns true if `settings` has been explicitly set.
+  public var hasSettings: Bool {self._settings != nil}
+  /// Clears the value of `settings`. Subsequent reads from it will return its default value.
+  public mutating func clearSettings() {self._settings = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _settings: Mavio_Acquisition_V1_RequestSettings? = nil
+}
+
+public nonisolated struct Mavio_Acquisition_V1_UpdateRequestSettingsRequest: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var settings: Mavio_Acquisition_V1_RequestSettings {
+    get {_settings ?? Mavio_Acquisition_V1_RequestSettings()}
+    set {_settings = newValue}
+  }
+  /// Returns true if `settings` has been explicitly set.
+  public var hasSettings: Bool {self._settings != nil}
+  /// Clears the value of `settings`. Subsequent reads from it will return its default value.
+  public mutating func clearSettings() {self._settings = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _settings: Mavio_Acquisition_V1_RequestSettings? = nil
+}
+
+public nonisolated struct Mavio_Acquisition_V1_UpdateRequestSettingsResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var settings: Mavio_Acquisition_V1_RequestSettings {
+    get {_settings ?? Mavio_Acquisition_V1_RequestSettings()}
+    set {_settings = newValue}
+  }
+  /// Returns true if `settings` has been explicitly set.
+  public var hasSettings: Bool {self._settings != nil}
+  /// Clears the value of `settings`. Subsequent reads from it will return its default value.
+  public mutating func clearSettings() {self._settings = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _settings: Mavio_Acquisition_V1_RequestSettings? = nil
+}
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate nonisolated let _protobuf_package = "mavio.acquisition.v1"
@@ -2560,6 +2849,337 @@ nonisolated extension Mavio_Acquisition_V1_UnblockCollectionResponse: SwiftProto
   }
 
   public static func ==(lhs: Mavio_Acquisition_V1_UnblockCollectionResponse, rhs: Mavio_Acquisition_V1_UnblockCollectionResponse) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Acquisition_V1_RequestSettings: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".RequestSettings"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}default_request_movies\0\u{3}default_request_series\0\u{3}default_auto_approve_movies\0\u{3}default_auto_approve_series\0\u{3}default_report_issues\0\u{3}movie_quota_limit\0\u{3}movie_quota_days\0\u{3}series_quota_limit\0\u{3}series_quota_days\0\u{3}movie_library_id\0\u{3}movie_quality_profile_id\0\u{3}minimum_availability\0\u{3}series_library_id\0\u{3}series_quality_profile_id\0\u{3}season_folder\0\u{3}monitor_new_items\0\u{1}specials\0\u{3}anime_library_id\0\u{3}anime_quality_profile_id\0\u{3}blocklisted_tags\0\u{3}blocklisted_tags_limit\0")
+
+  fileprivate class _StorageClass {
+    var _defaultRequestMovies: Bool? = nil
+    var _defaultRequestSeries: Bool? = nil
+    var _defaultAutoApproveMovies: Bool? = nil
+    var _defaultAutoApproveSeries: Bool? = nil
+    var _defaultReportIssues: Bool? = nil
+    var _movieQuotaLimit: Int32? = nil
+    var _movieQuotaDays: Int32? = nil
+    var _seriesQuotaLimit: Int32? = nil
+    var _seriesQuotaDays: Int32? = nil
+    var _movieLibraryID: String? = nil
+    var _movieQualityProfileID: String? = nil
+    var _minimumAvailability: Mavio_Acquisition_V1_MinimumAvailability? = nil
+    var _seriesLibraryID: String? = nil
+    var _seriesQualityProfileID: String? = nil
+    var _seasonFolder: Bool? = nil
+    var _monitorNewItems: Mavio_Acquisition_V1_NewItemMonitor? = nil
+    var _specials: Bool? = nil
+    var _animeLibraryID: String? = nil
+    var _animeQualityProfileID: String? = nil
+    var _blocklistedTags: [String] = []
+    var _blocklistedTagsLimit: Int32? = nil
+
+      // This property is used as the initial default value for new instances of the type.
+      // The type itself is protecting the reference to its storage via CoW semantics.
+      // This will force a copy to be made of this reference when the first mutation occurs;
+      // hence, it is safe to mark this as `nonisolated(unsafe)`.
+      static nonisolated(unsafe) let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _defaultRequestMovies = source._defaultRequestMovies
+      _defaultRequestSeries = source._defaultRequestSeries
+      _defaultAutoApproveMovies = source._defaultAutoApproveMovies
+      _defaultAutoApproveSeries = source._defaultAutoApproveSeries
+      _defaultReportIssues = source._defaultReportIssues
+      _movieQuotaLimit = source._movieQuotaLimit
+      _movieQuotaDays = source._movieQuotaDays
+      _seriesQuotaLimit = source._seriesQuotaLimit
+      _seriesQuotaDays = source._seriesQuotaDays
+      _movieLibraryID = source._movieLibraryID
+      _movieQualityProfileID = source._movieQualityProfileID
+      _minimumAvailability = source._minimumAvailability
+      _seriesLibraryID = source._seriesLibraryID
+      _seriesQualityProfileID = source._seriesQualityProfileID
+      _seasonFolder = source._seasonFolder
+      _monitorNewItems = source._monitorNewItems
+      _specials = source._specials
+      _animeLibraryID = source._animeLibraryID
+      _animeQualityProfileID = source._animeQualityProfileID
+      _blocklistedTags = source._blocklistedTags
+      _blocklistedTagsLimit = source._blocklistedTagsLimit
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularBoolField(value: &_storage._defaultRequestMovies) }()
+        case 2: try { try decoder.decodeSingularBoolField(value: &_storage._defaultRequestSeries) }()
+        case 3: try { try decoder.decodeSingularBoolField(value: &_storage._defaultAutoApproveMovies) }()
+        case 4: try { try decoder.decodeSingularBoolField(value: &_storage._defaultAutoApproveSeries) }()
+        case 5: try { try decoder.decodeSingularBoolField(value: &_storage._defaultReportIssues) }()
+        case 6: try { try decoder.decodeSingularInt32Field(value: &_storage._movieQuotaLimit) }()
+        case 7: try { try decoder.decodeSingularInt32Field(value: &_storage._movieQuotaDays) }()
+        case 8: try { try decoder.decodeSingularInt32Field(value: &_storage._seriesQuotaLimit) }()
+        case 9: try { try decoder.decodeSingularInt32Field(value: &_storage._seriesQuotaDays) }()
+        case 10: try { try decoder.decodeSingularStringField(value: &_storage._movieLibraryID) }()
+        case 11: try { try decoder.decodeSingularStringField(value: &_storage._movieQualityProfileID) }()
+        case 12: try { try decoder.decodeSingularEnumField(value: &_storage._minimumAvailability) }()
+        case 13: try { try decoder.decodeSingularStringField(value: &_storage._seriesLibraryID) }()
+        case 14: try { try decoder.decodeSingularStringField(value: &_storage._seriesQualityProfileID) }()
+        case 15: try { try decoder.decodeSingularBoolField(value: &_storage._seasonFolder) }()
+        case 16: try { try decoder.decodeSingularEnumField(value: &_storage._monitorNewItems) }()
+        case 17: try { try decoder.decodeSingularBoolField(value: &_storage._specials) }()
+        case 18: try { try decoder.decodeSingularStringField(value: &_storage._animeLibraryID) }()
+        case 19: try { try decoder.decodeSingularStringField(value: &_storage._animeQualityProfileID) }()
+        case 20: try { try decoder.decodeRepeatedStringField(value: &_storage._blocklistedTags) }()
+        case 21: try { try decoder.decodeSingularInt32Field(value: &_storage._blocklistedTagsLimit) }()
+        default: break
+        }
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      try { if let v = _storage._defaultRequestMovies {
+        try visitor.visitSingularBoolField(value: v, fieldNumber: 1)
+      } }()
+      try { if let v = _storage._defaultRequestSeries {
+        try visitor.visitSingularBoolField(value: v, fieldNumber: 2)
+      } }()
+      try { if let v = _storage._defaultAutoApproveMovies {
+        try visitor.visitSingularBoolField(value: v, fieldNumber: 3)
+      } }()
+      try { if let v = _storage._defaultAutoApproveSeries {
+        try visitor.visitSingularBoolField(value: v, fieldNumber: 4)
+      } }()
+      try { if let v = _storage._defaultReportIssues {
+        try visitor.visitSingularBoolField(value: v, fieldNumber: 5)
+      } }()
+      try { if let v = _storage._movieQuotaLimit {
+        try visitor.visitSingularInt32Field(value: v, fieldNumber: 6)
+      } }()
+      try { if let v = _storage._movieQuotaDays {
+        try visitor.visitSingularInt32Field(value: v, fieldNumber: 7)
+      } }()
+      try { if let v = _storage._seriesQuotaLimit {
+        try visitor.visitSingularInt32Field(value: v, fieldNumber: 8)
+      } }()
+      try { if let v = _storage._seriesQuotaDays {
+        try visitor.visitSingularInt32Field(value: v, fieldNumber: 9)
+      } }()
+      try { if let v = _storage._movieLibraryID {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 10)
+      } }()
+      try { if let v = _storage._movieQualityProfileID {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 11)
+      } }()
+      try { if let v = _storage._minimumAvailability {
+        try visitor.visitSingularEnumField(value: v, fieldNumber: 12)
+      } }()
+      try { if let v = _storage._seriesLibraryID {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 13)
+      } }()
+      try { if let v = _storage._seriesQualityProfileID {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 14)
+      } }()
+      try { if let v = _storage._seasonFolder {
+        try visitor.visitSingularBoolField(value: v, fieldNumber: 15)
+      } }()
+      try { if let v = _storage._monitorNewItems {
+        try visitor.visitSingularEnumField(value: v, fieldNumber: 16)
+      } }()
+      try { if let v = _storage._specials {
+        try visitor.visitSingularBoolField(value: v, fieldNumber: 17)
+      } }()
+      try { if let v = _storage._animeLibraryID {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 18)
+      } }()
+      try { if let v = _storage._animeQualityProfileID {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 19)
+      } }()
+      if !_storage._blocklistedTags.isEmpty {
+        try visitor.visitRepeatedStringField(value: _storage._blocklistedTags, fieldNumber: 20)
+      }
+      try { if let v = _storage._blocklistedTagsLimit {
+        try visitor.visitSingularInt32Field(value: v, fieldNumber: 21)
+      } }()
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Acquisition_V1_RequestSettings, rhs: Mavio_Acquisition_V1_RequestSettings) -> Bool {
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._defaultRequestMovies != rhs_storage._defaultRequestMovies {return false}
+        if _storage._defaultRequestSeries != rhs_storage._defaultRequestSeries {return false}
+        if _storage._defaultAutoApproveMovies != rhs_storage._defaultAutoApproveMovies {return false}
+        if _storage._defaultAutoApproveSeries != rhs_storage._defaultAutoApproveSeries {return false}
+        if _storage._defaultReportIssues != rhs_storage._defaultReportIssues {return false}
+        if _storage._movieQuotaLimit != rhs_storage._movieQuotaLimit {return false}
+        if _storage._movieQuotaDays != rhs_storage._movieQuotaDays {return false}
+        if _storage._seriesQuotaLimit != rhs_storage._seriesQuotaLimit {return false}
+        if _storage._seriesQuotaDays != rhs_storage._seriesQuotaDays {return false}
+        if _storage._movieLibraryID != rhs_storage._movieLibraryID {return false}
+        if _storage._movieQualityProfileID != rhs_storage._movieQualityProfileID {return false}
+        if _storage._minimumAvailability != rhs_storage._minimumAvailability {return false}
+        if _storage._seriesLibraryID != rhs_storage._seriesLibraryID {return false}
+        if _storage._seriesQualityProfileID != rhs_storage._seriesQualityProfileID {return false}
+        if _storage._seasonFolder != rhs_storage._seasonFolder {return false}
+        if _storage._monitorNewItems != rhs_storage._monitorNewItems {return false}
+        if _storage._specials != rhs_storage._specials {return false}
+        if _storage._animeLibraryID != rhs_storage._animeLibraryID {return false}
+        if _storage._animeQualityProfileID != rhs_storage._animeQualityProfileID {return false}
+        if _storage._blocklistedTags != rhs_storage._blocklistedTags {return false}
+        if _storage._blocklistedTagsLimit != rhs_storage._blocklistedTagsLimit {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Acquisition_V1_GetRequestSettingsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetRequestSettingsRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    // Load everything into unknown fields
+    while try decoder.nextFieldNumber() != nil {}
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Acquisition_V1_GetRequestSettingsRequest, rhs: Mavio_Acquisition_V1_GetRequestSettingsRequest) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Acquisition_V1_GetRequestSettingsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetRequestSettingsResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}settings\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._settings) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._settings {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Acquisition_V1_GetRequestSettingsResponse, rhs: Mavio_Acquisition_V1_GetRequestSettingsResponse) -> Bool {
+    if lhs._settings != rhs._settings {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Acquisition_V1_UpdateRequestSettingsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".UpdateRequestSettingsRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}settings\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._settings) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._settings {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Acquisition_V1_UpdateRequestSettingsRequest, rhs: Mavio_Acquisition_V1_UpdateRequestSettingsRequest) -> Bool {
+    if lhs._settings != rhs._settings {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Acquisition_V1_UpdateRequestSettingsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".UpdateRequestSettingsResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}settings\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._settings) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._settings {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Acquisition_V1_UpdateRequestSettingsResponse, rhs: Mavio_Acquisition_V1_UpdateRequestSettingsResponse) -> Bool {
+    if lhs._settings != rhs._settings {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

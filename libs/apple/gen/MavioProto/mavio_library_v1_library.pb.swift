@@ -340,7 +340,7 @@ public nonisolated struct Mavio_Library_V1_Library: @unchecked Sendable {
   public mutating func clearKind() {_uniqueStorage()._kind = nil}
 
   /// Root folders: absolute paths of the server's file system, or
-  /// "rclone:<remote>:<path>" for a folder below an rclone remote's root. A
+  /// "remote:<remote>:<path>" for a folder below an rclone remote's root. A
   /// path belongs to at most one library.
   public var paths: [String] {
     get {_storage._paths}

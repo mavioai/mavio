@@ -455,6 +455,138 @@ public nonisolated struct Mavio_System_V1_TestProxyResponse: Sendable {
   fileprivate var _country: String? = nil
 }
 
+/// OutboundProxies are the proxies the server's own HTTP requests go
+/// through, by what they reach: each the ID of one of the server's proxies
+/// (ProxyService), "system" for the system proxy, or empty for none. The
+/// hosts of this machine and of the local network are reached directly.
+public nonisolated struct Mavio_System_V1_OutboundProxies: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Plugin catalogs and plugin packages.
+  public var pluginCatalogs: String {
+    get {_pluginCatalogs ?? String()}
+    set {_pluginCatalogs = newValue}
+  }
+  /// Returns true if `pluginCatalogs` has been explicitly set.
+  public var hasPluginCatalogs: Bool {self._pluginCatalogs != nil}
+  /// Clears the value of `pluginCatalogs`. Subsequent reads from it will return its default value.
+  public mutating func clearPluginCatalogs() {self._pluginCatalogs = nil}
+
+  /// Items' remote images, such as posters.
+  public var images: String {
+    get {_images ?? String()}
+    set {_images = newValue}
+  }
+  /// Returns true if `images` has been explicitly set.
+  public var hasImages: Bool {self._images != nil}
+  /// Clears the value of `images`. Subsequent reads from it will return its default value.
+  public mutating func clearImages() {self._images = nil}
+
+  /// mavio.dev's API.
+  public var mavioDev: String {
+    get {_mavioDev ?? String()}
+    set {_mavioDev = newValue}
+  }
+  /// Returns true if `mavioDev` has been explicitly set.
+  public var hasMavioDev: Bool {self._mavioDev != nil}
+  /// Clears the value of `mavioDev`. Subsequent reads from it will return its default value.
+  public mutating func clearMavioDev() {self._mavioDev = nil}
+
+  /// The certificate authorities of mavio.site certificates.
+  public var acme: String {
+    get {_acme ?? String()}
+    set {_acme = newValue}
+  }
+  /// Returns true if `acme` has been explicitly set.
+  public var hasAcme: Bool {self._acme != nil}
+  /// Clears the value of `acme`. Subsequent reads from it will return its default value.
+  public mutating func clearAcme() {self._acme = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _pluginCatalogs: String? = nil
+  fileprivate var _images: String? = nil
+  fileprivate var _mavioDev: String? = nil
+  fileprivate var _acme: String? = nil
+}
+
+public nonisolated struct Mavio_System_V1_GetOutboundProxiesRequest: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+public nonisolated struct Mavio_System_V1_GetOutboundProxiesResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var proxies: Mavio_System_V1_OutboundProxies {
+    get {_proxies ?? Mavio_System_V1_OutboundProxies()}
+    set {_proxies = newValue}
+  }
+  /// Returns true if `proxies` has been explicitly set.
+  public var hasProxies: Bool {self._proxies != nil}
+  /// Clears the value of `proxies`. Subsequent reads from it will return its default value.
+  public mutating func clearProxies() {self._proxies = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _proxies: Mavio_System_V1_OutboundProxies? = nil
+}
+
+public nonisolated struct Mavio_System_V1_UpdateOutboundProxiesRequest: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var proxies: Mavio_System_V1_OutboundProxies {
+    get {_proxies ?? Mavio_System_V1_OutboundProxies()}
+    set {_proxies = newValue}
+  }
+  /// Returns true if `proxies` has been explicitly set.
+  public var hasProxies: Bool {self._proxies != nil}
+  /// Clears the value of `proxies`. Subsequent reads from it will return its default value.
+  public mutating func clearProxies() {self._proxies = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _proxies: Mavio_System_V1_OutboundProxies? = nil
+}
+
+public nonisolated struct Mavio_System_V1_UpdateOutboundProxiesResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var proxies: Mavio_System_V1_OutboundProxies {
+    get {_proxies ?? Mavio_System_V1_OutboundProxies()}
+    set {_proxies = newValue}
+  }
+  /// Returns true if `proxies` has been explicitly set.
+  public var hasProxies: Bool {self._proxies != nil}
+  /// Clears the value of `proxies`. Subsequent reads from it will return its default value.
+  public mutating func clearProxies() {self._proxies = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _proxies: Mavio_System_V1_OutboundProxies? = nil
+}
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate nonisolated let _protobuf_package = "mavio.system.v1"
@@ -906,6 +1038,176 @@ nonisolated extension Mavio_System_V1_TestProxyResponse: SwiftProtobuf.Message, 
     if lhs._latency != rhs._latency {return false}
     if lhs._exitIp != rhs._exitIp {return false}
     if lhs._country != rhs._country {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_System_V1_OutboundProxies: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".OutboundProxies"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}plugin_catalogs\0\u{1}images\0\u{3}mavio_dev\0\u{1}acme\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._pluginCatalogs) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self._images) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self._mavioDev) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self._acme) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._pluginCatalogs {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._images {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+    } }()
+    try { if let v = self._mavioDev {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 3)
+    } }()
+    try { if let v = self._acme {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 4)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_System_V1_OutboundProxies, rhs: Mavio_System_V1_OutboundProxies) -> Bool {
+    if lhs._pluginCatalogs != rhs._pluginCatalogs {return false}
+    if lhs._images != rhs._images {return false}
+    if lhs._mavioDev != rhs._mavioDev {return false}
+    if lhs._acme != rhs._acme {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_System_V1_GetOutboundProxiesRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetOutboundProxiesRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    // Load everything into unknown fields
+    while try decoder.nextFieldNumber() != nil {}
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_System_V1_GetOutboundProxiesRequest, rhs: Mavio_System_V1_GetOutboundProxiesRequest) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_System_V1_GetOutboundProxiesResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetOutboundProxiesResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}proxies\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._proxies) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._proxies {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_System_V1_GetOutboundProxiesResponse, rhs: Mavio_System_V1_GetOutboundProxiesResponse) -> Bool {
+    if lhs._proxies != rhs._proxies {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_System_V1_UpdateOutboundProxiesRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".UpdateOutboundProxiesRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}proxies\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._proxies) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._proxies {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_System_V1_UpdateOutboundProxiesRequest, rhs: Mavio_System_V1_UpdateOutboundProxiesRequest) -> Bool {
+    if lhs._proxies != rhs._proxies {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_System_V1_UpdateOutboundProxiesResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".UpdateOutboundProxiesResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}proxies\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._proxies) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._proxies {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_System_V1_UpdateOutboundProxiesResponse, rhs: Mavio_System_V1_UpdateOutboundProxiesResponse) -> Bool {
+    if lhs._proxies != rhs._proxies {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

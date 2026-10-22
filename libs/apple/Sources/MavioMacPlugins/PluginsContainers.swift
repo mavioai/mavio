@@ -74,9 +74,9 @@
         return name
     }
 
-    /// A container dependency's section: its mode, GPU and proxy, its
-    /// command and error, and, run elsewhere, its address and the commands
-    /// running it.
+    /// A container dependency's section: its mode, GPU, folders, peer port
+    /// and proxy, its command and error, and, run elsewhere, its address and
+    /// the commands running it.
     @MainActor private final class ContainerGroup {
         let view: LiveSection
         /// Whether it is the first, under the Containers heading.
@@ -106,6 +106,24 @@
         private var errorView: (String, DisclosureView)?
         private var hintRow: (String, NSView)?
         private var commandsRows: [String: (Mavio_System_V1_ContainerCommands, NSView)] = [:]
+        /// The fields of the server's folders it mounts, by the folder's name,
+        /// and of the port it publishes for peers, saved together.
+        private var folderFields: [String: InputField] = [:]
+        private var folderRows: [String: ContentRow] = [:]
+        private let peerPortField: InputField
+        private lazy var peerPortRow: FormRow = {
+            peerPortField.widthAnchor.constraint(equalToConstant: 96).isActive = true
+            return controlRow(
+                MavioStrings.pluginsContainerPeerPort, subtitle: MavioStrings.pluginsContainerPeerPortDetail,
+                control: peerPortField, theme: theme)
+        }()
+        private lazy var foldersHintRow = ContentRow(
+            note(MavioStrings.pluginsContainerFoldersHint, theme.fonts.footnote, theme.colors.textSecondary),
+            theme: theme)
+        private lazy var placesButton = MavioButton(MavioStrings.actionSave, kind: .secondary, theme: theme) {
+            [weak self] in self?.savePlaces()
+        }
+        private lazy var placesRow = ContentRow(bar([placesButton]), theme: theme)
 
         init(
             page: Page, server: ServerRecord, id: String, c: Mavio_System_V1_PluginContainer, first: Bool,
@@ -122,11 +140,18 @@
             let mode = c.hasStatus ? c.status.mode : .unspecified
             chosen = mode
             addressField = InputField(text: mode == .external ? c.status.address : "")
+            peerPortField = InputField(text: String(c.peerPort))
             addressField.setAccessibilityLabel(MavioStrings.pluginsContainerAddress)
             addressField.onChange = { [weak self] _ in self?.render() }
             addressField.onSubmit = { [weak self] in
                 guard let self, self.canSave else { return }
                 self.saveAddress()
+            }
+            peerPortField.setAccessibilityLabel(MavioStrings.pluginsContainerPeerPort)
+            peerPortField.onChange = { [weak self] _ in self?.render() }
+            peerPortField.onSubmit = { [weak self] in
+                guard let self, self.canSavePlaces else { return }
+                self.savePlaces()
             }
         }
 
@@ -139,6 +164,34 @@
             let same =
                 mode == .external && (trimmed.hasSuffix("/") ? String(trimmed.dropLast()) : trimmed) == c.status.address
             return !trimmed.isEmpty && !same && !saving
+        }
+
+        /// Whether every folder of the dependency has a folder of the server
+        /// saved, which a managed container needs to run.
+        private var foldersSet: Bool { d.folders.allSatisfy { !(c.folders[$0.name] ?? "").isEmpty } }
+        /// The server's folder typed for the dependency's folder of name.
+        private func folderText(_ name: String) -> String {
+            (folderFields[name]?.text ?? c.folders[name] ?? "").trimmingCharacters(in: .whitespaces)
+        }
+        private var peerPortText: String { peerPortField.text.trimmingCharacters(in: .whitespaces) }
+        private var peerPortValid: Bool {
+            !peerPortText.isEmpty && peerPortText.allSatisfy(\.isASCII) && peerPortText.allSatisfy(\.isNumber)
+                && (Int(peerPortText) ?? .max) <= 65535
+        }
+        /// Whether the folders typed are absolute paths, of Unix or Windows,
+        /// and the peer port a port.
+        private var placesValid: Bool {
+            d.folders.allSatisfy { f in
+                folderText(f.name).wholeMatch(of: /(\/|[A-Za-z]:[\\\/]).*/) != nil
+            } && (d.peerPort == 0 || peerPortValid)
+        }
+        /// Whether the folders or the peer port typed differ from those saved.
+        private var placesChanged: Bool {
+            d.folders.contains { folderText($0.name) != (c.folders[$0.name] ?? "") }
+                || (d.peerPort > 0 && peerPortText != String(c.peerPort))
+        }
+        private var canSavePlaces: Bool {
+            placesValid && (mode != .managed || placesChanged) && !saving
         }
 
         /// Shows the container as read, gpu telling whether the engine gives
@@ -170,6 +223,7 @@
                         enabled: !saving && d.gpu != .required, theme: theme
                     ) { [weak self] on in self?.set(.managed, useGpu: on) })
             }
+            if chosen == .managed && (!d.folders.isEmpty || d.peerPort > 0) { rows += places() }
             if chosen == .managed && mode == .managed {
                 // A container given the proxy of each request reaches sites directly.
                 if !d.direct { rows.append(proxyRow()) }
@@ -230,7 +284,8 @@
                 guard let self else { return }
                 let m = modes[i].1
                 self.chosen = m
-                if m != .external {
+                // One whose folders are not chosen yet runs once they are saved.
+                if m != .external && (m != .managed || self.foldersSet) {
                     self.set(m, useGpu: m == .managed && (self.d.gpu == .required || (self.gpu && self.c.useGpu)))
                 } else {
                     self.render()
@@ -242,6 +297,56 @@
             return ContentRow(
                 NSStackView.horizontal([column, Spacer(), focusable(popup, theme: theme)], spacing: MavioSpacing.s12),
                 theme: theme)
+        }
+
+        /// The folders of the server the managed container mounts, each under
+        /// its path in the container, the port it publishes for peers, and
+        /// the button saving them.
+        private func places() -> [NSView] {
+            var rows: [NSView] = []
+            if !d.folders.isEmpty { rows.append(foldersHintRow) }
+            for f in d.folders { rows.append(folderRow(f)) }
+            if d.peerPort > 0 {
+                peerPortField.isEnabled = !saving
+                rows.append(peerPortRow)
+            }
+            placesButton.isEnabled = canSavePlaces
+            rows.append(placesRow)
+            return rows
+        }
+
+        /// A folder's path in the container, what it is for, and the field
+        /// of the server's folder mounted there.
+        private func folderRow(_ f: Mavio_Plugin_V1_ContainerFolder) -> ContentRow {
+            let field: InputField
+            if let kept = folderFields[f.name] {
+                field = kept
+            } else {
+                field = InputField(text: c.folders[f.name] ?? "", placeholder: MavioStrings.pluginsContainerFolderPath)
+                field.setAccessibilityLabel(f.path)
+                field.onChange = { [weak self] _ in self?.render() }
+                field.onSubmit = { [weak self] in
+                    guard let self, self.canSavePlaces else { return }
+                    self.savePlaces()
+                }
+                folderFields[f.name] = field
+            }
+            field.isEnabled = !saving
+            if let kept = folderRows[f.name] { return kept }
+            let path = NSTextField.label(f.path, theme.fonts.callout, color: theme.colors.textPrimary)
+            path.font = .monospacedSystemFont(ofSize: theme.fonts.callout.size, weight: .regular)
+            path.setContentCompressionResistancePriority(.init(1), for: .horizontal)
+            var labels: [NSView] = [path]
+            if !f.description_p.isEmpty {
+                labels.append(note("· \(f.description_p)", theme.fonts.callout, theme.colors.textSecondary))
+            }
+            let title = NSStackView.horizontal(labels, spacing: MavioSpacing.s4)
+            title.alignment = .firstBaseline
+            let stack = NSStackView.vertical([title, field], spacing: 6)
+            for v in [title, field] as [NSView] { v.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true }
+            let r = ContentRow(stack, theme: theme)
+            folderRows[f.name] = r
+            return r
         }
 
         /// The proxy the container reaches sites through; going from direct
@@ -328,8 +433,18 @@
             set(.external, address: trimmed, useGpu: false)
         }
 
+        /// Saves the folders and the peer port, running the container once
+        /// its folders are all chosen.
+        private func savePlaces() {
+            set(
+                .managed, useGpu: d.gpu == .required || (gpu && c.useGpu),
+                folders: Dictionary(uniqueKeysWithValues: d.folders.map { ($0.name, folderText($0.name)) }),
+                peerPort: d.peerPort > 0 ? UInt32(peerPortText) : nil)
+        }
+
         private func set(
             _ m: Mavio_Plugin_V1_ContainerMode, address: String? = nil, useGpu: Bool? = nil, proxy: String? = nil,
+            folders: [String: String]? = nil, peerPort: UInt32? = nil,
             then done: @escaping @MainActor () -> Void = {}
         ) {
             guard let page else { return }
@@ -342,6 +457,8 @@
             request.useGpu = useGpu ?? (gpu && c.useGpu)
             if let address { request.address = address }
             if let proxy { request.proxy = proxy }
+            if let folders { request.folders = folders }
+            if let peerPort { request.peerPort = peerPort }
             let model = page.model
             let server = server
             run { [weak self] in

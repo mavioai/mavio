@@ -124,6 +124,8 @@ public enum Procedure {
     public static func syncPlay(_ method: String) -> String { "/mavio.session.v1.SyncPlayService/\(method)" }
     /// The path of a method of `mavio.library.v1.MetadataService`.
     public static func metadata(_ method: String) -> String { "/mavio.library.v1.MetadataService/\(method)" }
+    /// The path of a method of `mavio.playback.v1.PlaybackService`.
+    public static func playback(_ method: String) -> String { "/mavio.playback.v1.PlaybackService/\(method)" }
     /// The path of a method of `mavio.assistant.v1.AssistantService`.
     public static func assistant(_ method: String) -> String { "/mavio.assistant.v1.AssistantService/\(method)" }
 }

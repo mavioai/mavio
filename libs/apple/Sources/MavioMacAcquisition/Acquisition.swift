@@ -6,7 +6,8 @@
     /// and download clients the server's plugins have configured, the
     /// quality profiles of movies and series, and the pages of what else
     /// decides which releases are grabbed — quality definitions, custom
-    /// formats, delay and release profiles and remote path mappings.
+    /// formats, delay and release profiles and the options — where approved
+    /// requests go, and each download client's page.
     final class AcquisitionPage: FormController {
         private var indexers: Mavio_Acquisition_V1_ListIndexersResponse?
         private var indexersFailure: String?
@@ -69,9 +70,13 @@
                             ReleaseProfilesPage(context: context, server: server)
                         },
                         rule(
-                            "folder", 0x30B0C7, MavioStrings.acquisitionMappings, MavioStrings.acquisitionMappingsDetail
+                            "discover", 0x5AC8FA, MavioStrings.requestsettingsTitle,
+                            MavioStrings.requestsettingsDetail
                         ) {
-                            RemotePathMappingsPage(context: context, server: server)
+                            RequestSettingsPage(context: context, server: server)
+                        },
+                        rule("settings", 0x8E8E93, MavioStrings.optionsOptions, MavioStrings.optionsOptionsDetail) {
+                            AcquisitionOptionsPage(context: context, server: server)
                         },
                     ]))
             return views
@@ -104,13 +109,16 @@
             var rows: [NSView] = (clients?.clients ?? []).map { x in
                 let out = leftOut(
                     enabled: x.enabled, until: x.hasDisabledUntil ? x.disabledUntil.date : nil, failure: x.failure)
+                // A remote's offline downloads are named as such rather than by the plugin.
+                let by = x.pluginID == offlineProvider ? MavioStrings.storageOffline : pluginName(x.pluginID)
                 return tileRow(
                     x.name,
                     subtitle: dotted([
-                        pluginName(x.pluginID), acquisitionProtocolName(x.protocol),
+                        by, acquisitionProtocolName(x.protocol),
                         MavioStrings.acquisitionPriority(priority: String(x.priority)), out,
                     ]),
-                    icon: "downloads", tint: !x.enabled ? 0x8E8E93 : out != nil ? 0xFF9500 : 0x34C759)
+                    icon: "downloads", tint: !x.enabled ? 0x8E8E93 : out != nil ? 0xFF9500 : 0x34C759
+                ) { [weak self] in self?.openClient(x) }
             }
             for (plugin, error) in (clients?.failures ?? [:]).sorted(by: { $0.key < $1.key }) {
                 rows.append(note("\(pluginName(plugin)): \(error)", failed: true))
@@ -127,6 +135,12 @@
             page: @escaping @MainActor () -> NSViewController
         ) -> FormRow {
             tileRow(title, subtitle: detail, icon: icon, tint: tint) { [weak self] in self?.push(page()) }
+        }
+
+        private func openClient(_ client: Mavio_Acquisition_V1_DownloadClient) {
+            push(
+                DownloadClientPage(
+                    context: context, server: server, client: client, pluginName: pluginName(client.pluginID)))
         }
 
         private func openProfile(_ id: String?, kind: Mavio_Acquisition_V1_MediaKind) {

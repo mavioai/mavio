@@ -11,7 +11,7 @@
             ).remotes.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         }
 
-        /// The folders in a folder of a remote, "rclone:<remote>:<path>".
+        /// The folders in a folder of a remote, "remote:<remote>:<path>".
         fileprivate func remoteFolders(_ server: ServerRecord, _ path: String) async throws -> [String] {
             var request = Mavio_Storage_V1_ListFoldersRequest()
             request.path = path
@@ -105,7 +105,7 @@
     // MARK: Storage
 
     /// Storage (docs/clients.md §6.3.10): the disks of the server's
-    /// computer, the rclone the server runs or reaches, and its remotes —
+    /// computer and the remotes of the rclone the server runs or reaches —
     /// added with a kind's settings and the questions their configuration
     /// asks, such as authorizing a cloud drive — and their folders.
     final class StoragePage: ServerPage {
@@ -122,7 +122,6 @@
         private lazy var disksSection = section(MavioStrings.storageDisks, footer: MavioStrings.storageDisksFooter)
         private lazy var remotesSection = section(
             MavioStrings.storageRemotes, footer: MavioStrings.storageRemotesFooter)
-        private lazy var rcloneSection = section(MavioStrings.storageRclone)
 
         private var available: Bool { status?.available ?? false }
 
@@ -131,7 +130,6 @@
             title = MavioStrings.settingsStorage
             form.add(disksSection)
             form.add(remotesSection)
-            form.add(rcloneSection)
             render()
             show(form)
         }
@@ -147,7 +145,6 @@
         private func render() {
             renderDisks()
             renderRemotes()
-            renderRclone()
             refocus()
         }
 
@@ -203,10 +200,14 @@
         }
 
         private func renderRemotes() {
-            remotesSection.isHidden = !available
             for check in checks { check.cancel() }
             checks = []
-            guard available else { return }
+            // Without rclone there are no remotes; Overview tells of it.
+            remotesSection.isHidden = status == nil && statusFailure == nil
+            guard available else {
+                remotesSection.setRows([note(statusText, failed: true)])
+                return
+            }
             var rows: [NSView] = (remotes ?? []).map(remoteRow)
             if remotes?.isEmpty == true { rows.append(note(MavioStrings.storageNoRemotes)) }
             if let remotesFailure { rows.append(note(remotesFailure, failed: true)) }
@@ -263,7 +264,7 @@
                         as: Mavio_Storage_V1_GetRemoteUsageResponse.self)
                     var reached: String
                     do {
-                        _ = try await model.remoteFolders(server, "rclone:\(remote.name):")
+                        _ = try await model.remoteFolders(server, "remote:\(remote.name):")
                         reached = ""
                     } catch is CancellationError {
                         return
@@ -298,31 +299,6 @@
             if usage.hasUsedBytes { return usage.usedBytes }
             if usage.hasTotalBytes && usage.hasFreeBytes { return usage.totalBytes - usage.freeBytes }
             return nil
-        }
-
-        private func renderRclone() {
-            let color =
-                status == nil && statusFailure == nil
-                ? theme.colors.fill : available ? NSColor(hex: 0x34C759) : theme.colors.danger
-            let text = NSTextField.label(statusText, theme.fonts.body, color: theme.colors.textSecondary, lines: 0)
-            text.alignment = .right
-            var rows: [NSView] = [
-                FormRow(
-                    MavioStrings.storageStatus,
-                    accessory: NSStackView.horizontal([dot(color), text], spacing: MavioSpacing.s8), theme: theme)
-            ]
-            if let status, !status.version.isEmpty {
-                rows.append(valueRow(MavioStrings.storageVersion, status.version))
-            }
-            if let status, available {
-                rows.append(
-                    valueRow(
-                        MavioStrings.storageRcd,
-                        status.managed ? MavioStrings.storageManaged : MavioStrings.storageExternal,
-                        detail: status.managed ? MavioStrings.storageManagedDetail : MavioStrings.storageExternalDetail)
-                )
-            }
-            rcloneSection.setRows(rows)
         }
 
         private var statusText: String {
@@ -726,6 +702,7 @@
         private var started = false
         private var noticeSection: FormSection?
         private lazy var folders = RemoteFolders(page: self, remote: name)
+        private lazy var offline = RemoteOffline(page: self, remote: name)
         private lazy var form = FormPage(theme: theme)
         private lazy var save = saveButton { [weak self] in self?.update(nil, notice: MavioStrings.storageSaved) }
 
@@ -810,6 +787,7 @@
                     update([:], notice: MavioStrings.storageReconfigured)
                 }
                 views.append(section(nil, [reconfigure]))
+                views.append(offline.section)
                 views.append(folders.section)
                 views.append(
                     section(
@@ -849,7 +827,10 @@
                 failure = error.reason
             }
             rebuild()
-            if remote != nil { folders.go(to: "") }
+            if remote != nil {
+                folders.go(to: "")
+                offline.load()
+            }
         }
 
         /// Updates the remote with parameters, the changes when nil.
@@ -934,6 +915,208 @@
         }
     }
 
+    /// A remote's offline downloads, shown when its backend makes them: the
+    /// drive downloads magnet links itself into a folder of the remote, as a
+    /// download client named after the remote. A section of a remote's page,
+    /// rebuilt alone as it is edited.
+    @MainActor
+    private final class RemoteOffline {
+        /// The settings as edited; tags as typed.
+        private struct Draft: Equatable {
+            var enabled = false
+            var priority: Int32 = 1
+            var folder = ""
+            var tags = ""
+            var removeCompleted = false
+            var removeFailed = false
+
+            init(_ o: Mavio_Storage_V1_OfflineDownloads) {
+                enabled = o.enabled
+                priority = o.priority
+                folder = o.folder
+                tags = o.tags.joined(separator: ", ")
+                removeCompleted = o.removeCompletedDownloads
+                removeFailed = o.removeFailedDownloads
+            }
+
+            var settings: Mavio_Storage_V1_OfflineDownloads {
+                var o = Mavio_Storage_V1_OfflineDownloads()
+                o.enabled = enabled
+                o.priority = priority
+                o.folder = folder.trimmingCharacters(in: .whitespaces)
+                o.tags = tags.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                    .filter { !$0.isEmpty }
+                o.removeCompletedDownloads = removeCompleted
+                o.removeFailedDownloads = removeFailed
+                return o
+            }
+
+            /// A folder below the remote's root: relative, without "." or
+            /// "..", empty for the default.
+            var valid: Bool {
+                let trimmed = folder.trimmingCharacters(in: .whitespaces)
+                let parts = trimmed.trimmingCharacters(in: CharacterSet(charactersIn: "/")).split(
+                    separator: "/", omittingEmptySubsequences: false)
+                return (1...50).contains(priority)
+                    && parts.allSatisfy { !$0.isEmpty && $0 != "." && $0 != ".." && !$0.contains("\\") }
+            }
+        }
+
+        private weak var page: ServerPage?
+        private let remote: String
+        private var supported = false
+        private var saved: Mavio_Storage_V1_OfflineDownloads?
+        private var draft: Draft?
+        private var saving = false
+        private var failure: String?
+        private lazy var save = page?.saveButton { [weak self] in self?.update(self?.draft?.settings) }
+        /// The section the offline downloads show in, hidden unless the
+        /// remote's backend makes them.
+        let section: FormSection
+
+        init(page: ServerPage, remote: String) {
+            self.page = page
+            self.remote = remote
+            section = FormSection(
+                MavioStrings.storageOffline, footer: MavioStrings.storageOfflineRemoteFooter, theme: page.theme)
+            section.isHidden = true
+        }
+
+        /// Reads whether the remote's backend makes offline downloads, and
+        /// their settings.
+        func load() {
+            guard let page else { return }
+            page.run { [weak self] in
+                guard let self, let page = self.page else { return }
+                var request = Mavio_Storage_V1_GetOfflineDownloadsRequest()
+                request.remote = remote
+                do {
+                    let r = try await page.model.call(
+                        page.server, Procedure.storage("GetOfflineDownloads"), request,
+                        as: Mavio_Storage_V1_GetOfflineDownloadsResponse.self)
+                    supported = r.supported
+                    saved = r.hasSettings ? r.settings : nil
+                    draft = saved.map(Draft.init)
+                    failure = nil
+                } catch is CancellationError {
+                    return
+                } catch {
+                    supported = true
+                    failure = error.reason
+                }
+                render()
+            }
+        }
+
+        private var changed: Bool {
+            guard let saved, let draft else { return false }
+            return draft != Draft(saved)
+        }
+
+        private func edit(_ change: (inout Draft) -> Void) {
+            guard var d = draft else { return }
+            change(&d)
+            draft = d
+            refresh()
+        }
+
+        private func refresh() {
+            save?.isEnabled = changed && draft?.valid == true && !saving
+            save?.title = saving ? "…" : MavioStrings.actionSave
+        }
+
+        private func render() {
+            guard let page else { return }
+            section.isHidden = !supported
+            guard supported else { return }
+            var rows: [NSView] = []
+            if let draft {
+                rows.append(
+                    page.toggleRow(MavioStrings.storageOfflineEnabled, nil, draft.enabled) { [weak self] v in
+                        self?.edit { $0.enabled = v }
+                    })
+                rows.append(
+                    page.fieldRow(
+                        MavioStrings.storageOfflineDownloadFolder, MavioStrings.storageOfflineFolderBelow,
+                        text: draft.folder, placeholder: "downloads"
+                    ) { [weak self] v in self?.edit { $0.folder = v } })
+                rows.append(
+                    page.fieldRow(
+                        MavioStrings.storageOfflineTags, MavioStrings.storageOfflineTagsDetail, text: draft.tags
+                    ) { [weak self] v in self?.edit { $0.tags = v } })
+                rows.append(
+                    page.numberRow(
+                        MavioStrings.storageOfflinePriority, MavioStrings.storageOfflinePriorityDetail,
+                        value: Double(max(draft.priority, 1)), range: 1...50,
+                        onChange: { [weak self] v in self?.edit { $0.priority = v.map { Int32($0.rounded()) } ?? 0 } }))
+                rows.append(
+                    page.toggleRow(MavioStrings.storageRemoveCompleted, nil, draft.removeCompleted) { [weak self] v in
+                        self?.edit { $0.removeCompleted = v }
+                    })
+                rows.append(
+                    page.toggleRow(MavioStrings.storageRemoveFailed, nil, draft.removeFailed) { [weak self] v in
+                        self?.edit { $0.removeFailed = v }
+                    })
+                var actions: [NSView] = []
+                if let save { actions.append(save) }
+                actions.append(
+                    page.button(MavioStrings.storageOfflineStop, kind: .plain) { [weak self] in self?.confirmStop() })
+                rows.append(ControlRow(NSView(), controls: actions, theme: page.theme))
+            } else {
+                rows.append(
+                    ControlRow(
+                        NSView(),
+                        controls: [
+                            page.button(saving ? "…" : MavioStrings.storageOfflineSetUp) { [weak self] in
+                                var o = Mavio_Storage_V1_OfflineDownloads()
+                                o.enabled = true
+                                o.priority = 1
+                                o.removeCompletedDownloads = true
+                                self?.update(o)
+                            }
+                        ], theme: page.theme))
+            }
+            if let failure { rows.append(page.note(failure, failed: true)) }
+            section.setRows(rows)
+            refresh()
+            page.refocus()
+        }
+
+        private func confirmStop() {
+            page?.confirm(
+                MavioStrings.storageRemoveOfflineConfirm, message: MavioStrings.storageRemoveOfflineDetail,
+                button: MavioStrings.storageRemoveOfflineConfirm
+            ) { [weak self] in self?.update(nil) }
+        }
+
+        /// Replaces the remote's offline download settings, or removes them
+        /// when nil.
+        private func update(_ settings: Mavio_Storage_V1_OfflineDownloads?) {
+            guard let page, !saving else { return }
+            page.endEditing()
+            saving = true
+            failure = nil
+            refresh()
+            page.run { [weak self] in
+                guard let self, let page = self.page else { return }
+                var request = Mavio_Storage_V1_UpdateOfflineDownloadsRequest()
+                request.remote = remote
+                if let settings { request.settings = settings }
+                do {
+                    let r = try await page.model.call(
+                        page.server, Procedure.storage("UpdateOfflineDownloads"), request,
+                        as: Mavio_Storage_V1_UpdateOfflineDownloadsResponse.self)
+                    saved = settings == nil ? nil : r.hasSettings ? r.settings : settings
+                    draft = saved.map(Draft.init)
+                } catch {
+                    failure = error.reason
+                }
+                saving = false
+                render()
+            }
+        }
+    }
+
     /// A remote's folders, to walk and to see that it is reached: a section
     /// of a remote's page, rebuilt alone as it is walked.
     @MainActor
@@ -954,7 +1137,7 @@
                 MavioStrings.storageFolders, footer: MavioStrings.storageFoldersFooter, theme: page.theme)
         }
 
-        private var root: String { "rclone:\(remote):" }
+        private var root: String { "remote:\(remote):" }
 
         /// Walks to a folder, the remote's root when empty.
         func go(to path: String) {

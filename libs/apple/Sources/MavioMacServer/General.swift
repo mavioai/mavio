@@ -2,15 +2,14 @@
     import AppKit
     import MavioMac
 
-    /// The server's settings as a page edits them: read, changed and saved,
-    /// each change applied to the settings the server has when saving so that
-    /// what other pages changed in the meantime is kept.
+    /// A group of the server's settings as a page edits them: read, changed
+    /// and saved whole, on the service of their domain.
     @MainActor
-    final class SettingsEditor {
-        private let server: ServerRecord
-        private let model: AppModel
+    final class SettingsEditor<Settings> {
+        private let read: @MainActor () async throws -> Settings
+        private let write: @MainActor (Settings) async throws -> Settings
         /// The settings as last read or saved.
-        private(set) var saved: Mavio_System_V1_GetServerSettingsResponse?
+        private(set) var saved: Settings?
         /// Why reading or saving failed.
         var failure: String?
         /// Whether a save runs.
@@ -18,41 +17,37 @@
         /// What the last save said.
         var notice: String?
 
-        /// An editor of server's settings.
-        init(server: ServerRecord, model: AppModel) {
-            self.server = server
-            self.model = model
+        /// An editor reading the group with read and replacing it with
+        /// write, which returns the group as saved.
+        init(
+            read: @escaping @MainActor () async throws -> Settings,
+            write: @escaping @MainActor (Settings) async throws -> Settings
+        ) {
+            self.read = read
+            self.write = write
         }
 
         /// Reads the settings.
         func load() async {
             do {
-                saved = try await model.call(
-                    server, Procedure.system("GetServerSettings"), Mavio_System_V1_GetServerSettingsRequest(),
-                    as: Mavio_System_V1_GetServerSettingsResponse.self)
+                saved = try await read()
+                failure = nil
             } catch is CancellationError {
             } catch {
                 failure = error.reason
             }
         }
 
-        /// Saves a change, saying so with the notice given.
-        func save(_ notice: String, _ change: @escaping (inout Mavio_System_V1_ServerSettings) -> Void) async -> Bool {
+        /// Saves a change of the settings read, saying so with the notice
+        /// given.
+        func save(_ notice: String, _ change: @escaping (inout Settings) -> Void) async -> Bool {
+            guard var settings = saved else { return false }
+            change(&settings)
             saving = true
             failure = nil
             defer { saving = false }
             do {
-                var current = try await model.call(
-                    server, Procedure.system("GetServerSettings"), Mavio_System_V1_GetServerSettingsRequest(),
-                    as: Mavio_System_V1_GetServerSettingsResponse.self)
-                change(&current.settings)
-                var request = Mavio_System_V1_UpdateServerSettingsRequest()
-                request.settings = current.settings
-                let response = try await model.call(
-                    server, Procedure.system("UpdateServerSettings"), request,
-                    as: Mavio_System_V1_UpdateServerSettingsResponse.self)
-                current.settings = response.settings
-                saved = current
+                saved = try await write(settings)
                 self.notice = notice
                 return true
             } catch {
@@ -99,9 +94,9 @@
     /// A page editing the server's settings: its heading with Save, its
     /// sections rebuilt as choices change, and its spinner or failure while
     /// the settings are read.
-    class SettingsPage: ServerPage {
-        /// The editor of the server's settings.
-        private(set) lazy var editor = SettingsEditor(server: server, model: model)
+    class SettingsPage<Settings>: ServerPage {
+        /// The editor of the page's settings.
+        let editor: SettingsEditor<Settings>
         /// The page's form.
         private(set) lazy var form = FormPage(theme: theme)
         /// The page's Save button.
@@ -110,9 +105,10 @@
         private var started = false
         private var busy = false
 
-        /// A page of title, for server.
-        init(context: MacContext, server: ServerRecord, title: String) {
+        /// A page of title, for server, editing its settings with editor.
+        init(context: MacContext, server: ServerRecord, title: String, editor: SettingsEditor<Settings>) {
             heading = title
+            self.editor = editor
             super.init(context: context, server: server)
         }
 
@@ -175,7 +171,7 @@
         /// Saves a change, saying so with notice, then takes the draft from
         /// what was saved and builds the form again.
         func perform(
-            _ notice: String, _ change: @escaping (inout Mavio_System_V1_ServerSettings) -> Void,
+            _ notice: String, _ change: @escaping (inout Settings) -> Void,
             then: @escaping @MainActor () async -> Void = {}
         ) {
             endEditing()
@@ -204,7 +200,7 @@
     /// General (docs/clients.md §6.3.8): the server's name, the language and
     /// country of its metadata, how long devices stay signed in, the plugin
     /// that resets forgotten passwords, and how it is reached.
-    final class GeneralPage: SettingsPage {
+    final class GeneralPage: SettingsPage<Mavio_System_V1_GeneralSettings> {
         private var draft = Draft()
         private var languages: [(code: String, name: String)] = []
         private var countries: [(code: String, name: String)] = []
@@ -229,7 +225,7 @@
 
             init() {}
 
-            init(_ s: Mavio_System_V1_ServerSettings) {
+            init(_ s: Mavio_System_V1_GeneralSettings) {
                 name = s.network.serverName
                 language = s.metadata.preferredLanguage
                 country = s.metadata.country
@@ -245,7 +241,7 @@
 
             var valid: Bool { (1...3650).contains(idleDays) && (0...65535).contains(httpsPort) }
 
-            func apply(to s: inout Mavio_System_V1_ServerSettings) {
+            func apply(to s: inout Mavio_System_V1_GeneralSettings) {
                 s.network.serverName = name.trimmingCharacters(in: .whitespaces)
                 s.network.baseURL = baseURL.trimmingCharacters(in: .whitespaces)
                 s.network.httpsPort = httpsPort
@@ -262,7 +258,24 @@
 
         /// The General page of server.
         init(context: MacContext, server: ServerRecord) {
-            super.init(context: context, server: server, title: MavioStrings.settingsGeneral)
+            let model = context.model
+            super.init(
+                context: context, server: server, title: MavioStrings.settingsGeneral,
+                editor: SettingsEditor(
+                    read: {
+                        try await model.call(
+                            server, Procedure.system("GetGeneralSettings"), Mavio_System_V1_GetGeneralSettingsRequest(),
+                            as: Mavio_System_V1_GetGeneralSettingsResponse.self
+                        ).settings
+                    },
+                    write: {
+                        var request = Mavio_System_V1_UpdateGeneralSettingsRequest()
+                        request.settings = $0
+                        return try await model.call(
+                            server, Procedure.system("UpdateGeneralSettings"), request,
+                            as: Mavio_System_V1_UpdateGeneralSettingsResponse.self
+                        ).settings
+                    }))
         }
 
         override func appeared() {
@@ -271,10 +284,10 @@
         }
 
         override func loaded() {
-            if let s = editor.saved?.settings { draft = Draft(s) }
+            if let s = editor.saved { draft = Draft(s) }
         }
 
-        override var changed: Bool { editor.saved.map { draft != Draft($0.settings) } ?? false }
+        override var changed: Bool { editor.saved.map { draft != Draft($0) } ?? false }
         override var valid: Bool { draft.valid }
 
         private func loadChoices() async {
@@ -413,8 +426,8 @@
     /// devices cannot play — its hardware acceleration, the encoder's preset
     /// and quality, tone mapping, deinterlacing, the downmix, cropping and
     /// the folder of running transcodes.
-    final class TranscodingPage: SettingsPage {
-        private var draft = Mavio_System_V1_TranscodingSettings()
+    final class TranscodingPage: SettingsPage<Mavio_Playback_V1_GetTranscodingSettingsResponse> {
+        private var draft = Mavio_Playback_V1_TranscodingSettings()
         private var folderSection: FormSection?
 
         private static let presets = [
@@ -426,14 +439,33 @@
 
         /// The Transcoding page of server.
         init(context: MacContext, server: ServerRecord) {
-            super.init(context: context, server: server, title: MavioStrings.settingsTranscoding)
+            let model = context.model
+            super.init(
+                context: context, server: server, title: MavioStrings.settingsTranscoding,
+                editor: SettingsEditor(
+                    read: {
+                        try await model.call(
+                            server, Procedure.playback("GetTranscodingSettings"),
+                            Mavio_Playback_V1_GetTranscodingSettingsRequest(),
+                            as: Mavio_Playback_V1_GetTranscodingSettingsResponse.self)
+                    },
+                    write: { current in
+                        var request = Mavio_Playback_V1_UpdateTranscodingSettingsRequest()
+                        request.settings = current.settings
+                        var saved = current
+                        saved.settings = try await model.call(
+                            server, Procedure.playback("UpdateTranscodingSettings"), request,
+                            as: Mavio_Playback_V1_UpdateTranscodingSettingsResponse.self
+                        ).settings
+                        return saved
+                    }))
         }
 
         override func loaded() {
-            if let s = editor.saved?.settings { draft = s.transcoding }
+            if let s = editor.saved { draft = s.settings }
         }
 
-        override var changed: Bool { editor.saved.map { draft != $0.settings.transcoding } ?? false }
+        override var changed: Bool { editor.saved.map { draft != $0.settings } ?? false }
 
         override var valid: Bool {
             (0...51).contains(draft.h264Crf) && (0...51).contains(draft.h265Crf) && (0...256).contains(draft.threads)
@@ -441,13 +473,13 @@
                 && (0.5...3).contains(draft.downmixBoost)
         }
 
-        private func edit(_ change: (inout Mavio_System_V1_TranscodingSettings) -> Void) {
+        private func edit(_ change: (inout Mavio_Playback_V1_TranscodingSettings) -> Void) {
             change(&draft)
             refresh()
             folderSection?.footer = footer
         }
 
-        private func choose(_ change: (inout Mavio_System_V1_TranscodingSettings) -> Void) {
+        private func choose(_ change: (inout Mavio_Playback_V1_TranscodingSettings) -> Void) {
             change(&draft)
             rebuild()
         }
@@ -471,7 +503,7 @@
                     draft.hardwareAcceleration
                 ) { [weak self] v in self?.choose { $0.hardwareAcceleration = v } }
             ]
-            if draft.hardwareAcceleration != Mavio_System_V1_HardwareAcceleration.none {
+            if draft.hardwareAcceleration != Mavio_Playback_V1_HardwareAcceleration.none {
                 hardware.append(
                     toggleRow(
                         MavioStrings.transcodingHardwareEncoding, MavioStrings.transcodingHardwareEncodingDetail,
@@ -550,7 +582,7 @@
         /// list lacks it.
         private func list(
             _ title: String, _ detail: String?, _ value: String, _ names: [String],
-            _ set: @escaping (inout Mavio_System_V1_TranscodingSettings, String) -> Void
+            _ set: @escaping (inout Mavio_Playback_V1_TranscodingSettings, String) -> Void
         ) -> FormRow {
             let all = names.contains(value) ? names : names + [value]
             return choiceRow(title, detail, all.map { ($0, $0) }, value) { [weak self] v in
@@ -559,15 +591,15 @@
         }
 
         /// The accelerations offered: the server's, with the one chosen.
-        private func accelerations(_ available: [Mavio_System_V1_HardwareAcceleration])
-            -> [Mavio_System_V1_HardwareAcceleration]
+        private func accelerations(_ available: [Mavio_Playback_V1_HardwareAcceleration])
+            -> [Mavio_Playback_V1_HardwareAcceleration]
         {
-            var list = available.isEmpty ? [.auto, Mavio_System_V1_HardwareAcceleration.none] : available
+            var list = available.isEmpty ? [.auto, Mavio_Playback_V1_HardwareAcceleration.none] : available
             if !list.contains(draft.hardwareAcceleration) { list.append(draft.hardwareAcceleration) }
             return list.filter { $0 != .unspecified }
         }
 
-        private static func name(_ a: Mavio_System_V1_HardwareAcceleration) -> String {
+        private static func name(_ a: Mavio_Playback_V1_HardwareAcceleration) -> String {
             switch a {
             case .auto: MavioStrings.transcodingAccelerationAuto
             case .none: MavioStrings.transcodingAccelerationNone
@@ -579,7 +611,7 @@
         override func saveTapped() {
             var draft = draft
             draft.transcodeDir = draft.transcodeDir.trimmingCharacters(in: .whitespaces)
-            perform(MavioStrings.transcodingSaved) { $0.transcoding = draft }
+            perform(MavioStrings.transcodingSaved) { $0.settings = draft }
         }
     }
 #endif

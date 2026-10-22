@@ -98,7 +98,7 @@
         /// The lines' tests, by their proxies' IDs.
         private var testing: Set<String> = []
         private var outcomes: [String: TestOutcome] = [:]
-        private var settings: Mavio_System_V1_ServerSettings?
+        private var settings: Mavio_System_V1_OutboundProxies?
         private var mavioDev = false
         /// The choice being saved, shown until the settings come back.
         private var choosing: (key: Request, id: String)?
@@ -165,17 +165,20 @@
 
         // MARK: Loading
 
-        /// Loads the proxies, the server's mode and its settings.
+        /// Loads the proxies, the server's mode and the proxies of its own
+        /// requests.
         private func loadAll() async {
+            let model = model
+            let server = server
             async let info = try? model.call(
                 server, Procedure.auth("GetAuthInfo"), Mavio_Auth_V1_GetAuthInfoRequest(),
                 as: Mavio_Auth_V1_GetAuthInfoResponse.self)
             async let saved = try? model.call(
-                server, Procedure.system("GetServerSettings"), Mavio_System_V1_GetServerSettingsRequest(),
-                as: Mavio_System_V1_GetServerSettingsResponse.self)
+                server, Procedure.proxies("GetOutboundProxies"), Mavio_System_V1_GetOutboundProxiesRequest(),
+                as: Mavio_System_V1_GetOutboundProxiesResponse.self)
             await load()
             mavioDev = await info?.mode == .mavioDev
-            if let s = await saved, s.hasSettings { settings = s.settings }
+            if let s = await saved { settings = s.proxies }
             guard !Task.isCancelled else { return }
             render()
         }
@@ -469,7 +472,7 @@
         /// settings'.
         private func value(_ request: Request) -> String {
             if let choosing, choosing.key == request { return choosing.id }
-            return settings?.network.proxies[keyPath: request.path] ?? ""
+            return settings?[keyPath: request.path] ?? ""
         }
 
         /// The choices of a proxy: none, the system proxy, then the server's
@@ -485,33 +488,24 @@
             return out
         }
 
-        /// Saves the proxy of a request into the server's settings, read
-        /// again first so nothing else is overwritten.
+        /// Saves the proxy of a request with the others as shown, keeping
+        /// what the server returns.
         private func choose(_ request: Request, _ id: String) {
+            guard var proxies = settings else { return }
             choosing = (request, id)
             choosingFailure = nil
             render()
+            proxies[keyPath: request.path] = id
+            var update = Mavio_System_V1_UpdateOutboundProxiesRequest()
+            update.proxies = proxies
             run { [weak self, model, server] in
                 do {
-                    var current = try await model.call(
-                        server, Procedure.system("GetServerSettings"), Mavio_System_V1_GetServerSettingsRequest(),
-                        as: Mavio_System_V1_GetServerSettingsResponse.self
-                    ).settings
-                    current.network.proxies[keyPath: request.path] = id
-                    var update = Mavio_System_V1_UpdateServerSettingsRequest()
-                    update.settings = current
                     self?.settings = try await model.call(
-                        server, Procedure.system("UpdateServerSettings"), update,
-                        as: Mavio_System_V1_UpdateServerSettingsResponse.self
-                    ).settings
+                        server, Procedure.proxies("UpdateOutboundProxies"), update,
+                        as: Mavio_System_V1_UpdateOutboundProxiesResponse.self
+                    ).proxies
                 } catch {
                     self?.choosingFailure = error.reason
-                    if let saved = try? await model.call(
-                        server, Procedure.system("GetServerSettings"), Mavio_System_V1_GetServerSettingsRequest(),
-                        as: Mavio_System_V1_GetServerSettingsResponse.self)
-                    {
-                        self?.settings = saved.settings
-                    }
                 }
                 self?.choosing = nil
                 self?.render()
