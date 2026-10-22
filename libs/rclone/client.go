@@ -20,7 +20,7 @@ import (
 // mise.toml and the container image pin. Mavio relies on the fork's changes
 // to the rcd, so an rcd of another release, upstream rclone's above all,
 // is refused.
-const Version = "v1.75.2-mavio"
+const Version = "v1.75.2-mavio.2"
 
 // ErrVersion reports an rcd of another rclone release than the one
 // required.

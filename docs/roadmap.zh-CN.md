@@ -922,8 +922,7 @@ flowchart TD
 - [x] 离线下载作为内置下载客户端，其任务记录在数据库中
 - [x] 分发 mavioai/rclone 二进制：由 fork 的 CI 为 Linux、macOS 与 Windows 的 amd64 和 arm64 构建发布版本，`mise.toml` 锁定这些构建，容器镜像内置之，并与服务端二进制一起打包（`server:dist`），服务端默认使用其旁边的 `rclone`
 - [x] 远端内部的硬链接：fork 的 `operations/hardlink`（本地目录，以及支持 OpenSSH hardlink 扩展的 SFTP 服务器），用于从远端的下载目录入库到同一远端上的媒体库路径，并显示在下载客户端的文件夹中
-- [ ] SMB 共享上的硬链接：fork 的 `smb` 后端经 mavioai/go-smb2 的 `Share.Link`（fork 的子模块）在共享内建立硬链接；等待包含它的 fork 发布版，以及 `mise.toml`、`apps/server/Dockerfile` 与 `libs/rclone` 的固定版本随之更新
-- [ ] SMB 远端的硬链接，待 fork 的 smb 后端能建立硬链接后
+- [x] SMB 共享上的硬链接：fork 的 `smb` 后端经 mavioai/go-smb2 的 `Share.Link`（fork 的子模块）在共享内建立硬链接，自 v1.75.2-mavio.2 起
 - [ ] Web UI：服务器设置中的远端管理、媒体库表单目录选择器中的 rclone 目录（`StorageService.ListFolders`），以及下载客户端设置中的离线下载客户端
 - [ ] Web UI 目录选择器中从远端目录手动导入
 - [ ] rclone 远端读取（[优化 §3](optimization.zh-CN.md#3-通过-rclone-读取远端存储reading-remote-storage-through-rclone)），按以下顺序：

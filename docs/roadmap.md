@@ -922,8 +922,7 @@ flowchart TD
 - [x] Offline downloads as a built-in download client, with their jobs recorded in the database
 - [x] Distribution of the mavioai/rclone binary: release builds for Linux, macOS and Windows on amd64 and arm64 by the fork's CI, pinned in `mise.toml`, bundled into the container image and packaged beside the server's binaries (`server:dist`), whose default `rclone` is the one beside it
 - [x] Hard links within remotes: the fork's `operations/hardlink` (local folders, and SFTP servers with OpenSSH's hardlink extension), used by imports from a remote's download folder into a library path on the same remote, and shown on a download client's folders
-- [ ] Hard links on SMB shares: the fork's `smb` backend links within a share through mavioai/go-smb2's `Share.Link` (a submodule of the fork); waiting for a release of the fork with it and the pins of `mise.toml`, `apps/server/Dockerfile` and `libs/rclone` moving to it
-- [ ] Hard links on SMB remotes, once the fork's smb backend can make them
+- [x] Hard links on SMB shares: the fork's `smb` backend links within a share through mavioai/go-smb2's `Share.Link` (a submodule of the fork), from v1.75.2-mavio.2
 - [ ] Web UI: remotes in the server settings, rclone folders in the library form's folder picker (`StorageService.ListFolders`), and the offline download clients in the download client settings
 - [ ] Manual imports from folders on remotes in the web UI's folder picker
 - [ ] Reads of rclone remotes ([Optimization §3](optimization.md#3-reading-remote-storage-through-rclone)), in this order:
