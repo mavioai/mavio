@@ -24,7 +24,6 @@ type settings struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	client.Categories
-	client.Directories
 	client.Priorities
 	InitialState    int  `json:"initial_state"`
 	SequentialOrder bool `json:"sequential_order"`
@@ -89,7 +88,6 @@ func fields() []client.Field {
 		client.Field{Name: "password", Label: "Password", Type: client.FieldText, Secret: true},
 	)
 	f = append(f, client.CategoryFields("Category", client.DefaultMovieCategory, client.DefaultTVCategory, true)...)
-	f = append(f, client.DirectoryFields("qBittorrent")...)
 	f = append(f, client.PriorityFields([]client.Option{{Value: priorityLast, Label: "Last"}, {Value: priorityFirst, Label: "First"}}, priorityLast)...)
 	return append(f,
 		client.Field{
@@ -537,7 +535,7 @@ func (q *qbittorrent) AddMagnet(ctx context.Context, r *client.Release, hash, li
 		return "", fmt.Errorf("magnet links without trackers are not supported if DHT is disabled: %w", client.ErrMagnetNotSupported)
 	}
 	return q.add(ctx, p, version, r, hash, func(seed *client.Release) error {
-		return p.addURL(ctx, link, r.Kind, seed)
+		return p.addURL(ctx, link, q.settings.Category(r.Kind), seed)
 	})
 }
 
@@ -548,7 +546,7 @@ func (q *qbittorrent) AddTorrentFile(ctx context.Context, r *client.Release, has
 		return "", err
 	}
 	return q.add(ctx, p, version, r, hash, func(seed *client.Release) error {
-		return p.addFile(ctx, fileName, data, r.Kind, seed)
+		return p.addFile(ctx, fileName, data, q.settings.Category(r.Kind), seed)
 	})
 }
 

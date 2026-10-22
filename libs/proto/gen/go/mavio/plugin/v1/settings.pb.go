@@ -99,7 +99,6 @@ type SettingField struct {
 	xxx_hidden_Options     *[]*SettingFieldOption `protobuf:"bytes,6,rep,name=options"`
 	xxx_hidden_Advanced    bool                   `protobuf:"varint,7,opt,name=advanced"`
 	xxx_hidden_Secret      bool                   `protobuf:"varint,8,opt,name=secret"`
-	xxx_hidden_Prefix      *string                `protobuf:"bytes,9,opt,name=prefix"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -203,39 +202,29 @@ func (x *SettingField) GetSecret() bool {
 	return false
 }
 
-func (x *SettingField) GetPrefix() string {
-	if x != nil {
-		if x.xxx_hidden_Prefix != nil {
-			return *x.xxx_hidden_Prefix
-		}
-		return ""
-	}
-	return ""
-}
-
 func (x *SettingField) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
 }
 
 func (x *SettingField) SetLabel(v string) {
 	x.xxx_hidden_Label = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
 }
 
 func (x *SettingField) SetHelpText(v string) {
 	x.xxx_hidden_HelpText = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
 }
 
 func (x *SettingField) SetType(v SettingFieldType) {
 	x.xxx_hidden_Type = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
 }
 
 func (x *SettingField) SetDefaultJson(v string) {
 	x.xxx_hidden_DefaultJson = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
 }
 
 func (x *SettingField) SetOptions(v []*SettingFieldOption) {
@@ -244,17 +233,12 @@ func (x *SettingField) SetOptions(v []*SettingFieldOption) {
 
 func (x *SettingField) SetAdvanced(v bool) {
 	x.xxx_hidden_Advanced = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
 }
 
 func (x *SettingField) SetSecret(v bool) {
 	x.xxx_hidden_Secret = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 9)
-}
-
-func (x *SettingField) SetPrefix(v string) {
-	x.xxx_hidden_Prefix = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
 }
 
 func (x *SettingField) HasName() bool {
@@ -306,13 +290,6 @@ func (x *SettingField) HasSecret() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
 }
 
-func (x *SettingField) HasPrefix() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
-}
-
 func (x *SettingField) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -348,11 +325,6 @@ func (x *SettingField) ClearSecret() {
 	x.xxx_hidden_Secret = false
 }
 
-func (x *SettingField) ClearPrefix() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
-	x.xxx_hidden_Prefix = nil
-}
-
 type SettingField_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -369,10 +341,6 @@ type SettingField_builder struct {
 	// A secret, such as a password, an API key or a cookie, which is never
 	// shown back.
 	Secret *bool
-	// The fixed beginning of a text setting, such as a folder its path must
-	// be in, which clients show before what the administrator types; the
-	// value holds both, and stays empty while nothing is typed.
-	Prefix *string
 }
 
 func (b0 SettingField_builder) Build() *SettingField {
@@ -380,37 +348,33 @@ func (b0 SettingField_builder) Build() *SettingField {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Label != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
 		x.xxx_hidden_Label = b.Label
 	}
 	if b.HelpText != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
 		x.xxx_hidden_HelpText = b.HelpText
 	}
 	if b.Type != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
 		x.xxx_hidden_Type = *b.Type
 	}
 	if b.DefaultJson != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
 		x.xxx_hidden_DefaultJson = b.DefaultJson
 	}
 	x.xxx_hidden_Options = &b.Options
 	if b.Advanced != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
 		x.xxx_hidden_Advanced = *b.Advanced
 	}
 	if b.Secret != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
 		x.xxx_hidden_Secret = *b.Secret
-	}
-	if b.Prefix != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 9)
-		x.xxx_hidden_Prefix = b.Prefix
 	}
 	return m0
 }
@@ -532,7 +496,7 @@ var File_mavio_plugin_v1_settings_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_settings_proto_rawDesc = "" +
 	"\n" +
-	"\x1emavio/plugin/v1/settings.proto\x12\x0fmavio.plugin.v1\"\xba\x02\n" +
+	"\x1emavio/plugin/v1/settings.proto\x12\x0fmavio.plugin.v1\"\xa2\x02\n" +
 	"\fSettingField\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05label\x18\x02 \x01(\tR\x05label\x12\x1b\n" +
@@ -541,8 +505,7 @@ const file_mavio_plugin_v1_settings_proto_rawDesc = "" +
 	"\fdefault_json\x18\x05 \x01(\tR\vdefaultJson\x12=\n" +
 	"\aoptions\x18\x06 \x03(\v2#.mavio.plugin.v1.SettingFieldOptionR\aoptions\x12\x1a\n" +
 	"\badvanced\x18\a \x01(\bR\badvanced\x12\x16\n" +
-	"\x06secret\x18\b \x01(\bR\x06secret\x12\x16\n" +
-	"\x06prefix\x18\t \x01(\tR\x06prefix\"I\n" +
+	"\x06secret\x18\b \x01(\bR\x06secret\"I\n" +
 	"\x12SettingFieldOption\x12\x1d\n" +
 	"\n" +
 	"value_json\x18\x01 \x01(\tR\tvalueJson\x12\x14\n" +

@@ -153,12 +153,6 @@ pub struct SettingField {
     ///
     /// Field 8: `secret`
     pub secret: ::core::option::Option<bool>,
-    /// The fixed beginning of a text setting, such as a folder its path must
-    /// be in, which clients show before what the administrator types; the
-    /// value holds both, and stays empty while nothing is typed.
-    ///
-    /// Field 9: `prefix`
-    pub prefix: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -173,7 +167,6 @@ impl ::core::fmt::Debug for SettingField {
             .field("options", &self.options)
             .field("advanced", &self.advanced)
             .field("secret", &self.secret)
-            .field("prefix", &self.prefix)
             .finish()
     }
 }
@@ -249,16 +242,6 @@ impl SettingField {
         self.secret = Some(value);
         self
     }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::prefix`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_prefix(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.prefix = Some(value.into());
-        self
-    }
 }
 ::buffa::impl_default_instance!(SettingField);
 impl ::buffa::MessageName for SettingField {
@@ -309,9 +292,6 @@ impl ::buffa::Message for SettingField {
         if self.secret.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
-        if let Some(ref v) = self.prefix {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -350,9 +330,6 @@ impl ::buffa::Message for SettingField {
         }
         if let Some(v) = self.secret {
             ::buffa::types::put_bool_field(8u32, v, buf);
-        }
-        if let Some(ref v) = self.prefix {
-            ::buffa::types::put_string_field(9u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -450,16 +427,6 @@ impl ::buffa::Message for SettingField {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
-            9u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self.prefix.get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -476,7 +443,6 @@ impl ::buffa::Message for SettingField {
         self.options.clear();
         self.advanced = ::core::option::Option::None;
         self.secret = ::core::option::Option::None;
-        self.prefix = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

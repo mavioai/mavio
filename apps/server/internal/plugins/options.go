@@ -222,9 +222,6 @@ func SettingsSchema(fields []*pluginv1.SettingField) string {
 		if f.GetSecret() {
 			p.add("writeOnly", true)
 		}
-		if f.GetPrefix() != "" {
-			p.add(manifest.PrefixKeyword, f.GetPrefix())
-		}
 		p.write(&b)
 	}
 	b.WriteString("}}")

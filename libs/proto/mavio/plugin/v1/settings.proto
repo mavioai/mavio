@@ -18,10 +18,6 @@ message SettingField {
   // A secret, such as a password, an API key or a cookie, which is never
   // shown back.
   bool secret = 8;
-  // The fixed beginning of a text setting, such as a folder its path must
-  // be in, which clients show before what the administrator types; the
-  // value holds both, and stays empty while nothing is typed.
-  string prefix = 9;
 }
 
 // SettingFieldType is how a setting is entered.

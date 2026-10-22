@@ -21,12 +21,6 @@ import (
 // property with the option's name.
 const OptionsKeyword = "x-mavio-options"
 
-// PrefixKeyword is the configuration schema's keyword giving a string
-// property's fixed beginning, which clients show before what the
-// administrator types; the value holds both, and stays empty while nothing
-// is typed.
-const PrefixKeyword = "x-mavio-prefix"
-
 // The sources of options.
 const (
 	// OptionsIndexerDefinitions are the definitions of the plugin's
