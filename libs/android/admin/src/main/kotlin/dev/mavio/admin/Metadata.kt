@@ -42,7 +42,9 @@ import com.google.protobuf.fieldMask
 import com.google.protobuf.timestamp
 import dev.mavio.core.AppModel
 import dev.mavio.core.call
+import dev.mavio.core.choices
 import dev.mavio.core.instant
+import dev.mavio.core.localization
 import dev.mavio.design.MavioRadius
 import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.ConfirmDialog
@@ -137,6 +139,12 @@ private fun WithItem(model: AppModel, serverId: String, itemId: String, attempt:
 /** The text fields of the form by their ItemMetadata names, which are the update mask's paths. */
 private typealias Fields = Map<String, String>
 
+/** The kinds the providers identify, as dev.mavio.core.identifiableKinds. */
+private val describedKinds = setOf(
+    ItemKind.ITEM_KIND_MOVIE, ItemKind.ITEM_KIND_SERIES, ItemKind.ITEM_KIND_MUSIC_ARTIST, ItemKind.ITEM_KIND_MUSIC_ALBUM,
+    ItemKind.ITEM_KIND_MUSIC_VIDEO, ItemKind.ITEM_KIND_BOOK, ItemKind.ITEM_KIND_AUDIOBOOK,
+)
+
 private fun list(v: List<String>) = v.joinToString(", ")
 private fun unlist(v: String) = v.split(",").map { it.trim() }.filter { it.isNotEmpty() }
 private fun num(n: Int) = if (n != 0) n.toString() else ""
@@ -167,6 +175,8 @@ private fun fieldsOf(item: Item): Fields = mapOf(
     "parent_index_number" to num(item.parentIndexNumber),
     "absolute_number" to num(item.absoluteNumber),
     "series_status" to item.seriesStatusValue.toString(),
+    "metadata_language" to item.metadataLanguage,
+    "metadata_country" to item.metadataCountry,
 )
 
 /** Whether a field's text is one the server takes; empty always is. */
@@ -221,6 +231,19 @@ private fun EditForm(model: AppModel, serverId: String, item: Item, onDone: () -
         runCatching {
             metadata(model, serverId, "ListExternalIdKinds", listExternalIdKindsRequest { itemKind = item.kind }, ListExternalIdKindsResponse::parseFrom).kindsList
         }.onSuccess { kinds = it }
+    }
+    // The kinds the providers identify are described in a language and
+    // country of their own, their library's by default.
+    val described = item.kind in describedKinds
+    var languages by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
+    var countries by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
+    LaunchedEffect(described) {
+        if (described) {
+            model.localization(serverId).let { (l, c) ->
+                languages = l
+                countries = c
+            }
+        }
     }
     val paths = buildList {
         before.keys.filter { before[it] != fields[it] }.forEach { add(it) }
@@ -328,6 +351,21 @@ private fun EditForm(model: AppModel, serverId: String, item: Item, onDone: () -
                 field("studios", stringResource(R.string.metadata_studios), placeholder = commas)
                 RowDivider()
                 field("production_locations", stringResource(R.string.metadata_locations), placeholder = commas)
+                if (described) {
+                    val default = stringResource(R.string.metadata_library_default)
+                    RowDivider()
+                    ChoiceRow(
+                        stringResource(R.string.libraries_language),
+                        listOf("" to default) + choices(languages, fields["metadata_language"].orEmpty()),
+                        fields["metadata_language"].orEmpty(),
+                    ) { fields = fields + ("metadata_language" to it) }
+                    RowDivider()
+                    ChoiceRow(
+                        stringResource(R.string.libraries_country),
+                        listOf("" to default) + choices(countries, fields["metadata_country"].orEmpty()),
+                        fields["metadata_country"].orEmpty(),
+                    ) { fields = fields + ("metadata_country" to it) }
+                }
             }
         }
         if (kinds.isNotEmpty()) item {
@@ -412,6 +450,8 @@ private fun metadataOf(f: Fields, ids: Map<String, String>, locked: Boolean, loc
     parentIndexNumber = s("parent_index_number").toIntOrNull() ?: 0
     absoluteNumber = s("absolute_number").toIntOrNull() ?: 0
     seriesStatusValue = s("series_status").toIntOrNull() ?: 0
+    metadataLanguage = s("metadata_language")
+    metadataCountry = s("metadata_country")
     externalIds.putAll(ids.mapValues { it.value.trim() }.filterValues { it.isNotEmpty() })
     this.locked = locked
     lockedFields += locks
