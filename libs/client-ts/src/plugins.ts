@@ -153,7 +153,16 @@ export function usePluginActions(server: ServerEntry) {
     }),
     /** Sets how a container dependency is reached. */
     setContainer: useMutation({
-      mutationFn: (req: { pluginId: string; name: string; mode: ContainerMode; address?: string; useGpu?: boolean; proxy?: string }) =>
+      mutationFn: (req: {
+        pluginId: string;
+        name: string;
+        mode: ContainerMode;
+        address?: string;
+        useGpu?: boolean;
+        proxy?: string;
+        folders?: Record<string, string>;
+        peerPort?: number;
+      }) =>
         client().setPluginContainer(req),
       onSettled,
     }),

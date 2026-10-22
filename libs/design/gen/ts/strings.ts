@@ -524,6 +524,10 @@ export type MessageKey =
   | 'plugins.containerOptional'
   | 'plugins.containerUseGpu'
   | 'plugins.containerAddress'
+  | 'plugins.containerPeerPortDetail'
+  | 'plugins.containerPeerPort'
+  | 'plugins.containerFoldersHint'
+  | 'plugins.containerFolderPath'
   | 'plugins.containerPulling'
   | 'plugins.containerQueued'
   | 'plugins.containerStarting'
@@ -1108,6 +1112,7 @@ export type MessageKey =
   | 'client.serverFolder'
   | 'client.unreported'
   | 'client.noFolders'
+  | 'client.containerFolder'
   | 'options.options'
   | 'options.optionsDetail'
   | 'options.optionsMessage'
@@ -2617,6 +2622,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.containerOptional": "Optional",
     "plugins.containerUseGpu": "Use GPU",
     "plugins.containerAddress": "Address",
+    "plugins.containerPeerPortDetail": "Published on every interface of the host, TCP and UDP, for peers to connect to; forward it on the router. 0 publishes none.",
+    "plugins.containerPeerPort": "Peer Port",
+    "plugins.containerFoldersHint": "Choose the folders before the server runs the container; it creates those missing.",
+    "plugins.containerFolderPath": "Absolute path of the server",
     "plugins.containerPulling": "Downloading",
     "plugins.containerQueued": "Waiting to Download",
     "plugins.containerStarting": "Starting",
@@ -3201,6 +3210,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "client.serverFolder": "Server's Folder",
     "client.unreported": "Why the client did not tell its folders: {failure}",
     "client.noFolders": "The client reports no folders.",
+    "client.containerFolder": "Mounted by the server in the client's container",
     "options.options": "Options",
     "options.optionsDetail": "Naming, importing, releases and the recycle bin",
     "options.optionsMessage": "How the server names and imports what it downloads, which releases it takes and where replaced files go.",
@@ -4708,6 +4718,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.containerOptional": "可选",
     "plugins.containerUseGpu": "使用 GPU",
     "plugins.containerAddress": "地址",
+    "plugins.containerPeerPortDetail": "在主机的所有网络接口上以 TCP 和 UDP 发布，供对等方连接；请在路由器上转发此端口。为 0 时不发布。",
+    "plugins.containerPeerPort": "对等端口",
+    "plugins.containerFoldersHint": "在服务器运行容器之前选好文件夹；不存在的文件夹会自动创建。",
+    "plugins.containerFolderPath": "服务器上的绝对路径",
     "plugins.containerPulling": "正在下载",
     "plugins.containerQueued": "等待下载",
     "plugins.containerStarting": "正在启动",
@@ -5292,6 +5306,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "client.serverFolder": "服务器的文件夹",
     "client.unreported": "客户端未告知其文件夹：{failure}",
     "client.noFolders": "客户端未报告任何文件夹。",
+    "client.containerFolder": "由服务器挂载到客户端的容器中",
     "options.options": "选项",
     "options.optionsDetail": "命名、导入、发布和回收站",
     "options.optionsMessage": "服务器如何命名和导入下载的内容、接受哪些发布，以及被替换的文件去向。",

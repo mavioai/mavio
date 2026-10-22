@@ -9487,6 +9487,78 @@
         }
       }
     },
+    "plugins.containerPeerPortDetail": {
+      "comment": "Explains a container dependency's peer port.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Published on every interface of the host, TCP and UDP, for peers to connect to; forward it on the router. 0 publishes none."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在主机的所有网络接口上以 TCP 和 UDP 发布，供对等方连接；请在路由器上转发此端口。为 0 时不发布。"
+          }
+        }
+      }
+    },
+    "plugins.containerPeerPort": {
+      "comment": "Field of the port a container dependency publishes for peers, such as a BitTorrent client's.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peer Port"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对等端口"
+          }
+        }
+      }
+    },
+    "plugins.containerFoldersHint": {
+      "comment": "Hint above the folders of a container dependency the server runs.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the folders before the server runs the container; it creates those missing."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在服务器运行容器之前选好文件夹；不存在的文件夹会自动创建。"
+          }
+        }
+      }
+    },
+    "plugins.containerFolderPath": {
+      "comment": "Placeholder of the server folder a container dependency mounts.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Absolute path of the server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器上的绝对路径"
+          }
+        }
+      }
+    },
     "plugins.containerPulling": {
       "comment": "State of a container dependency whose image is being downloaded.",
       "extractionState": "manual",
@@ -20157,6 +20229,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "客户端未报告任何文件夹。"
+          }
+        }
+      }
+    },
+    "client.containerFolder": {
+      "comment": "A download client folder the server mounted in the client's container, which cannot be changed here",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mounted by the server in the client's container"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "由服务器挂载到客户端的容器中"
           }
         }
       }

@@ -1058,6 +1058,14 @@
     <string name="plugins_container_use_gpu">Use GPU</string>
     <!-- Field of the address of a container dependency run elsewhere. -->
     <string name="plugins_container_address">Address</string>
+    <!-- Explains a container dependency's peer port. -->
+    <string name="plugins_container_peer_port_detail">Published on every interface of the host, TCP and UDP, for peers to connect to; forward it on the router. 0 publishes none.</string>
+    <!-- Field of the port a container dependency publishes for peers, such as a BitTorrent client's. -->
+    <string name="plugins_container_peer_port">Peer Port</string>
+    <!-- Hint above the folders of a container dependency the server runs. -->
+    <string name="plugins_container_folders_hint">Choose the folders before the server runs the container; it creates those missing.</string>
+    <!-- Placeholder of the server folder a container dependency mounts. -->
+    <string name="plugins_container_folder_path">Absolute path of the server</string>
     <!-- State of a container dependency whose image is being downloaded. -->
     <string name="plugins_container_pulling">Downloading</string>
     <!-- State of a container dependency whose image download waits for other downloads to end. -->
@@ -2254,6 +2262,8 @@
     <string name="client_unreported">Why the client did not tell its folders: %s</string>
     <!-- Shown when a download client has no folders -->
     <string name="client_no_folders">The client reports no folders.</string>
+    <!-- A download client folder the server mounted in the client's container, which cannot be changed here -->
+    <string name="client_container_folder">Mounted by the server in the client\'s container</string>
     <!-- Page of the acquisition options -->
     <string name="options_options">Options</string>
     <!-- Detail of the acquisition options -->

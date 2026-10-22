@@ -1686,6 +1686,18 @@ public enum MavioStrings {
     /// Field of the address of a container dependency run elsewhere.
     public static var pluginsContainerAddress: String { NSLocalizedString("plugins.containerAddress", bundle: .module, comment: "") }
 
+    /// Explains a container dependency's peer port.
+    public static var pluginsContainerPeerPortDetail: String { NSLocalizedString("plugins.containerPeerPortDetail", bundle: .module, comment: "") }
+
+    /// Field of the port a container dependency publishes for peers, such as a BitTorrent client's.
+    public static var pluginsContainerPeerPort: String { NSLocalizedString("plugins.containerPeerPort", bundle: .module, comment: "") }
+
+    /// Hint above the folders of a container dependency the server runs.
+    public static var pluginsContainerFoldersHint: String { NSLocalizedString("plugins.containerFoldersHint", bundle: .module, comment: "") }
+
+    /// Placeholder of the server folder a container dependency mounts.
+    public static var pluginsContainerFolderPath: String { NSLocalizedString("plugins.containerFolderPath", bundle: .module, comment: "") }
+
     /// State of a container dependency whose image is being downloaded.
     public static var pluginsContainerPulling: String { NSLocalizedString("plugins.containerPulling", bundle: .module, comment: "") }
 
@@ -3550,6 +3562,9 @@ public enum MavioStrings {
 
     /// Shown when a download client has no folders
     public static var clientNoFolders: String { NSLocalizedString("client.noFolders", bundle: .module, comment: "") }
+
+    /// A download client folder the server mounted in the client's container, which cannot be changed here
+    public static var clientContainerFolder: String { NSLocalizedString("client.containerFolder", bundle: .module, comment: "") }
 
     /// Page of the acquisition options
     public static var optionsOptions: String { NSLocalizedString("options.options", bundle: .module, comment: "") }

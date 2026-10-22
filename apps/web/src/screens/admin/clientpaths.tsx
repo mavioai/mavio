@@ -18,9 +18,12 @@ interface Draft {
   remote: string;
   local: string;
   added?: boolean;
+  /** Mounted in the client's managed container, which is not edited here. */
+  container?: boolean;
 }
 
-const draftsOf = (paths: DownloadClientPath[]): Draft[] => paths.map((p) => ({ remote: p.remotePath, local: p.localPath }));
+const draftsOf = (paths: DownloadClientPath[]): Draft[] =>
+  paths.map((p) => ({ remote: p.remotePath, local: p.localPath, ...(p.container ? { container: true } : {}) }));
 
 /** Where the server may read a folder: empty, an absolute path or a remote's folder. */
 const validLocal = (s: string) => {
@@ -49,7 +52,7 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
   const save = () =>
     d &&
     update.mutate(
-      d.filter((x) => x.local.trim() !== "").map((x) => create(DownloadClientPathSchema, { remotePath: x.remote.trim(), localPath: x.local.trim() })),
+      d.filter((x) => !x.container && x.local.trim() !== "").map((x) => create(DownloadClientPathSchema, { remotePath: x.remote.trim(), localPath: x.local.trim() })),
     );
   return (
     <Page title={client?.name ?? clientId} message={t("client.message")} back={<BackLink section="acquisition" label={t("settings.acquisition")} />}>
@@ -77,15 +80,19 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
                 <span aria-hidden className="text-text-secondary">
                   →
                 </span>
-                <input
-                  className={`${input} flex-1`}
-                  aria-label={t("client.serverFolder")}
-                  placeholder={t("client.readAt")}
-                  value={x.local}
-                  aria-invalid={!validLocal(x.local)}
-                  onChange={(e) => set(i, { local: e.target.value })}
-                />
-                {(x.added || (p && !p.rootFolder)) && (
+                {x.container ? (
+                  <span className="type-body break-all font-mono">{x.local}</span>
+                ) : (
+                  <input
+                    className={`${input} flex-1`}
+                    aria-label={t("client.serverFolder")}
+                    placeholder={t("client.readAt")}
+                    value={x.local}
+                    aria-invalid={!validLocal(x.local)}
+                    onChange={(e) => set(i, { local: e.target.value })}
+                  />
+                )}
+                {!x.container && (x.added || (p && !p.rootFolder)) && (
                   <Button variant="plain" className="text-danger" onClick={() => setD((xs) => xs?.filter((_, j) => j !== i))}>
                     {t("rules.remove")}
                   </Button>
@@ -93,6 +100,12 @@ export function DownloadClientPage({ server, id }: { server: ServerEntry; id: st
               </div>
               {p && unchanged && (
                 <p className="type-footnote break-words text-text-secondary">
+                  {x.container && (
+                    <>
+                      {t("client.containerFolder")}
+                      {" · "}
+                    </>
+                  )}
                   {p.readable ? (
                     <>
                       <span className="text-success">{t("client.readable")}</span>

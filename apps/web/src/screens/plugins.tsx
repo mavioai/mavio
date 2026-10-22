@@ -36,6 +36,7 @@ import { optionSources, type Schema, SchemaForm } from "../schema-form.tsx";
 import { Button, Group, Row } from "../ui.tsx";
 import { Switch } from "../controls/inputs.tsx";
 import { Select } from "../controls/select.tsx";
+import { input } from "../controls/styles.ts";
 import type { SettingsSearch } from "./settings.tsx";
 import { proxyChoices, proxyDirect } from "./admin/proxies.tsx";
 import { BackLink, SectionTrail, TitleAccessory } from "./admin/common.tsx";
@@ -638,8 +639,18 @@ function ContainerDependency({ server, id, c }: { server: ServerEntry; id: strin
   const mode = st?.mode ?? ContainerMode.UNSPECIFIED;
   const [address, setAddress] = useState(mode === ContainerMode.EXTERNAL ? (st?.address ?? "") : "");
   const [chosen, setChosen] = useState(mode);
-  const set = (m: ContainerMode, extra: { address?: string; useGpu?: boolean; proxy?: string } = {}, onSettled?: () => void) =>
-    actions.setContainer.mutate({ pluginId: id, name: d.name, mode: m, useGpu: gpu && c.useGpu, ...extra }, { onSettled });
+  const set = (
+    m: ContainerMode,
+    extra: { address?: string; useGpu?: boolean; proxy?: string; folders?: Record<string, string>; peerPort?: number } = {},
+    onSettled?: () => void,
+  ) => actions.setContainer.mutate({ pluginId: id, name: d.name, mode: m, useGpu: gpu && c.useGpu, ...extra }, { onSettled });
+  // The server's folders it mounts and the port it publishes for peers, saved together.
+  const [folders, setFolders] = useState<Record<string, string>>(() => ({ ...c.folders }));
+  const [peerPort, setPeerPort] = useState(String(c.peerPort));
+  const foldersSet = d.folders.every((f) => c.folders[f.name]);
+  const placesChanged = d.folders.some((f) => (folders[f.name] ?? "").trim() !== (c.folders[f.name] ?? "")) || (d.peerPort > 0 && peerPort !== String(c.peerPort));
+  const peerPortValid = /^\d+$/.test(peerPort) && Number(peerPort) <= 65535;
+  const placesValid = d.folders.every((f) => /^(\/|[A-Za-z]:[\\/])/.test((folders[f.name] ?? "").trim())) && (d.peerPort === 0 || peerPortValid);
   const proxy =
     actions.setContainer.isPending && actions.setContainer.variables?.proxy !== undefined ? actions.setContainer.variables.proxy : c.proxy;
   const setProxy = (p: string) => set(ContainerMode.MANAGED, { proxy: p }, () => setRecreating(undefined));
@@ -685,7 +696,10 @@ function ContainerDependency({ server, id, c }: { server: ServerEntry; id: strin
           onChange={(v) => {
             const m = Number(v) as ContainerMode;
             setChosen(m);
-            if (m !== ContainerMode.EXTERNAL) set(m, { useGpu: m === ContainerMode.MANAGED && (d.gpu === GpuSupport.REQUIRED || (gpu && c.useGpu)) });
+            // One whose folders are not chosen yet runs once they are saved.
+            if (m !== ContainerMode.EXTERNAL && (m !== ContainerMode.MANAGED || foldersSet)) {
+              set(m, { useGpu: m === ContainerMode.MANAGED && (d.gpu === GpuSupport.REQUIRED || (gpu && c.useGpu)) });
+            }
           }}
         />
       </Row>
@@ -698,6 +712,59 @@ function ContainerDependency({ server, id, c }: { server: ServerEntry; id: strin
             onChange={(on) => set(ContainerMode.MANAGED, { useGpu: on })}
           />
         </Row>
+      )}
+      {chosen === ContainerMode.MANAGED && (d.folders.length > 0 || d.peerPort > 0) && (
+        <form
+          className="flex flex-col"
+          onSubmit={(ev) => {
+            ev.preventDefault();
+            set(ContainerMode.MANAGED, {
+              useGpu: d.gpu === GpuSupport.REQUIRED || (gpu && c.useGpu),
+              folders: Object.fromEntries(d.folders.map((f) => [f.name, (folders[f.name] ?? "").trim()])),
+              ...(d.peerPort > 0 ? { peerPort: Number(peerPort) } : {}),
+            });
+          }}
+        >
+          {d.folders.length > 0 && <p className="px-4 pt-2.5 type-footnote text-text-secondary">{t("plugins.containerFoldersHint")}</p>}
+          {d.folders.map((f) => (
+            <div key={f.name} className="flex flex-col gap-1.5 px-4 py-2.5">
+              <span className="type-callout">
+                <span className="font-mono">{f.path}</span>
+                {f.description && <span className="text-text-secondary"> · {f.description}</span>}
+              </span>
+              <input
+                className={input}
+                value={folders[f.name] ?? ""}
+                onChange={(ev) => setFolders({ ...folders, [f.name]: ev.target.value })}
+                placeholder={t("plugins.containerFolderPath")}
+                aria-label={f.path}
+              />
+            </div>
+          ))}
+          {d.peerPort > 0 && (
+            <Row label={t("plugins.containerPeerPort")} detail={t("plugins.containerPeerPortDetail")} wrap>
+              <div className="w-24">
+                <input
+                  className={input}
+                  inputMode="numeric"
+                  value={peerPort}
+                  aria-invalid={!peerPortValid}
+                  onChange={(ev) => setPeerPort(ev.target.value.trim())}
+                  aria-label={t("plugins.containerPeerPort")}
+                />
+              </div>
+            </Row>
+          )}
+          <div className="px-4 py-2.5">
+            <Button
+              type="submit"
+              variant="secondary"
+              disabled={!placesValid || (mode === ContainerMode.MANAGED && !placesChanged) || actions.setContainer.isPending}
+            >
+              {t("action.save")}
+            </Button>
+          </div>
+        </form>
       )}
       {chosen === ContainerMode.MANAGED && mode === ContainerMode.MANAGED && (
         <>
