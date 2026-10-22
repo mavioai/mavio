@@ -26,6 +26,9 @@
         private var tints: [ObjectIdentifier: NSColor?] = [:]
         /// The fill shown when neither focused nor hovered.
         public var restingFill: NSColor? { didSet { restyle() } }
+        /// Whether hovering fills it, as a row's; a header of its own box,
+        /// as a season's, keeps its box's fill.
+        public var fillsOnHover = true { didSet { restyle() } }
         /// What a click or select does.
         public var onPress: (@MainActor () -> Void)?
         /// The menu a secondary click shows, if any.
@@ -86,7 +89,7 @@
                 alphaValue = hovering ? 0.85 : 1
                 scale(focused ? theme.layout.focusScale : 1)
             case .highlight:
-                fill = focused ? .white : hovering ? theme.colors.fill : restingFill
+                fill = focused ? .white : hovering && fillsOnHover ? theme.colors.fill : restingFill
                 elevation =
                     focused ? MavioNSShadow(color: theme.colors.tvFocusShadow, x: 0, y: 12, blur: 32, spread: 0) : nil
                 recolor(focused)

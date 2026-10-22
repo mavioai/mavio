@@ -6,7 +6,10 @@
     /// its backdrop, name, number of movies and what the server has of
     /// them, requesting the movies chosen and administrators blocklisting
     /// all of them, then its overview and its movies in release order.
-    final class DiscoveredCollectionPage: Page {
+    final class DiscoveredCollectionPage: Page, TitleBarReaching {
+        /// The backdrop goes behind the title bar, as an item's details'.
+        var reachesTitleBar: Bool { true }
+
         private let serverId: String
         private let tmdbId: Int32
         private var collection: Mavio_Acquisition_V1_Collection?

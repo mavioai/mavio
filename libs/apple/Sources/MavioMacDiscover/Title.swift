@@ -9,7 +9,10 @@
     /// beside its collection and facts, its seasons, its cast and the titles
     /// alike. Laid out as an item's details in television mode, focus
     /// starting on its first action (docs/tv.md §6.2, §6.3).
-    final class TitlePage: Page {
+    final class TitlePage: Page, TitleBarReaching {
+        /// The backdrop goes behind the title bar, as an item's details'.
+        var reachesTitleBar: Bool { true }
+
         /// The server discovering the title.
         let serverId: String
         private let kind: MediaKind
@@ -318,7 +321,11 @@
             if !marks.isEmpty {
                 let views = marks.map(ratingView)
                 let wrap = NSStackView.horizontal(views, spacing: MavioSpacing.s16)
-                rows.append(NSStackView.horizontal([Spacer(), wrap, Spacer()], spacing: 0))
+                // Centered: the two spaces kept equal, which they would
+                // otherwise share by chance.
+                let (before, after) = (Spacer(), Spacer())
+                rows.append(NSStackView.horizontal([before, wrap, after], spacing: 0))
+                before.widthAnchor.constraint(equalTo: after.widthAnchor).isActive = true
             }
             for (name, values) in titleFactRows(
                 info, serverId: serverId, discovery: context.discovery, allStudios: allStudios)

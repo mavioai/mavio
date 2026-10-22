@@ -84,18 +84,16 @@
         isolated deinit { task?.cancel() }
     }
 
-    /// The logo of a site, as `ServiceLogos` names it, height tall; tinted
-    /// when it is drawn in one color, as the links' are.
+    /// The logo of a site, as `ServiceLogos` names it, height tall; in tint
+    /// when its asset is drawn in one color, as TVDB's and Simkl's, the
+    /// others in their own colors, as the web UI's.
     @MainActor
     func serviceLogo(_ name: String, height: CGFloat, width: CGFloat? = nil, tint: NSColor? = nil) -> NSImageView {
         let image = ServiceLogos.bundle.image(forResource: name) ?? NSImage()
         let view = NSImageView(image: image)
         view.imageScaling = .scaleProportionallyUpOrDown
         view.translatesAutoresizingMaskIntoConstraints = false
-        if let tint {
-            image.isTemplate = true
-            view.contentTintColor = tint
-        }
+        view.contentTintColor = tint
         let aspect = image.size.height > 0 ? image.size.width / image.size.height : 1
         view.size(width: width ?? ceil(height * aspect), height: height)
         view.setAccessibilityElement(false)

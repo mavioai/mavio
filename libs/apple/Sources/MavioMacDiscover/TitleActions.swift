@@ -178,6 +178,9 @@
         private let tmdbId: Int32
         private let season: Mavio_Acquisition_V1_SeasonStatus
         private let list = NSStackView.vertical([], spacing: 0)
+        /// The episodes' panel, clipped as it grows and shrinks.
+        private let panel = NSView()
+        private var panelHeight: NSLayoutConstraint!
         private let expand: IconView
         private let header: Pressable
         private var open = false
@@ -216,11 +219,29 @@
             super.init(fill: theme.isTV ? theme.colors.fill : theme.colors.surfaceRaised, radius: 10)
             border = theme.colors.border
             header.onPress = { [weak self] in self?.toggle() }
+            // As MavioGO's and the web UI's, the row keeps its box's fill.
+            header.fillsOnHover = false
             header.setAccessibilityLabel(seasonName(season.seasonNumber))
-            list.isHidden = true
-            let stack = NSStackView.vertical([header, list], spacing: 0)
+            panel.translatesAutoresizingMaskIntoConstraints = false
+            panel.wantsLayer = true
+            panel.layer?.masksToBounds = true
+            panel.isHidden = true
+            panel.addSubview(list)
+            list.translatesAutoresizingMaskIntoConstraints = false
+            // The panel is its episodes' height, but while it grows or
+            // shrinks the height it is given, the episodes cut at its end.
+            let fits = list.bottomAnchor.constraint(equalTo: panel.bottomAnchor)
+            fits.priority = .init(999)
+            panelHeight = panel.heightAnchor.constraint(equalToConstant: 0)
+            NSLayoutConstraint.activate([
+                list.topAnchor.constraint(equalTo: panel.topAnchor),
+                list.leadingAnchor.constraint(equalTo: panel.leadingAnchor),
+                list.trailingAnchor.constraint(equalTo: panel.trailingAnchor),
+                fits,
+            ])
+            let stack = NSStackView.vertical([header, panel], spacing: 0)
             header.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
-            list.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+            panel.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
             addFilling(stack)
         }
 
@@ -233,9 +254,43 @@
             open.toggle()
             expand.upsideDown = open
             header.setAccessibilitySelected(open)
-            list.isHidden = !open
             if open, episodes == nil, task == nil { load() }
             renderList()
+            slide()
+        }
+
+        /// Grows the episodes into view as the season opens and shrinks them
+        /// away as it closes, as MavioGO's and the web UI's collapsible: from
+        /// the height shown to the episodes' own or none.
+        private func slide() {
+            let root = window?.contentView
+            let from = panel.isHidden ? 0 : panel.frame.height
+            panel.isHidden = false
+            panelHeight.isActive = false
+            root?.layoutSubtreeIfNeeded()
+            let to = open ? list.frame.height : 0
+            panelHeight.constant = from
+            panelHeight.isActive = true
+            root?.layoutSubtreeIfNeeded()
+            let opening = open
+            let settle: @MainActor @Sendable () -> Void = { [weak self] in
+                guard let self, self.open == opening else { return }
+                // Open, the panel follows its episodes as they load or wrap.
+                self.panelHeight.isActive = !opening
+                self.panel.isHidden = !opening
+            }
+            guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else {
+                settle()
+                return
+            }
+            NSAnimationContext.runAnimationGroup(
+                { context in
+                    context.duration = MavioDuration.normal
+                    context.timingFunction = MavioEasings.standard.timingFunction
+                    context.allowsImplicitAnimation = true
+                    panelHeight.animator().constant = to
+                    root?.layoutSubtreeIfNeeded()
+                }, completionHandler: { MainActor.assumeIsolated { settle() } })
         }
 
         private func load() {

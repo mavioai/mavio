@@ -159,10 +159,14 @@
             translatesAutoresizingMaskIntoConstraints = false
             let label = NSTextField.label(title, theme.fonts.title3, color: theme.colors.textPrimary)
             var header: [NSView] = [label]
-            if let accessory { header.append(accessory) }
-            // Stretching less than an accessory's own space, so that an
-            // accessory starting with one, as See All, ends at the arrows
-            // rather than either taking the room by chance.
+            if let accessory {
+                // An accessory starting with a space, as See All, stretches
+                // before the space below, ending at the arrows.
+                (accessory as? NSStackView)?.setHuggingPriority(.init(100), for: .horizontal)
+                header.append(accessory)
+            }
+            // Stretching less than the title, so that an accessory without
+            // a space keeps beside it.
             let rest = Spacer()
             rest.setContentHuggingPriority(.init(200), for: .horizontal)
             header.append(rest)
