@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,6 +61,7 @@ import dev.mavio.ui.ButtonKind
 import dev.mavio.ui.Focusable
 import dev.mavio.ui.Group
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.MenuDivider
 import dev.mavio.ui.Pressable
 import dev.mavio.ui.R
 import dev.mavio.ui.RowDivider
@@ -276,7 +276,7 @@ internal fun TvMoreMenu(model: AppModel, details: Details, modifier: Modifier = 
         if (open) {
             TvMenu(first, 360.dp, Alignment.BottomStart, ABOVE, onDismiss = back) {
                 groups.forEachIndexed { g, group ->
-                    if (g > 0) HorizontalDivider(Modifier.padding(vertical = MavioSpacing.s4), color = theme.colors.border)
+                    if (g > 0) MenuDivider()
                     group.forEachIndexed { i, e ->
                         TvMenuItem(
                             {
