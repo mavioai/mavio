@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"path/filepath"
 	"slices"
 	"strings"
 	"sync"
@@ -38,6 +39,11 @@ type Remotes struct {
 	Jobs core.StorageJobRepository
 	// Log is where failures of the ledger go; slog.Default when nil.
 	Log *slog.Logger
+	// LocalFiles tells that the rcd runs on the server's host, sharing
+	// its file system: MoveFrom and CopyFrom then take the server's
+	// local files too, which the rcd reads itself, hashing them where the
+	// remote asks for hashes before an upload rather than spooling them.
+	LocalFiles bool
 	// now is the clock; time.Now when nil.
 	now func() time.Time
 
@@ -344,8 +350,8 @@ func (s *Storage) transfer(ctx context.Context, method, srcFs, from, to string) 
 }
 
 // MoveFrom implements core.StorageTransfers for files of remotes of the
-// rcd, which moves them itself: within one remote, most cloud drives move
-// files without transferring them.
+// rcd, and local files with LocalFiles, which it moves itself: within one
+// remote, most cloud drives move files without transferring them.
 func (s *Storage) MoveFrom(ctx context.Context, src, to string) error {
 	return s.from(ctx, "operations/movefile", src, to)
 }
@@ -357,10 +363,15 @@ func (s *Storage) CopyFrom(ctx context.Context, src, to string) error {
 
 func (s *Storage) from(ctx context.Context, method, src, to string) error {
 	remote, rest, ok := core.SplitRemotePath(src)
-	if !ok {
-		return core.ErrUnsupported
+	if ok {
+		return s.transfer(ctx, method, remote+":", rest, to)
 	}
-	return s.transfer(ctx, method, remote+":", rest, to)
+	// A local file is the file of its folder, as the rcd names local
+	// file systems by their paths.
+	if native := filepath.FromSlash(src); s.r.LocalFiles && filepath.IsAbs(native) {
+		return s.transfer(ctx, method, filepath.Dir(native), filepath.Base(native), to)
+	}
+	return core.ErrUnsupported
 }
 
 // LinkFrom implements core.StorageTransfers like MoveFrom, for files of

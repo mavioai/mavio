@@ -193,6 +193,30 @@ func TestStorage(t *testing.T) {
 	if err := tr.MoveFrom(ctx, "/local/file.mkv", "x.mkv"); !errors.Is(err, core.ErrUnsupported) {
 		t.Errorf("MoveFrom(local) error = %v, want = %v", err, core.ErrUnsupported)
 	}
+
+	// An rcd on the server's host reads its local files itself.
+	r.LocalFiles = true
+	local := filepath.Join(t.TempDir(), "local file.mkv")
+	if err := os.WriteFile(local, []byte("local"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := tr.CopyFrom(ctx, filepath.ToSlash(local), "Local/copy.mkv"); err != nil {
+		t.Fatal(err)
+	}
+	if err := tr.MoveFrom(ctx, filepath.ToSlash(local), "Local/moved.mkv"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(local); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("local source after MoveFrom error = %v, want = %v", err, fs.ErrNotExist)
+	}
+	for _, name := range []string{"Local/copy.mkv", "Local/moved.mkv"} {
+		if info, err := st.Stat(ctx, name); err != nil || info.Size() != 5 {
+			t.Errorf("Stat(%s) = %v, %v, want = 5 bytes", name, info, err)
+		}
+	}
+	if err := tr.CopyFrom(ctx, "relative/file.mkv", "x.mkv"); !errors.Is(err, core.ErrUnsupported) {
+		t.Errorf("CopyFrom(relative) error = %v, want = %v", err, core.ErrUnsupported)
+	}
 }
 
 func TestStorageWithoutProxy(t *testing.T) {

@@ -79,8 +79,10 @@ func (r *Runtime) openFile(ctx context.Context, p string) (core.Storage, string,
 // transfer moves, links or copies src, a local path or a path on a
 // remote, to rel in dst, whose folder must exist. Local files move and
 // link to the path dst resolves; a remote that holds both moves, links
-// and copies the file itself; otherwise the file is copied through the
-// server, and a move then deletes it.
+// and copies the file itself, and one that reaches src otherwise, as an
+// rcd on the server's host reaches its local files, moves and copies it
+// itself; otherwise the file is copied through the server, and a move
+// then deletes it.
 func (r *Runtime) transfer(ctx context.Context, dst folder, src, rel string, mode transferMode) error {
 	name := filepath.ToSlash(rel)
 	if _, err := dst.Stat(ctx, name); err == nil {
@@ -104,7 +106,7 @@ func (r *Runtime) transfer(ctx context.Context, dst folder, src, rel string, mod
 				return nil
 			}
 		}
-	case core.IsRemotePath(src):
+	case core.IsRemotePath(src) || !local:
 		if t, ok := dst.Storage.(core.StorageTransfers); ok {
 			if mode == transferHardLinkOrCopy {
 				if err := t.LinkFrom(ctx, src, name); !errors.Is(err, core.ErrUnsupported) {

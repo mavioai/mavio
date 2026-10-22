@@ -94,7 +94,7 @@ func startRclone(ctx context.Context, log *slog.Logger, cfg Config, jobs core.St
 	if err := rt.proxy.Listen(); err != nil {
 		log.ErrorContext(ctx, "rclone media proxy", "err", err)
 	}
-	rt.Remotes = &rclone.Remotes{Client: rt.Client, MediaURL: rt.proxy.URL, Jobs: jobs, Log: log, Class: class}
+	rt.Remotes = &rclone.Remotes{Client: rt.Client, MediaURL: rt.proxy.URL, Jobs: jobs, Log: log, Class: class, LocalFiles: rt.Managed}
 	if cfg.RcloneCacheSize > 0 {
 		bc, err := rclone.NewBlockCache(rt.Client, rclone.BlockCacheOptions{
 			Dir: filepath.Join(cfg.CacheDir, "rclone", "blocks"), MaxSize: cfg.RcloneCacheSize, Logger: log,
