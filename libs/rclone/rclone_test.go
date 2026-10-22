@@ -461,7 +461,7 @@ func TestStorageBlockCache(t *testing.T) {
 	defer proxy.Close()
 	class := core.StorageCloud
 	r := &Remotes{Client: d.Client(), MediaURL: proxy.URL, Blocks: bc, Class: func(_ context.Context, p string) core.StorageClass {
-		if p != "remote:disk:" {
+		if p != "remote:disk:" && p != "remote:disk:later" {
 			t.Errorf("Class(%q), want = remote:disk:", p)
 		}
 		return class
@@ -523,6 +523,41 @@ func TestStorageBlockCache(t *testing.T) {
 	it.mu.Unlock()
 	if _, err := g.ReadAt(make([]byte, 10), 2<<20); !errors.Is(err, ErrChanged) {
 		t.Errorf("ReadAt() of a replaced file error = %v, want = %v", err, ErrChanged)
+	}
+
+	// A playback opens its folder and names its object without asking the
+	// remote, which it asks on the first read, through the cache.
+	play := core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadPlayback})
+	later, err := r.Open(play, "disk", "later")
+	if err != nil {
+		t.Fatalf("Open() of a folder not there yet for a playback error = %v", err)
+	}
+	u, err = later.MediaURL(play, "b.mkv")
+	if err != nil {
+		t.Fatalf("MediaURL() of a file not there yet for a playback error = %v", err)
+	}
+	if err := os.MkdirAll(filepath.Join(disk, "later"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(disk, "later", "b.mkv"), data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	bc.mu.Lock()
+	before := len(bc.items)
+	bc.mu.Unlock()
+	req, _ = http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	req.Header.Set("Range", "bytes=2000-2009")
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ = io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	bc.mu.Lock()
+	after := len(bc.items)
+	bc.mu.Unlock()
+	if resp.StatusCode != http.StatusPartialContent || !bytes.Equal(body, data[2000:2010]) || after != before+1 {
+		t.Errorf("GET %s = %d %v, items %d → %d, want = 206, bytes 2000-2009 and one item more", u, resp.StatusCode, body, before, after)
 	}
 
 	// Folders on local storage are read from the rcd.

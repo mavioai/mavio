@@ -383,7 +383,7 @@ The fork's limiter (`lib/connlimit`) caps the streams `--rc-serve` has open, for
 Mavio keeps the bytes it reads from rclone remotes on local disk, in `libs/rclone`. The cache sits beneath both of Mavio's read paths:
 
 * The reader of `rclone.Storage.Open`, used for direct play, the container-index reads of keyframes and trickplay, and sidecars.
-* The media proxy ffmpeg and ffprobe read. The proxy serves from the cache instead of forwarding.
+* The media proxy ffmpeg and ffprobe read. The proxy serves from the cache instead of forwarding. A cache item is keyed by the version of its file, which the remote tells. For a playback the proxy asks it on ffmpeg's first read rather than when the playback starts, and opening the storage of a playback's files skips the check that their folder is there, so that starting a playback waits for no call to a remote: remotes such as 115 pace their API calls a second or so apart.
 
 The cache follows rclone's VFS cache (`--vfs-cache-mode full`) where that works, and departs from it where Mavio knows more:
 

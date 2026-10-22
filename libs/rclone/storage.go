@@ -69,6 +69,11 @@ func (r *Remotes) Open(ctx context.Context, remote, dir string) (core.Storage, e
 	if r.Blocks != nil && (r.Class == nil || r.Class(ctx, "remote:"+remote+":"+dir) == core.StorageCloud) {
 		s.blocks, s.seq = r.Blocks, f["SeekReadsFromStart"]
 	}
+	if core.ReadIntentOf(ctx).Kind == core.ReadPlayback {
+		// Playbacks read files scans found, in folders known to be there:
+		// asking the remote again only delays them.
+		return s, nil
+	}
 	info, err := s.Stat(ctx, ".")
 	if err != nil {
 		return nil, err
@@ -448,7 +453,9 @@ func (s *Storage) RemoveAll(ctx context.Context, name string) error {
 func (*Storage) Chtimes(context.Context, string, time.Time) error { return core.ErrUnsupported }
 
 // MediaURL implements core.Storage. The read intent of ctx tells how
-// the block cache, if the folder has it, reads ahead of ffmpeg.
+// the block cache, if the folder has it, reads ahead of ffmpeg. A
+// playback's object is looked up on its first read rather than now, so
+// that the playback starts without waiting for the remote.
 func (s *Storage) MediaURL(ctx context.Context, name string) (string, error) {
 	if _, err := rel("media", name); err != nil {
 		return "", err
@@ -458,15 +465,30 @@ func (s *Storage) MediaURL(ctx context.Context, name string) (string, error) {
 	}
 	m := Media{FsName: s.fsName(), Remote: s.abs(name), Intent: core.ReadIntentOf(ctx)}
 	if s.blocks != nil {
-		info, err := s.Stat(ctx, name)
-		if err != nil {
-			return "", err
-		}
-		if !info.IsDir() {
-			m.blocks, m.key, m.size, m.seq = s.blocks, itemKey(m.FsName, m.Remote, info.(fileInfo)), info.Size(), s.seq
+		if m.Intent.Kind == core.ReadPlayback {
+			m.lookup = func(ctx context.Context) (Media, error) { return s.cached(ctx, m, name) }
+		} else {
+			var err error
+			if m, err = s.cached(ctx, m, name); err != nil {
+				return "", err
+			}
 		}
 	}
 	return s.r.MediaURL(ctx, m)
+}
+
+// cached returns m read through the block cache, keyed by the version of
+// the object name that the remote tells; m as it is when name is a folder.
+func (s *Storage) cached(ctx context.Context, m Media, name string) (Media, error) {
+	info, err := s.Stat(ctx, name)
+	if err != nil {
+		return m, err
+	}
+	if !info.IsDir() {
+		m.blocks, m.key, m.size, m.seq = s.blocks, itemKey(m.FsName, m.Remote, info.(fileInfo)), info.Size(), s.seq
+	}
+	m.lookup = nil
+	return m, nil
 }
 
 // Media is an object of a remote that ffmpeg reads.
@@ -482,6 +504,8 @@ type Media struct {
 	key    string
 	size   int64
 	seq    bool
+	// lookup, when set, finds the object's item on its first read.
+	lookup func(context.Context) (Media, error)
 }
 
 // Capabilities implements core.Storage.

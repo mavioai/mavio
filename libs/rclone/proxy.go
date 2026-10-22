@@ -44,6 +44,8 @@ type target struct {
 	used time.Time
 	// ver is the version of the object the token reads from the rcd.
 	ver version
+	// looking is held while the first read looks the object up.
+	looking sync.Mutex
 }
 
 // proxyTTL is how long a token lives after its last use: a paused
@@ -139,6 +141,9 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	if m.lookup != nil {
+		m = p.lookup(r.Context(), t)
+	}
 	fsName, remote := m.FsName, m.Remote
 	if m.blocks != nil && p.serveCached(w, r, m) {
 		return
@@ -179,6 +184,31 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if _, err := io.Copy(w, resp.Body); err != nil && r.Context().Err() == nil && !errors.Is(err, context.Canceled) {
 		p.log.DebugContext(r.Context(), "rclone media proxy copy ended", "remote", remote, "err", err)
 	}
+}
+
+// lookup looks up the object of a token on its first read, which the
+// reads after it wait for; a failed lookup reads past the block cache.
+func (p *Proxy) lookup(ctx context.Context, t *target) Media {
+	t.looking.Lock()
+	defer t.looking.Unlock()
+	p.mu.Lock()
+	m := t.m
+	p.mu.Unlock()
+	if m.lookup == nil {
+		return m
+	}
+	found, err := m.lookup(ctx)
+	if err != nil {
+		if ctx.Err() == nil {
+			p.log.WarnContext(ctx, "look up a media object", "fs", m.FsName, "remote", m.Remote, "err", err)
+		}
+		// Asked again on the next read.
+		return Media{FsName: m.FsName, Remote: m.Remote, Intent: m.Intent}
+	}
+	p.mu.Lock()
+	t.m = found
+	p.mu.Unlock()
+	return found
 }
 
 // serveCached serves m from the block cache, reading ahead as its intent

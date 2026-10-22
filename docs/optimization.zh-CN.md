@@ -383,7 +383,7 @@ fork 的限制器（`lib/connlimit`）为所有后端限制 `--rc-serve` 同时�
 Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs/rclone`。缓存处在 Mavio 的两条读取路径之下：
 
 * `rclone.Storage.Open` 的读取器，用于直接播放、keyframes 与 trickplay 的容器索引读取以及外挂文件。
-* ffmpeg 与 ffprobe 读取的媒体代理。代理从缓存提供数据，不再直接转发。
+* ffmpeg 与 ffprobe 读取的媒体代理。代理从缓存提供数据，不再直接转发。缓存条目以远端告知的文件版本为键。对播放，代理在 ffmpeg 第一次读取时才询问版本，而不是在播放开始时；为播放的文件打开存储时也跳过其文件夹是否存在的检查，这样开始播放不必等待任何远端调用：115 等远端的 API 调用会被限速到相隔一秒左右。
 
 它在 rclone VFS 缓存（`--vfs-cache-mode full`）行之有效的地方沿用其做法，在 Mavio 掌握更多信息的地方有所不同：
 
