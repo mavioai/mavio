@@ -434,12 +434,25 @@ func (r memJobs) Complete(_ context.Context, id core.ID, owner, result string) e
 	defer r.m.mu.Unlock()
 	j, err := r.find(id, owner)
 	if err == nil {
-		j.State, j.Result = core.JobSucceeded, result
+		now := r.m.clock()
+		j.State, j.Result, j.FinishedAt = core.JobSucceeded, result, &now
 	}
 	return err
 }
 
-func (r memJobs) List(context.Context, core.JobQuery) (core.Page[core.Job], error) { panic("unused") }
+func (r memJobs) List(_ context.Context, q core.JobQuery) (core.Page[core.Job], error) {
+	r.m.mu.Lock()
+	defer r.m.mu.Unlock()
+	var out core.Page[core.Job]
+	for _, j := range slices.Backward(r.m.jobs) {
+		if (len(q.Kinds) == 0 || slices.Contains(q.Kinds, j.Kind)) && (len(q.States) == 0 || slices.Contains(q.States, j.State)) {
+			out.Items = append(out.Items, j)
+		}
+	}
+	out.Total = len(out.Items)
+	out.Items = out.Items[min(q.Offset, out.Total):min(q.Offset+q.PageSize(), out.Total)]
+	return out, nil
+}
 
 func (r memJobs) Purge(_ context.Context, before time.Time) (int, error) {
 	r.m.mu.Lock()

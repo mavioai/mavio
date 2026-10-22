@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"path/filepath"
+	"slices"
 	"testing"
 	"time"
 
@@ -215,6 +216,57 @@ func TestRequestedScanBesideScheduled(t *testing.T) {
 		if added, err := m.Jobs().Enqueue(t.Context(), j); err != nil || !added {
 			t.Errorf("%s: added = %v, %v", j.UniqueKey, added, err)
 		}
+	}
+}
+
+func TestScheduleSkipsRecentCloudScans(t *testing.T) {
+	now := time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC)
+	local := filepath.ToSlash(t.TempDir())
+	cloud := core.RemoteScheme + "115:Movies"
+	for _, tt := range []struct {
+		name     string
+		path     string
+		interval time.Duration
+		scanned  time.Duration // how long ago a scan finished; zero for none
+		want     []bool        // whether each job enqueued is scheduled
+	}{
+		{"cloud scanned lately", cloud, 24 * time.Hour, time.Hour, []bool{true}},
+		{"cloud scanned long ago", cloud, 24 * time.Hour, 48 * time.Hour, []bool{false, true}},
+		{"cloud never scanned", cloud, 24 * time.Hour, 0, []bool{false, true}},
+		{"cloud without interval", cloud, 0, time.Hour, []bool{false}},
+		{"local scanned lately", local, 24 * time.Hour, time.Hour, []bool{false, true}},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			st := newMemStore()
+			lib := core.Library{ID: core.NewID(), Name: "Movies", Kind: core.LibraryMovies, Paths: []string{tt.path}, ScanInterval: tt.interval}
+			if err := st.Libraries().Create(t.Context(), &lib); err != nil {
+				t.Fatal(err)
+			}
+			if tt.scanned > 0 {
+				done := ScanJob(lib, now.Add(-tt.scanned), false)
+				finished := now.Add(-tt.scanned)
+				done.State, done.FinishedAt = core.JobSucceeded, &finished
+				st.jobs = append(st.jobs, done)
+			}
+			jobs := &Jobs{Store: st, Now: func() time.Time { return now }}
+			if err := jobs.Schedule(t.Context()); err != nil {
+				t.Fatal(err)
+			}
+			var got []bool
+			for _, j := range st.jobs {
+				if j.State == core.JobSucceeded {
+					continue
+				}
+				var p LibraryPayload
+				if err := json.Unmarshal(j.Payload, &p); err != nil {
+					t.Fatal(err)
+				}
+				got = append(got, p.Scheduled)
+			}
+			if !slices.Equal(got, tt.want) {
+				t.Errorf("scans enqueued = %v, want = %v", got, tt.want)
+			}
+		})
 	}
 }
 

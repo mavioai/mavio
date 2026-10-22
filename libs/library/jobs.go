@@ -170,18 +170,30 @@ func (j *Jobs) Handlers() map[string]Handler {
 
 // Schedule enqueues a scan of every library with folders now, as on server
 // startup, and for libraries with a scan interval the scheduled scan after
-// it, unless one is pending; each scheduled scan enqueues the next.
+// it, unless one is pending; each scheduled scan enqueues the next. A
+// library on cloud storage scanned within its scan interval is not scanned
+// now, for listing cloud storage is slow and rate limited; its scheduled
+// scan still follows.
 func (j *Jobs) Schedule(ctx context.Context) error {
 	libs, err := j.Store.Libraries().List(ctx)
 	if err != nil {
 		return err
 	}
 	now := j.now()
+	recent, err := j.recentCloudScans(ctx, libs, now)
+	if err != nil {
+		return err
+	}
 	for _, lib := range libs {
 		if lib.Kind.Curated() {
 			continue
 		}
-		jobs := []core.Job{ScanJob(lib, now, false)}
+		var jobs []core.Job
+		if recent[lib.ID] {
+			j.logger().InfoContext(ctx, "skipping the startup scan of a library on cloud storage scanned lately", "library", lib.Name)
+		} else {
+			jobs = append(jobs, ScanJob(lib, now, false))
+		}
 		if lib.ScanInterval > 0 {
 			jobs = append(jobs, ScanJob(lib, now.Add(lib.ScanInterval), true))
 		}
@@ -192,6 +204,52 @@ func (j *Jobs) Schedule(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+// recentCloudScans returns which libraries among libs, with a scan interval
+// and all their folders on cloud storage, a scan finished within their scan
+// interval before now.
+func (j *Jobs) recentCloudScans(ctx context.Context, libs []core.Library, now time.Time) (map[core.ID]bool, error) {
+	intervals := map[core.ID]time.Duration{}
+	for i := range libs {
+		lib := &libs[i]
+		if !lib.Kind.Curated() && lib.ScanInterval > 0 && len(lib.Paths) > 0 && j.onCloud(lib) {
+			intervals[lib.ID] = lib.ScanInterval
+		}
+	}
+	recent := map[core.ID]bool{}
+	if len(intervals) == 0 {
+		return recent, nil
+	}
+	q := core.JobQuery{Kinds: []string{JobScan}, States: []core.JobState{core.JobSucceeded}}
+	for {
+		page, err := j.Store.Jobs().List(ctx, q)
+		if err != nil {
+			return nil, fmt.Errorf("list scans: %w", err)
+		}
+		for _, job := range page.Items {
+			var p LibraryPayload
+			if job.FinishedAt == nil || json.Unmarshal(job.Payload, &p) != nil {
+				continue
+			}
+			if interval, ok := intervals[p.LibraryID]; ok && now.Sub(*job.FinishedAt) < interval {
+				recent[p.LibraryID] = true
+			}
+		}
+		q.Offset += len(page.Items)
+		if len(page.Items) == 0 || q.Offset >= page.Total {
+			return recent, nil
+		}
+	}
+}
+
+// onCloud reports whether all the folders of lib are on cloud storage.
+func (j *Jobs) onCloud(lib *core.Library) bool {
+	classify := storage.NewClassifier(nil).Classify
+	if j.Scanner != nil {
+		classify = func(lib *core.Library, path string) core.StorageClass { return j.Scanner.classify(lib, path) }
+	}
+	return !slices.ContainsFunc(lib.Paths, func(p string) bool { return classify(lib, p) != core.StorageCloud })
 }
 
 // libraryLock serializes the scans of one library, which a scheduled and a
