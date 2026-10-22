@@ -276,8 +276,11 @@ pub struct ContainerDependency {
     /// Field 6: `command`
     pub command: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     /// Environment variables. A value may hold "${secret:\<key\>}", a random
-    /// secret the server generates once for the dependency, and
-    /// "${address}", the dependency's own address.
+    /// secret the server generates once for the dependency, "${address}",
+    /// the dependency's own address, "${peer_port}", the port peers reach
+    /// it at (peer_port), and "${uid}" and "${gid}", the user and group the
+    /// server runs as, for files in its folders the server can move and
+    /// hard link; command takes the same.
     ///
     /// Field 7: `env`
     pub env: ::buffa::__private::HashMap<
@@ -333,6 +336,25 @@ pub struct ContainerDependency {
     ///
     /// Field 16: `no_proxy_ipv4_only`
     pub no_proxy_ipv4_only: ::core::option::Option<bool>,
+    /// Folders of the server an administrator chooses, each mounted at its
+    /// path, such as the folder a download client puts downloads in, which
+    /// the server then reads.
+    ///
+    /// Field 17: `folders`
+    pub folders: ::buffa::alloc::vec::Vec<ContainerFolder>,
+    /// A port peers connect to from outside, such as a BitTorrent client's:
+    /// a managed container publishes it on every interface of the host, TCP
+    /// and UDP, at the number an administrator chooses, this one by default,
+    /// which "${peer_port}" gives the service. 0 for none.
+    ///
+    /// Field 18: `peer_port`
+    pub peer_port: ::core::option::Option<u32>,
+    /// The program replacing the image's entrypoint, such as "/bin/sh" for a
+    /// command that prepares the container before running the image's own;
+    /// empty keeps it.
+    ///
+    /// Field 19: `entrypoint`
+    pub entrypoint: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -355,6 +377,9 @@ impl ::core::fmt::Debug for ContainerDependency {
             .field("host_access", &self.host_access)
             .field("direct", &self.direct)
             .field("no_proxy_ipv4_only", &self.no_proxy_ipv4_only)
+            .field("folders", &self.folders)
+            .field("peer_port", &self.peer_port)
+            .field("entrypoint", &self.entrypoint)
             .finish()
     }
 }
@@ -472,6 +497,23 @@ impl ContainerDependency {
         self.no_proxy_ipv4_only = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::peer_port`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_peer_port(mut self, value: u32) -> Self {
+        self.peer_port = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::entrypoint`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_entrypoint(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.entrypoint = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(ContainerDependency);
 impl ::buffa::MessageName for ContainerDependency {
@@ -489,7 +531,7 @@ impl ::buffa::Message for ContainerDependency {
     /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
     /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
@@ -547,12 +589,26 @@ impl ::buffa::Message for ContainerDependency {
         if self.no_proxy_ipv4_only.is_some() {
             size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        for v in &self.folders {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if let Some(v) = self.peer_port {
+            size += 2u64 + ::buffa::types::uint32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.entrypoint {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
@@ -608,6 +664,20 @@ impl ::buffa::Message for ContainerDependency {
         }
         if let Some(v) = self.no_proxy_ipv4_only {
             ::buffa::types::put_bool_field(16u32, v, buf);
+        }
+        for v in &self.folders {
+            ::buffa::types::put_len_delimited_header(
+                17u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        if let Some(v) = self.peer_port {
+            ::buffa::types::put_uint32_field(18u32, v, buf);
+        }
+        if let Some(ref v) = self.entrypoint {
+            ::buffa::types::put_string_field(19u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -783,6 +853,39 @@ impl ::buffa::Message for ContainerDependency {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.folders.push(elem);
+            }
+            18u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.peer_port = ::core::option::Option::Some(
+                    ::buffa::types::decode_uint32(buf)?,
+                );
+            }
+            19u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .entrypoint
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -807,11 +910,198 @@ impl ::buffa::Message for ContainerDependency {
         self.host_access = ::core::option::Option::None;
         self.direct = ::core::option::Option::None;
         self.no_proxy_ipv4_only = ::core::option::Option::None;
+        self.folders.clear();
+        self.peer_port = ::core::option::Option::None;
+        self.entrypoint = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
 impl ::buffa::ExtensionSet for ContainerDependency {
     const PROTO_FQN: &'static str = "mavio.plugin.v1.ContainerDependency";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// ContainerFolder is a folder of the server mounted in a container
+/// dependency.
+#[derive(Clone, PartialEq, Default)]
+pub struct ContainerFolder {
+    /// Identifier within the dependency: lowercase letters, digits and
+    /// dashes.
+    ///
+    /// Field 1: `name`
+    pub name: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The absolute path it is mounted at in the container.
+    ///
+    /// Field 2: `path`
+    pub path: ::core::option::Option<::buffa::alloc::string::String>,
+    /// What it is for, shown to administrators.
+    ///
+    /// Field 3: `description`
+    pub description: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for ContainerFolder {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("ContainerFolder")
+            .field("name", &self.name)
+            .field("path", &self.path)
+            .field("description", &self.description)
+            .finish()
+    }
+}
+impl ContainerFolder {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.ContainerFolder";
+}
+impl ContainerFolder {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::name`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_name(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.name = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::path`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_path(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.path = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::description`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_description(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.description = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(ContainerFolder);
+impl ::buffa::MessageName for ContainerFolder {
+    const PACKAGE: &'static str = "mavio.plugin.v1";
+    const NAME: &'static str = "ContainerFolder";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.ContainerFolder";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.ContainerFolder";
+}
+impl ::buffa::Message for ContainerFolder {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.path {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.description {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.name {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.path {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.description {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.name.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.path.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .description
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.name = ::core::option::Option::None;
+        self.path = ::core::option::Option::None;
+        self.description = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for ContainerFolder {
+    const PROTO_FQN: &'static str = "mavio.plugin.v1.ContainerFolder";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -846,6 +1136,15 @@ pub struct ContainerStatus {
     ///
     /// Field 7: `queued`
     pub queued: ::core::option::Option<bool>,
+    /// The secrets the server generated for it, by key, which its
+    /// environment names "${secret:\<key\>}", for the plugin to sign in with;
+    /// only HostService.ListContainers tells them.
+    ///
+    /// Field 8: `secrets`
+    pub secrets: ::buffa::__private::HashMap<
+        ::buffa::alloc::string::String,
+        ::buffa::alloc::string::String,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -859,6 +1158,7 @@ impl ::core::fmt::Debug for ContainerStatus {
             .field("error", &self.error)
             .field("progress", &self.progress)
             .field("queued", &self.queued)
+            .field("secrets", &self.secrets)
             .finish()
     }
 }
@@ -976,6 +1276,12 @@ impl ::buffa::Message for ContainerStatus {
         if self.queued.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        size
+            += ::buffa::map_codec::field_len::<
+                ::buffa::map_codec::Str,
+                ::buffa::map_codec::Str,
+                _,
+            >(&self.secrets, 1u64);
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1007,6 +1313,11 @@ impl ::buffa::Message for ContainerStatus {
         if let Some(v) = self.queued {
             ::buffa::types::put_bool_field(7u32, v, buf);
         }
+        ::buffa::map_codec::write_field::<
+            ::buffa::map_codec::Str,
+            ::buffa::map_codec::Str,
+            _,
+        >(&self.secrets, 8u32, buf);
         self.__buffa_unknown_fields.write_to(buf);
     }
     fn merge_field(
@@ -1086,6 +1397,17 @@ impl ::buffa::Message for ContainerStatus {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::map_codec::merge_entry::<
+                    ::buffa::map_codec::Str,
+                    ::buffa::map_codec::Str,
+                    _,
+                >(&mut self.secrets, buf, ctx)?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1101,6 +1423,7 @@ impl ::buffa::Message for ContainerStatus {
         self.error = ::core::option::Option::None;
         self.progress = ::core::option::Option::None;
         self.queued = ::core::option::Option::None;
+        self.secrets.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

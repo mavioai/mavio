@@ -6781,6 +6781,16 @@ pub struct PluginContainerView<'a> {
     ///
     /// Field 8: `command`
     pub command: ::core::option::Option<&'a str>,
+    /// The folders of the server chosen for the dependency's folders, by
+    /// name.
+    ///
+    /// Field 9: `folders` (map)
+    pub folders: ::buffa::MapView<'a, &'a str, &'a str>,
+    /// The port a managed container publishes for peers, as the
+    /// dependency's peer_port; 0 for none.
+    ///
+    /// Field 10: `peer_port`
+    pub peer_port: ::core::option::Option<u32>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for PluginContainerView<'a> {
@@ -6925,6 +6935,54 @@ impl<'a> ::buffa::MessageView<'a> for PluginContainerView<'a> {
                 )?;
                 view.command = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.peer_port = Some(::buffa::types::decode_uint32(&mut cur)?);
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let entry_bytes = ::buffa::types::borrow_bytes(&mut cur)?;
+                let mut entry_cur: &'a [u8] = entry_bytes;
+                let mut key = "";
+                let mut val = "";
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&key)
+                        + ::buffa::__private::element_footprint(&val),
+                )?;
+                while !entry_cur.is_empty() {
+                    let entry_tag = ::buffa::encoding::Tag::decode(&mut entry_cur)?;
+                    match entry_tag.field_number() {
+                        1 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            )?;
+                            key = ::buffa::types::borrow_str(&mut entry_cur)?;
+                        }
+                        2 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            )?;
+                            val = ::buffa::types::borrow_str(&mut entry_cur)?;
+                        }
+                        _ => {
+                            ::buffa::encoding::skip_field_depth(
+                                entry_tag,
+                                &mut entry_cur,
+                                ctx.depth(),
+                            )?;
+                        }
+                    }
+                }
+                view.folders.push(key, val);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -6991,6 +7049,12 @@ impl<'a> ::buffa::MessageView<'a> for PluginContainerView<'a> {
             plugin_id: self.plugin_id.map(|s| s.to_string()),
             proxy: self.proxy.map(|s| s.to_string()),
             command: self.command.map(|s| s.to_string()),
+            folders: self
+                .folders
+                .iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            peer_port: self.peer_port,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -7046,6 +7110,15 @@ impl<'a> ::buffa::ViewEncode<'a> for PluginContainerView<'a> {
         if let Some(ref v) = self.command {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        #[allow(clippy::for_kv_map)]
+        for (k, v) in &self.folders {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+            size += 1u64 + ::buffa::encoding::varint_len(entry_size) as u64 + entry_size;
+        }
+        if let Some(v) = self.peer_port {
+            size += 1u64 + ::buffa::types::uint32_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -7100,6 +7173,31 @@ impl<'a> ::buffa::ViewEncode<'a> for PluginContainerView<'a> {
         }
         if let Some(ref v) = self.command {
             ::buffa::types::put_string_field(8u32, v, buf);
+        }
+        for (k, v) in &self.folders {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+            ::buffa::encoding::Tag::new(
+                    9u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::encoding::encode_varint(entry_size, buf);
+            ::buffa::encoding::Tag::new(
+                    1u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(k, buf);
+            ::buffa::encoding::Tag::new(
+                    2u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(v, buf);
+        }
+        if let Some(v) = self.peer_port {
+            ::buffa::types::put_uint32_field(10u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -7269,6 +7367,22 @@ impl PluginContainerOwnedView {
     #[must_use]
     pub fn command(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().command
+    }
+    /// The folders of the server chosen for the dependency's folders, by
+    /// name.
+    ///
+    /// Field 9: `folders` (map)
+    #[must_use]
+    pub fn folders(&self) -> &::buffa::MapView<'_, &'_ str, &'_ str> {
+        &self.0.reborrow().folders
+    }
+    /// The port a managed container publishes for peers, as the
+    /// dependency's peer_port; 0 for none.
+    ///
+    /// Field 10: `peer_port`
+    #[must_use]
+    pub fn peer_port(&self) -> ::core::option::Option<u32> {
+        self.0.reborrow().peer_port
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<PluginContainerView<'static>>>
@@ -8546,6 +8660,16 @@ pub struct SetPluginContainerRequestView<'a> {
     ///
     /// Field 6: `proxy`
     pub proxy: ::core::option::Option<&'a str>,
+    /// Folders of the server, absolute paths, for the dependency's folders by
+    /// name; those left out keep theirs. A managed container needs all.
+    ///
+    /// Field 7: `folders` (map)
+    pub folders: ::buffa::MapView<'a, &'a str, &'a str>,
+    /// The port a managed container publishes for peers, 0 for none; unset
+    /// keeps it, the dependency's peer_port at first.
+    ///
+    /// Field 8: `peer_port`
+    pub peer_port: ::core::option::Option<u32>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for SetPluginContainerRequestView<'a> {
@@ -8622,6 +8746,54 @@ impl<'a> ::buffa::MessageView<'a> for SetPluginContainerRequestView<'a> {
                 )?;
                 view.proxy = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.peer_port = Some(::buffa::types::decode_uint32(&mut cur)?);
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let entry_bytes = ::buffa::types::borrow_bytes(&mut cur)?;
+                let mut entry_cur: &'a [u8] = entry_bytes;
+                let mut key = "";
+                let mut val = "";
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&key)
+                        + ::buffa::__private::element_footprint(&val),
+                )?;
+                while !entry_cur.is_empty() {
+                    let entry_tag = ::buffa::encoding::Tag::decode(&mut entry_cur)?;
+                    match entry_tag.field_number() {
+                        1 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            )?;
+                            key = ::buffa::types::borrow_str(&mut entry_cur)?;
+                        }
+                        2 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            )?;
+                            val = ::buffa::types::borrow_str(&mut entry_cur)?;
+                        }
+                        _ => {
+                            ::buffa::encoding::skip_field_depth(
+                                entry_tag,
+                                &mut entry_cur,
+                                ctx.depth(),
+                            )?;
+                        }
+                    }
+                }
+                view.folders.push(key, val);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -8656,6 +8828,12 @@ impl<'a> ::buffa::MessageView<'a> for SetPluginContainerRequestView<'a> {
             address: self.address.map(|s| s.to_string()),
             use_gpu: self.use_gpu,
             proxy: self.proxy.map(|s| s.to_string()),
+            folders: self
+                .folders
+                .iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            peer_port: self.peer_port,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -8685,6 +8863,15 @@ impl<'a> ::buffa::ViewEncode<'a> for SetPluginContainerRequestView<'a> {
         if let Some(ref v) = self.proxy {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        #[allow(clippy::for_kv_map)]
+        for (k, v) in &self.folders {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+            size += 1u64 + ::buffa::encoding::varint_len(entry_size) as u64 + entry_size;
+        }
+        if let Some(v) = self.peer_port {
+            size += 1u64 + ::buffa::types::uint32_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -8713,6 +8900,31 @@ impl<'a> ::buffa::ViewEncode<'a> for SetPluginContainerRequestView<'a> {
         }
         if let Some(ref v) = self.proxy {
             ::buffa::types::put_string_field(6u32, v, buf);
+        }
+        for (k, v) in &self.folders {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+            ::buffa::encoding::Tag::new(
+                    7u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::encoding::encode_varint(entry_size, buf);
+            ::buffa::encoding::Tag::new(
+                    1u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(k, buf);
+            ::buffa::encoding::Tag::new(
+                    2u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(v, buf);
+        }
+        if let Some(v) = self.peer_port {
+            ::buffa::types::put_uint32_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -8850,6 +9062,22 @@ impl SetPluginContainerRequestOwnedView {
     #[must_use]
     pub fn proxy(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().proxy
+    }
+    /// Folders of the server, absolute paths, for the dependency's folders by
+    /// name; those left out keep theirs. A managed container needs all.
+    ///
+    /// Field 7: `folders` (map)
+    #[must_use]
+    pub fn folders(&self) -> &::buffa::MapView<'_, &'_ str, &'_ str> {
+        &self.0.reborrow().folders
+    }
+    /// The port a managed container publishes for peers, 0 for none; unset
+    /// keeps it, the dependency's peer_port at first.
+    ///
+    /// Field 8: `peer_port`
+    #[must_use]
+    pub fn peer_port(&self) -> ::core::option::Option<u32> {
+        self.0.reborrow().peer_port
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<SetPluginContainerRequestView<'static>>>

@@ -85,6 +85,11 @@ func Proxy(v string) predicate.PluginContainer {
 	return predicate.PluginContainer(sql.FieldEQ(FieldProxy, v))
 }
 
+// PeerPort applies equality check predicate on the "peer_port" field. It's identical to PeerPortEQ.
+func PeerPort(v int) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldEQ(FieldPeerPort, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.PluginContainer {
 	return predicate.PluginContainer(sql.FieldEQ(FieldUpdatedAt, v))
@@ -433,6 +438,56 @@ func ProxyEqualFold(v string) predicate.PluginContainer {
 // ProxyContainsFold applies the ContainsFold predicate on the "proxy" field.
 func ProxyContainsFold(v string) predicate.PluginContainer {
 	return predicate.PluginContainer(sql.FieldContainsFold(FieldProxy, v))
+}
+
+// FoldersIsNil applies the IsNil predicate on the "folders" field.
+func FoldersIsNil() predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldIsNull(FieldFolders))
+}
+
+// FoldersNotNil applies the NotNil predicate on the "folders" field.
+func FoldersNotNil() predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldNotNull(FieldFolders))
+}
+
+// PeerPortEQ applies the EQ predicate on the "peer_port" field.
+func PeerPortEQ(v int) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldEQ(FieldPeerPort, v))
+}
+
+// PeerPortNEQ applies the NEQ predicate on the "peer_port" field.
+func PeerPortNEQ(v int) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldNEQ(FieldPeerPort, v))
+}
+
+// PeerPortIn applies the In predicate on the "peer_port" field.
+func PeerPortIn(vs ...int) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldIn(FieldPeerPort, vs...))
+}
+
+// PeerPortNotIn applies the NotIn predicate on the "peer_port" field.
+func PeerPortNotIn(vs ...int) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldNotIn(FieldPeerPort, vs...))
+}
+
+// PeerPortGT applies the GT predicate on the "peer_port" field.
+func PeerPortGT(v int) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldGT(FieldPeerPort, v))
+}
+
+// PeerPortGTE applies the GTE predicate on the "peer_port" field.
+func PeerPortGTE(v int) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldGTE(FieldPeerPort, v))
+}
+
+// PeerPortLT applies the LT predicate on the "peer_port" field.
+func PeerPortLT(v int) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldLT(FieldPeerPort, v))
+}
+
+// PeerPortLTE applies the LTE predicate on the "peer_port" field.
+func PeerPortLTE(v int) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldLTE(FieldPeerPort, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

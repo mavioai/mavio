@@ -90,6 +90,26 @@ func (_c *PluginContainerCreate) SetNillableProxy(v *string) *PluginContainerCre
 	return _c
 }
 
+// SetFolders sets the "folders" field.
+func (_c *PluginContainerCreate) SetFolders(v map[string]string) *PluginContainerCreate {
+	_c.mutation.SetFolders(v)
+	return _c
+}
+
+// SetPeerPort sets the "peer_port" field.
+func (_c *PluginContainerCreate) SetPeerPort(v int) *PluginContainerCreate {
+	_c.mutation.SetPeerPort(v)
+	return _c
+}
+
+// SetNillablePeerPort sets the "peer_port" field if the given value is not nil.
+func (_c *PluginContainerCreate) SetNillablePeerPort(v *int) *PluginContainerCreate {
+	if v != nil {
+		_c.SetPeerPort(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *PluginContainerCreate) SetUpdatedAt(v time.Time) *PluginContainerCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -165,6 +185,10 @@ func (_c *PluginContainerCreate) defaults() {
 		v := plugincontainer.DefaultProxy
 		_c.mutation.SetProxy(v)
 	}
+	if _, ok := _c.mutation.PeerPort(); !ok {
+		v := plugincontainer.DefaultPeerPort
+		_c.mutation.SetPeerPort(v)
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := plugincontainer.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
@@ -194,6 +218,9 @@ func (_c *PluginContainerCreate) check() error {
 	}
 	if _, ok := _c.mutation.Proxy(); !ok {
 		return &ValidationError{Name: "proxy", err: errors.New(`ent: missing required field "PluginContainer.proxy"`)}
+	}
+	if _, ok := _c.mutation.PeerPort(); !ok {
+		return &ValidationError{Name: "peer_port", err: errors.New(`ent: missing required field "PluginContainer.peer_port"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "PluginContainer.updated_at"`)}
@@ -261,6 +288,14 @@ func (_c *PluginContainerCreate) createSpec() (*PluginContainer, *sqlgraph.Creat
 	if value, ok := _c.mutation.Proxy(); ok {
 		_spec.SetField(plugincontainer.FieldProxy, field.TypeString, value)
 		_node.Proxy = value
+	}
+	if value, ok := _c.mutation.Folders(); ok {
+		_spec.SetField(plugincontainer.FieldFolders, field.TypeJSON, value)
+		_node.Folders = value
+	}
+	if value, ok := _c.mutation.PeerPort(); ok {
+		_spec.SetField(plugincontainer.FieldPeerPort, field.TypeInt, value)
+		_node.PeerPort = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(plugincontainer.FieldUpdatedAt, field.TypeTime, value)
@@ -381,6 +416,42 @@ func (u *PluginContainerUpsert) SetProxy(v string) *PluginContainerUpsert {
 // UpdateProxy sets the "proxy" field to the value that was provided on create.
 func (u *PluginContainerUpsert) UpdateProxy() *PluginContainerUpsert {
 	u.SetExcluded(plugincontainer.FieldProxy)
+	return u
+}
+
+// SetFolders sets the "folders" field.
+func (u *PluginContainerUpsert) SetFolders(v map[string]string) *PluginContainerUpsert {
+	u.Set(plugincontainer.FieldFolders, v)
+	return u
+}
+
+// UpdateFolders sets the "folders" field to the value that was provided on create.
+func (u *PluginContainerUpsert) UpdateFolders() *PluginContainerUpsert {
+	u.SetExcluded(plugincontainer.FieldFolders)
+	return u
+}
+
+// ClearFolders clears the value of the "folders" field.
+func (u *PluginContainerUpsert) ClearFolders() *PluginContainerUpsert {
+	u.SetNull(plugincontainer.FieldFolders)
+	return u
+}
+
+// SetPeerPort sets the "peer_port" field.
+func (u *PluginContainerUpsert) SetPeerPort(v int) *PluginContainerUpsert {
+	u.Set(plugincontainer.FieldPeerPort, v)
+	return u
+}
+
+// UpdatePeerPort sets the "peer_port" field to the value that was provided on create.
+func (u *PluginContainerUpsert) UpdatePeerPort() *PluginContainerUpsert {
+	u.SetExcluded(plugincontainer.FieldPeerPort)
+	return u
+}
+
+// AddPeerPort adds v to the "peer_port" field.
+func (u *PluginContainerUpsert) AddPeerPort(v int) *PluginContainerUpsert {
+	u.Add(plugincontainer.FieldPeerPort, v)
 	return u
 }
 
@@ -524,6 +595,48 @@ func (u *PluginContainerUpsertOne) SetProxy(v string) *PluginContainerUpsertOne 
 func (u *PluginContainerUpsertOne) UpdateProxy() *PluginContainerUpsertOne {
 	return u.Update(func(s *PluginContainerUpsert) {
 		s.UpdateProxy()
+	})
+}
+
+// SetFolders sets the "folders" field.
+func (u *PluginContainerUpsertOne) SetFolders(v map[string]string) *PluginContainerUpsertOne {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.SetFolders(v)
+	})
+}
+
+// UpdateFolders sets the "folders" field to the value that was provided on create.
+func (u *PluginContainerUpsertOne) UpdateFolders() *PluginContainerUpsertOne {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.UpdateFolders()
+	})
+}
+
+// ClearFolders clears the value of the "folders" field.
+func (u *PluginContainerUpsertOne) ClearFolders() *PluginContainerUpsertOne {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.ClearFolders()
+	})
+}
+
+// SetPeerPort sets the "peer_port" field.
+func (u *PluginContainerUpsertOne) SetPeerPort(v int) *PluginContainerUpsertOne {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.SetPeerPort(v)
+	})
+}
+
+// AddPeerPort adds v to the "peer_port" field.
+func (u *PluginContainerUpsertOne) AddPeerPort(v int) *PluginContainerUpsertOne {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.AddPeerPort(v)
+	})
+}
+
+// UpdatePeerPort sets the "peer_port" field to the value that was provided on create.
+func (u *PluginContainerUpsertOne) UpdatePeerPort() *PluginContainerUpsertOne {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.UpdatePeerPort()
 	})
 }
 
@@ -836,6 +949,48 @@ func (u *PluginContainerUpsertBulk) SetProxy(v string) *PluginContainerUpsertBul
 func (u *PluginContainerUpsertBulk) UpdateProxy() *PluginContainerUpsertBulk {
 	return u.Update(func(s *PluginContainerUpsert) {
 		s.UpdateProxy()
+	})
+}
+
+// SetFolders sets the "folders" field.
+func (u *PluginContainerUpsertBulk) SetFolders(v map[string]string) *PluginContainerUpsertBulk {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.SetFolders(v)
+	})
+}
+
+// UpdateFolders sets the "folders" field to the value that was provided on create.
+func (u *PluginContainerUpsertBulk) UpdateFolders() *PluginContainerUpsertBulk {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.UpdateFolders()
+	})
+}
+
+// ClearFolders clears the value of the "folders" field.
+func (u *PluginContainerUpsertBulk) ClearFolders() *PluginContainerUpsertBulk {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.ClearFolders()
+	})
+}
+
+// SetPeerPort sets the "peer_port" field.
+func (u *PluginContainerUpsertBulk) SetPeerPort(v int) *PluginContainerUpsertBulk {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.SetPeerPort(v)
+	})
+}
+
+// AddPeerPort adds v to the "peer_port" field.
+func (u *PluginContainerUpsertBulk) AddPeerPort(v int) *PluginContainerUpsertBulk {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.AddPeerPort(v)
+	})
+}
+
+// UpdatePeerPort sets the "peer_port" field to the value that was provided on create.
+func (u *PluginContainerUpsertBulk) UpdatePeerPort() *PluginContainerUpsertBulk {
+	return u.Update(func(s *PluginContainerUpsert) {
+		s.UpdatePeerPort()
 	})
 }
 

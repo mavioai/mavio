@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"maps"
 	"net/http"
+	"path"
 	"slices"
 	"strings"
 	"sync"
@@ -89,9 +90,19 @@ type Dependency struct {
 	HealthPath string
 	// Volumes maps the dependency's volume names to their mount paths.
 	Volumes map[string]string
-	Memory  int64
-	CPUs    float64
-	GPU     GPU
+	// Folders maps the server's folders, slash-separated absolute paths,
+	// to the paths they are mounted at: a server on the host mounts them,
+	// one in a container (SupervisorOptions.Self) what its own container
+	// mounts them from.
+	Folders map[string]string
+	// PeerPort is a port published at its own number on every interface
+	// of the host, TCP and UDP, for peers to connect to; 0 for none.
+	PeerPort int
+	// Entrypoint replaces the image's entrypoint when not empty.
+	Entrypoint []string
+	Memory     int64
+	CPUs       float64
+	GPU        GPU
 	// HostAccess is whether the service reaches the host by the name
 	// HostName.
 	HostAccess bool
@@ -322,7 +333,7 @@ func (s *Supervisor) Status(plugin, name string) (Status, bool) {
 // Command returns the docker run command equivalent to how the
 // Supervisor creates d's container, which reaches the proxy gateway where
 // it does when it runs, or where it would.
-func (s *Supervisor) Command(d Dependency) string {
+func (s *Supervisor) Command(ctx context.Context, d Dependency) string {
 	r := &run{dep: d, hash: Hash(d), gateway: HostName}
 	if s.o.Self != "" {
 		r.gateway = "<server>"
@@ -332,7 +343,14 @@ func (s *Supervisor) Command(d Dependency) string {
 		r.gateway = cur.gateway
 	}
 	s.mu.Unlock()
-	return s.spec(r, s.o.Names.Container(d.Plugin, d.Name)).DockerRun()
+	binds, err := s.binds(ctx, d)
+	if err != nil {
+		binds = nil
+		for _, f := range slices.Sorted(maps.Keys(d.Folders)) {
+			binds = append(binds, Bind{Source: "<" + f + ">", Target: d.Folders[f]})
+		}
+	}
+	return s.spec(r, s.o.Names.Container(d.Plugin, d.Name), binds).DockerRun()
 }
 
 // Running lists the names of a plugin's running dependencies.
@@ -628,7 +646,11 @@ func (s *Supervisor) ensure(ctx context.Context, r *run, name string) (id, addr 
 		} else if err != nil {
 			return "", "", fmt.Errorf("inspect image %s: %w", d.Image, err)
 		}
-		if id, err = e.CreateContainer(ctx, s.spec(r, name)); err != nil {
+		binds, err := s.binds(ctx, d)
+		if err != nil {
+			return "", "", err
+		}
+		if id, err = e.CreateContainer(ctx, s.spec(r, name, binds)); err != nil {
 			return "", "", fmt.Errorf("create container %s: %w", name, err)
 		}
 	}
@@ -703,8 +725,59 @@ func (s *Supervisor) specLabel(r *run) string {
 	return label
 }
 
+// binds returns how a dependency's folders are mounted: the server's
+// folders themselves for a server on the host, else where its own
+// container mounts them from.
+func (s *Supervisor) binds(ctx context.Context, d Dependency) ([]Bind, error) {
+	if len(d.Folders) == 0 {
+		return nil, nil
+	}
+	var mounts []Mount
+	if s.o.Self != "" {
+		self, err := s.o.Engine.InspectContainer(ctx, s.o.Self)
+		if err != nil {
+			return nil, fmt.Errorf("inspect the server's container: %w", err)
+		}
+		mounts = self.Mounts
+	}
+	out := make([]Bind, 0, len(d.Folders))
+	for _, f := range slices.Sorted(maps.Keys(d.Folders)) {
+		b := Bind{Source: f, Target: d.Folders[f]}
+		if s.o.Self != "" {
+			var err error
+			if b, err = HostBind(mounts, f, d.Folders[f]); err != nil {
+				return nil, err
+			}
+		}
+		out = append(out, b)
+	}
+	return out, nil
+}
+
+// HostBind returns how a container mounts a folder of a container whose
+// mounts are these at target: from the source of the bind mount the
+// folder is on, or a subpath of its volume.
+func HostBind(mounts []Mount, folder, target string) (Bind, error) {
+	folder = path.Clean(folder)
+	var best *Mount
+	for i, m := range mounts {
+		d := path.Clean(m.Destination)
+		if (folder == d || strings.HasPrefix(folder, strings.TrimSuffix(d, "/")+"/")) && (best == nil || len(d) > len(path.Clean(best.Destination))) {
+			best = &mounts[i]
+		}
+	}
+	if best == nil || best.Type != "bind" && best.Type != "volume" {
+		return Bind{}, fmt.Errorf("%w: folder %s is on none of the bind mounts or volumes of the server's container", core.ErrInvalid, folder)
+	}
+	rest := strings.TrimPrefix(strings.TrimPrefix(folder, path.Clean(best.Destination)), "/")
+	if best.Type == "volume" {
+		return Bind{Volume: best.Name, Subpath: rest, Target: target}, nil
+	}
+	return Bind{Source: path.Join(best.Source, rest), Target: target}, nil
+}
+
 // spec returns what a run's container is created with.
-func (s *Supervisor) spec(r *run, name string) ContainerSpec {
+func (s *Supervisor) spec(r *run, name string, binds []Bind) ContainerSpec {
 	d := r.dep
 	volumeLabels := s.labels(d.Plugin, d.Name)
 	labels := maps.Clone(volumeLabels)
@@ -726,9 +799,9 @@ func (s *Supervisor) spec(r *run, name string) ContainerSpec {
 		volumes[s.o.Names.Volume(d.Plugin, d.Name, v)] = target
 	}
 	return ContainerSpec{
-		Name: name, Image: d.Image, Cmd: d.Cmd, Env: env, Labels: labels, VolumeLabels: volumeLabels,
-		Port: d.Port, PublishLoopback: s.o.Self == "", Network: s.o.Names.Network(), Aliases: []string{name},
-		Volumes: volumes, Memory: d.Memory, CPUs: d.CPUs, GPU: d.GPU, HostGateway: (d.HostAccess || d.ProxyEnv != nil && s.o.Self == "") && s.o.HostGateway,
+		Name: name, Image: d.Image, Entrypoint: d.Entrypoint, Cmd: d.Cmd, Env: env, Labels: labels, VolumeLabels: volumeLabels,
+		Port: d.Port, PublishLoopback: s.o.Self == "", PeerPort: d.PeerPort, Network: s.o.Names.Network(), Aliases: []string{name},
+		Volumes: volumes, Binds: binds, Memory: d.Memory, CPUs: d.CPUs, GPU: d.GPU, HostGateway: (d.HostAccess || d.ProxyEnv != nil && s.o.Self == "") && s.o.HostGateway,
 	}
 }
 

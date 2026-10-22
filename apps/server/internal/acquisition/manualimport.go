@@ -316,7 +316,7 @@ func (r *Runtime) manualSource(ctx context.Context, downloadID core.ID, folder s
 		if strings.TrimSpace(out) == "" {
 			return nil, fmt.Errorf("%w: %s", core.ErrConflict, msgNoOutputPath)
 		}
-		mappings, err := r.downloadPathMappings(ctx)
+		mappings, err := r.downloadPathMappings(ctx, []Client{p.client})
 		if err != nil {
 			return nil, err
 		}

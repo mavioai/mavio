@@ -36,8 +36,11 @@ pub struct ContainerDependencyView<'a> {
     /// Field 6: `command`
     pub command: ::buffa::RepeatedView<'a, &'a str>,
     /// Environment variables. A value may hold "${secret:\<key\>}", a random
-    /// secret the server generates once for the dependency, and
-    /// "${address}", the dependency's own address.
+    /// secret the server generates once for the dependency, "${address}",
+    /// the dependency's own address, "${peer_port}", the port peers reach
+    /// it at (peer_port), and "${uid}" and "${gid}", the user and group the
+    /// server runs as, for files in its folders the server can move and
+    /// hard link; command takes the same.
     ///
     /// Field 7: `env` (map)
     pub env: ::buffa::MapView<'a, &'a str, &'a str>,
@@ -87,6 +90,28 @@ pub struct ContainerDependencyView<'a> {
     ///
     /// Field 16: `no_proxy_ipv4_only`
     pub no_proxy_ipv4_only: ::core::option::Option<bool>,
+    /// Folders of the server an administrator chooses, each mounted at its
+    /// path, such as the folder a download client puts downloads in, which
+    /// the server then reads.
+    ///
+    /// Field 17: `folders`
+    pub folders: ::buffa::RepeatedView<
+        'a,
+        super::super::__buffa::view::ContainerFolderView<'a>,
+    >,
+    /// A port peers connect to from outside, such as a BitTorrent client's:
+    /// a managed container publishes it on every interface of the host, TCP
+    /// and UDP, at the number an administrator chooses, this one by default,
+    /// which "${peer_port}" gives the service. 0 for none.
+    ///
+    /// Field 18: `peer_port`
+    pub peer_port: ::core::option::Option<u32>,
+    /// The program replacing the image's entrypoint, such as "/bin/sh" for a
+    /// command that prepares the container before running the image's own;
+    /// empty keeps it.
+    ///
+    /// Field 19: `entrypoint`
+    pub entrypoint: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ContainerDependencyView<'a> {
@@ -212,6 +237,20 @@ impl<'a> ::buffa::MessageView<'a> for ContainerDependencyView<'a> {
                 )?;
                 view.no_proxy_ipv4_only = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            18u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.peer_port = Some(::buffa::types::decode_uint32(&mut cur)?);
+            }
+            19u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.entrypoint = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             6u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -222,6 +261,26 @@ impl<'a> ::buffa::MessageView<'a> for ContainerDependencyView<'a> {
                     ::buffa::__private::element_footprint(&__elem),
                 )?;
                 view.command.push(__elem);
+            }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                ctx.register_element_memory(
+                    ::core::mem::size_of::<
+                        super::super::__buffa::view::ContainerFolderView,
+                    >(),
+                )?;
+                view.folders
+                    .push(
+                        <super::super::__buffa::view::ContainerFolderView as ::buffa::MessageView>::decode_view_ctx(
+                            sub,
+                            __sub_ctx,
+                        )?,
+                    );
             }
             7u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -353,6 +412,13 @@ impl<'a> ::buffa::MessageView<'a> for ContainerDependencyView<'a> {
             host_access: self.host_access,
             direct: self.direct,
             no_proxy_ipv4_only: self.no_proxy_ipv4_only,
+            folders: self
+                .folders
+                .iter()
+                .map(|v| v.to_owned_from_source(__buffa_src))
+                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
+            peer_port: self.peer_port,
+            entrypoint: self.entrypoint.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -360,7 +426,7 @@ impl<'a> ::buffa::MessageView<'a> for ContainerDependencyView<'a> {
 }
 impl<'a> ::buffa::ViewEncode<'a> for ContainerDependencyView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
@@ -418,13 +484,27 @@ impl<'a> ::buffa::ViewEncode<'a> for ContainerDependencyView<'a> {
         if self.no_proxy_ipv4_only.is_some() {
             size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        for v in &self.folders {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if let Some(v) = self.peer_port {
+            size += 2u64 + ::buffa::types::uint32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.entrypoint {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
@@ -514,6 +594,20 @@ impl<'a> ::buffa::ViewEncode<'a> for ContainerDependencyView<'a> {
         }
         if let Some(v) = self.no_proxy_ipv4_only {
             ::buffa::types::put_bool_field(16u32, v, buf);
+        }
+        for v in &self.folders {
+            ::buffa::types::put_len_delimited_header(
+                17u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        if let Some(v) = self.peer_port {
+            ::buffa::types::put_uint32_field(18u32, v, buf);
+        }
+        if let Some(ref v) = self.entrypoint {
+            ::buffa::types::put_string_field(19u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -657,8 +751,11 @@ impl ContainerDependencyOwnedView {
         &self.0.reborrow().command
     }
     /// Environment variables. A value may hold "${secret:\<key\>}", a random
-    /// secret the server generates once for the dependency, and
-    /// "${address}", the dependency's own address.
+    /// secret the server generates once for the dependency, "${address}",
+    /// the dependency's own address, "${peer_port}", the port peers reach
+    /// it at (peer_port), and "${uid}" and "${gid}", the user and group the
+    /// server runs as, for files in its folders the server can move and
+    /// hard link; command takes the same.
     ///
     /// Field 7: `env` (map)
     #[must_use]
@@ -740,6 +837,39 @@ impl ContainerDependencyOwnedView {
     pub fn no_proxy_ipv4_only(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().no_proxy_ipv4_only
     }
+    /// Folders of the server an administrator chooses, each mounted at its
+    /// path, such as the folder a download client puts downloads in, which
+    /// the server then reads.
+    ///
+    /// Field 17: `folders`
+    #[must_use]
+    pub fn folders(
+        &self,
+    ) -> &::buffa::RepeatedView<
+        '_,
+        super::super::__buffa::view::ContainerFolderView<'_>,
+    > {
+        &self.0.reborrow().folders
+    }
+    /// A port peers connect to from outside, such as a BitTorrent client's:
+    /// a managed container publishes it on every interface of the host, TCP
+    /// and UDP, at the number an administrator chooses, this one by default,
+    /// which "${peer_port}" gives the service. 0 for none.
+    ///
+    /// Field 18: `peer_port`
+    #[must_use]
+    pub fn peer_port(&self) -> ::core::option::Option<u32> {
+        self.0.reborrow().peer_port
+    }
+    /// The program replacing the image's entrypoint, such as "/bin/sh" for a
+    /// command that prepares the container before running the image's own;
+    /// empty keeps it.
+    ///
+    /// Field 19: `entrypoint`
+    #[must_use]
+    pub fn entrypoint(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().entrypoint
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<ContainerDependencyView<'static>>>
 for ContainerDependencyOwnedView {
@@ -762,6 +892,279 @@ for ContainerDependencyOwnedView {
 impl ::buffa::HasMessageView for super::super::ContainerDependency {
     type View<'a> = ContainerDependencyView<'a>;
     type ViewHandle = ContainerDependencyOwnedView;
+}
+/// ContainerFolder is a folder of the server mounted in a container
+/// dependency.
+#[derive(Clone, Debug, Default)]
+pub struct ContainerFolderView<'a> {
+    /// Identifier within the dependency: lowercase letters, digits and
+    /// dashes.
+    ///
+    /// Field 1: `name`
+    pub name: ::core::option::Option<&'a str>,
+    /// The absolute path it is mounted at in the container.
+    ///
+    /// Field 2: `path`
+    pub path: ::core::option::Option<&'a str>,
+    /// What it is for, shown to administrators.
+    ///
+    /// Field 3: `description`
+    pub description: ::core::option::Option<&'a str>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for ContainerFolderView<'a> {
+    type Owned = super::super::ContainerFolder;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.name = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.path = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.description = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::ContainerFolder, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::ContainerFolder, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::ContainerFolder {
+            name: self.name.map(|s| s.to_string()),
+            path: self.path.map(|s| s.to_string()),
+            description: self.description.map(|s| s.to_string()),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for ContainerFolderView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.path {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.description {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.name {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.path {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.description {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for ContainerFolderView<'a> {
+    const PACKAGE: &'static str = "mavio.plugin.v1";
+    const NAME: &'static str = "ContainerFolder";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.ContainerFolder";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.ContainerFolder";
+}
+::buffa::impl_default_view_instance!(ContainerFolderView);
+::buffa::impl_view_reborrow!(ContainerFolderView);
+/** Self-contained, `'static` owned view of a `ContainerFolder` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`ContainerFolderView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ContainerFolderView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct ContainerFolderOwnedView(::buffa::OwnedView<ContainerFolderView<'static>>);
+impl ContainerFolderOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ContainerFolderOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ContainerFolderOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::ContainerFolder,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ContainerFolderOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`ContainerFolderView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &ContainerFolderView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::ContainerFolder {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Identifier within the dependency: lowercase letters, digits and
+    /// dashes.
+    ///
+    /// Field 1: `name`
+    #[must_use]
+    pub fn name(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().name
+    }
+    /// The absolute path it is mounted at in the container.
+    ///
+    /// Field 2: `path`
+    #[must_use]
+    pub fn path(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().path
+    }
+    /// What it is for, shown to administrators.
+    ///
+    /// Field 3: `description`
+    #[must_use]
+    pub fn description(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().description
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<ContainerFolderView<'static>>>
+for ContainerFolderOwnedView {
+    fn from(inner: ::buffa::OwnedView<ContainerFolderView<'static>>) -> Self {
+        ContainerFolderOwnedView(inner)
+    }
+}
+impl ::core::convert::From<ContainerFolderOwnedView>
+for ::buffa::OwnedView<ContainerFolderView<'static>> {
+    fn from(wrapper: ContainerFolderOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<ContainerFolderView<'static>>>
+for ContainerFolderOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<ContainerFolderView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::ContainerFolder {
+    type View<'a> = ContainerFolderView<'a>;
+    type ViewHandle = ContainerFolderOwnedView;
 }
 /// ContainerStatus is how a container dependency is reached and whether it
 /// can be used.
@@ -790,6 +1193,12 @@ pub struct ContainerStatusView<'a> {
     ///
     /// Field 7: `queued`
     pub queued: ::core::option::Option<bool>,
+    /// The secrets the server generated for it, by key, which its
+    /// environment names "${secret:\<key\>}", for the plugin to sign in with;
+    /// only HostService.ListContainers tells them.
+    ///
+    /// Field 8: `secrets` (map)
+    pub secrets: ::buffa::MapView<'a, &'a str, &'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ContainerStatusView<'a> {
@@ -875,6 +1284,47 @@ impl<'a> ::buffa::MessageView<'a> for ContainerStatusView<'a> {
                 )?;
                 view.queued = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let entry_bytes = ::buffa::types::borrow_bytes(&mut cur)?;
+                let mut entry_cur: &'a [u8] = entry_bytes;
+                let mut key = "";
+                let mut val = "";
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&key)
+                        + ::buffa::__private::element_footprint(&val),
+                )?;
+                while !entry_cur.is_empty() {
+                    let entry_tag = ::buffa::encoding::Tag::decode(&mut entry_cur)?;
+                    match entry_tag.field_number() {
+                        1 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            )?;
+                            key = ::buffa::types::borrow_str(&mut entry_cur)?;
+                        }
+                        2 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            )?;
+                            val = ::buffa::types::borrow_str(&mut entry_cur)?;
+                        }
+                        _ => {
+                            ::buffa::encoding::skip_field_depth(
+                                entry_tag,
+                                &mut entry_cur,
+                                ctx.depth(),
+                            )?;
+                        }
+                    }
+                }
+                view.secrets.push(key, val);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -904,6 +1354,11 @@ impl<'a> ::buffa::MessageView<'a> for ContainerStatusView<'a> {
             error: self.error.map(|s| s.to_string()),
             progress: self.progress,
             queued: self.queued,
+            secrets: self
+                .secrets
+                .iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -936,6 +1391,12 @@ impl<'a> ::buffa::ViewEncode<'a> for ContainerStatusView<'a> {
         if self.queued.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        #[allow(clippy::for_kv_map)]
+        for (k, v) in &self.secrets {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+            size += 1u64 + ::buffa::encoding::varint_len(entry_size) as u64 + entry_size;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -967,6 +1428,28 @@ impl<'a> ::buffa::ViewEncode<'a> for ContainerStatusView<'a> {
         }
         if let Some(v) = self.queued {
             ::buffa::types::put_bool_field(7u32, v, buf);
+        }
+        for (k, v) in &self.secrets {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+            ::buffa::encoding::Tag::new(
+                    8u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::encoding::encode_varint(entry_size, buf);
+            ::buffa::encoding::Tag::new(
+                    1u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(k, buf);
+            ::buffa::encoding::Tag::new(
+                    2u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1108,6 +1591,15 @@ impl ContainerStatusOwnedView {
     #[must_use]
     pub fn queued(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().queued
+    }
+    /// The secrets the server generated for it, by key, which its
+    /// environment names "${secret:\<key\>}", for the plugin to sign in with;
+    /// only HostService.ListContainers tells them.
+    ///
+    /// Field 8: `secrets` (map)
+    #[must_use]
+    pub fn secrets(&self) -> &::buffa::MapView<'_, &'_ str, &'_ str> {
+        &self.0.reborrow().secrets
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ContainerStatusView<'static>>>

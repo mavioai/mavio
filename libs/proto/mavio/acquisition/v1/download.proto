@@ -384,6 +384,9 @@ message DownloadClientPath {
   // Set by the server: the library paths on the folder's storage, which
   // imports hard link files to rather than copy them.
   repeated string link_library_paths = 7;
+  // Set by the server: the mapping is a folder of the container the
+  // client runs in, set with the container rather than here.
+  bool container = 8;
 }
 
 message GetDownloadClientPathsRequest {

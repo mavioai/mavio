@@ -854,6 +854,12 @@ pub struct DownloadClient {
     ///
     /// Field 13: `tags`
     pub tags: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// The plugin's container dependency the client runs in, whose folders'
+    /// paths in the container the server maps to where it chose them;
+    /// empty for none.
+    ///
+    /// Field 14: `container`
+    pub container: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -873,6 +879,7 @@ impl ::core::fmt::Debug for DownloadClient {
             .field("prefers_torrent_file", &self.prefers_torrent_file)
             .field("host", &self.host)
             .field("tags", &self.tags)
+            .field("container", &self.container)
             .finish()
     }
 }
@@ -976,6 +983,16 @@ impl DownloadClient {
         self.host = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::container`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_container(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.container = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(DownloadClient);
 impl ::buffa::MessageName for DownloadClient {
@@ -1041,6 +1058,9 @@ impl ::buffa::Message for DownloadClient {
         for v in &self.tags {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.container {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1094,6 +1114,9 @@ impl ::buffa::Message for DownloadClient {
         }
         for v in &self.tags {
             ::buffa::types::put_string_field(13u32, v, buf);
+        }
+        if let Some(ref v) = self.container {
+            ::buffa::types::put_string_field(14u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1236,6 +1259,18 @@ impl ::buffa::Message for DownloadClient {
                 )?;
                 self.tags.push(__elem);
             }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .container
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1257,6 +1292,7 @@ impl ::buffa::Message for DownloadClient {
         self.prefers_torrent_file = ::core::option::Option::None;
         self.host = ::core::option::Option::None;
         self.tags.clear();
+        self.container = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

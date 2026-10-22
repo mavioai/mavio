@@ -29,6 +29,9 @@ type ClientPath struct {
 	// an absolute path or a remote's folder; empty when the server reads
 	// RemotePath itself.
 	LocalPath string
+	// Container: the mapping is a folder of the client's managed
+	// container, which the server mounted there, rather than stored.
+	Container bool
 	// RootFolder: the client reports the folder as one completed
 	// downloads end up in, rather than only a mapping naming it.
 	RootFolder bool
@@ -84,6 +87,10 @@ func (r *Runtime) ClientPaths(ctx context.Context, pluginID, clientID string) ([
 			mappings = append(mappings, acquire.DownloadPathMapping{Client: c.Ref(), RemotePath: m.RemotePath, LocalPath: m.LocalPath})
 			out = append(out, ClientPath{RemotePath: m.RemotePath, LocalPath: m.LocalPath})
 		}
+	}
+	for _, m := range r.containerMappings(ctx, c) {
+		mappings = append(mappings, m)
+		out = append(out, ClientPath{RemotePath: m.RemotePath, LocalPath: m.LocalPath, Container: true})
 	}
 	roots, failure := r.rootFolders(ctx, c)
 	for _, root := range roots {
@@ -272,15 +279,15 @@ func (r *Runtime) linkable(ctx context.Context, folder, lib string) bool {
 	return st.Capabilities().HardLinks
 }
 
-// SetClientPaths replaces the download path mappings of a client and
-// returns its folders as ClientPaths does.
+// SetClientPaths replaces the download path mappings of a client, but for
+// its container's, and returns its folders as ClientPaths does.
 func (r *Runtime) SetClientPaths(ctx context.Context, pluginID, clientID string, paths []ClientPath) ([]ClientPath, string, error) {
 	if _, err := r.client(ctx, pluginID, clientID); err != nil {
 		return nil, "", err
 	}
 	var ms []core.DownloadPathMapping
 	for _, p := range paths {
-		if p.LocalPath == "" {
+		if p.LocalPath == "" || p.Container {
 			continue
 		}
 		local := p.LocalPath

@@ -75,7 +75,7 @@ class ListDownloadClientsResponse(_message.Message):
     def __init__(self, clients: _Optional[_Iterable[_Union[DownloadClient, _Mapping]]] = ...) -> None: ...
 
 class DownloadClient(_message.Message):
-    __slots__ = ("id", "name", "definition_id", "protocol", "enabled", "priority", "remove_completed_downloads", "remove_failed_downloads", "disabled_until", "failure", "prefers_torrent_file", "host", "tags")
+    __slots__ = ("id", "name", "definition_id", "protocol", "enabled", "priority", "remove_completed_downloads", "remove_failed_downloads", "disabled_until", "failure", "prefers_torrent_file", "host", "tags", "container")
     ID_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
     DEFINITION_ID_FIELD_NUMBER: _ClassVar[int]
@@ -89,6 +89,7 @@ class DownloadClient(_message.Message):
     PREFERS_TORRENT_FILE_FIELD_NUMBER: _ClassVar[int]
     HOST_FIELD_NUMBER: _ClassVar[int]
     TAGS_FIELD_NUMBER: _ClassVar[int]
+    CONTAINER_FIELD_NUMBER: _ClassVar[int]
     id: str
     name: str
     definition_id: str
@@ -102,7 +103,8 @@ class DownloadClient(_message.Message):
     prefers_torrent_file: bool
     host: str
     tags: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., definition_id: _Optional[str] = ..., protocol: _Optional[_Union[_indexer_pb2.DownloadProtocol, str]] = ..., enabled: _Optional[bool] = ..., priority: _Optional[int] = ..., remove_completed_downloads: _Optional[bool] = ..., remove_failed_downloads: _Optional[bool] = ..., disabled_until: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., failure: _Optional[str] = ..., prefers_torrent_file: _Optional[bool] = ..., host: _Optional[str] = ..., tags: _Optional[_Iterable[str]] = ...) -> None: ...
+    container: str
+    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., definition_id: _Optional[str] = ..., protocol: _Optional[_Union[_indexer_pb2.DownloadProtocol, str]] = ..., enabled: _Optional[bool] = ..., priority: _Optional[int] = ..., remove_completed_downloads: _Optional[bool] = ..., remove_failed_downloads: _Optional[bool] = ..., disabled_until: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., failure: _Optional[str] = ..., prefers_torrent_file: _Optional[bool] = ..., host: _Optional[str] = ..., tags: _Optional[_Iterable[str]] = ..., container: _Optional[str] = ...) -> None: ...
 
 class TestDownloadClientRequest(_message.Message):
     __slots__ = ("client_id", "definition_id", "settings_json")

@@ -41,7 +41,7 @@ CONTAINER_STATE_UNHEALTHY: ContainerState
 CONTAINER_STATE_UNAVAILABLE: ContainerState
 
 class ContainerDependency(_message.Message):
-    __slots__ = ("name", "description", "image", "port", "health_path", "command", "env", "volumes", "gpu", "gpu_image", "memory_mib", "cpus", "required", "host_access", "direct", "no_proxy_ipv4_only")
+    __slots__ = ("name", "description", "image", "port", "health_path", "command", "env", "volumes", "gpu", "gpu_image", "memory_mib", "cpus", "required", "host_access", "direct", "no_proxy_ipv4_only", "folders", "peer_port", "entrypoint")
     class EnvEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
@@ -72,6 +72,9 @@ class ContainerDependency(_message.Message):
     HOST_ACCESS_FIELD_NUMBER: _ClassVar[int]
     DIRECT_FIELD_NUMBER: _ClassVar[int]
     NO_PROXY_IPV4_ONLY_FIELD_NUMBER: _ClassVar[int]
+    FOLDERS_FIELD_NUMBER: _ClassVar[int]
+    PEER_PORT_FIELD_NUMBER: _ClassVar[int]
+    ENTRYPOINT_FIELD_NUMBER: _ClassVar[int]
     name: str
     description: str
     image: str
@@ -88,10 +91,30 @@ class ContainerDependency(_message.Message):
     host_access: bool
     direct: bool
     no_proxy_ipv4_only: bool
-    def __init__(self, name: _Optional[str] = ..., description: _Optional[str] = ..., image: _Optional[str] = ..., port: _Optional[int] = ..., health_path: _Optional[str] = ..., command: _Optional[_Iterable[str]] = ..., env: _Optional[_Mapping[str, str]] = ..., volumes: _Optional[_Mapping[str, str]] = ..., gpu: _Optional[_Union[GpuSupport, str]] = ..., gpu_image: _Optional[str] = ..., memory_mib: _Optional[int] = ..., cpus: _Optional[float] = ..., required: _Optional[bool] = ..., host_access: _Optional[bool] = ..., direct: _Optional[bool] = ..., no_proxy_ipv4_only: _Optional[bool] = ...) -> None: ...
+    folders: _containers.RepeatedCompositeFieldContainer[ContainerFolder]
+    peer_port: int
+    entrypoint: str
+    def __init__(self, name: _Optional[str] = ..., description: _Optional[str] = ..., image: _Optional[str] = ..., port: _Optional[int] = ..., health_path: _Optional[str] = ..., command: _Optional[_Iterable[str]] = ..., env: _Optional[_Mapping[str, str]] = ..., volumes: _Optional[_Mapping[str, str]] = ..., gpu: _Optional[_Union[GpuSupport, str]] = ..., gpu_image: _Optional[str] = ..., memory_mib: _Optional[int] = ..., cpus: _Optional[float] = ..., required: _Optional[bool] = ..., host_access: _Optional[bool] = ..., direct: _Optional[bool] = ..., no_proxy_ipv4_only: _Optional[bool] = ..., folders: _Optional[_Iterable[_Union[ContainerFolder, _Mapping]]] = ..., peer_port: _Optional[int] = ..., entrypoint: _Optional[str] = ...) -> None: ...
+
+class ContainerFolder(_message.Message):
+    __slots__ = ("name", "path", "description")
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    PATH_FIELD_NUMBER: _ClassVar[int]
+    DESCRIPTION_FIELD_NUMBER: _ClassVar[int]
+    name: str
+    path: str
+    description: str
+    def __init__(self, name: _Optional[str] = ..., path: _Optional[str] = ..., description: _Optional[str] = ...) -> None: ...
 
 class ContainerStatus(_message.Message):
-    __slots__ = ("name", "mode", "address", "state", "error", "progress", "queued")
+    __slots__ = ("name", "mode", "address", "state", "error", "progress", "queued", "secrets")
+    class SecretsEntry(_message.Message):
+        __slots__ = ("key", "value")
+        KEY_FIELD_NUMBER: _ClassVar[int]
+        VALUE_FIELD_NUMBER: _ClassVar[int]
+        key: str
+        value: str
+        def __init__(self, key: _Optional[str] = ..., value: _Optional[str] = ...) -> None: ...
     NAME_FIELD_NUMBER: _ClassVar[int]
     MODE_FIELD_NUMBER: _ClassVar[int]
     ADDRESS_FIELD_NUMBER: _ClassVar[int]
@@ -99,6 +122,7 @@ class ContainerStatus(_message.Message):
     ERROR_FIELD_NUMBER: _ClassVar[int]
     PROGRESS_FIELD_NUMBER: _ClassVar[int]
     QUEUED_FIELD_NUMBER: _ClassVar[int]
+    SECRETS_FIELD_NUMBER: _ClassVar[int]
     name: str
     mode: ContainerMode
     address: str
@@ -106,7 +130,8 @@ class ContainerStatus(_message.Message):
     error: str
     progress: float
     queued: bool
-    def __init__(self, name: _Optional[str] = ..., mode: _Optional[_Union[ContainerMode, str]] = ..., address: _Optional[str] = ..., state: _Optional[_Union[ContainerState, str]] = ..., error: _Optional[str] = ..., progress: _Optional[float] = ..., queued: _Optional[bool] = ...) -> None: ...
+    secrets: _containers.ScalarMap[str, str]
+    def __init__(self, name: _Optional[str] = ..., mode: _Optional[_Union[ContainerMode, str]] = ..., address: _Optional[str] = ..., state: _Optional[_Union[ContainerState, str]] = ..., error: _Optional[str] = ..., progress: _Optional[float] = ..., queued: _Optional[bool] = ..., secrets: _Optional[_Mapping[str, str]] = ...) -> None: ...
 
 class ListContainersRequest(_message.Message):
     __slots__ = ()

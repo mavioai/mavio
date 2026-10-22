@@ -105,6 +105,10 @@ message DownloadClient {
   // The client's tags: a movie or series with tags only uses the clients
   // sharing one of them, else those without tags, as Radarr's.
   repeated string tags = 13;
+  // The plugin's container dependency the client runs in, whose folders'
+  // paths in the container the server maps to where it chose them;
+  // empty for none.
+  string container = 14;
 }
 
 message TestDownloadClientRequest {

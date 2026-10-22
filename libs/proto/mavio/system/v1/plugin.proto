@@ -295,6 +295,12 @@ message PluginContainer {
   // For a managed container, the docker run command equivalent to how the
   // server runs it; empty without a container engine.
   string command = 8;
+  // The folders of the server chosen for the dependency's folders, by
+  // name.
+  map<string, string> folders = 9;
+  // The port a managed container publishes for peers, as the
+  // dependency's peer_port; 0 for none.
+  uint32 peer_port = 10;
 }
 
 // ContainerCommands run a container dependency outside the server, under
@@ -337,6 +343,12 @@ message SetPluginContainerRequest {
   // The proxy a managed container reaches sites through, as
   // PluginContainer.proxy; unset keeps it.
   string proxy = 6;
+  // Folders of the server, absolute paths, for the dependency's folders by
+  // name; those left out keep theirs. A managed container needs all.
+  map<string, string> folders = 7;
+  // The port a managed container publishes for peers, 0 for none; unset
+  // keeps it, the dependency's peer_port at first.
+  uint32 peer_port = 8 [(buf.validate.field).uint32.lte = 65535];
 }
 
 message SetPluginContainerResponse {

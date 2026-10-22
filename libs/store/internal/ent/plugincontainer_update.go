@@ -97,6 +97,39 @@ func (_u *PluginContainerUpdate) SetNillableProxy(v *string) *PluginContainerUpd
 	return _u
 }
 
+// SetFolders sets the "folders" field.
+func (_u *PluginContainerUpdate) SetFolders(v map[string]string) *PluginContainerUpdate {
+	_u.mutation.SetFolders(v)
+	return _u
+}
+
+// ClearFolders clears the value of the "folders" field.
+func (_u *PluginContainerUpdate) ClearFolders() *PluginContainerUpdate {
+	_u.mutation.ClearFolders()
+	return _u
+}
+
+// SetPeerPort sets the "peer_port" field.
+func (_u *PluginContainerUpdate) SetPeerPort(v int) *PluginContainerUpdate {
+	_u.mutation.ResetPeerPort()
+	_u.mutation.SetPeerPort(v)
+	return _u
+}
+
+// SetNillablePeerPort sets the "peer_port" field if the given value is not nil.
+func (_u *PluginContainerUpdate) SetNillablePeerPort(v *int) *PluginContainerUpdate {
+	if v != nil {
+		_u.SetPeerPort(*v)
+	}
+	return _u
+}
+
+// AddPeerPort adds value to the "peer_port" field.
+func (_u *PluginContainerUpdate) AddPeerPort(v int) *PluginContainerUpdate {
+	_u.mutation.AddPeerPort(v)
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *PluginContainerUpdate) SetUpdatedAt(v time.Time) *PluginContainerUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -175,6 +208,18 @@ func (_u *PluginContainerUpdate) sqlSave(ctx context.Context) (_node int, err er
 	}
 	if value, ok := _u.mutation.Proxy(); ok {
 		_spec.SetField(plugincontainer.FieldProxy, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Folders(); ok {
+		_spec.SetField(plugincontainer.FieldFolders, field.TypeJSON, value)
+	}
+	if _u.mutation.FoldersCleared() {
+		_spec.ClearField(plugincontainer.FieldFolders, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.PeerPort(); ok {
+		_spec.SetField(plugincontainer.FieldPeerPort, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedPeerPort(); ok {
+		_spec.AddField(plugincontainer.FieldPeerPort, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(plugincontainer.FieldUpdatedAt, field.TypeTime, value)
@@ -266,6 +311,39 @@ func (_u *PluginContainerUpdateOne) SetNillableProxy(v *string) *PluginContainer
 	if v != nil {
 		_u.SetProxy(*v)
 	}
+	return _u
+}
+
+// SetFolders sets the "folders" field.
+func (_u *PluginContainerUpdateOne) SetFolders(v map[string]string) *PluginContainerUpdateOne {
+	_u.mutation.SetFolders(v)
+	return _u
+}
+
+// ClearFolders clears the value of the "folders" field.
+func (_u *PluginContainerUpdateOne) ClearFolders() *PluginContainerUpdateOne {
+	_u.mutation.ClearFolders()
+	return _u
+}
+
+// SetPeerPort sets the "peer_port" field.
+func (_u *PluginContainerUpdateOne) SetPeerPort(v int) *PluginContainerUpdateOne {
+	_u.mutation.ResetPeerPort()
+	_u.mutation.SetPeerPort(v)
+	return _u
+}
+
+// SetNillablePeerPort sets the "peer_port" field if the given value is not nil.
+func (_u *PluginContainerUpdateOne) SetNillablePeerPort(v *int) *PluginContainerUpdateOne {
+	if v != nil {
+		_u.SetPeerPort(*v)
+	}
+	return _u
+}
+
+// AddPeerPort adds value to the "peer_port" field.
+func (_u *PluginContainerUpdateOne) AddPeerPort(v int) *PluginContainerUpdateOne {
+	_u.mutation.AddPeerPort(v)
 	return _u
 }
 
@@ -377,6 +455,18 @@ func (_u *PluginContainerUpdateOne) sqlSave(ctx context.Context) (_node *PluginC
 	}
 	if value, ok := _u.mutation.Proxy(); ok {
 		_spec.SetField(plugincontainer.FieldProxy, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Folders(); ok {
+		_spec.SetField(plugincontainer.FieldFolders, field.TypeJSON, value)
+	}
+	if _u.mutation.FoldersCleared() {
+		_spec.ClearField(plugincontainer.FieldFolders, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.PeerPort(); ok {
+		_spec.SetField(plugincontainer.FieldPeerPort, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedPeerPort(); ok {
+		_spec.AddField(plugincontainer.FieldPeerPort, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(plugincontainer.FieldUpdatedAt, field.TypeTime, value)

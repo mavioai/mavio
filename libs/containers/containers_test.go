@@ -381,6 +381,38 @@ func TestCreateContainer(t *testing.T) {
 	}
 }
 
+func TestCreateContainerBindsAndPeerPort(t *testing.T) {
+	f := startFake(t, "1.47")
+	f.route("POST /v1.47/containers/create", jsonRoute(map[string]any{"Id": "c1"}))
+	c := NewClient(f.ep)
+	defer c.Close()
+	if _, err := c.CreateContainer(t.Context(), ContainerSpec{
+		Name: "mavio-download-clients-qbittorrent", Image: "qbittorrent", Entrypoint: []string{"/bin/sh"}, Cmd: []string{"-c", "exec /init"},
+		PeerPort: 6881, Binds: []Bind{{Source: "/srv/downloads", Target: "/downloads"}, {Volume: "mavio-data", Subpath: "downloads", Target: "/more"}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	var got, want any
+	if err := json.Unmarshal([]byte(f.body("POST /v1.47/containers/create")), &got); err != nil {
+		t.Fatal(err)
+	}
+	_ = json.Unmarshal([]byte(`{
+		"Image": "qbittorrent", "Entrypoint": ["/bin/sh"], "Cmd": ["-c", "exec /init"],
+		"ExposedPorts": {"6881/tcp": {}, "6881/udp": {}},
+		"HostConfig": {
+			"PortBindings": {"6881/tcp": [{"HostIp": "", "HostPort": "6881"}], "6881/udp": [{"HostIp": "", "HostPort": "6881"}]},
+			"Mounts": [
+				{"Type": "bind", "Source": "/srv/downloads", "Target": "/downloads"},
+				{"Type": "volume", "Source": "mavio-data", "Target": "/more", "VolumeOptions": {"Subpath": "downloads"}}
+			],
+			"RestartPolicy": {"Name": "no"}
+		}
+	}`), &want)
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("create body = %v, want %v", got, want)
+	}
+}
+
 func TestContainerLifecycle(t *testing.T) {
 	f := startFake(t, "1.47")
 	ok := func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusNoContent) }

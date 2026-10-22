@@ -161,7 +161,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 * `RATINGS_PROVIDER`：`RatingsProviderService` 给出电影或剧集在 TMDB 之外的评分：`GetRatings` 接受其类型、外部 ID、英文名称与年份，返回每项评分的来源（烂番茄的影评人或观众评分、IMDb 评分）、分数、票数、页面以及烂番茄是否认证新鲜；不认识该作品时不返回评分。`DiscoverService.GetRatings` 询问每个评分提供者，如 Seerr 在作品 TMDB 评分旁显示的评分。`plugins/ratings` 如 Seerr 一样无需密钥地提供它：经烂番茄网站所用的搜索得到电影与剧集的烂番茄评分，按 Seerr 的打分匹配名称与年份；按 IMDb ID 从 Radarr 的元数据服务得到电影的 IMDb 评分。
 * `SCENE_MAPPING_PROVIDER`：`SceneMappingProviderService` 说明 release 以不同于集列表的方式命名和编号剧集的情况，用于把 release 匹配到剧集与单集：`ListSceneMappings` 列出 release 对剧集或其部分季使用的标题，附带其编号的季、用于搜索索引器的标题，以及 release 必须匹配的正则表达式，每条映射来自提供者的某个来源，来源新列出的映射取代它之前列出的；`ListDailySeries` 列出 release 按播出日期命名的剧集；`GetSceneNumbering` 列出 release 对剧集单集的编号与其集列表不同之处。`scraper-servarr` 根据 Sonarr 的服务（scene 映射与日播剧）与 XEM（按 TVDB 的标题与编号）提供它，二者作为两个来源；其中一个不可用时只列出另一个的映射。
 * `INDEXER_PROVIDER`：`IndexerProviderService` 搜索索引器。`ListDefinitions` 列出提供者实现的索引器种类（站点，或 Newznab 等协议）及每种所需的设置，并标明其中的机密；插件配置列出据此配置的索引器，`ListIndexers` 列出它们及其能力（Newznab 的搜索参数与分类）、是否因失败而暂被排除，以及服务器的决策与抓取所用的设置（标签、MULTi 发布的语言，torrent 索引器还有必需标志、最少做种数、分享率、做种时间、整季包做种时间，以及抓取时是否拒绝哈希已被拉黑的种子），以及总是接收该索引器 release 的下载客户端；`TestIndexer` 检查索引器的设置；`SearchReleases` 按 ID、标题、季与集在 Newznab 分类中、在时间与大小限制内搜索电影、剧集或文本，无任何搜索条件时读取最近的 release，返回 release（索引器提供时附带来源组、片源、容器、编码与分辨率）与失败的索引器；`GetReleaseFile` 获取 release 的种子文件或 NZB，或其下载链接指向的磁力链接，并拒绝无效的 NZB；`ReleaseService` 搜索每个就绪的索引器提供者，并保存其索引器一小时，直到插件重启或重新配置。`plugins/indexers` 把站点给出的内容（Cookie、Newznab 能力、API 令牌）与每个索引器的状态一起保存在其数据目录中，跨重启保留。由 `plugins/indexers` 提供。
-* `DOWNLOAD_CLIENT_PROVIDER`：`DownloadClientProviderService` 把 release 发送给下载客户端。`ListDownloadClientDefinitions` 如索引器定义那样列出提供者实现的客户端种类及每种所需的设置；插件配置列出据此配置的客户端，每个客户端有电影与剧集各自的分类，`ListDownloadClients` 列出它们的协议、优先级、标签、主机（服务端据此建议在哪里读取客户端的文件夹）、是否偏好种子文件而非磁力链接，以及是否因失败而暂被排除；`TestDownloadClient` 检查客户端的设置，对不妨碍其工作的问题（缺少分类、开发版本）返回警告；`AddDownload` 把电影或剧集的种子文件、磁力链接或 NZB 发送给客户端，并标明是否为近期发行、附带其索引器要求的做种条件、是否为整季（Pneumatic 拒绝整季）、release 及其电影或剧集的信息（质量、语言、发布组、索引器、年份、合集、制片公司、标题 slug，Flood 将其添加为标签），以及为其拉黑的种子哈希（release 未给出哈希的种子，若其哈希在其中则被拒绝），返回下载的 ID；客户端不接受磁力链接时以 unimplemented 失败，由服务端改发种子文件，客户端拒绝该 release 时以 failed precondition 失败；`ListDownloads` 列出客户端分类中的下载及其状态、大小、分享率与输出路径，以及各客户端自身的信息（输出目录、是否自行删除已完成的下载、其整理方式）；`GetDownload` 在入库前重新读取下载；`RemoveDownload` 删除下载，按需连同其文件；`MarkDownloadImported` 把已入库的下载移到客户端的已入库分类。`DownloadService` 如同 Radarr 的 DownloadClientProvider，把每个 release 发送给其协议的客户端：与电影或剧集共享某个标签的客户端，否则为无标签的客户端；索引器指定了下载客户端时即用它；否则在其中未因失败而暂被排除者里（若全被排除，则为全部，除非该 release 因等待客户端恢复而处于待定），优先级最高的那些轮流使用。由 `plugins/download-clients` 提供；它把抓取给出的各种子的做种限制保存在数据目录中（`seeds.json`），使其在重启后保留，并按 `history_limit` 列出 Usenet 客户端的历史条数。
+* `DOWNLOAD_CLIENT_PROVIDER`：`DownloadClientProviderService` 把 release 发送给下载客户端。`ListDownloadClientDefinitions` 如索引器定义那样列出提供者实现的客户端种类及每种所需的设置；插件配置列出据此配置的客户端，每个客户端有电影与剧集各自的分类，`ListDownloadClients` 列出它们的协议、优先级、标签、主机（服务端据此建议在哪里读取客户端的文件夹）、是否偏好种子文件而非磁力链接，以及是否因失败而暂被排除；`TestDownloadClient` 检查客户端的设置，对不妨碍其工作的问题（缺少分类、开发版本）返回警告；`AddDownload` 把电影或剧集的种子文件、磁力链接或 NZB 发送给客户端，并标明是否为近期发行、附带其索引器要求的做种条件、是否为整季（Pneumatic 拒绝整季）、release 及其电影或剧集的信息（质量、语言、发布组、索引器、年份、合集、制片公司、标题 slug，Flood 将其添加为标签），以及为其拉黑的种子哈希（release 未给出哈希的种子，若其哈希在其中则被拒绝），返回下载的 ID；客户端不接受磁力链接时以 unimplemented 失败，由服务端改发种子文件，客户端拒绝该 release 时以 failed precondition 失败；`ListDownloads` 列出客户端分类中的下载及其状态、大小、分享率与输出路径，以及各客户端自身的信息（输出目录、是否自行删除已完成的下载、其整理方式）；`GetDownload` 在入库前重新读取下载；`RemoveDownload` 删除下载，按需连同其文件；`MarkDownloadImported` 把已入库的下载移到客户端的已入库分类。`DownloadService` 如同 Radarr 的 DownloadClientProvider，把每个 release 发送给其协议的客户端：与电影或剧集共享某个标签的客户端，否则为无标签的客户端；索引器指定了下载客户端时即用它；否则在其中未因失败而暂被排除者里（若全被排除，则为全部，除非该 release 因等待客户端恢复而处于待定），优先级最高的那些轮流使用。由 `plugins/download-clients` 提供；它把抓取给出的各种子的做种限制保存在数据目录中（`seeds.json`），使其在重启后保留，并按 `history_limit` 列出 Usenet 客户端的历史条数。其清单把 qBittorrent、Transmission 与 SABnzbd（LinuxServer 的镜像）声明为可选的容器依赖，每个都有位于 `/downloads` 的文件夹 `downloads`，其凭据作为密钥生成：qBittorrent 与 SABnzbd 由在镜像的 init 之前运行的 Python 脚本设置（网页界面的用户与密码；SABnzbd 的 API 密钥、主机白名单、文件夹以及分类 `movies-mavio` 与 `tv-mavio`），Transmission 由其环境变量设置；qBittorrent 与 Transmission 发布对等端口（6881 与 51413）。其 `container_clients` 列出它们，每个只在其容器设置好后才能启用；容器就绪者成为客户端 `container-<name>`，名为“<定义> (container)”，使用该定义的默认设置、容器的地址及其密钥。服务端在它挂载的位置读取这类客户端的文件夹（`DownloadClientPath.container`），它们不与其他映射一起编辑（[架构 §16.3](architecture.zh-CN.md#163-托管依赖)）。
 
 配置的每个索引器与下载客户端都有一个由服务器生成的 ID（架构 §7.5）和一个由管理员给定的名称——默认取其定义的名称——在插件的索引器或下载客户端中唯一（不区分大小写）；与 Prowlarr 一样，同一定义可以配置多次。配置 schema 把定义、以及索引器的下载客户端作为选项提供。
 
@@ -247,8 +247,11 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 * `description`：用途，向管理员显示。
 * `image`：带 digest 的引用（`repository:tag@sha256:…`）；没有 digest 的镜像被拒绝。
 * `port`：服务在容器内监听的端口；`health_path`：服务就绪时返回 2xx 的 HTTP 路径，未设置时以端口可连接为准。
-* `command`、`env`：参数与环境变量。值 `${secret:<key>}` 是服务端为该依赖生成一次的随机密钥；`${address}` 是其他容器访问该依赖自己时的地址 `http://mavio-<plugin>-<name>:<port>`。
+* `command`、`env`：参数与环境变量。值 `${secret:<key>}` 是服务端为该依赖生成一次的随机密钥；`${address}` 是其他容器访问该依赖自己时的地址 `http://mavio-<plugin>-<name>:<port>`；`${peer_port}` 是其对等端口；`${uid}` 与 `${gid}` 是服务端运行所用的用户与组（没有时为 1000），供以它们的身份写入共享文件夹的镜像使用。
+* `entrypoint`：替换镜像的入口点，用于在运行镜像自己的入口点之前设置服务的命令，例如 `/bin/sh`。
 * `volumes`：按卷名给出的挂载路径，例如 `{"cache": "/root/.cache"}`。
+* `folders`：挂载到托管容器中的服务端文件夹，每个包含 `name`、容器中的 `path`（绝对路径，不是卷的路径）与 `description`；服务端运行它之前，由管理员为每个文件夹选择服务端的文件夹，缺失时服务端创建它。
+* `peer_port`：服务接受对等方连接的端口，例如 BitTorrent 客户端的端口，以相同的端口号在宿主机的所有接口上发布 TCP 与 UDP；管理员可以修改，为 0 时不发布。
 * `gpu`：不设置表示不用，或 `GPU_SUPPORT_OPTIONAL`、`GPU_SUPPORT_REQUIRED`（NVIDIA），以及 `gpu_image`：使用 GPU 时若为另一个镜像，则为该镜像，同样带 digest；服务端按引擎提供的方式为它提供 GPU，经 NVIDIA 运行时或 CDI 设备（架构文档 §16），因此为两者发布的同一个镜像（如 CUDA 镜像）只需声明一次；`memory_mib` 与 `cpus`：托管容器的限制。
 * `host_access`：服务是否以名称 `host.docker.internal` 访问服务器宿主机上的服务：Docker 把它映射到宿主机（`host-gateway`），Docker Desktop 与 Podman 自行提供该名称。在 Linux 上，宿主机上的服务须监听回环接口之外的接口才能被访问。
 * `direct`：托管容器是否只直连访问站点，用于每个请求都带有代理的服务，例如 FlareSolverr：服务器不为它提供代理选择，也不给其容器设置代理（§12.1）。
@@ -258,13 +261,13 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 安装或升级插件时显示其依赖及镜像，管理员随插件一并批准；升级带来新的镜像 digest 时，插件启动时替换托管容器。
 
 ### 11.2 地址
-* `HostService.ListContainers` 返回插件的依赖及其模式（`unset`、`managed`、`external`）、地址与状态（`pulling`、`starting`、`ready`、`unhealthy`、`unavailable`），拉取时还有已下载的比例，或拉取是否在等待其他拉取。与 `HostService` 的其他方法一样，任何插件都可调用（§7）。
+* `HostService.ListContainers` 返回插件的依赖及其模式（`unset`、`managed`、`external`）、地址、生成的密钥（供插件以它们登录服务）与状态（`pulling`、`starting`、`ready`、`unhealthy`、`unavailable`），拉取时还有已下载的比例，或拉取是否在等待其他拉取。与 `HostService` 的其他方法一样，任何插件都可调用（§7）。
 * 地址变化时，服务端用已保存的配置再次调用 `Configure`，因此插件在被配置时读取地址。
 * 依赖未就绪时插件照常工作，并报告需要该依赖的操作的失败，如同面对一个无法访问的服务。
 
 ### 11.3 管理
-* `PluginManagementService.GetContainerRuntime` 说明是否有可用的容器引擎，以及它是否为容器提供 NVIDIA GPU，客户端只在提供时才给出 GPU 选项，`ListPluginContainers` 列出插件的依赖及运行它们的命令，`SetPluginContainer` 把某个依赖设为托管，或设为外部并给出地址。
-* 客户端标明每个依赖是必需还是可选；有引擎时提供托管；否则提供命令（`docker run` 与一个 Compose 服务），并预填它们对应的地址（[架构 §16.4](architecture.zh-CN.md#164-外部依赖)）。
+* `PluginManagementService.GetContainerRuntime` 说明是否有可用的容器引擎，以及它是否为容器提供 NVIDIA GPU，客户端只在提供时才给出 GPU 选项，`ListPluginContainers` 列出插件的依赖及运行它们的命令，`SetPluginContainer` 把某个依赖设为托管并给出其文件夹与对等端口，或设为外部并给出地址。
+* 客户端标明每个依赖是必需还是可选，在托管依赖运行前询问其文件夹；有引擎时提供托管；否则提供命令（`docker run` 与一个 Compose 服务），并预填它们对应的地址（[架构 §16.4](architecture.zh-CN.md#164-外部依赖)）。
 
 ## 12. 代理与 `plugins/solvers`
 

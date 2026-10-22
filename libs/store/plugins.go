@@ -60,7 +60,7 @@ func (r pluginContainers) List(ctx context.Context, pluginID string) ([]core.Plu
 	for i, c := range rows {
 		out[i] = core.PluginContainer{
 			PluginID: c.PluginID, Name: c.Name, Mode: core.ContainerMode(c.Mode), Address: c.Address,
-			Secrets: c.Secrets, UseGPU: c.UseGpu, Proxy: c.Proxy, UpdatedAt: c.UpdatedAt,
+			Secrets: c.Secrets, UseGPU: c.UseGpu, Proxy: c.Proxy, Folders: c.Folders, PeerPort: c.PeerPort, UpdatedAt: c.UpdatedAt,
 		}
 	}
 	return out, nil
@@ -79,6 +79,8 @@ func (r pluginContainers) Put(ctx context.Context, c *core.PluginContainer) erro
 		SetSecrets(c.Secrets).
 		SetUseGpu(c.UseGPU).
 		SetProxy(c.Proxy).
+		SetFolders(c.Folders).
+		SetPeerPort(c.PeerPort).
 		SetUpdatedAt(c.UpdatedAt).
 		OnConflictColumns(plugincontainer.FieldPluginID, plugincontainer.FieldName).
 		UpdateNewValues().

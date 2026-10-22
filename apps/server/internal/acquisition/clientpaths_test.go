@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/mavioai/mavio/libs/core"
@@ -58,5 +59,39 @@ func TestClientPaths(t *testing.T) {
 
 	if _, _, err := e.rt.ClientPaths(e.ctx, "dl", "nope"); err == nil {
 		t.Error("ClientPaths of an unknown client: got = nil error")
+	}
+}
+
+// TestClientPathsContainer checks that the folders of a client's managed
+// container map to the server's folders mounted there, which stay out of
+// the stored mappings.
+func TestClientPathsContainer(t *testing.T) {
+	e := newEnv(t)
+	e.client.container = "qbittorrent"
+	e.client.roots = []string{"/downloads/complete"}
+	e.rt.ContainerFolders = func(_ context.Context, pluginID, name string) (map[string]string, error) {
+		if pluginID != "dl" || name != "qbittorrent" {
+			t.Errorf("ContainerFolders(%s, %s), want = (dl, qbittorrent)", pluginID, name)
+		}
+		return map[string]string{"/downloads": e.dlDir}, nil
+	}
+	want := ClientPath{RemotePath: "/downloads", LocalPath: e.dlDir, Container: true, RootFolder: true, Readable: true}
+	check := func(what string, paths []ClientPath, err error) {
+		t.Helper()
+		if err != nil || len(paths) != 1 {
+			t.Fatalf("%s = %+v, %v; want = the container's folder", what, paths, err)
+		}
+		got := paths[0]
+		got.LinkLibraryPaths = nil
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("%s: paths[0] = %+v; want = %+v", what, got, want)
+		}
+	}
+	paths, _, err := e.rt.ClientPaths(e.ctx, "dl", "qb")
+	check("ClientPaths", paths, err)
+	paths, _, err = e.rt.SetClientPaths(e.ctx, "dl", "qb", paths)
+	check("SetClientPaths", paths, err)
+	if stored, err := e.rt.Store.DownloadPathMappings().List(e.ctx); err != nil || len(stored) != 0 {
+		t.Errorf("stored mappings = %+v, %v; want = none", stored, err)
 	}
 }

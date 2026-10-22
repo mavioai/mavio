@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -126,7 +128,7 @@ func TestSetExternal(t *testing.T) {
 	s, plugs, now := newService(t, nil)
 	ctx := t.Context()
 
-	d, err := s.Set(ctx, pluginID, "whisper", core.ContainerExternal, srv.URL+"/", true, nil)
+	d, err := s.Set(ctx, pluginID, "whisper", core.ContainerExternal, srv.URL+"/", true, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -153,7 +155,7 @@ func TestSetExternal(t *testing.T) {
 	}
 
 	// The same address keeps the secret and leaves the plugin alone.
-	d, err = s.Set(ctx, pluginID, "whisper", core.ContainerExternal, srv.URL, false, nil)
+	d, err = s.Set(ctx, pluginID, "whisper", core.ContainerExternal, srv.URL, false, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -174,13 +176,13 @@ func TestSetExternal(t *testing.T) {
 	}
 
 	// Without a health path, the port must accept connections.
-	d, err = s.Set(ctx, pluginID, "tts", core.ContainerExternal, srv.URL, false, nil)
+	d, err = s.Set(ctx, pluginID, "tts", core.ContainerExternal, srv.URL, false, nil, nil, nil)
 	if err != nil || d.Status.GetState() != pluginv1.ContainerState_CONTAINER_STATE_READY || d.Kept.Secrets != nil {
 		t.Errorf("Set of tts = %+v, %v, want ready without secrets", d, err)
 	}
 
 	// Unsetting it changes how it is reached.
-	d, err = s.Set(ctx, pluginID, "whisper", core.ContainerUnset, "", false, nil)
+	d, err = s.Set(ctx, pluginID, "whisper", core.ContainerUnset, "", false, nil, nil, nil)
 	if err != nil || d.Status.GetState() != pluginv1.ContainerState_CONTAINER_STATE_UNAVAILABLE || d.Kept.Secrets["api-key"] != secret {
 		t.Errorf("Set to unset = %+v, %v, want unavailable with the secret kept", d, err)
 	}
@@ -208,7 +210,7 @@ func TestSetInvalid(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if _, err := s.Set(ctx, tt.plugin, tt.container, tt.mode, tt.address, tt.gpu, nil); !errors.Is(err, tt.want) {
+			if _, err := s.Set(ctx, tt.plugin, tt.container, tt.mode, tt.address, tt.gpu, nil, nil, nil); !errors.Is(err, tt.want) {
 				t.Errorf("Set = %v, want %v", err, tt.want)
 			}
 		})
@@ -244,7 +246,7 @@ func TestManagedInContainer(t *testing.T) {
 			}
 			c.Engine = func(containers.Runtime) containers.Engine { return containerstest.New() }
 		})
-		_, err := s.Set(t.Context(), pluginID, "whisper", core.ContainerManaged, "", false, nil)
+		_, err := s.Set(t.Context(), pluginID, "whisper", core.ContainerManaged, "", false, nil, nil, nil)
 		if self == nil && !errors.Is(err, dependencies.ErrNoEngine) {
 			t.Errorf("Set of managed = %v, want ErrNoEngine without the server's container", err)
 		}
@@ -289,7 +291,7 @@ func TestManaged(t *testing.T) {
 	}
 
 	// Managed before the plugin runs, it waits for the plugin.
-	d, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", true, nil)
+	d, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", true, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -317,7 +319,7 @@ func TestManaged(t *testing.T) {
 
 	// Leaving managed removes the container and keeps its volume.
 	engine.Took()
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerUnset, "", false, nil); err != nil {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerUnset, "", false, nil, nil, nil); err != nil {
 		t.Fatal(err)
 	}
 	if got, want := engine.Took(), []string{"remove mavio-voice-whisper"}; !slices.Equal(got, want) {
@@ -328,7 +330,7 @@ func TestManaged(t *testing.T) {
 	}
 
 	// Managed while the plugin runs starts at once; stopping the plugin stops it.
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil); err != nil {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil, nil, nil); err != nil {
 		t.Fatal(err)
 	}
 	eventually(t, "whisper ready again", func() bool {
@@ -392,7 +394,7 @@ func TestPullJob(t *testing.T) {
 		c.Probe = func(context.Context, string, string) error { return nil }
 	})
 	ctx := t.Context()
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil); err != nil {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil, nil, nil); err != nil {
 		t.Fatal(err)
 	}
 	s.PluginStarted(ctx, plugs.manifest)
@@ -445,13 +447,13 @@ func TestPullAbandoned(t *testing.T) {
 			return core.Job{}
 		}
 	}
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil); err != nil {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil, nil, nil); err != nil {
 		t.Fatal(err)
 	}
 	s.PluginStarted(ctx, plugs.manifest)
 	cpu := next()
 	// Taking the GPU image leaves the pull of the CPU image waiting for nothing.
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", true, nil); err != nil {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", true, nil, nil, nil); err != nil {
 		t.Fatal(err)
 	}
 	gpu := next()
@@ -483,7 +485,7 @@ func TestManagedWithCDI(t *testing.T) {
 		c.Probe = func(context.Context, string, string) error { return nil }
 	})
 	ctx := t.Context()
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", true, nil); err != nil {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", true, nil, nil, nil); err != nil {
 		t.Fatal(err)
 	}
 	s.PluginStarted(ctx, plugs.manifest)
@@ -512,7 +514,7 @@ func TestManagedWithoutGPU(t *testing.T) {
 		c.Probe = func(context.Context, string, string) error { return nil }
 	})
 	ctx := t.Context()
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", true, nil); err != nil {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", true, nil, nil, nil); err != nil {
 		t.Fatal(err)
 	}
 	s.PluginStarted(ctx, plugs.manifest)
@@ -529,7 +531,7 @@ func TestManagedWithoutGPU(t *testing.T) {
 			Name: new("cuda"), Image: new("cuda:1" + testDigest), Port: new(uint32(9000)), Gpu: pluginv1.GpuSupport_GPU_SUPPORT_REQUIRED.Enum(),
 		}.Build(),
 	}}.Build()
-	if _, err := s.Set(ctx, pluginID, "cuda", core.ContainerManaged, "", true, nil); !errors.Is(err, core.ErrInvalid) {
+	if _, err := s.Set(ctx, pluginID, "cuda", core.ContainerManaged, "", true, nil, nil, nil); !errors.Is(err, core.ErrInvalid) {
 		t.Errorf("Set of a dependency requiring a GPU = %v, want core.ErrInvalid", err)
 	}
 }
@@ -568,7 +570,7 @@ func TestManagedProxy(t *testing.T) {
 	s.PluginStarted(ctx, plugs.manifest)
 
 	// Through the system proxy, set to none, it reaches sites directly.
-	d, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil)
+	d, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -591,7 +593,7 @@ func TestManagedProxy(t *testing.T) {
 	// Another proxy keeps the container, its connections ended.
 	engine.Took()
 	p := office
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, &p); err != nil {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, &p, nil, nil); err != nil {
 		t.Fatal(err)
 	}
 	if got := <-changed; got != "mavio-voice-whisper" {
@@ -601,7 +603,7 @@ func TestManagedProxy(t *testing.T) {
 		t.Errorf("calls after another proxy got = %q, want no container removed", got)
 	}
 	p = "gone"
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, &p); !errors.Is(err, core.ErrInvalid) {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, &p, nil, nil); !errors.Is(err, core.ErrInvalid) {
 		t.Errorf("Set of a missing proxy got = %v, want = ErrInvalid", err)
 	}
 	if got, _ := s.ProxyOf(ctx, "mavio-voice-whisper"); got != office {
@@ -610,7 +612,7 @@ func TestManagedProxy(t *testing.T) {
 
 	// None reaches sites directly again.
 	p = ""
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, &p); err != nil {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, &p, nil, nil); err != nil {
 		t.Fatal(err)
 	}
 	eventually(t, "whisper direct", func() bool {
@@ -639,7 +641,7 @@ func TestManagedDirect(t *testing.T) {
 	ctx := t.Context()
 	s.PluginStarted(ctx, plugs.manifest)
 
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil); err != nil {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil, nil, nil); err != nil {
 		t.Fatal(err)
 	}
 	eventually(t, "whisper running", func() bool { _, running, _ := engine.Spec("mavio-voice-whisper"); return running })
@@ -650,7 +652,80 @@ func TestManagedDirect(t *testing.T) {
 		t.Errorf("ProxyOf of a direct container got = %q, true, want = false", got)
 	}
 	p := "01a14422-45e1-730c-a64f-a7e1a6b5e6b7"
-	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, &p); !errors.Is(err, core.ErrInvalid) {
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, &p, nil, nil); !errors.Is(err, core.ErrInvalid) {
 		t.Errorf("Set of a direct container's proxy got = %v, want = ErrInvalid", err)
+	}
+}
+
+func TestSetFolders(t *testing.T) {
+	engine := containerstest.New()
+	s, plugs, _ := newService(t, func(c *dependencies.Config) {
+		c.Detect = onHost
+		c.Engine = func(containers.Runtime) containers.Engine { return engine }
+		c.Poll = 5 * time.Millisecond
+		c.Probe = func(context.Context, string, string) error { return nil }
+	})
+	plugs.manifest.SetContainers(append(plugs.manifest.GetContainers(), pluginv1.ContainerDependency_builder{
+		Name: new("qbittorrent"), Image: new("qbittorrent:5" + testDigest), Port: new(uint32(8080)),
+		Folders:  []*pluginv1.ContainerFolder{pluginv1.ContainerFolder_builder{Name: new("downloads"), Path: new("/downloads")}.Build()},
+		PeerPort: new(uint32(6881)), Entrypoint: new("/bin/sh"), Command: []string{"-c", "echo ${secret:password} ${peer_port}; exec /init"},
+		Env: map[string]string{"TORRENTING_PORT": "${peer_port}", "PUID": "${uid}", "PGID": "${gid}"},
+	}.Build()))
+	ctx := t.Context()
+
+	deps, err := s.List(ctx, pluginID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := deps[2].Kept.PeerPort; got != 6881 {
+		t.Errorf("peer port unset = %d, want the dependency's 6881", got)
+	}
+	if !strings.Contains(deps[2].Commands.DockerRun, " -v '<downloads>:/downloads' ") || !strings.Contains(deps[2].Commands.DockerRun, " -p 6881:6881/udp ") {
+		t.Errorf("commands unset = %s, want the folder named and the peer port", deps[2].Commands.DockerRun)
+	}
+
+	if _, err := s.Set(ctx, pluginID, "qbittorrent", core.ContainerManaged, "", false, nil, nil, nil); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("managed without its folder = %v, want core.ErrInvalid", err)
+	}
+	if _, err := s.Set(ctx, pluginID, "qbittorrent", core.ContainerManaged, "", false, nil, map[string]string{"other": "/srv"}, nil); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("an unknown folder = %v, want core.ErrInvalid", err)
+	}
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil, nil, new(6881)); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("a peer port of a dependency without = %v, want core.ErrInvalid", err)
+	}
+
+	folder := filepath.ToSlash(filepath.Join(t.TempDir(), "downloads"))
+	d, err := s.Set(ctx, pluginID, "qbittorrent", core.ContainerManaged, "", false, nil, map[string]string{"downloads": folder}, new(51000))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if d.Kept.Folders["downloads"] != folder || d.Kept.PeerPort != 51000 {
+		t.Errorf("kept = %+v, want the folder and peer port 51000", d.Kept)
+	}
+	if fi, err := os.Stat(filepath.FromSlash(folder)); err != nil || !fi.IsDir() {
+		t.Errorf("the folder was not created: %v", err)
+	}
+	got, err := s.Folders(ctx, pluginID, "qbittorrent")
+	if err != nil || got["/downloads"] != folder {
+		t.Errorf("Folders = %v, %v, want /downloads at %s", got, err, folder)
+	}
+
+	s.PluginStarted(ctx, plugs.manifest)
+	eventually(t, "the container created", func() bool {
+		_, running, _ := engine.Spec("mavio-voice-qbittorrent")
+		return running
+	})
+	spec, _, _ := engine.Spec("mavio-voice-qbittorrent")
+	uid, gid := strconv.Itoa(os.Getuid()), strconv.Itoa(os.Getgid())
+	pw := d.Kept.Secrets["password"]
+	if len(spec.Binds) != 1 || spec.Binds[0] != (containers.Bind{Source: folder, Target: "/downloads"}) || spec.PeerPort != 51000 ||
+		!slices.Equal(spec.Entrypoint, []string{"/bin/sh"}) || !slices.Equal(spec.Cmd, []string{"-c", "echo " + pw + " 51000; exec /init"}) ||
+		!slices.Contains(spec.Env, "TORRENTING_PORT=51000") || !slices.Contains(spec.Env, "PUID="+uid) || !slices.Contains(spec.Env, "PGID="+gid) {
+		t.Errorf("container = %+v, want the folder, the peer port, the entrypoint and the substitutions", spec)
+	}
+
+	// Leaving out the folder keeps it; a peer port of 0 publishes none.
+	if d, err = s.Set(ctx, pluginID, "qbittorrent", core.ContainerManaged, "", false, nil, nil, new(0)); err != nil || d.Kept.Folders["downloads"] != folder || d.Kept.PeerPort != 0 {
+		t.Errorf("Set keeping the folder = %+v, %v, want it kept with no peer port", d.Kept, err)
 	}
 }

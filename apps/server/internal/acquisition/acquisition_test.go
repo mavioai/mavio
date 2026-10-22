@@ -113,6 +113,8 @@ type fakeClient struct {
 	// roots are the folders the client says completed downloads end up
 	// in.
 	roots []string
+	// container is the client's managed container.
+	container string
 }
 
 func (f *fakeClient) ListDownloadClients(context.Context, *pluginv1.ListDownloadClientsRequest) (*pluginv1.ListDownloadClientsResponse, error) {
@@ -123,6 +125,9 @@ func (f *fakeClient) ListDownloadClients(context.Context, *pluginv1.ListDownload
 	f.mu.Lock()
 	if !f.disabledUntil.IsZero() {
 		c.SetDisabledUntil(timestamppb.New(f.disabledUntil))
+	}
+	if f.container != "" {
+		c.SetContainer(f.container)
 	}
 	f.mu.Unlock()
 	return pluginv1.ListDownloadClientsResponse_builder{Clients: []*pluginv1.DownloadClient{c}}.Build(), nil

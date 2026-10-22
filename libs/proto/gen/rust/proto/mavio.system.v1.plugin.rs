@@ -3932,6 +3932,19 @@ pub struct PluginContainer {
     ///
     /// Field 8: `command`
     pub command: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The folders of the server chosen for the dependency's folders, by
+    /// name.
+    ///
+    /// Field 9: `folders`
+    pub folders: ::buffa::__private::HashMap<
+        ::buffa::alloc::string::String,
+        ::buffa::alloc::string::String,
+    >,
+    /// The port a managed container publishes for peers, as the
+    /// dependency's peer_port; 0 for none.
+    ///
+    /// Field 10: `peer_port`
+    pub peer_port: ::core::option::Option<u32>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3946,6 +3959,8 @@ impl ::core::fmt::Debug for PluginContainer {
             .field("plugin_id", &self.plugin_id)
             .field("proxy", &self.proxy)
             .field("command", &self.command)
+            .field("folders", &self.folders)
+            .field("peer_port", &self.peer_port)
             .finish()
     }
 }
@@ -3992,6 +4007,13 @@ impl PluginContainer {
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
         self.command = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::peer_port`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_peer_port(mut self, value: u32) -> Self {
+        self.peer_port = Some(value);
         self
     }
 }
@@ -4059,6 +4081,15 @@ impl ::buffa::Message for PluginContainer {
         if let Some(ref v) = self.command {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        size
+            += ::buffa::map_codec::field_len::<
+                ::buffa::map_codec::Str,
+                ::buffa::map_codec::Str,
+                _,
+            >(&self.folders, 1u64);
+        if let Some(v) = self.peer_port {
+            size += 1u64 + ::buffa::types::uint32_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4112,6 +4143,14 @@ impl ::buffa::Message for PluginContainer {
         }
         if let Some(ref v) = self.command {
             ::buffa::types::put_string_field(8u32, v, buf);
+        }
+        ::buffa::map_codec::write_field::<
+            ::buffa::map_codec::Str,
+            ::buffa::map_codec::Str,
+            _,
+        >(&self.folders, 9u32, buf);
+        if let Some(v) = self.peer_port {
+            ::buffa::types::put_uint32_field(10u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4211,6 +4250,26 @@ impl ::buffa::Message for PluginContainer {
                     buf,
                 )?;
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::map_codec::merge_entry::<
+                    ::buffa::map_codec::Str,
+                    ::buffa::map_codec::Str,
+                    _,
+                >(&mut self.folders, buf, ctx)?;
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.peer_port = ::core::option::Option::Some(
+                    ::buffa::types::decode_uint32(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -4227,6 +4286,8 @@ impl ::buffa::Message for PluginContainer {
         self.plugin_id = ::core::option::Option::None;
         self.proxy = ::core::option::Option::None;
         self.command = ::core::option::Option::None;
+        self.folders.clear();
+        self.peer_port = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -4872,6 +4933,19 @@ pub struct SetPluginContainerRequest {
     ///
     /// Field 6: `proxy`
     pub proxy: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Folders of the server, absolute paths, for the dependency's folders by
+    /// name; those left out keep theirs. A managed container needs all.
+    ///
+    /// Field 7: `folders`
+    pub folders: ::buffa::__private::HashMap<
+        ::buffa::alloc::string::String,
+        ::buffa::alloc::string::String,
+    >,
+    /// The port a managed container publishes for peers, 0 for none; unset
+    /// keeps it, the dependency's peer_port at first.
+    ///
+    /// Field 8: `peer_port`
+    pub peer_port: ::core::option::Option<u32>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -4884,6 +4958,8 @@ impl ::core::fmt::Debug for SetPluginContainerRequest {
             .field("address", &self.address)
             .field("use_gpu", &self.use_gpu)
             .field("proxy", &self.proxy)
+            .field("folders", &self.folders)
+            .field("peer_port", &self.peer_port)
             .finish()
     }
 }
@@ -4952,6 +5028,13 @@ impl SetPluginContainerRequest {
         self.proxy = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::peer_port`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_peer_port(mut self, value: u32) -> Self {
+        self.peer_port = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(SetPluginContainerRequest);
 impl ::buffa::MessageName for SetPluginContainerRequest {
@@ -4991,6 +5074,15 @@ impl ::buffa::Message for SetPluginContainerRequest {
         if let Some(ref v) = self.proxy {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        size
+            += ::buffa::map_codec::field_len::<
+                ::buffa::map_codec::Str,
+                ::buffa::map_codec::Str,
+                _,
+            >(&self.folders, 1u64);
+        if let Some(v) = self.peer_port {
+            size += 1u64 + ::buffa::types::uint32_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -5018,6 +5110,14 @@ impl ::buffa::Message for SetPluginContainerRequest {
         }
         if let Some(ref v) = self.proxy {
             ::buffa::types::put_string_field(6u32, v, buf);
+        }
+        ::buffa::map_codec::write_field::<
+            ::buffa::map_codec::Str,
+            ::buffa::map_codec::Str,
+            _,
+        >(&self.folders, 7u32, buf);
+        if let Some(v) = self.peer_port {
+            ::buffa::types::put_uint32_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5092,6 +5192,26 @@ impl ::buffa::Message for SetPluginContainerRequest {
                     buf,
                 )?;
             }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::map_codec::merge_entry::<
+                    ::buffa::map_codec::Str,
+                    ::buffa::map_codec::Str,
+                    _,
+                >(&mut self.folders, buf, ctx)?;
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.peer_port = ::core::option::Option::Some(
+                    ::buffa::types::decode_uint32(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -5106,6 +5226,8 @@ impl ::buffa::Message for SetPluginContainerRequest {
         self.address = ::core::option::Option::None;
         self.use_gpu = ::core::option::Option::None;
         self.proxy = ::core::option::Option::None;
+        self.folders.clear();
+        self.peer_port = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

@@ -28,6 +28,10 @@ const (
 	FieldUseGpu = "use_gpu"
 	// FieldProxy holds the string denoting the proxy field in the database.
 	FieldProxy = "proxy"
+	// FieldFolders holds the string denoting the folders field in the database.
+	FieldFolders = "folders"
+	// FieldPeerPort holds the string denoting the peer_port field in the database.
+	FieldPeerPort = "peer_port"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the plugincontainer in the database.
@@ -44,6 +48,8 @@ var Columns = []string{
 	FieldSecrets,
 	FieldUseGpu,
 	FieldProxy,
+	FieldFolders,
+	FieldPeerPort,
 	FieldUpdatedAt,
 }
 
@@ -64,6 +70,8 @@ var (
 	DefaultUseGpu bool
 	// DefaultProxy holds the default value on creation for the "proxy" field.
 	DefaultProxy string
+	// DefaultPeerPort holds the default value on creation for the "peer_port" field.
+	DefaultPeerPort int
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
@@ -106,6 +114,11 @@ func ByUseGpu(opts ...sql.OrderTermOption) OrderOption {
 // ByProxy orders the results by the proxy field.
 func ByProxy(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProxy, opts...).ToFunc()
+}
+
+// ByPeerPort orders the results by the peer_port field.
+func ByPeerPort(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPeerPort, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

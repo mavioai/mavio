@@ -48,7 +48,7 @@ var (
 	envPattern     = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
 	// placeholderPattern matches what may follow "${" in a container
 	// dependency's environment.
-	placeholderPattern = regexp.MustCompile(`^(secret:[a-z0-9]+(-[a-z0-9]+)*|address)\}`)
+	placeholderPattern = regexp.MustCompile(`^(secret:[a-z0-9]+(-[a-z0-9]+)*|address|peer_port|uid|gid)\}`)
 	secretPattern      = regexp.MustCompile(`\$\{secret:([a-z0-9]+(?:-[a-z0-9]+)*)\}`)
 )
 
@@ -272,7 +272,7 @@ func containerProblems(c *pluginv1.ContainerDependency) []string {
 		for i := strings.Index(v, "${"); i >= 0; i = strings.Index(v, "${") {
 			v = v[i+2:]
 			if !placeholderPattern.MatchString(v) {
-				add("environment variable %q: only ${secret:<key>} and ${address} may follow $", k)
+				add("environment variable %q: only ${secret:<key>}, ${address}, ${peer_port}, ${uid} and ${gid} may follow $", k)
 				break
 			}
 		}
@@ -286,6 +286,22 @@ func containerProblems(c *pluginv1.ContainerDependency) []string {
 			add("volume %q: mount path %q must be absolute and not /", name, target)
 		}
 	}
+	folders := map[string]bool{}
+	for _, f := range c.GetFolders() {
+		switch {
+		case !taskPattern.MatchString(f.GetName()):
+			add("folder name %q must be lowercase letters, digits and dashes", f.GetName())
+		case folders[f.GetName()]:
+			add("folder name %q is not unique", f.GetName())
+		}
+		folders[f.GetName()] = true
+		if p := f.GetPath(); !path.IsAbs(p) || path.Clean(p) == "/" || slices.Contains(slices.Collect(maps.Values(c.GetVolumes())), p) {
+			add("folder %q: mount path %q must be absolute, not / and no volume's", f.GetName(), p)
+		}
+	}
+	if c.GetPeerPort() > 65535 {
+		add("peer_port must be 1 to 65535")
+	}
 	if c.GetCpus() < 0 {
 		add("cpus must not be negative")
 	}
@@ -293,10 +309,11 @@ func containerProblems(c *pluginv1.ContainerDependency) []string {
 }
 
 // ContainerSecrets returns the keys of the secrets a container
-// dependency's environment asks for with ${secret:<key>}, sorted.
+// dependency's environment and command ask for with ${secret:<key>},
+// sorted.
 func ContainerSecrets(c *pluginv1.ContainerDependency) []string {
 	var keys []string
-	for _, v := range c.GetEnv() {
+	for _, v := range slices.Concat(slices.Collect(maps.Values(c.GetEnv())), c.GetCommand()) {
 		for _, m := range secretPattern.FindAllStringSubmatch(v, -1) {
 			keys = append(keys, m[1])
 		}

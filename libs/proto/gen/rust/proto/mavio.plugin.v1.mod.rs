@@ -584,6 +584,10 @@ pub use self::__buffa::view::ContainerDependencyView;
 #[doc(inline)]
 pub use self::__buffa::view::ContainerDependencyOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ContainerFolderView;
+#[doc(inline)]
+pub use self::__buffa::view::ContainerFolderOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ContainerStatusView;
 #[doc(inline)]
 pub use self::__buffa::view::ContainerStatusOwnedView;

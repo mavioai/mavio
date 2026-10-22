@@ -1132,6 +1132,8 @@ flowchart TD
 - [x] Managed dependencies, the server in a container: the server's container joins the `mavio` network and dependencies are reached by name without published ports; tested against the in-memory engine
 - [x] External dependencies and commands, and dependencies' addresses in WASM plugins' `http_hosts`: `containers.RunCommands` builds the `docker run` command and the Compose file, with and without a GPU, returned as `PluginContainer.commands` and `gpu_commands`; a WASM plugin may fetch the hosts of its dependencies' addresses
 - [x] The first dependency and the web UI: `plugins/voice` declared whisper-asr-webservice, deleted with that plugin in P29, `plugins/solvers` FlareSolverr since; the plugin's page in the web UI sets how each dependency runs and shows its state and commands
+- [x] Download clients in containers: declared folders bind-mounted from the server's folders an administrator chose, through the server's own mounts when it runs in a container, a published peer port, an entrypoint, and `${peer_port}`, `${uid}` and `${gid}`; `plugins/download-clients` declares qBittorrent, Transmission and SABnzbd set up for Mavio and adds them as clients once ready, whose folders acquisition reads where the server mounted them; the web UI's folders and peer port of a managed dependency and its read-only folders of such a client
+  - [ ] The desktop and Mac apps' folders and peer port of a managed dependency
 - [ ] The end-to-end test of **Done when**
 - [ ] Docker Desktop on macOS and Windows, and Podman, checked by hand
 

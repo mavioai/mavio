@@ -34,9 +34,11 @@ func container(name string, mut func(c *pluginv1.ContainerDependency)) *pluginv1
 	c := pluginv1.ContainerDependency_builder{
 		Name: proto.String(name), Image: proto.String("onerahmet/openai-whisper-asr-webservice:v1.9.1" + digest),
 		Port: proto.Uint32(9000), HealthPath: proto.String("/docs"),
-		Env:     map[string]string{"ASR_MODEL": "base", "API_KEY": "${secret:api-key}", "SELF": "${address}/x"},
-		Volumes: map[string]string{"cache": "/root/.cache"},
-		Gpu:     pluginv1.GpuSupport_GPU_SUPPORT_OPTIONAL.Enum(), GpuImage: proto.String("onerahmet/openai-whisper-asr-webservice:v1.9.1-gpu" + digest),
+		Env:      map[string]string{"ASR_MODEL": "base", "API_KEY": "${secret:api-key}", "SELF": "${address}/x", "PEER": "${peer_port} ${uid}:${gid}"},
+		Volumes:  map[string]string{"cache": "/root/.cache"},
+		Folders:  []*pluginv1.ContainerFolder{pluginv1.ContainerFolder_builder{Name: proto.String("downloads"), Path: proto.String("/downloads")}.Build()},
+		PeerPort: proto.Uint32(6881), Entrypoint: proto.String("/bin/sh"), Command: []string{"-c", "echo ${HOME}; exec /init"},
+		Gpu: pluginv1.GpuSupport_GPU_SUPPORT_OPTIONAL.Enum(), GpuImage: proto.String("onerahmet/openai-whisper-asr-webservice:v1.9.1-gpu" + digest),
 	}.Build()
 	if mut != nil {
 		mut(c)
@@ -189,6 +191,14 @@ func TestValidate(t *testing.T) {
 		{"bad volume name", withContainer(func(c *pluginv1.ContainerDependency) { c.GetVolumes()["Cache"] = "/c" }), "volume name"},
 		{"relative mount", withContainer(func(c *pluginv1.ContainerDependency) { c.GetVolumes()["cache"] = "cache" }), "mount path"},
 		{"root mount", withContainer(func(c *pluginv1.ContainerDependency) { c.GetVolumes()["cache"] = "/" }), "mount path"},
+		{"other placeholder", withContainer(func(c *pluginv1.ContainerDependency) { c.GetEnv()["HOME"] = "${home}" }), "may follow"},
+		{"bad folder name", withContainer(func(c *pluginv1.ContainerDependency) { c.GetFolders()[0].SetName("Downloads") }), "folder name"},
+		{"duplicate folder", withContainer(func(c *pluginv1.ContainerDependency) {
+			c.SetFolders(append(c.GetFolders(), c.GetFolders()[0]))
+		}), "not unique"},
+		{"relative folder", withContainer(func(c *pluginv1.ContainerDependency) { c.GetFolders()[0].SetPath("downloads") }), "mount path"},
+		{"folder on a volume", withContainer(func(c *pluginv1.ContainerDependency) { c.GetFolders()[0].SetPath("/root/.cache") }), "mount path"},
+		{"peer port out of range", withContainer(func(c *pluginv1.ContainerDependency) { c.SetPeerPort(70000) }), "peer_port"},
 		{"negative CPUs", withContainer(func(c *pluginv1.ContainerDependency) { c.SetCpus(-1) }), "cpus"},
 	}
 	for _, tt := range tests {
@@ -316,8 +326,9 @@ func TestValidateConfig(t *testing.T) {
 func TestContainerSecrets(t *testing.T) {
 	c := container("whisper", func(c *pluginv1.ContainerDependency) {
 		c.GetEnv()["TOKEN"] = "${secret:token}:${secret:api-key}"
+		c.SetCommand([]string{"-c", "echo ${secret:password}"})
 	})
-	if got, want := ContainerSecrets(c), []string{"api-key", "token"}; !slices.Equal(got, want) {
+	if got, want := ContainerSecrets(c), []string{"api-key", "password", "token"}; !slices.Equal(got, want) {
 		t.Errorf("ContainerSecrets = %q, want %q", got, want)
 	}
 	m := valid()

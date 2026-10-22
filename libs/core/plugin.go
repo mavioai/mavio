@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"path/filepath"
 	"time"
 )
 
@@ -55,7 +56,13 @@ type PluginContainer struct {
 	UseGPU bool
 	// Proxy is the ID of the proxy a managed dependency reaches sites
 	// through: SystemProxyID for the system proxy, empty for none.
-	Proxy     string
+	Proxy string
+	// Folders are the absolute paths of the server chosen for the
+	// dependency's folders, by name.
+	Folders map[string]string
+	// PeerPort is the port a managed dependency publishes for peers; 0 for
+	// none.
+	PeerPort  int
 	UpdatedAt time.Time
 }
 
@@ -69,6 +76,13 @@ func (c *PluginContainer) Validate() error {
 		return fmt.Errorf("%w: container of plugin %s requires a name", ErrInvalid, c.PluginID)
 	case !validProxyChoice(c.Proxy):
 		return fmt.Errorf("%w: proxy %q of container %s of plugin %s", ErrInvalid, c.Proxy, c.Name, c.PluginID)
+	case c.PeerPort < 0 || c.PeerPort > 65535:
+		return fmt.Errorf("%w: peer port %d of container %s of plugin %s", ErrInvalid, c.PeerPort, c.Name, c.PluginID)
+	}
+	for name, p := range c.Folders {
+		if !filepath.IsAbs(filepath.FromSlash(p)) {
+			return fmt.Errorf("%w: folder %s of container %s of plugin %s is not an absolute path: %q", ErrInvalid, name, c.Name, c.PluginID, p)
+		}
 	}
 	switch c.Mode {
 	case ContainerUnset, ContainerManaged:

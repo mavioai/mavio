@@ -1158,6 +1158,8 @@ var (
 		{Name: "secrets", Type: field.TypeJSON, Nullable: true},
 		{Name: "use_gpu", Type: field.TypeBool, Default: false},
 		{Name: "proxy", Type: field.TypeString, Default: "system"},
+		{Name: "folders", Type: field.TypeJSON, Nullable: true},
+		{Name: "peer_port", Type: field.TypeInt, Default: 0},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// PluginContainersTable holds the schema information for the "plugin_containers" table.

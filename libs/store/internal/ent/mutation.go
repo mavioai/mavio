@@ -32284,6 +32284,9 @@ type PluginContainerMutation struct {
 	secrets       *map[string]string
 	use_gpu       *bool
 	proxy         *string
+	folders       *map[string]string
+	peer_port     *int
+	addpeer_port  *int
 	updated_at    *time.Time
 	clearedFields map[string]struct{}
 	done          bool
@@ -32660,6 +32663,111 @@ func (m *PluginContainerMutation) ResetProxy() {
 	m.proxy = nil
 }
 
+// SetFolders sets the "folders" field.
+func (m *PluginContainerMutation) SetFolders(value map[string]string) {
+	m.folders = &value
+}
+
+// Folders returns the value of the "folders" field in the mutation.
+func (m *PluginContainerMutation) Folders() (r map[string]string, exists bool) {
+	v := m.folders
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFolders returns the old "folders" field's value of the PluginContainer entity.
+// If the PluginContainer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PluginContainerMutation) OldFolders(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFolders is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFolders requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFolders: %w", err)
+	}
+	return oldValue.Folders, nil
+}
+
+// ClearFolders clears the value of the "folders" field.
+func (m *PluginContainerMutation) ClearFolders() {
+	m.folders = nil
+	m.clearedFields[plugincontainer.FieldFolders] = struct{}{}
+}
+
+// FoldersCleared returns if the "folders" field was cleared in this mutation.
+func (m *PluginContainerMutation) FoldersCleared() bool {
+	_, ok := m.clearedFields[plugincontainer.FieldFolders]
+	return ok
+}
+
+// ResetFolders resets all changes to the "folders" field.
+func (m *PluginContainerMutation) ResetFolders() {
+	m.folders = nil
+	delete(m.clearedFields, plugincontainer.FieldFolders)
+}
+
+// SetPeerPort sets the "peer_port" field.
+func (m *PluginContainerMutation) SetPeerPort(i int) {
+	m.peer_port = &i
+	m.addpeer_port = nil
+}
+
+// PeerPort returns the value of the "peer_port" field in the mutation.
+func (m *PluginContainerMutation) PeerPort() (r int, exists bool) {
+	v := m.peer_port
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPeerPort returns the old "peer_port" field's value of the PluginContainer entity.
+// If the PluginContainer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PluginContainerMutation) OldPeerPort(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPeerPort is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPeerPort requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPeerPort: %w", err)
+	}
+	return oldValue.PeerPort, nil
+}
+
+// AddPeerPort adds i to the "peer_port" field.
+func (m *PluginContainerMutation) AddPeerPort(i int) {
+	if m.addpeer_port != nil {
+		*m.addpeer_port += i
+	} else {
+		m.addpeer_port = &i
+	}
+}
+
+// AddedPeerPort returns the value that was added to the "peer_port" field in this mutation.
+func (m *PluginContainerMutation) AddedPeerPort() (r int, exists bool) {
+	v := m.addpeer_port
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPeerPort resets all changes to the "peer_port" field.
+func (m *PluginContainerMutation) ResetPeerPort() {
+	m.peer_port = nil
+	m.addpeer_port = nil
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *PluginContainerMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -32730,7 +32838,7 @@ func (m *PluginContainerMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PluginContainerMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 10)
 	if m.plugin_id != nil {
 		fields = append(fields, plugincontainer.FieldPluginID)
 	}
@@ -32751,6 +32859,12 @@ func (m *PluginContainerMutation) Fields() []string {
 	}
 	if m.proxy != nil {
 		fields = append(fields, plugincontainer.FieldProxy)
+	}
+	if m.folders != nil {
+		fields = append(fields, plugincontainer.FieldFolders)
+	}
+	if m.peer_port != nil {
+		fields = append(fields, plugincontainer.FieldPeerPort)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, plugincontainer.FieldUpdatedAt)
@@ -32777,6 +32891,10 @@ func (m *PluginContainerMutation) Field(name string) (ent.Value, bool) {
 		return m.UseGpu()
 	case plugincontainer.FieldProxy:
 		return m.Proxy()
+	case plugincontainer.FieldFolders:
+		return m.Folders()
+	case plugincontainer.FieldPeerPort:
+		return m.PeerPort()
 	case plugincontainer.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -32802,6 +32920,10 @@ func (m *PluginContainerMutation) OldField(ctx context.Context, name string) (en
 		return m.OldUseGpu(ctx)
 	case plugincontainer.FieldProxy:
 		return m.OldProxy(ctx)
+	case plugincontainer.FieldFolders:
+		return m.OldFolders(ctx)
+	case plugincontainer.FieldPeerPort:
+		return m.OldPeerPort(ctx)
 	case plugincontainer.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -32862,6 +32984,20 @@ func (m *PluginContainerMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetProxy(v)
 		return nil
+	case plugincontainer.FieldFolders:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFolders(v)
+		return nil
+	case plugincontainer.FieldPeerPort:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPeerPort(v)
+		return nil
 	case plugincontainer.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -32876,13 +33012,21 @@ func (m *PluginContainerMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *PluginContainerMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addpeer_port != nil {
+		fields = append(fields, plugincontainer.FieldPeerPort)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *PluginContainerMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case plugincontainer.FieldPeerPort:
+		return m.AddedPeerPort()
+	}
 	return nil, false
 }
 
@@ -32891,6 +33035,13 @@ func (m *PluginContainerMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *PluginContainerMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case plugincontainer.FieldPeerPort:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPeerPort(v)
+		return nil
 	}
 	return fmt.Errorf("unknown PluginContainer numeric field %s", name)
 }
@@ -32901,6 +33052,9 @@ func (m *PluginContainerMutation) ClearedFields() []string {
 	var fields []string
 	if m.FieldCleared(plugincontainer.FieldSecrets) {
 		fields = append(fields, plugincontainer.FieldSecrets)
+	}
+	if m.FieldCleared(plugincontainer.FieldFolders) {
+		fields = append(fields, plugincontainer.FieldFolders)
 	}
 	return fields
 }
@@ -32918,6 +33072,9 @@ func (m *PluginContainerMutation) ClearField(name string) error {
 	switch name {
 	case plugincontainer.FieldSecrets:
 		m.ClearSecrets()
+		return nil
+	case plugincontainer.FieldFolders:
+		m.ClearFolders()
 		return nil
 	}
 	return fmt.Errorf("unknown PluginContainer nullable field %s", name)
@@ -32947,6 +33104,12 @@ func (m *PluginContainerMutation) ResetField(name string) error {
 		return nil
 	case plugincontainer.FieldProxy:
 		m.ResetProxy()
+		return nil
+	case plugincontainer.FieldFolders:
+		m.ResetFolders()
+		return nil
+	case plugincontainer.FieldPeerPort:
+		m.ResetPeerPort()
 		return nil
 	case plugincontainer.FieldUpdatedAt:
 		m.ResetUpdatedAt()

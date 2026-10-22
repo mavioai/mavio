@@ -2,6 +2,8 @@ package core
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -26,6 +28,9 @@ func TestPluginContainerValidate(t *testing.T) {
 		{"external without address", PluginContainer{PluginID: "dev.mavio.voice", Name: "whisper", Mode: ContainerExternal}, false},
 		{"external relative", PluginContainer{PluginID: "dev.mavio.voice", Name: "whisper", Mode: ContainerExternal, Address: "asr:9000"}, false},
 		{"external other scheme", PluginContainer{PluginID: "dev.mavio.voice", Name: "whisper", Mode: ContainerExternal, Address: "tcp://asr:9000"}, false},
+		{"managed with a folder and a peer port", PluginContainer{PluginID: "dev.mavio.download-clients", Name: "qbittorrent", Mode: ContainerManaged, Folders: map[string]string{"downloads": filepath.ToSlash(filepath.Join(os.TempDir(), "downloads"))}, PeerPort: 6881}, true},
+		{"relative folder", PluginContainer{PluginID: "dev.mavio.download-clients", Name: "qbittorrent", Mode: ContainerManaged, Folders: map[string]string{"downloads": "downloads"}}, false},
+		{"peer port out of range", PluginContainer{PluginID: "dev.mavio.download-clients", Name: "qbittorrent", Mode: ContainerManaged, PeerPort: 70000}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

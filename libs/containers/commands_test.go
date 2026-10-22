@@ -51,4 +51,20 @@ func TestRunCommands(t *testing.T) {
 		!strings.Contains(c.Compose, `extra_hosts: ["host.docker.internal:host-gateway"]`) {
 		t.Errorf("with host access, got = %s\n%s", c.DockerRun, c.Compose)
 	}
+
+	d.Folders, d.PeerPort, d.Entrypoint = map[string]string{"/srv/downloads": "/downloads"}, 6881, []string{"/bin/sh", "-e"}
+	c = containers.RunCommands(containers.Names{}, d, true)
+	for _, s := range []string{" -p 6881:6881/tcp -p 6881:6881/udp ", " -v /srv/downloads:/downloads ", " --entrypoint /bin/sh whisper:1@sha256:abc -e serve"} {
+		if !strings.Contains(c.DockerRun, s) {
+			t.Errorf("with folders, a peer port and an entrypoint, DockerRun = %s, want %q in it", c.DockerRun, s)
+		}
+	}
+	for _, s := range []string{`entrypoint: ["/bin/sh", "-e"]`, `ports: ["127.0.0.1:9000:9000", "6881:6881/tcp", "6881:6881/udp"]`, `volumes: ["mavio-voice-whisper-cache:/root/.cache", "/srv/downloads:/downloads"]`} {
+		if !strings.Contains(c.Compose, s) {
+			t.Errorf("Compose lacks %q:\n%s", s, c.Compose)
+		}
+	}
+	if strings.Contains(c.Compose, "/srv/downloads: {}") {
+		t.Errorf("Compose declares a folder as a volume:\n%s", c.Compose)
+	}
 }

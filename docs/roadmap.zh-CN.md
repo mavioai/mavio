@@ -1132,6 +1132,8 @@ flowchart TD
 - [x] 托管依赖，服务端在容器中：服务端的容器加入 `mavio` 网络，依赖按名称访问而不发布端口；针对内存中的引擎测试
 - [x] 外部依赖与命令，以及 WASM 插件 `http_hosts` 中依赖的地址：`containers.RunCommands` 生成带与不带 GPU 的 `docker run` 命令与 Compose 文件，作为 `PluginContainer.commands` 与 `gpu_commands` 返回；WASM 插件可以访问其依赖地址的主机
 - [x] 第一个依赖与 Web UI：`plugins/voice` 曾声明 whisper-asr-webservice，已在 P29 中随该插件删除，此后由 `plugins/solvers` 声明 FlareSolverr；Web UI 的插件页面设置每个依赖的运行方式，并显示其状态与命令
+- [x] 容器中的下载客户端：声明的文件夹以绑定挂载方式挂载管理员选择的服务端文件夹，服务端在容器中时经其自身的挂载，发布的对等端口、入口点，以及 `${peer_port}`、`${uid}` 与 `${gid}`；`plugins/download-clients` 声明为 Mavio 设置好的 qBittorrent、Transmission 与 SABnzbd，并在就绪后把它们添加为客户端，获取在服务端挂载的位置读取它们的文件夹；Web UI 中托管依赖的文件夹与对等端口，以及这类客户端只读的文件夹
+  - [ ] 桌面与 Mac 应用中托管依赖的文件夹与对等端口
 - [ ] **完成标准**中的端到端测试
 - [ ] macOS 与 Windows 上的 Docker Desktop，以及 Podman，手工检查
 

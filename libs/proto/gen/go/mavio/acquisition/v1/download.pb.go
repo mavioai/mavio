@@ -4326,6 +4326,7 @@ type DownloadClientPath struct {
 	xxx_hidden_Readable         bool                   `protobuf:"varint,5,opt,name=readable"`
 	xxx_hidden_Error            *string                `protobuf:"bytes,6,opt,name=error"`
 	xxx_hidden_LinkLibraryPaths []string               `protobuf:"bytes,7,rep,name=link_library_paths,json=linkLibraryPaths"`
+	xxx_hidden_Container        bool                   `protobuf:"varint,8,opt,name=container"`
 	XXX_raceDetectHookData      protoimpl.RaceDetectHookData
 	XXX_presence                [1]uint32
 	unknownFields               protoimpl.UnknownFields
@@ -4418,38 +4419,50 @@ func (x *DownloadClientPath) GetLinkLibraryPaths() []string {
 	return nil
 }
 
+func (x *DownloadClientPath) GetContainer() bool {
+	if x != nil {
+		return x.xxx_hidden_Container
+	}
+	return false
+}
+
 func (x *DownloadClientPath) SetRemotePath(v string) {
 	x.xxx_hidden_RemotePath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
 }
 
 func (x *DownloadClientPath) SetLocalPath(v string) {
 	x.xxx_hidden_LocalPath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
 }
 
 func (x *DownloadClientPath) SetRootFolder(v bool) {
 	x.xxx_hidden_RootFolder = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
 }
 
 func (x *DownloadClientPath) SetSuggestedPath(v string) {
 	x.xxx_hidden_SuggestedPath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
 }
 
 func (x *DownloadClientPath) SetReadable(v bool) {
 	x.xxx_hidden_Readable = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
 }
 
 func (x *DownloadClientPath) SetError(v string) {
 	x.xxx_hidden_Error = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
 }
 
 func (x *DownloadClientPath) SetLinkLibraryPaths(v []string) {
 	x.xxx_hidden_LinkLibraryPaths = v
+}
+
+func (x *DownloadClientPath) SetContainer(v bool) {
+	x.xxx_hidden_Container = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
 }
 
 func (x *DownloadClientPath) HasRemotePath() bool {
@@ -4494,6 +4507,13 @@ func (x *DownloadClientPath) HasError() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
 }
 
+func (x *DownloadClientPath) HasContainer() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
 func (x *DownloadClientPath) ClearRemotePath() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_RemotePath = nil
@@ -4524,6 +4544,11 @@ func (x *DownloadClientPath) ClearError() {
 	x.xxx_hidden_Error = nil
 }
 
+func (x *DownloadClientPath) ClearContainer() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_Container = false
+}
+
 type DownloadClientPath_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -4545,6 +4570,9 @@ type DownloadClientPath_builder struct {
 	// Set by the server: the library paths on the folder's storage, which
 	// imports hard link files to rather than copy them.
 	LinkLibraryPaths []string
+	// Set by the server: the mapping is a folder of the container the
+	// client runs in, set with the container rather than here.
+	Container *bool
 }
 
 func (b0 DownloadClientPath_builder) Build() *DownloadClientPath {
@@ -4552,30 +4580,34 @@ func (b0 DownloadClientPath_builder) Build() *DownloadClientPath {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.RemotePath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
 		x.xxx_hidden_RemotePath = b.RemotePath
 	}
 	if b.LocalPath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
 		x.xxx_hidden_LocalPath = b.LocalPath
 	}
 	if b.RootFolder != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
 		x.xxx_hidden_RootFolder = *b.RootFolder
 	}
 	if b.SuggestedPath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
 		x.xxx_hidden_SuggestedPath = b.SuggestedPath
 	}
 	if b.Readable != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
 		x.xxx_hidden_Readable = *b.Readable
 	}
 	if b.Error != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
 		x.xxx_hidden_Error = b.Error
 	}
 	x.xxx_hidden_LinkLibraryPaths = b.LinkLibraryPaths
+	if b.Container != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		x.xxx_hidden_Container = *b.Container
+	}
 	return m0
 }
 
@@ -5155,7 +5187,7 @@ const file_mavio_acquisition_v1_download_proto_rawDesc = "" +
 	"\tlanguages\x18\x06 \x03(\tR\tlanguages\x12#\n" +
 	"\rrelease_group\x18\a \x01(\tR\freleaseGroup\x124\n" +
 	"\x04mode\x18\b \x01(\x0e2 .mavio.acquisition.v1.ImportModeR\x04mode\"\x16\n" +
-	"\x14ManualImportResponse\"\x92\x02\n" +
+	"\x14ManualImportResponse\"\xb0\x02\n" +
 	"\x12DownloadClientPath\x12+\n" +
 	"\vremote_path\x18\x01 \x01(\tB\n" +
 	"\xbaH\ar\x05\x10\x01\x18\x80 R\n" +
@@ -5167,7 +5199,8 @@ const file_mavio_acquisition_v1_download_proto_rawDesc = "" +
 	"\x0esuggested_path\x18\x04 \x01(\tR\rsuggestedPath\x12\x1a\n" +
 	"\breadable\x18\x05 \x01(\bR\breadable\x12\x14\n" +
 	"\x05error\x18\x06 \x01(\tR\x05error\x12,\n" +
-	"\x12link_library_paths\x18\a \x03(\tR\x10linkLibraryPaths\"k\n" +
+	"\x12link_library_paths\x18\a \x03(\tR\x10linkLibraryPaths\x12\x1c\n" +
+	"\tcontainer\x18\b \x01(\bR\tcontainer\"k\n" +
 	"\x1dGetDownloadClientPathsRequest\x12$\n" +
 	"\tplugin_id\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpluginId\x12$\n" +
 	"\tclient_id\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bclientId\"z\n" +

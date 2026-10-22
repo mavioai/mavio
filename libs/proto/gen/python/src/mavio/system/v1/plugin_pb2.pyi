@@ -237,7 +237,14 @@ class GetContainerRuntimeResponse(_message.Message):
     def __init__(self, runtime: _Optional[_Union[ContainerRuntime, _Mapping]] = ...) -> None: ...
 
 class PluginContainer(_message.Message):
-    __slots__ = ("dependency", "status", "use_gpu", "commands", "gpu_commands", "plugin_id", "proxy", "command")
+    __slots__ = ("dependency", "status", "use_gpu", "commands", "gpu_commands", "plugin_id", "proxy", "command", "folders", "peer_port")
+    class FoldersEntry(_message.Message):
+        __slots__ = ("key", "value")
+        KEY_FIELD_NUMBER: _ClassVar[int]
+        VALUE_FIELD_NUMBER: _ClassVar[int]
+        key: str
+        value: str
+        def __init__(self, key: _Optional[str] = ..., value: _Optional[str] = ...) -> None: ...
     DEPENDENCY_FIELD_NUMBER: _ClassVar[int]
     STATUS_FIELD_NUMBER: _ClassVar[int]
     USE_GPU_FIELD_NUMBER: _ClassVar[int]
@@ -246,6 +253,8 @@ class PluginContainer(_message.Message):
     PLUGIN_ID_FIELD_NUMBER: _ClassVar[int]
     PROXY_FIELD_NUMBER: _ClassVar[int]
     COMMAND_FIELD_NUMBER: _ClassVar[int]
+    FOLDERS_FIELD_NUMBER: _ClassVar[int]
+    PEER_PORT_FIELD_NUMBER: _ClassVar[int]
     dependency: _container_pb2.ContainerDependency
     status: _container_pb2.ContainerStatus
     use_gpu: bool
@@ -254,7 +263,9 @@ class PluginContainer(_message.Message):
     plugin_id: str
     proxy: str
     command: str
-    def __init__(self, dependency: _Optional[_Union[_container_pb2.ContainerDependency, _Mapping]] = ..., status: _Optional[_Union[_container_pb2.ContainerStatus, _Mapping]] = ..., use_gpu: _Optional[bool] = ..., commands: _Optional[_Union[ContainerCommands, _Mapping]] = ..., gpu_commands: _Optional[_Union[ContainerCommands, _Mapping]] = ..., plugin_id: _Optional[str] = ..., proxy: _Optional[str] = ..., command: _Optional[str] = ...) -> None: ...
+    folders: _containers.ScalarMap[str, str]
+    peer_port: int
+    def __init__(self, dependency: _Optional[_Union[_container_pb2.ContainerDependency, _Mapping]] = ..., status: _Optional[_Union[_container_pb2.ContainerStatus, _Mapping]] = ..., use_gpu: _Optional[bool] = ..., commands: _Optional[_Union[ContainerCommands, _Mapping]] = ..., gpu_commands: _Optional[_Union[ContainerCommands, _Mapping]] = ..., plugin_id: _Optional[str] = ..., proxy: _Optional[str] = ..., command: _Optional[str] = ..., folders: _Optional[_Mapping[str, str]] = ..., peer_port: _Optional[int] = ...) -> None: ...
 
 class ContainerCommands(_message.Message):
     __slots__ = ("docker_run", "compose", "address")
@@ -289,20 +300,31 @@ class ListContainersResponse(_message.Message):
     def __init__(self, containers: _Optional[_Iterable[_Union[PluginContainer, _Mapping]]] = ...) -> None: ...
 
 class SetPluginContainerRequest(_message.Message):
-    __slots__ = ("plugin_id", "name", "mode", "address", "use_gpu", "proxy")
+    __slots__ = ("plugin_id", "name", "mode", "address", "use_gpu", "proxy", "folders", "peer_port")
+    class FoldersEntry(_message.Message):
+        __slots__ = ("key", "value")
+        KEY_FIELD_NUMBER: _ClassVar[int]
+        VALUE_FIELD_NUMBER: _ClassVar[int]
+        key: str
+        value: str
+        def __init__(self, key: _Optional[str] = ..., value: _Optional[str] = ...) -> None: ...
     PLUGIN_ID_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
     MODE_FIELD_NUMBER: _ClassVar[int]
     ADDRESS_FIELD_NUMBER: _ClassVar[int]
     USE_GPU_FIELD_NUMBER: _ClassVar[int]
     PROXY_FIELD_NUMBER: _ClassVar[int]
+    FOLDERS_FIELD_NUMBER: _ClassVar[int]
+    PEER_PORT_FIELD_NUMBER: _ClassVar[int]
     plugin_id: str
     name: str
     mode: _container_pb2.ContainerMode
     address: str
     use_gpu: bool
     proxy: str
-    def __init__(self, plugin_id: _Optional[str] = ..., name: _Optional[str] = ..., mode: _Optional[_Union[_container_pb2.ContainerMode, str]] = ..., address: _Optional[str] = ..., use_gpu: _Optional[bool] = ..., proxy: _Optional[str] = ...) -> None: ...
+    folders: _containers.ScalarMap[str, str]
+    peer_port: int
+    def __init__(self, plugin_id: _Optional[str] = ..., name: _Optional[str] = ..., mode: _Optional[_Union[_container_pb2.ContainerMode, str]] = ..., address: _Optional[str] = ..., use_gpu: _Optional[bool] = ..., proxy: _Optional[str] = ..., folders: _Optional[_Mapping[str, str]] = ..., peer_port: _Optional[int] = ...) -> None: ...
 
 class SetPluginContainerResponse(_message.Message):
     __slots__ = ("container",)

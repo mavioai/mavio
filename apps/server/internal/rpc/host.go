@@ -112,6 +112,7 @@ func (s *HostService) ListContainers(ctx context.Context, _ *pluginv1.ListContai
 	out := make([]*pluginv1.ContainerStatus, len(deps))
 	for i, d := range deps {
 		out[i] = d.Status
+		out[i].SetSecrets(d.Kept.Secrets)
 	}
 	return pluginv1.ListContainersResponse_builder{Containers: out}.Build(), nil
 }

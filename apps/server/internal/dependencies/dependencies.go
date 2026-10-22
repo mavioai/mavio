@@ -1,6 +1,7 @@
 package dependencies
 
 import (
+	"cmp"
 	"context"
 	"crypto/rand"
 	"errors"
@@ -9,6 +10,9 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
+	"os"
+	"path"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -358,7 +362,7 @@ func (s *Service) ProxyOf(ctx context.Context, container string) (string, bool) 
 			if s.cfg.Names.Container(id, spec.GetName()) != container {
 				continue
 			}
-			c, err := s.kept(ctx, id, spec.GetName())
+			c, err := s.kept(ctx, id, spec)
 			if err != nil || c.Mode != core.ContainerManaged || spec.GetDirect() {
 				return "", false
 			}
@@ -454,9 +458,10 @@ func gpuAccess(rt containers.Runtime) containers.GPU {
 }
 
 // Resolve returns a managed dependency as it runs: its image, with the
-// GPUs access gives when it may use one, and its environment with its
-// secrets and its own address, http://<container>:<port> on the network it
-// joins.
+// GPUs access gives when it may use one, its folders, and its environment
+// and command with its secrets, its own address, http://<container>:<port>
+// on the network it joins, its peer port and the server's user and group.
+// A folder not chosen yet is mounted from "<name>".
 func Resolve(names containers.Names, spec *pluginv1.ContainerDependency, c core.PluginContainer, access containers.GPU) containers.Dependency {
 	gpu := containers.NoGPU
 	if c.UseGPU && spec.GetGpu() != pluginv1.GpuSupport_GPU_SUPPORT_UNSPECIFIED {
@@ -466,7 +471,11 @@ func Resolve(names containers.Names, spec *pluginv1.ContainerDependency, c core.
 	if gpu != containers.NoGPU && spec.GetGpuImage() != "" {
 		image = spec.GetGpuImage()
 	}
-	pairs := []string{"${address}", "http://" + names.Container(c.PluginID, c.Name) + ":" + strconv.Itoa(int(spec.GetPort()))}
+	uid, gid := serverUser()
+	pairs := []string{
+		"${address}", "http://" + names.Container(c.PluginID, c.Name) + ":" + strconv.Itoa(int(spec.GetPort())),
+		"${peer_port}", strconv.Itoa(cmp.Or(c.PeerPort, int(spec.GetPeerPort()))), "${uid}", uid, "${gid}", gid,
+	}
 	for k, v := range c.Secrets {
 		pairs = append(pairs, "${secret:"+k+"}", v)
 	}
@@ -475,11 +484,76 @@ func Resolve(names containers.Names, spec *pluginv1.ContainerDependency, c core.
 	for k, v := range spec.GetEnv() {
 		env[k] = r.Replace(v)
 	}
+	var cmd []string
+	for _, a := range spec.GetCommand() {
+		cmd = append(cmd, r.Replace(a))
+	}
+	var folders map[string]string
+	for _, f := range spec.GetFolders() {
+		p := c.Folders[f.GetName()]
+		if p == "" {
+			p = "<" + f.GetName() + ">"
+		}
+		if folders == nil {
+			folders = map[string]string{}
+		}
+		folders[p] = f.GetPath()
+	}
+	var entrypoint []string
+	if spec.GetEntrypoint() != "" {
+		entrypoint = []string{spec.GetEntrypoint()}
+	}
+	peerPort := 0
+	if spec.GetPeerPort() > 0 {
+		peerPort = c.PeerPort
+	}
 	return containers.Dependency{
-		Plugin: c.PluginID, Name: c.Name, Image: image, Cmd: spec.GetCommand(), Env: env,
+		Plugin: c.PluginID, Name: c.Name, Image: image, Entrypoint: entrypoint, Cmd: cmd, Env: env,
+		Folders: folders, PeerPort: peerPort,
 		Port: int(spec.GetPort()), HealthPath: spec.GetHealthPath(), Volumes: maps.Clone(spec.GetVolumes()),
 		Memory: int64(spec.GetMemoryMib()) << 20, CPUs: spec.GetCpus(), GPU: gpu, HostAccess: spec.GetHostAccess(),
 	}
+}
+
+// serverUser returns the user and group the server runs as, 1000 where
+// the system has none (Windows).
+func serverUser() (uid, gid string) {
+	u, g := os.Getuid(), os.Getgid()
+	if u < 0 {
+		u = 1000
+	}
+	if g < 0 {
+		g = 1000
+	}
+	return strconv.Itoa(u), strconv.Itoa(g)
+}
+
+// Folders returns where the server reads the folders of a managed
+// dependency: its folders' paths in the container mapped to the server's
+// folders mounted there; nil for another.
+func (s *Service) Folders(ctx context.Context, pluginID, name string) (map[string]string, error) {
+	m, err := s.manifest(pluginID)
+	if err != nil {
+		return nil, err
+	}
+	spec, ok := manifest.Container(m, name)
+	if !ok {
+		return nil, fmt.Errorf("container %s of plugin %s: %w", name, pluginID, core.ErrNotFound)
+	}
+	c, err := s.kept(ctx, pluginID, spec)
+	if err != nil || c.Mode != core.ContainerManaged {
+		return nil, err
+	}
+	var out map[string]string
+	for _, f := range spec.GetFolders() {
+		if p := c.Folders[f.GetName()]; p != "" {
+			if out == nil {
+				out = map[string]string{}
+			}
+			out[f.GetPath()] = p
+		}
+	}
+	return out, nil
 }
 
 // Dependency is a container dependency a plugin's manifest declares, what
@@ -516,7 +590,7 @@ func (s *Service) List(ctx context.Context, pluginID string) ([]Dependency, erro
 	for i, spec := range m.GetContainers() {
 		c, ok := byName[spec.GetName()]
 		if !ok {
-			c = unset(pluginID, spec.GetName())
+			c = unset(pluginID, spec)
 		}
 		out[i] = Dependency{Spec: spec, Kept: c, Status: s.status(ctx, spec, c)}
 		out[i].Commands, out[i].GPUCommands = s.commands(spec, c, rt)
@@ -535,13 +609,15 @@ func (s *Service) command(ctx context.Context, m *pluginv1.Manifest, spec *plugi
 	if err != nil {
 		return ""
 	}
-	return sup.Command(s.resolve(ctx, m, spec, c))
+	return sup.Command(ctx, s.resolve(ctx, m, spec, c))
 }
 
 // unset is a dependency nothing is kept of: unset, through the system
-// proxy once managed.
-func unset(pluginID, name string) core.PluginContainer {
-	return core.PluginContainer{PluginID: pluginID, Name: name, Mode: core.ContainerUnset, Proxy: core.SystemProxyID}
+// proxy once managed, publishing its peer port at its own number.
+func unset(pluginID string, spec *pluginv1.ContainerDependency) core.PluginContainer {
+	return core.PluginContainer{
+		PluginID: pluginID, Name: spec.GetName(), Mode: core.ContainerUnset, Proxy: core.SystemProxyID, PeerPort: int(spec.GetPeerPort()),
+	}
 }
 
 // commands returns the commands running a dependency without and with a
@@ -588,10 +664,13 @@ func (s *Service) AllowsHost(ctx context.Context, pluginID, host string) bool {
 // secrets the first time, and configures the plugin again when its mode
 // or address changed. A managed dependency needs a container engine
 // (ErrNoEngine), and one requiring a GPU an engine giving it one; one
-// that may use a GPU runs without on an engine giving none. It runs while its plugin runs, reaching sites through
-// the proxy of ID proxy, which nil keeps. Leaving managed removes its
-// container and keeps its volumes.
-func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.ContainerMode, address string, useGPU bool, proxy *string) (Dependency, error) {
+// that may use a GPU runs without on an engine giving none. It runs while
+// its plugin runs, reaching sites through the proxy of ID proxy, which nil
+// keeps; it mounts folders, the server's folders by the names of the
+// dependency's, which keep those left out and are created when missing,
+// and needs all; it publishes peerPort for peers, which nil keeps. Leaving
+// managed removes its container and keeps its volumes.
+func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.ContainerMode, address string, useGPU bool, proxy *string, folders map[string]string, peerPort *int) (Dependency, error) {
 	m, err := s.manifest(pluginID)
 	if err != nil {
 		return Dependency{}, err
@@ -615,13 +694,32 @@ func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.Cont
 			return Dependency{}, fmt.Errorf("%w: container %s of plugin %s needs an NVIDIA GPU, which the container engine gives none of", core.ErrInvalid, name, pluginID)
 		}
 	}
-	old, err := s.kept(ctx, pluginID, name)
+	old, err := s.kept(ctx, pluginID, spec)
 	if err != nil {
 		return Dependency{}, err
 	}
 	c := core.PluginContainer{
 		PluginID: pluginID, Name: name, Mode: mode, Address: strings.TrimSuffix(address, "/"),
-		Secrets: secrets(spec, old.Secrets), UseGPU: useGPU, Proxy: old.Proxy,
+		Secrets: secrets(spec, old.Secrets), UseGPU: useGPU, Proxy: old.Proxy, PeerPort: old.PeerPort,
+	}
+	if c.Folders, err = chooseFolders(spec, old.Folders, folders, mode == core.ContainerManaged); err != nil {
+		return Dependency{}, fmt.Errorf("container %s of plugin %s: %w", name, pluginID, err)
+	}
+	if peerPort != nil {
+		if *peerPort != 0 && spec.GetPeerPort() == 0 {
+			return Dependency{}, fmt.Errorf("%w: container %s of plugin %s has no peer port", core.ErrInvalid, name, pluginID)
+		}
+		c.PeerPort = *peerPort
+	}
+	if err := c.Validate(); err != nil {
+		return Dependency{}, err
+	}
+	if mode == core.ContainerManaged {
+		for _, p := range c.Folders {
+			if err := os.MkdirAll(filepath.FromSlash(p), 0o775); err != nil {
+				return Dependency{}, fmt.Errorf("create folder %s: %w", p, err)
+			}
+		}
 	}
 	if proxy != nil && *proxy != old.Proxy {
 		if spec.GetDirect() {
@@ -656,7 +754,7 @@ func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.Cont
 	if c.Proxy != old.Proxy && s.cfg.ProxyChanged != nil {
 		s.cfg.ProxyChanged(s.cfg.Names.Container(pluginID, name))
 	}
-	if old.Mode != c.Mode || old.Address != c.Address {
+	if old.Mode != c.Mode || old.Address != c.Address || !maps.Equal(old.Folders, c.Folders) {
 		if p := s.boundPlugins(); p != nil {
 			if err := p.Reconfigure(ctx, pluginID); err != nil {
 				s.cfg.Logger.WarnContext(ctx, "reconfigure plugin after its container changed", "plugin", pluginID, "container", name, "err", err)
@@ -677,17 +775,56 @@ func (s *Service) manifest(pluginID string) (*pluginv1.Manifest, error) {
 }
 
 // kept returns what is kept of a dependency; an unset one when nothing is.
-func (s *Service) kept(ctx context.Context, pluginID, name string) (core.PluginContainer, error) {
+func (s *Service) kept(ctx context.Context, pluginID string, spec *pluginv1.ContainerDependency) (core.PluginContainer, error) {
 	kept, err := s.cfg.Store.List(ctx, pluginID)
 	if err != nil {
 		return core.PluginContainer{}, err
 	}
 	for _, c := range kept {
-		if c.Name == name {
+		if c.Name == spec.GetName() {
 			return c, nil
 		}
 	}
-	return unset(pluginID, name), nil
+	return unset(pluginID, spec), nil
+}
+
+// chooseFolders returns the server's folders of a dependency's folders:
+// the chosen ones, else the old ones; all of them when required. Two of
+// its folders cannot be one of the server's.
+func chooseFolders(spec *pluginv1.ContainerDependency, old, chosen map[string]string, required bool) (map[string]string, error) {
+	names := map[string]bool{}
+	for _, f := range spec.GetFolders() {
+		names[f.GetName()] = true
+	}
+	for k := range chosen {
+		if !names[k] {
+			return nil, fmt.Errorf("%w: no folder %s", core.ErrInvalid, k)
+		}
+	}
+	var out map[string]string
+	used := map[string]string{}
+	for _, f := range spec.GetFolders() {
+		p, ok := chosen[f.GetName()]
+		if !ok {
+			p = old[f.GetName()]
+		}
+		if p == "" {
+			if required {
+				return nil, fmt.Errorf("%w: choose a folder for %s", core.ErrInvalid, f.GetName())
+			}
+			continue
+		}
+		p = path.Clean(filepath.ToSlash(p))
+		if other, ok := used[p]; ok {
+			return nil, fmt.Errorf("%w: folders %s and %s are both %s", core.ErrInvalid, other, f.GetName(), p)
+		}
+		used[p] = f.GetName()
+		if out == nil {
+			out = map[string]string{}
+		}
+		out[f.GetName()] = p
+	}
+	return out, nil
 }
 
 // secrets returns the secrets a dependency's environment names: those

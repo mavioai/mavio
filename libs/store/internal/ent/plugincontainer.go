@@ -33,6 +33,10 @@ type PluginContainer struct {
 	UseGpu bool `json:"use_gpu,omitempty"`
 	// Proxy holds the value of the "proxy" field.
 	Proxy string `json:"proxy,omitempty"`
+	// Folders holds the value of the "folders" field.
+	Folders map[string]string `json:"folders,omitempty"`
+	// PeerPort holds the value of the "peer_port" field.
+	PeerPort int `json:"peer_port,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -43,12 +47,14 @@ func (*PluginContainer) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case plugincontainer.FieldSecrets:
+		case plugincontainer.FieldSecrets, plugincontainer.FieldFolders:
 			values[i] = new([]byte)
 		case plugincontainer.FieldID:
 			values[i] = new(core.ID)
 		case plugincontainer.FieldUseGpu:
 			values[i] = new(sql.NullBool)
+		case plugincontainer.FieldPeerPort:
+			values[i] = new(sql.NullInt64)
 		case plugincontainer.FieldPluginID, plugincontainer.FieldName, plugincontainer.FieldMode, plugincontainer.FieldAddress, plugincontainer.FieldProxy:
 			values[i] = new(sql.NullString)
 		case plugincontainer.FieldUpdatedAt:
@@ -118,6 +124,20 @@ func (_m *PluginContainer) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Proxy = value.String
 			}
+		case plugincontainer.FieldFolders:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field folders", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Folders); err != nil {
+					return fmt.Errorf("unmarshal field folders: %w", err)
+				}
+			}
+		case plugincontainer.FieldPeerPort:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field peer_port", values[i])
+			} else if value.Valid {
+				_m.PeerPort = int(value.Int64)
+			}
 		case plugincontainer.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -179,6 +199,12 @@ func (_m *PluginContainer) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("proxy=")
 	builder.WriteString(_m.Proxy)
+	builder.WriteString(", ")
+	builder.WriteString("folders=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Folders))
+	builder.WriteString(", ")
+	builder.WriteString("peer_port=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PeerPort))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

@@ -62,7 +62,7 @@ type PluginManagementService struct {
 type ContainerDependencies interface {
 	Runtime(ctx context.Context, detect bool) (containers.Runtime, error)
 	List(ctx context.Context, pluginID string) ([]dependencies.Dependency, error)
-	Set(ctx context.Context, pluginID, name string, mode core.ContainerMode, address string, useGPU bool, proxy *string) (dependencies.Dependency, error)
+	Set(ctx context.Context, pluginID, name string, mode core.ContainerMode, address string, useGPU bool, proxy *string, folders map[string]string, peerPort *int) (dependencies.Dependency, error)
 	// JobProgress returns the fraction done of a running image pull job.
 	JobProgress(id core.ID) (float64, bool)
 }
@@ -573,7 +573,11 @@ func (s *PluginManagementService) SetPluginContainer(ctx context.Context, req *s
 	if req.HasProxy() {
 		proxy = new(req.GetProxy())
 	}
-	d, err := s.Containers.Set(ctx, req.GetPluginId(), req.GetName(), mode, req.GetAddress(), req.GetUseGpu(), proxy)
+	var peerPort *int
+	if req.HasPeerPort() {
+		peerPort = new(int(req.GetPeerPort()))
+	}
+	d, err := s.Containers.Set(ctx, req.GetPluginId(), req.GetName(), mode, req.GetAddress(), req.GetUseGpu(), proxy, req.GetFolders(), peerPort)
 	switch {
 	case errors.Is(err, dependencies.ErrNoEngine):
 		return nil, connect.NewError(connect.CodeFailedPrecondition, err)
@@ -610,14 +614,22 @@ func (s *PluginManagementService) translator(ctx context.Context, pluginID strin
 // translated by tr, when not nil.
 func pluginContainerToProto(d dependencies.Dependency, tr func(string) string) *systemv1.PluginContainer {
 	spec := d.Spec
-	if tr != nil && spec.HasDescription() {
+	if tr != nil {
 		spec = proto.CloneOf(spec)
-		spec.SetDescription(tr(spec.GetDescription()))
+		if spec.HasDescription() {
+			spec.SetDescription(tr(spec.GetDescription()))
+		}
+		for _, f := range spec.GetFolders() {
+			if f.HasDescription() {
+				f.SetDescription(tr(f.GetDescription()))
+			}
+		}
 	}
 	return systemv1.PluginContainer_builder{
 		Dependency: spec, Status: d.Status, UseGpu: new(d.Kept.UseGPU),
 		Commands: containerCommandsToProto(d.Commands), GpuCommands: containerCommandsToProto(d.GPUCommands),
 		PluginId: new(d.Kept.PluginID), Proxy: new(d.Kept.Proxy), Command: new(d.Command),
+		Folders: d.Kept.Folders, PeerPort: new(uint32(d.Kept.PeerPort)),
 	}.Build()
 }
 

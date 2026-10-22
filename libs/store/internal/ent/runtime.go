@@ -729,8 +729,12 @@ func init() {
 	plugincontainerDescProxy := plugincontainerFields[7].Descriptor()
 	// plugincontainer.DefaultProxy holds the default value on creation for the proxy field.
 	plugincontainer.DefaultProxy = plugincontainerDescProxy.Default.(string)
+	// plugincontainerDescPeerPort is the schema descriptor for peer_port field.
+	plugincontainerDescPeerPort := plugincontainerFields[9].Descriptor()
+	// plugincontainer.DefaultPeerPort holds the default value on creation for the peer_port field.
+	plugincontainer.DefaultPeerPort = plugincontainerDescPeerPort.Default.(int)
 	// plugincontainerDescUpdatedAt is the schema descriptor for updated_at field.
-	plugincontainerDescUpdatedAt := plugincontainerFields[8].Descriptor()
+	plugincontainerDescUpdatedAt := plugincontainerFields[10].Descriptor()
 	// plugincontainer.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	plugincontainer.DefaultUpdatedAt = plugincontainerDescUpdatedAt.Default.(func() time.Time)
 	// plugincontainerDescID is the schema descriptor for id field.

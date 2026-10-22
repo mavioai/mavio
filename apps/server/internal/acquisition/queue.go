@@ -3,6 +3,7 @@ package acquisition
 import (
 	"context"
 	"errors"
+	"maps"
 	"slices"
 	"strings"
 	"time"
@@ -95,7 +96,7 @@ func (r *Runtime) CheckQueue(ctx context.Context) error {
 	for _, c := range clients {
 		byRef[c.Ref()] = c
 	}
-	mappings, err := r.downloadPathMappings(ctx)
+	mappings, err := r.downloadPathMappings(ctx, clients)
 	if err != nil {
 		return err
 	}
@@ -279,8 +280,9 @@ func (r *Runtime) removeFromClient(ctx context.Context, d *core.Download, delete
 	return true
 }
 
-// downloadPathMappings returns the stored download path mappings.
-func (r *Runtime) downloadPathMappings(ctx context.Context) ([]acquire.DownloadPathMapping, error) {
+// downloadPathMappings returns the stored download path mappings, then
+// those of the folders of the clients' managed containers.
+func (r *Runtime) downloadPathMappings(ctx context.Context, clients []Client) ([]acquire.DownloadPathMapping, error) {
 	stored, err := r.Store.DownloadPathMappings().List(ctx)
 	if err != nil {
 		return nil, err
@@ -289,5 +291,27 @@ func (r *Runtime) downloadPathMappings(ctx context.Context) ([]acquire.DownloadP
 	for i, m := range stored {
 		out[i] = acquire.DownloadPathMapping{Client: m.PluginID + "/" + m.ClientID, RemotePath: m.RemotePath, LocalPath: m.LocalPath}
 	}
+	for _, c := range clients {
+		out = append(out, r.containerMappings(ctx, c)...)
+	}
 	return out, nil
+}
+
+// containerMappings returns the mappings of the folders of a client's
+// managed container: each folder's path in the container to the server's
+// folder mounted there.
+func (r *Runtime) containerMappings(ctx context.Context, c Client) []acquire.DownloadPathMapping {
+	if c.GetContainer() == "" || r.ContainerFolders == nil {
+		return nil
+	}
+	folders, err := r.ContainerFolders(ctx, c.PluginID, c.GetContainer())
+	if err != nil {
+		r.logger().WarnContext(ctx, "couldn't tell the folders of a download client's container", "client", c.Ref(), "container", c.GetContainer(), "err", err)
+		return nil
+	}
+	var out []acquire.DownloadPathMapping
+	for _, remote := range slices.Sorted(maps.Keys(folders)) {
+		out = append(out, acquire.DownloadPathMapping{Client: c.Ref(), RemotePath: remote, LocalPath: folders[remote]})
+	}
+	return out
 }

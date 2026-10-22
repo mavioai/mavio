@@ -76,6 +76,11 @@ type Runtime struct {
 	// RemoteHosts returns the hosts of the remotes, by remote, for which
 	// download client folders are suggested; nil suggests none.
 	RemoteHosts func(ctx context.Context) (map[string]string, error)
+	// ContainerFolders returns the folders of a plugin's managed container
+	// dependency, their paths in the container mapped to the server's
+	// folders mounted there, which the download clients it runs put
+	// downloads in; nil maps none.
+	ContainerFolders func(ctx context.Context, pluginID, name string) (map[string]string, error)
 	// VolumeLedger, QuietGate and Devices pace imports on rotational and
 	// remote volumes, as for scans; nil leaves imports unpaced.
 	VolumeLedger *storage.VolumeLedger

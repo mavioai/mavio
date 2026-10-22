@@ -48,6 +48,8 @@ func (PluginContainer) Fields() []ent.Field {
 		field.JSON("secrets", map[string]string{}).Optional().Sensitive(),
 		field.Bool("use_gpu").Default(false),
 		field.String("proxy").Default("system"),
+		field.JSON("folders", map[string]string{}).Optional(),
+		field.Int("peer_port").Default(0),
 		field.Time("updated_at").Default(time.Now),
 	}
 }

@@ -452,6 +452,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	if rc != nil {
 		acq.RemoteHosts = rc.Hosts
 	}
+	acq.ContainerFolders = deps.Folders
 	reqs := &requests.Service{
 		Store: db, Acquisition: acq, Settings: func() core.RequestSettings { return set.Get().Requests },
 		Metadata: plugs.MetadataProviders, Episodes: plugs.EpisodeListers, Discovery: plugs.DiscoveryProviders,

@@ -2076,6 +2076,11 @@
             },
             "title": "link_library_paths",
             "description": "Set by the server: the library paths on the folder's storage, which\n imports hard link files to rather than copy them."
+          },
+          "container": {
+            "type": "boolean",
+            "title": "container",
+            "description": "Set by the server: the mapping is a folder of the container the\n client runs in, set with the container rather than here."
           }
         },
         "title": "DownloadClientPath",
@@ -17521,7 +17526,7 @@
               "type": "string",
               "title": "value"
             },
-            "description": "Environment variables. A value may hold \"${secret:\u003ckey\u003e}\", a random\n secret the server generates once for the dependency, and\n \"${address}\", the dependency's own address."
+            "description": "Environment variables. A value may hold \"${secret:\u003ckey\u003e}\", a random\n secret the server generates once for the dependency, \"${address}\",\n the dependency's own address, \"${peer_port}\", the port peers reach\n it at (peer_port), and \"${uid}\" and \"${gid}\", the user and group the\n server runs as, for files in its folders the server can move and\n hard link; command takes the same."
           },
           "volumes": {
             "type": "object",
@@ -17576,11 +17581,52 @@
             "type": "boolean",
             "title": "no_proxy_ipv4_only",
             "description": "Whether a managed container's NO_PROXY lists IPv4 blocks alone, for a\n service whose HTTP library fails on IPv6 ones, such as Python's httpx\n on fc00::/7; single addresses such as ::1 stay."
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.plugin.v1.ContainerFolder"
+            },
+            "title": "folders",
+            "description": "Folders of the server an administrator chooses, each mounted at its\n path, such as the folder a download client puts downloads in, which\n the server then reads."
+          },
+          "peerPort": {
+            "type": "integer",
+            "title": "peer_port",
+            "description": "A port peers connect to from outside, such as a BitTorrent client's:\n a managed container publishes it on every interface of the host, TCP\n and UDP, at the number an administrator chooses, this one by default,\n which \"${peer_port}\" gives the service. 0 for none."
+          },
+          "entrypoint": {
+            "type": "string",
+            "title": "entrypoint",
+            "description": "The program replacing the image's entrypoint, such as \"/bin/sh\" for a\n command that prepares the container before running the image's own;\n empty keeps it."
           }
         },
         "title": "ContainerDependency",
         "additionalProperties": false,
         "description": "ContainerDependency is a service a plugin depends on that runs as a\n container image, such as FlareSolverr. The server runs it on a\n container engine (managed) or reaches it at an address an administrator\n gives (external); the plugin sees only its address."
+      },
+      "mavio.plugin.v1.ContainerFolder": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name",
+            "description": "Identifier within the dependency: lowercase letters, digits and\n dashes."
+          },
+          "path": {
+            "type": "string",
+            "title": "path",
+            "description": "The absolute path it is mounted at in the container."
+          },
+          "description": {
+            "type": "string",
+            "title": "description",
+            "description": "What it is for, shown to administrators."
+          }
+        },
+        "title": "ContainerFolder",
+        "additionalProperties": false,
+        "description": "ContainerFolder is a folder of the server mounted in a container\n dependency."
       },
       "mavio.plugin.v1.ContainerMode": {
         "type": "string",
@@ -17648,6 +17694,15 @@
             "type": "boolean",
             "title": "queued",
             "description": "While its image is pulled, whether the pull waits for others to end."
+          },
+          "secrets": {
+            "type": "object",
+            "title": "secrets",
+            "additionalProperties": {
+              "type": "string",
+              "title": "value"
+            },
+            "description": "The secrets the server generated for it, by key, which its\n environment names \"${secret:\u003ckey\u003e}\", for the plugin to sign in with;\n only HostService.ListContainers tells them."
           }
         },
         "title": "ContainerStatus",
@@ -22328,6 +22383,20 @@
             "type": "string",
             "title": "command",
             "description": "For a managed container, the docker run command equivalent to how the\n server runs it; empty without a container engine."
+          },
+          "folders": {
+            "type": "object",
+            "title": "folders",
+            "additionalProperties": {
+              "type": "string",
+              "title": "value"
+            },
+            "description": "The folders of the server chosen for the dependency's folders, by\n name."
+          },
+          "peerPort": {
+            "type": "integer",
+            "title": "peer_port",
+            "description": "The port a managed container publishes for peers, as the\n dependency's peer_port; 0 for none."
           }
         },
         "title": "PluginContainer",
@@ -22701,6 +22770,21 @@
             "type": "string",
             "title": "proxy",
             "description": "The proxy a managed container reaches sites through, as\n PluginContainer.proxy; unset keeps it."
+          },
+          "folders": {
+            "type": "object",
+            "title": "folders",
+            "additionalProperties": {
+              "type": "string",
+              "title": "value"
+            },
+            "description": "Folders of the server, absolute paths, for the dependency's folders by\n name; those left out keep theirs. A managed container needs all."
+          },
+          "peerPort": {
+            "type": "integer",
+            "title": "peer_port",
+            "maximum": 65535,
+            "description": "The port a managed container publishes for peers, 0 for none; unset\n keeps it, the dependency's peer_port at first."
           }
         },
         "title": "SetPluginContainerRequest",

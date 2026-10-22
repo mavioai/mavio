@@ -394,7 +394,7 @@ class ManualImportResponse(_message.Message):
     def __init__(self) -> None: ...
 
 class DownloadClientPath(_message.Message):
-    __slots__ = ("remote_path", "local_path", "root_folder", "suggested_path", "readable", "error", "link_library_paths")
+    __slots__ = ("remote_path", "local_path", "root_folder", "suggested_path", "readable", "error", "link_library_paths", "container")
     REMOTE_PATH_FIELD_NUMBER: _ClassVar[int]
     LOCAL_PATH_FIELD_NUMBER: _ClassVar[int]
     ROOT_FOLDER_FIELD_NUMBER: _ClassVar[int]
@@ -402,6 +402,7 @@ class DownloadClientPath(_message.Message):
     READABLE_FIELD_NUMBER: _ClassVar[int]
     ERROR_FIELD_NUMBER: _ClassVar[int]
     LINK_LIBRARY_PATHS_FIELD_NUMBER: _ClassVar[int]
+    CONTAINER_FIELD_NUMBER: _ClassVar[int]
     remote_path: str
     local_path: str
     root_folder: bool
@@ -409,7 +410,8 @@ class DownloadClientPath(_message.Message):
     readable: bool
     error: str
     link_library_paths: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, remote_path: _Optional[str] = ..., local_path: _Optional[str] = ..., root_folder: _Optional[bool] = ..., suggested_path: _Optional[str] = ..., readable: _Optional[bool] = ..., error: _Optional[str] = ..., link_library_paths: _Optional[_Iterable[str]] = ...) -> None: ...
+    container: bool
+    def __init__(self, remote_path: _Optional[str] = ..., local_path: _Optional[str] = ..., root_folder: _Optional[bool] = ..., suggested_path: _Optional[str] = ..., readable: _Optional[bool] = ..., error: _Optional[str] = ..., link_library_paths: _Optional[_Iterable[str]] = ..., container: _Optional[bool] = ...) -> None: ...
 
 class GetDownloadClientPathsRequest(_message.Message):
     __slots__ = ("plugin_id", "client_id")

@@ -8100,6 +8100,11 @@ pub struct DownloadClientPathView<'a> {
     ///
     /// Field 7: `link_library_paths`
     pub link_library_paths: ::buffa::RepeatedView<'a, &'a str>,
+    /// Set by the server: the mapping is a folder of the container the
+    /// client runs in, set with the container rather than here.
+    ///
+    /// Field 8: `container`
+    pub container: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for DownloadClientPathView<'a> {
@@ -8174,6 +8179,13 @@ impl<'a> ::buffa::MessageView<'a> for DownloadClientPathView<'a> {
                 )?;
                 view.error = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.container = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
             7u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -8218,6 +8230,7 @@ impl<'a> ::buffa::MessageView<'a> for DownloadClientPathView<'a> {
                 .iter()
                 .map(|s| s.to_string())
                 .collect(),
+            container: self.container,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -8250,6 +8263,9 @@ impl<'a> ::buffa::ViewEncode<'a> for DownloadClientPathView<'a> {
         for v in &self.link_library_paths {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.container.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -8281,6 +8297,9 @@ impl<'a> ::buffa::ViewEncode<'a> for DownloadClientPathView<'a> {
         }
         for v in &self.link_library_paths {
             ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        if let Some(v) = self.container {
+            ::buffa::types::put_bool_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -8428,6 +8447,14 @@ impl DownloadClientPathOwnedView {
     #[must_use]
     pub fn link_library_paths(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
         &self.0.reborrow().link_library_paths
+    }
+    /// Set by the server: the mapping is a folder of the container the
+    /// client runs in, set with the container rather than here.
+    ///
+    /// Field 8: `container`
+    #[must_use]
+    pub fn container(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().container
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<DownloadClientPathView<'static>>>

@@ -5560,6 +5560,11 @@ pub struct DownloadClientPath {
     ///
     /// Field 7: `link_library_paths`
     pub link_library_paths: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// Set by the server: the mapping is a folder of the container the
+    /// client runs in, set with the container rather than here.
+    ///
+    /// Field 8: `container`
+    pub container: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -5573,6 +5578,7 @@ impl ::core::fmt::Debug for DownloadClientPath {
             .field("readable", &self.readable)
             .field("error", &self.error)
             .field("link_library_paths", &self.link_library_paths)
+            .field("container", &self.container)
             .finish()
     }
 }
@@ -5638,6 +5644,13 @@ impl DownloadClientPath {
         self.error = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::container`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_container(mut self, value: bool) -> Self {
+        self.container = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(DownloadClientPath);
 impl ::buffa::MessageName for DownloadClientPath {
@@ -5680,6 +5693,9 @@ impl ::buffa::Message for DownloadClientPath {
         for v in &self.link_library_paths {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.container.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -5710,6 +5726,9 @@ impl ::buffa::Message for DownloadClientPath {
         }
         for v in &self.link_library_paths {
             ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        if let Some(v) = self.container {
+            ::buffa::types::put_bool_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5799,6 +5818,15 @@ impl ::buffa::Message for DownloadClientPath {
                 )?;
                 self.link_library_paths.push(__elem);
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.container = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -5814,6 +5842,7 @@ impl ::buffa::Message for DownloadClientPath {
         self.readable = ::core::option::Option::None;
         self.error = ::core::option::Option::None;
         self.link_library_paths.clear();
+        self.container = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

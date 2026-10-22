@@ -9,16 +9,19 @@ import (
 )
 
 // ContainerSpec is what a container is created with. It has no field for
-// privileged mode, capabilities, devices, host namespaces or bind mounts,
-// so no caller can create a container with them.
+// privileged mode, capabilities, devices or host namespaces, so no caller
+// can create a container with them; it binds only the folders an
+// administrator chose.
 type ContainerSpec struct {
 	// Name is the container's name.
 	Name string
 	// Image is the image's reference or ID.
 	Image string
-	// Cmd replaces the image's command when not nil; Env is KEY=value.
-	Cmd []string
-	Env []string
+	// Entrypoint replaces the image's entrypoint when not empty, Cmd its
+	// command when not nil; Env is KEY=value.
+	Entrypoint []string
+	Cmd        []string
+	Env        []string
 	// Labels label the container, and the volumes it creates unless
 	// VolumeLabels is set.
 	Labels       map[string]string
@@ -29,6 +32,9 @@ type ContainerSpec struct {
 	// PublishLoopback publishes Port on 127.0.0.1 at a port the engine
 	// picks, which Container.PublishedPort tells.
 	PublishLoopback bool
+	// PeerPort is published at its own number on every interface of the
+	// host, TCP and UDP; 0 for none.
+	PeerPort int
 	// Network is the network the container joins, with Aliases its names
 	// there; empty for the engine's default.
 	Network string
@@ -36,6 +42,8 @@ type ContainerSpec struct {
 	// Volumes maps named volumes to the paths they are mounted at; the
 	// engine creates volumes that do not exist yet, with Labels.
 	Volumes map[string]string
+	// Binds mount folders of the host, or subpaths of volumes.
+	Binds []Bind
 	// Memory is the memory limit in bytes and CPUs the CPU limit in
 	// CPUs; 0 for none.
 	Memory int64
@@ -46,12 +54,34 @@ type ContainerSpec struct {
 	HostGateway bool
 }
 
+// Bind mounts a folder of the host, or a subpath of a volume, in a
+// container.
+type Bind struct {
+	// Source is the host's folder; empty for a volume's.
+	Source string
+	// Volume is the volume's name and Subpath the folder in it, empty for
+	// its root.
+	Volume, Subpath string
+	// Target is the path it is mounted at.
+	Target string
+}
+
+// Mount is a container's mount as the engine tells it.
+type Mount struct {
+	// Type is bind, volume, tmpfs…; Name is a volume's name.
+	Type, Name string
+	// Source is where it is mounted from on the host, Destination where
+	// in the container.
+	Source, Destination string
+}
+
 // hostGateway maps HostName to the host.
 const hostGateway = HostName + ":host-gateway"
 
 // createBody is the body of a container creation.
 type createBody struct {
 	Image            string
+	Entrypoint       []string            `json:",omitempty"`
 	Cmd              []string            `json:",omitempty"`
 	Env              []string            `json:",omitempty"`
 	Labels           map[string]string   `json:",omitempty"`
@@ -77,7 +107,8 @@ type mount struct {
 }
 
 type volumeOptions struct {
-	Labels map[string]string `json:",omitempty"`
+	Labels  map[string]string `json:",omitempty"`
+	Subpath string            `json:",omitempty"`
 }
 
 type deviceRequest struct {
@@ -169,6 +200,7 @@ type Container struct {
 	HostConfig struct {
 		NetworkMode string
 	}
+	Mounts          []Mount
 	NetworkSettings struct {
 		Ports    map[string][]PortBinding
 		Networks map[string]struct {
@@ -204,14 +236,31 @@ type ContainerSummary struct {
 // CreateContainer creates a container and returns its ID; core.ErrConflict
 // when its name is taken, core.ErrNotFound when its image is missing.
 func (c *Client) CreateContainer(ctx context.Context, s ContainerSpec) (string, error) {
-	body := createBody{Image: s.Image, Cmd: s.Cmd, Env: s.Env, Labels: s.Labels}
+	body := createBody{Image: s.Image, Entrypoint: s.Entrypoint, Cmd: s.Cmd, Env: s.Env, Labels: s.Labels}
 	body.HostConfig.RestartPolicy.Name = "no"
-	if s.Port > 0 {
-		port := strconv.Itoa(s.Port) + "/tcp"
-		body.ExposedPorts = map[string]struct{}{port: {}}
-		if s.PublishLoopback {
-			body.HostConfig.PortBindings = map[string][]PortBinding{port: {{HostIP: "127.0.0.1"}}}
+	expose := func(port string, b *PortBinding) {
+		if body.ExposedPorts == nil {
+			body.ExposedPorts = map[string]struct{}{}
 		}
+		body.ExposedPorts[port] = struct{}{}
+		if b != nil {
+			if body.HostConfig.PortBindings == nil {
+				body.HostConfig.PortBindings = map[string][]PortBinding{}
+			}
+			body.HostConfig.PortBindings[port] = []PortBinding{*b}
+		}
+	}
+	if s.Port > 0 {
+		var b *PortBinding
+		if s.PublishLoopback {
+			b = &PortBinding{HostIP: "127.0.0.1"}
+		}
+		expose(strconv.Itoa(s.Port)+"/tcp", b)
+	}
+	if s.PeerPort > 0 {
+		p := strconv.Itoa(s.PeerPort)
+		expose(p+"/tcp", &PortBinding{HostPort: p})
+		expose(p+"/udp", &PortBinding{HostPort: p})
 	}
 	volumeLabels := s.VolumeLabels
 	if volumeLabels == nil {
@@ -221,6 +270,16 @@ func (c *Client) CreateContainer(ctx context.Context, s ContainerSpec) (string, 
 		m := mount{Type: "volume", Source: name, Target: target}
 		if len(volumeLabels) > 0 {
 			m.VolumeOptions = &volumeOptions{Labels: volumeLabels}
+		}
+		body.HostConfig.Mounts = append(body.HostConfig.Mounts, m)
+	}
+	for _, b := range s.Binds {
+		m := mount{Type: "bind", Source: b.Source, Target: b.Target}
+		if b.Source == "" {
+			m = mount{Type: "volume", Source: b.Volume, Target: b.Target}
+			if b.Subpath != "" {
+				m.VolumeOptions = &volumeOptions{Subpath: b.Subpath}
+			}
 		}
 		body.HostConfig.Mounts = append(body.HostConfig.Mounts, m)
 	}

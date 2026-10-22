@@ -198,6 +198,9 @@ type ContainerDependency struct {
 	xxx_hidden_HostAccess      bool                   `protobuf:"varint,14,opt,name=host_access,json=hostAccess"`
 	xxx_hidden_Direct          bool                   `protobuf:"varint,15,opt,name=direct"`
 	xxx_hidden_NoProxyIpv4Only bool                   `protobuf:"varint,16,opt,name=no_proxy_ipv4_only,json=noProxyIpv4Only"`
+	xxx_hidden_Folders         *[]*ContainerFolder    `protobuf:"bytes,17,rep,name=folders"`
+	xxx_hidden_PeerPort        uint32                 `protobuf:"varint,18,opt,name=peer_port,json=peerPort"`
+	xxx_hidden_Entrypoint      *string                `protobuf:"bytes,19,opt,name=entrypoint"`
 	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
 	XXX_presence               [1]uint32
 	unknownFields              protoimpl.UnknownFields
@@ -358,29 +361,55 @@ func (x *ContainerDependency) GetNoProxyIpv4Only() bool {
 	return false
 }
 
+func (x *ContainerDependency) GetFolders() []*ContainerFolder {
+	if x != nil {
+		if x.xxx_hidden_Folders != nil {
+			return *x.xxx_hidden_Folders
+		}
+	}
+	return nil
+}
+
+func (x *ContainerDependency) GetPeerPort() uint32 {
+	if x != nil {
+		return x.xxx_hidden_PeerPort
+	}
+	return 0
+}
+
+func (x *ContainerDependency) GetEntrypoint() string {
+	if x != nil {
+		if x.xxx_hidden_Entrypoint != nil {
+			return *x.xxx_hidden_Entrypoint
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *ContainerDependency) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 19)
 }
 
 func (x *ContainerDependency) SetDescription(v string) {
 	x.xxx_hidden_Description = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 19)
 }
 
 func (x *ContainerDependency) SetImage(v string) {
 	x.xxx_hidden_Image = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 19)
 }
 
 func (x *ContainerDependency) SetPort(v uint32) {
 	x.xxx_hidden_Port = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 19)
 }
 
 func (x *ContainerDependency) SetHealthPath(v string) {
 	x.xxx_hidden_HealthPath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 19)
 }
 
 func (x *ContainerDependency) SetCommand(v []string) {
@@ -397,42 +426,56 @@ func (x *ContainerDependency) SetVolumes(v map[string]string) {
 
 func (x *ContainerDependency) SetGpu(v GpuSupport) {
 	x.xxx_hidden_Gpu = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 19)
 }
 
 func (x *ContainerDependency) SetGpuImage(v string) {
 	x.xxx_hidden_GpuImage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 19)
 }
 
 func (x *ContainerDependency) SetMemoryMib(v uint32) {
 	x.xxx_hidden_MemoryMib = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 19)
 }
 
 func (x *ContainerDependency) SetCpus(v float64) {
 	x.xxx_hidden_Cpus = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 19)
 }
 
 func (x *ContainerDependency) SetRequired(v bool) {
 	x.xxx_hidden_Required = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 19)
 }
 
 func (x *ContainerDependency) SetHostAccess(v bool) {
 	x.xxx_hidden_HostAccess = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 19)
 }
 
 func (x *ContainerDependency) SetDirect(v bool) {
 	x.xxx_hidden_Direct = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 19)
 }
 
 func (x *ContainerDependency) SetNoProxyIpv4Only(v bool) {
 	x.xxx_hidden_NoProxyIpv4Only = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 19)
+}
+
+func (x *ContainerDependency) SetFolders(v []*ContainerFolder) {
+	x.xxx_hidden_Folders = &v
+}
+
+func (x *ContainerDependency) SetPeerPort(v uint32) {
+	x.xxx_hidden_PeerPort = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 19)
+}
+
+func (x *ContainerDependency) SetEntrypoint(v string) {
+	x.xxx_hidden_Entrypoint = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 19)
 }
 
 func (x *ContainerDependency) HasName() bool {
@@ -526,6 +569,20 @@ func (x *ContainerDependency) HasNoProxyIpv4Only() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 15)
 }
 
+func (x *ContainerDependency) HasPeerPort() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 17)
+}
+
+func (x *ContainerDependency) HasEntrypoint() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 18)
+}
+
 func (x *ContainerDependency) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -591,6 +648,16 @@ func (x *ContainerDependency) ClearNoProxyIpv4Only() {
 	x.xxx_hidden_NoProxyIpv4Only = false
 }
 
+func (x *ContainerDependency) ClearPeerPort() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 17)
+	x.xxx_hidden_PeerPort = 0
+}
+
+func (x *ContainerDependency) ClearEntrypoint() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 18)
+	x.xxx_hidden_Entrypoint = nil
+}
+
 type ContainerDependency_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -611,8 +678,11 @@ type ContainerDependency_builder struct {
 	// Arguments replacing the image's command; empty keeps it.
 	Command []string
 	// Environment variables. A value may hold "${secret:<key>}", a random
-	// secret the server generates once for the dependency, and
-	// "${address}", the dependency's own address.
+	// secret the server generates once for the dependency, "${address}",
+	// the dependency's own address, "${peer_port}", the port peers reach
+	// it at (peer_port), and "${uid}" and "${gid}", the user and group the
+	// server runs as, for files in its folders the server can move and
+	// hard link; command takes the same.
 	Env map[string]string
 	// Named volumes by name, each mounted at the path given, e.g.
 	// {"cache": "/root/.cache"}. The volume is mavio-<plugin>-<name>-<volume>.
@@ -642,6 +712,19 @@ type ContainerDependency_builder struct {
 	// service whose HTTP library fails on IPv6 ones, such as Python's httpx
 	// on fc00::/7; single addresses such as ::1 stay.
 	NoProxyIpv4Only *bool
+	// Folders of the server an administrator chooses, each mounted at its
+	// path, such as the folder a download client puts downloads in, which
+	// the server then reads.
+	Folders []*ContainerFolder
+	// A port peers connect to from outside, such as a BitTorrent client's:
+	// a managed container publishes it on every interface of the host, TCP
+	// and UDP, at the number an administrator chooses, this one by default,
+	// which "${peer_port}" gives the service. 0 for none.
+	PeerPort *uint32
+	// The program replacing the image's entrypoint, such as "/bin/sh" for a
+	// command that prepares the container before running the image's own;
+	// empty keeps it.
+	Entrypoint *string
 }
 
 func (b0 ContainerDependency_builder) Build() *ContainerDependency {
@@ -649,59 +732,218 @@ func (b0 ContainerDependency_builder) Build() *ContainerDependency {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 19)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Description != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 19)
 		x.xxx_hidden_Description = b.Description
 	}
 	if b.Image != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 19)
 		x.xxx_hidden_Image = b.Image
 	}
 	if b.Port != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 19)
 		x.xxx_hidden_Port = *b.Port
 	}
 	if b.HealthPath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 19)
 		x.xxx_hidden_HealthPath = b.HealthPath
 	}
 	x.xxx_hidden_Command = b.Command
 	x.xxx_hidden_Env = b.Env
 	x.xxx_hidden_Volumes = b.Volumes
 	if b.Gpu != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 19)
 		x.xxx_hidden_Gpu = *b.Gpu
 	}
 	if b.GpuImage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 19)
 		x.xxx_hidden_GpuImage = b.GpuImage
 	}
 	if b.MemoryMib != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 19)
 		x.xxx_hidden_MemoryMib = *b.MemoryMib
 	}
 	if b.Cpus != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 19)
 		x.xxx_hidden_Cpus = *b.Cpus
 	}
 	if b.Required != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 19)
 		x.xxx_hidden_Required = *b.Required
 	}
 	if b.HostAccess != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 19)
 		x.xxx_hidden_HostAccess = *b.HostAccess
 	}
 	if b.Direct != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 19)
 		x.xxx_hidden_Direct = *b.Direct
 	}
 	if b.NoProxyIpv4Only != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 19)
 		x.xxx_hidden_NoProxyIpv4Only = *b.NoProxyIpv4Only
+	}
+	x.xxx_hidden_Folders = &b.Folders
+	if b.PeerPort != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 19)
+		x.xxx_hidden_PeerPort = *b.PeerPort
+	}
+	if b.Entrypoint != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 19)
+		x.xxx_hidden_Entrypoint = b.Entrypoint
+	}
+	return m0
+}
+
+// ContainerFolder is a folder of the server mounted in a container
+// dependency.
+type ContainerFolder struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Name        *string                `protobuf:"bytes,1,opt,name=name"`
+	xxx_hidden_Path        *string                `protobuf:"bytes,2,opt,name=path"`
+	xxx_hidden_Description *string                `protobuf:"bytes,3,opt,name=description"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ContainerFolder) Reset() {
+	*x = ContainerFolder{}
+	mi := &file_mavio_plugin_v1_container_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ContainerFolder) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContainerFolder) ProtoMessage() {}
+
+func (x *ContainerFolder) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_container_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ContainerFolder) GetName() string {
+	if x != nil {
+		if x.xxx_hidden_Name != nil {
+			return *x.xxx_hidden_Name
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ContainerFolder) GetPath() string {
+	if x != nil {
+		if x.xxx_hidden_Path != nil {
+			return *x.xxx_hidden_Path
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ContainerFolder) GetDescription() string {
+	if x != nil {
+		if x.xxx_hidden_Description != nil {
+			return *x.xxx_hidden_Description
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ContainerFolder) SetName(v string) {
+	x.xxx_hidden_Name = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *ContainerFolder) SetPath(v string) {
+	x.xxx_hidden_Path = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *ContainerFolder) SetDescription(v string) {
+	x.xxx_hidden_Description = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *ContainerFolder) HasName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ContainerFolder) HasPath() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *ContainerFolder) HasDescription() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *ContainerFolder) ClearName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Name = nil
+}
+
+func (x *ContainerFolder) ClearPath() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Path = nil
+}
+
+func (x *ContainerFolder) ClearDescription() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Description = nil
+}
+
+type ContainerFolder_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Identifier within the dependency: lowercase letters, digits and
+	// dashes.
+	Name *string
+	// The absolute path it is mounted at in the container.
+	Path *string
+	// What it is for, shown to administrators.
+	Description *string
+}
+
+func (b0 ContainerFolder_builder) Build() *ContainerFolder {
+	m0 := &ContainerFolder{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Name != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_Name = b.Name
+	}
+	if b.Path != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Path = b.Path
+	}
+	if b.Description != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_Description = b.Description
 	}
 	return m0
 }
@@ -717,6 +959,7 @@ type ContainerStatus struct {
 	xxx_hidden_Error       *string                `protobuf:"bytes,5,opt,name=error"`
 	xxx_hidden_Progress    float64                `protobuf:"fixed64,6,opt,name=progress"`
 	xxx_hidden_Queued      bool                   `protobuf:"varint,7,opt,name=queued"`
+	xxx_hidden_Secrets     map[string]string      `protobuf:"bytes,8,rep,name=secrets" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -725,7 +968,7 @@ type ContainerStatus struct {
 
 func (x *ContainerStatus) Reset() {
 	*x = ContainerStatus{}
-	mi := &file_mavio_plugin_v1_container_proto_msgTypes[1]
+	mi := &file_mavio_plugin_v1_container_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -737,7 +980,7 @@ func (x *ContainerStatus) String() string {
 func (*ContainerStatus) ProtoMessage() {}
 
 func (x *ContainerStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_container_proto_msgTypes[1]
+	mi := &file_mavio_plugin_v1_container_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -810,39 +1053,50 @@ func (x *ContainerStatus) GetQueued() bool {
 	return false
 }
 
+func (x *ContainerStatus) GetSecrets() map[string]string {
+	if x != nil {
+		return x.xxx_hidden_Secrets
+	}
+	return nil
+}
+
 func (x *ContainerStatus) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
 }
 
 func (x *ContainerStatus) SetMode(v ContainerMode) {
 	x.xxx_hidden_Mode = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
 }
 
 func (x *ContainerStatus) SetAddress(v string) {
 	x.xxx_hidden_Address = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
 }
 
 func (x *ContainerStatus) SetState(v ContainerState) {
 	x.xxx_hidden_State = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
 }
 
 func (x *ContainerStatus) SetError(v string) {
 	x.xxx_hidden_Error = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
 }
 
 func (x *ContainerStatus) SetProgress(v float64) {
 	x.xxx_hidden_Progress = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
 }
 
 func (x *ContainerStatus) SetQueued(v bool) {
 	x.xxx_hidden_Queued = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
+}
+
+func (x *ContainerStatus) SetSecrets(v map[string]string) {
+	x.xxx_hidden_Secrets = v
 }
 
 func (x *ContainerStatus) HasName() bool {
@@ -944,6 +1198,10 @@ type ContainerStatus_builder struct {
 	Progress *float64
 	// While its image is pulled, whether the pull waits for others to end.
 	Queued *bool
+	// The secrets the server generated for it, by key, which its
+	// environment names "${secret:<key>}", for the plugin to sign in with;
+	// only HostService.ListContainers tells them.
+	Secrets map[string]string
 }
 
 func (b0 ContainerStatus_builder) Build() *ContainerStatus {
@@ -951,33 +1209,34 @@ func (b0 ContainerStatus_builder) Build() *ContainerStatus {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Mode != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
 		x.xxx_hidden_Mode = *b.Mode
 	}
 	if b.Address != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
 		x.xxx_hidden_Address = b.Address
 	}
 	if b.State != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
 		x.xxx_hidden_State = *b.State
 	}
 	if b.Error != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
 		x.xxx_hidden_Error = b.Error
 	}
 	if b.Progress != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
 		x.xxx_hidden_Progress = *b.Progress
 	}
 	if b.Queued != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
 		x.xxx_hidden_Queued = *b.Queued
 	}
+	x.xxx_hidden_Secrets = b.Secrets
 	return m0
 }
 
@@ -989,7 +1248,7 @@ type ListContainersRequest struct {
 
 func (x *ListContainersRequest) Reset() {
 	*x = ListContainersRequest{}
-	mi := &file_mavio_plugin_v1_container_proto_msgTypes[2]
+	mi := &file_mavio_plugin_v1_container_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1001,7 +1260,7 @@ func (x *ListContainersRequest) String() string {
 func (*ListContainersRequest) ProtoMessage() {}
 
 func (x *ListContainersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_container_proto_msgTypes[2]
+	mi := &file_mavio_plugin_v1_container_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1033,7 +1292,7 @@ type ListContainersResponse struct {
 
 func (x *ListContainersResponse) Reset() {
 	*x = ListContainersResponse{}
-	mi := &file_mavio_plugin_v1_container_proto_msgTypes[3]
+	mi := &file_mavio_plugin_v1_container_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1045,7 +1304,7 @@ func (x *ListContainersResponse) String() string {
 func (*ListContainersResponse) ProtoMessage() {}
 
 func (x *ListContainersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_container_proto_msgTypes[3]
+	mi := &file_mavio_plugin_v1_container_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1088,7 +1347,7 @@ var File_mavio_plugin_v1_container_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_container_proto_rawDesc = "" +
 	"\n" +
-	"\x1fmavio/plugin/v1/container.proto\x12\x0fmavio.plugin.v1\"\xb3\x05\n" +
+	"\x1fmavio/plugin/v1/container.proto\x12\x0fmavio.plugin.v1\"\xac\x06\n" +
 	"\x13ContainerDependency\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x14\n" +
@@ -1109,13 +1368,22 @@ const file_mavio_plugin_v1_container_proto_rawDesc = "" +
 	"\vhost_access\x18\x0e \x01(\bR\n" +
 	"hostAccess\x12\x16\n" +
 	"\x06direct\x18\x0f \x01(\bR\x06direct\x12+\n" +
-	"\x12no_proxy_ipv4_only\x18\x10 \x01(\bR\x0fnoProxyIpv4Only\x1a6\n" +
+	"\x12no_proxy_ipv4_only\x18\x10 \x01(\bR\x0fnoProxyIpv4Only\x12:\n" +
+	"\afolders\x18\x11 \x03(\v2 .mavio.plugin.v1.ContainerFolderR\afolders\x12\x1b\n" +
+	"\tpeer_port\x18\x12 \x01(\rR\bpeerPort\x12\x1e\n" +
+	"\n" +
+	"entrypoint\x18\x13 \x01(\tR\n" +
+	"entrypoint\x1a6\n" +
 	"\bEnvEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a:\n" +
 	"\fVolumesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xf4\x01\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"[\n" +
+	"\x0fContainerFolder\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
+	"\x04path\x18\x02 \x01(\tR\x04path\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"\xf9\x02\n" +
 	"\x0fContainerStatus\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x122\n" +
 	"\x04mode\x18\x02 \x01(\x0e2\x1e.mavio.plugin.v1.ContainerModeR\x04mode\x12\x18\n" +
@@ -1123,7 +1391,11 @@ const file_mavio_plugin_v1_container_proto_rawDesc = "" +
 	"\x05state\x18\x04 \x01(\x0e2\x1f.mavio.plugin.v1.ContainerStateR\x05state\x12\x14\n" +
 	"\x05error\x18\x05 \x01(\tR\x05error\x12\x1a\n" +
 	"\bprogress\x18\x06 \x01(\x01R\bprogress\x12\x16\n" +
-	"\x06queued\x18\a \x01(\bR\x06queued\"\x17\n" +
+	"\x06queued\x18\a \x01(\bR\x06queued\x12G\n" +
+	"\asecrets\x18\b \x03(\v2-.mavio.plugin.v1.ContainerStatus.SecretsEntryR\asecrets\x1a:\n" +
+	"\fSecretsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x17\n" +
 	"\x15ListContainersRequest\"Z\n" +
 	"\x16ListContainersResponse\x12@\n" +
 	"\n" +
@@ -1148,30 +1420,34 @@ const file_mavio_plugin_v1_container_proto_rawDesc = "" +
 	"\x13com.mavio.plugin.v1B\x0eContainerProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\beditionsp\xe8\a"
 
 var file_mavio_plugin_v1_container_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_mavio_plugin_v1_container_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_mavio_plugin_v1_container_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_mavio_plugin_v1_container_proto_goTypes = []any{
 	(GpuSupport)(0),                // 0: mavio.plugin.v1.GpuSupport
 	(ContainerMode)(0),             // 1: mavio.plugin.v1.ContainerMode
 	(ContainerState)(0),            // 2: mavio.plugin.v1.ContainerState
 	(*ContainerDependency)(nil),    // 3: mavio.plugin.v1.ContainerDependency
-	(*ContainerStatus)(nil),        // 4: mavio.plugin.v1.ContainerStatus
-	(*ListContainersRequest)(nil),  // 5: mavio.plugin.v1.ListContainersRequest
-	(*ListContainersResponse)(nil), // 6: mavio.plugin.v1.ListContainersResponse
-	nil,                            // 7: mavio.plugin.v1.ContainerDependency.EnvEntry
-	nil,                            // 8: mavio.plugin.v1.ContainerDependency.VolumesEntry
+	(*ContainerFolder)(nil),        // 4: mavio.plugin.v1.ContainerFolder
+	(*ContainerStatus)(nil),        // 5: mavio.plugin.v1.ContainerStatus
+	(*ListContainersRequest)(nil),  // 6: mavio.plugin.v1.ListContainersRequest
+	(*ListContainersResponse)(nil), // 7: mavio.plugin.v1.ListContainersResponse
+	nil,                            // 8: mavio.plugin.v1.ContainerDependency.EnvEntry
+	nil,                            // 9: mavio.plugin.v1.ContainerDependency.VolumesEntry
+	nil,                            // 10: mavio.plugin.v1.ContainerStatus.SecretsEntry
 }
 var file_mavio_plugin_v1_container_proto_depIdxs = []int32{
-	7, // 0: mavio.plugin.v1.ContainerDependency.env:type_name -> mavio.plugin.v1.ContainerDependency.EnvEntry
-	8, // 1: mavio.plugin.v1.ContainerDependency.volumes:type_name -> mavio.plugin.v1.ContainerDependency.VolumesEntry
-	0, // 2: mavio.plugin.v1.ContainerDependency.gpu:type_name -> mavio.plugin.v1.GpuSupport
-	1, // 3: mavio.plugin.v1.ContainerStatus.mode:type_name -> mavio.plugin.v1.ContainerMode
-	2, // 4: mavio.plugin.v1.ContainerStatus.state:type_name -> mavio.plugin.v1.ContainerState
-	4, // 5: mavio.plugin.v1.ListContainersResponse.containers:type_name -> mavio.plugin.v1.ContainerStatus
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	8,  // 0: mavio.plugin.v1.ContainerDependency.env:type_name -> mavio.plugin.v1.ContainerDependency.EnvEntry
+	9,  // 1: mavio.plugin.v1.ContainerDependency.volumes:type_name -> mavio.plugin.v1.ContainerDependency.VolumesEntry
+	0,  // 2: mavio.plugin.v1.ContainerDependency.gpu:type_name -> mavio.plugin.v1.GpuSupport
+	4,  // 3: mavio.plugin.v1.ContainerDependency.folders:type_name -> mavio.plugin.v1.ContainerFolder
+	1,  // 4: mavio.plugin.v1.ContainerStatus.mode:type_name -> mavio.plugin.v1.ContainerMode
+	2,  // 5: mavio.plugin.v1.ContainerStatus.state:type_name -> mavio.plugin.v1.ContainerState
+	10, // 6: mavio.plugin.v1.ContainerStatus.secrets:type_name -> mavio.plugin.v1.ContainerStatus.SecretsEntry
+	5,  // 7: mavio.plugin.v1.ListContainersResponse.containers:type_name -> mavio.plugin.v1.ContainerStatus
+	8,  // [8:8] is the sub-list for method output_type
+	8,  // [8:8] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_mavio_plugin_v1_container_proto_init() }
@@ -1185,7 +1461,7 @@ func file_mavio_plugin_v1_container_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_plugin_v1_container_proto_rawDesc), len(file_mavio_plugin_v1_container_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

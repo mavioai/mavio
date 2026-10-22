@@ -545,6 +545,7 @@ type DownloadClient struct {
 	xxx_hidden_PrefersTorrentFile       bool                   `protobuf:"varint,11,opt,name=prefers_torrent_file,json=prefersTorrentFile"`
 	xxx_hidden_Host                     *string                `protobuf:"bytes,12,opt,name=host"`
 	xxx_hidden_Tags                     []string               `protobuf:"bytes,13,rep,name=tags"`
+	xxx_hidden_Container                *string                `protobuf:"bytes,14,opt,name=container"`
 	XXX_raceDetectHookData              protoimpl.RaceDetectHookData
 	XXX_presence                        [1]uint32
 	unknownFields                       protoimpl.UnknownFields
@@ -684,44 +685,54 @@ func (x *DownloadClient) GetTags() []string {
 	return nil
 }
 
+func (x *DownloadClient) GetContainer() string {
+	if x != nil {
+		if x.xxx_hidden_Container != nil {
+			return *x.xxx_hidden_Container
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *DownloadClient) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 14)
 }
 
 func (x *DownloadClient) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 14)
 }
 
 func (x *DownloadClient) SetDefinitionId(v string) {
 	x.xxx_hidden_DefinitionId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 14)
 }
 
 func (x *DownloadClient) SetProtocol(v DownloadProtocol) {
 	x.xxx_hidden_Protocol = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 14)
 }
 
 func (x *DownloadClient) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 14)
 }
 
 func (x *DownloadClient) SetPriority(v int32) {
 	x.xxx_hidden_Priority = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 14)
 }
 
 func (x *DownloadClient) SetRemoveCompletedDownloads(v bool) {
 	x.xxx_hidden_RemoveCompletedDownloads = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 14)
 }
 
 func (x *DownloadClient) SetRemoveFailedDownloads(v bool) {
 	x.xxx_hidden_RemoveFailedDownloads = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 14)
 }
 
 func (x *DownloadClient) SetDisabledUntil(v *timestamppb.Timestamp) {
@@ -730,21 +741,26 @@ func (x *DownloadClient) SetDisabledUntil(v *timestamppb.Timestamp) {
 
 func (x *DownloadClient) SetFailure(v string) {
 	x.xxx_hidden_Failure = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 14)
 }
 
 func (x *DownloadClient) SetPrefersTorrentFile(v bool) {
 	x.xxx_hidden_PrefersTorrentFile = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 14)
 }
 
 func (x *DownloadClient) SetHost(v string) {
 	x.xxx_hidden_Host = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 14)
 }
 
 func (x *DownloadClient) SetTags(v []string) {
 	x.xxx_hidden_Tags = v
+}
+
+func (x *DownloadClient) SetContainer(v string) {
+	x.xxx_hidden_Container = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 14)
 }
 
 func (x *DownloadClient) HasId() bool {
@@ -831,6 +847,13 @@ func (x *DownloadClient) HasHost() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
 }
 
+func (x *DownloadClient) HasContainer() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 13)
+}
+
 func (x *DownloadClient) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -890,6 +913,11 @@ func (x *DownloadClient) ClearHost() {
 	x.xxx_hidden_Host = nil
 }
 
+func (x *DownloadClient) ClearContainer() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 13)
+	x.xxx_hidden_Container = nil
+}
+
 type DownloadClient_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -918,6 +946,10 @@ type DownloadClient_builder struct {
 	// The client's tags: a movie or series with tags only uses the clients
 	// sharing one of them, else those without tags, as Radarr's.
 	Tags []string
+	// The plugin's container dependency the client runs in, whose folders'
+	// paths in the container the server maps to where it chose them;
+	// empty for none.
+	Container *string
 }
 
 func (b0 DownloadClient_builder) Build() *DownloadClient {
@@ -925,51 +957,55 @@ func (b0 DownloadClient_builder) Build() *DownloadClient {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 14)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 14)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.DefinitionId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 14)
 		x.xxx_hidden_DefinitionId = b.DefinitionId
 	}
 	if b.Protocol != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 14)
 		x.xxx_hidden_Protocol = *b.Protocol
 	}
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 14)
 		x.xxx_hidden_Enabled = *b.Enabled
 	}
 	if b.Priority != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 14)
 		x.xxx_hidden_Priority = *b.Priority
 	}
 	if b.RemoveCompletedDownloads != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 14)
 		x.xxx_hidden_RemoveCompletedDownloads = *b.RemoveCompletedDownloads
 	}
 	if b.RemoveFailedDownloads != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 14)
 		x.xxx_hidden_RemoveFailedDownloads = *b.RemoveFailedDownloads
 	}
 	x.xxx_hidden_DisabledUntil = b.DisabledUntil
 	if b.Failure != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 14)
 		x.xxx_hidden_Failure = b.Failure
 	}
 	if b.PrefersTorrentFile != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 14)
 		x.xxx_hidden_PrefersTorrentFile = *b.PrefersTorrentFile
 	}
 	if b.Host != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 14)
 		x.xxx_hidden_Host = b.Host
 	}
 	x.xxx_hidden_Tags = b.Tags
+	if b.Container != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 14)
+		x.xxx_hidden_Container = b.Container
+	}
 	return m0
 }
 
@@ -3642,7 +3678,7 @@ const file_mavio_plugin_v1_download_client_proto_rawDesc = "" +
 	"\x06fields\x18\x05 \x03(\v2\x1d.mavio.plugin.v1.SettingFieldR\x06fields\"\x1c\n" +
 	"\x1aListDownloadClientsRequest\"X\n" +
 	"\x1bListDownloadClientsResponse\x129\n" +
-	"\aclients\x18\x01 \x03(\v2\x1f.mavio.plugin.v1.DownloadClientR\aclients\"\xfb\x03\n" +
+	"\aclients\x18\x01 \x03(\v2\x1f.mavio.plugin.v1.DownloadClientR\aclients\"\x99\x04\n" +
 	"\x0eDownloadClient\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12#\n" +
@@ -3657,7 +3693,8 @@ const file_mavio_plugin_v1_download_client_proto_rawDesc = "" +
 	" \x01(\tR\afailure\x120\n" +
 	"\x14prefers_torrent_file\x18\v \x01(\bR\x12prefersTorrentFile\x12\x12\n" +
 	"\x04host\x18\f \x01(\tR\x04host\x12\x12\n" +
-	"\x04tags\x18\r \x03(\tR\x04tags\"\x82\x01\n" +
+	"\x04tags\x18\r \x03(\tR\x04tags\x12\x1c\n" +
+	"\tcontainer\x18\x0e \x01(\tR\tcontainer\"\x82\x01\n" +
 	"\x19TestDownloadClientRequest\x12\x1b\n" +
 	"\tclient_id\x18\x01 \x01(\tR\bclientId\x12#\n" +
 	"\rdefinition_id\x18\x02 \x01(\tR\fdefinitionId\x12#\n" +

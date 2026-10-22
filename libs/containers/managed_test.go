@@ -252,6 +252,61 @@ func TestSupervisorInContainer(t *testing.T) {
 	})
 }
 
+func TestSupervisorFolders(t *testing.T) {
+	mounts := []containers.Mount{
+		{Type: "bind", Source: "/srv/media", Destination: "/media"},
+		{Type: "volume", Name: "mavio-data", Source: "/var/lib/docker/volumes/mavio-data/_data", Destination: "/data"},
+		{Type: "bind", Source: "/srv/media/downloads", Destination: "/media/downloads"},
+	}
+	cases := []struct {
+		name, self, folder string
+		want               containers.Bind
+	}{
+		{"on the host", "", "/srv/downloads", containers.Bind{Source: "/srv/downloads", Target: "/downloads"}},
+		{"in a bind mount", "self", "/media/torrents", containers.Bind{Source: "/srv/media/torrents", Target: "/downloads"}},
+		{"in the deepest bind mount", "self", "/media/downloads/a", containers.Bind{Source: "/srv/media/downloads/a", Target: "/downloads"}},
+		{"in a volume", "self", "/data/downloads", containers.Bind{Volume: "mavio-data", Subpath: "downloads", Target: "/downloads"}},
+		{"a volume's root", "self", "/data", containers.Bind{Volume: "mavio-data", Target: "/downloads"}},
+	}
+	for _, tc := range cases {
+		synctest.Test(t, func(t *testing.T) {
+			e, h := containerstest.New(), &health{}
+			if tc.self != "" {
+				e.Self(tc.self, mounts...)
+			}
+			s := containers.NewSupervisor(containers.SupervisorOptions{
+				Engine: e, Server: "server-1", Self: tc.self, OnChange: (&changes{}).record, Probe: h.probe,
+			})
+			defer s.Close(context.Background())
+			d := whisper()
+			d.Folders, d.PeerPort, d.Entrypoint = map[string]string{tc.folder: "/downloads"}, 6881, []string{"/bin/sh"}
+			s.Start(d)
+			synctest.Wait()
+			spec, _, _ := e.Spec("mavio-voice-whisper")
+			if len(spec.Binds) != 1 || spec.Binds[0] != tc.want || spec.PeerPort != 6881 || !slices.Equal(spec.Entrypoint, []string{"/bin/sh"}) {
+				t.Errorf("%s: spec got = %+v, %d, %v, want = %+v, 6881, [/bin/sh]", tc.name, spec.Binds, spec.PeerPort, spec.Entrypoint, tc.want)
+			}
+		})
+	}
+
+	synctest.Test(t, func(t *testing.T) {
+		e, h, c := containerstest.New(), &health{}, &changes{}
+		e.Self("self", mounts...)
+		s := containers.NewSupervisor(containers.SupervisorOptions{Engine: e, Server: "server-1", Self: "self", OnChange: c.record, Probe: h.probe})
+		defer s.Close(context.Background())
+		d := whisper()
+		d.Folders = map[string]string{"/elsewhere": "/downloads"}
+		s.Start(d)
+		synctest.Wait()
+		if st, _ := s.Status("dev.mavio.voice", "whisper"); st.State != containers.Unavailable || !errors.Is(st.Err, core.ErrInvalid) {
+			t.Errorf("a folder on no mount: Status got = %+v, want unavailable with core.ErrInvalid", st)
+		}
+		if cmd := s.Command(t.Context(), d); !strings.Contains(cmd, "-v '</elsewhere>:/downloads'") {
+			t.Errorf("Command got = %s, want the folder named", cmd)
+		}
+	})
+}
+
 func TestSupervisorReconcileStopsLeftRunning(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		e, h, c := containerstest.New(), &health{}, &changes{}
@@ -471,7 +526,7 @@ func TestSupervisorProxy(t *testing.T) {
 			if spec.HostGateway != (tc.self == "") {
 				t.Errorf("%s: HostGateway got = %v, want = %v", tc.name, spec.HostGateway, tc.self == "")
 			}
-			if cmd := s.Command(proxied()); !strings.Contains(cmd, "-e "+tc.want) || !strings.HasPrefix(cmd, "docker run -d --name mavio-voice-whisper --network mavio") {
+			if cmd := s.Command(t.Context(), proxied()); !strings.Contains(cmd, "-e "+tc.want) || !strings.HasPrefix(cmd, "docker run -d --name mavio-voice-whisper --network mavio") {
 				t.Errorf("%s: Command got = %q, want the docker run with %s", tc.name, cmd, tc.want)
 			}
 		})

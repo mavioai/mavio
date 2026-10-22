@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/plugin/v1/container.proto.
  */
 export const file_mavio_plugin_v1_container: GenFile = /*@__PURE__*/
-  fileDesc("Ch9tYXZpby9wbHVnaW4vdjEvY29udGFpbmVyLnByb3RvEg9tYXZpby5wbHVnaW4udjEiiQQKE0NvbnRhaW5lckRlcGVuZGVuY3kSDAoEbmFtZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRINCgVpbWFnZRgDIAEoCRIMCgRwb3J0GAQgASgNEhMKC2hlYWx0aF9wYXRoGAUgASgJEg8KB2NvbW1hbmQYBiADKAkSOgoDZW52GAcgAygLMi0ubWF2aW8ucGx1Z2luLnYxLkNvbnRhaW5lckRlcGVuZGVuY3kuRW52RW50cnkSQgoHdm9sdW1lcxgIIAMoCzIxLm1hdmlvLnBsdWdpbi52MS5Db250YWluZXJEZXBlbmRlbmN5LlZvbHVtZXNFbnRyeRIoCgNncHUYCSABKA4yGy5tYXZpby5wbHVnaW4udjEuR3B1U3VwcG9ydBIRCglncHVfaW1hZ2UYCiABKAkSEgoKbWVtb3J5X21pYhgLIAEoDRIMCgRjcHVzGAwgASgBEhAKCHJlcXVpcmVkGA0gASgIEhMKC2hvc3RfYWNjZXNzGA4gASgIEg4KBmRpcmVjdBgPIAEoCBIaChJub19wcm94eV9pcHY0X29ubHkYECABKAgaKgoIRW52RW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ARouCgxWb2x1bWVzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASK/AQoPQ29udGFpbmVyU3RhdHVzEgwKBG5hbWUYASABKAkSLAoEbW9kZRgCIAEoDjIeLm1hdmlvLnBsdWdpbi52MS5Db250YWluZXJNb2RlEg8KB2FkZHJlc3MYAyABKAkSLgoFc3RhdGUYBCABKA4yHy5tYXZpby5wbHVnaW4udjEuQ29udGFpbmVyU3RhdGUSDQoFZXJyb3IYBSABKAkSEAoIcHJvZ3Jlc3MYBiABKAESDgoGcXVldWVkGAcgASgIIhcKFUxpc3RDb250YWluZXJzUmVxdWVzdCJOChZMaXN0Q29udGFpbmVyc1Jlc3BvbnNlEjQKCmNvbnRhaW5lcnMYASADKAsyIC5tYXZpby5wbHVnaW4udjEuQ29udGFpbmVyU3RhdHVzKl0KCkdwdVN1cHBvcnQSGwoXR1BVX1NVUFBPUlRfVU5TUEVDSUZJRUQQABIYChRHUFVfU1VQUE9SVF9PUFRJT05BTBABEhgKFEdQVV9TVVBQT1JUX1JFUVVJUkVEEAIqaAoNQ29udGFpbmVyTW9kZRIeChpDT05UQUlORVJfTU9ERV9VTlNQRUNJRklFRBAAEhoKFkNPTlRBSU5FUl9NT0RFX01BTkFHRUQQARIbChdDT05UQUlORVJfTU9ERV9FWFRFUk5BTBACKscBCg5Db250YWluZXJTdGF0ZRIfChtDT05UQUlORVJfU1RBVEVfVU5TUEVDSUZJRUQQABIbChdDT05UQUlORVJfU1RBVEVfUFVMTElORxABEhwKGENPTlRBSU5FUl9TVEFURV9TVEFSVElORxACEhkKFUNPTlRBSU5FUl9TVEFURV9SRUFEWRADEh0KGUNPTlRBSU5FUl9TVEFURV9VTkhFQUxUSFkQBBIfChtDT05UQUlORVJfU1RBVEVfVU5BVkFJTEFCTEUQBULIAQoTY29tLm1hdmlvLnBsdWdpbi52MUIOQ29udGFpbmVyUHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3BsdWdpbi92MTtwbHVnaW52MaICA01QWKoCD01hdmlvLlBsdWdpbi5WMcoCD01hdmlvXFBsdWdpblxWMeICG01hdmlvXFBsdWdpblxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpQbHVnaW46OlYxYghlZGl0aW9uc3DoBw");
+  fileDesc("Ch9tYXZpby9wbHVnaW4vdjEvY29udGFpbmVyLnByb3RvEg9tYXZpby5wbHVnaW4udjEi4wQKE0NvbnRhaW5lckRlcGVuZGVuY3kSDAoEbmFtZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRINCgVpbWFnZRgDIAEoCRIMCgRwb3J0GAQgASgNEhMKC2hlYWx0aF9wYXRoGAUgASgJEg8KB2NvbW1hbmQYBiADKAkSOgoDZW52GAcgAygLMi0ubWF2aW8ucGx1Z2luLnYxLkNvbnRhaW5lckRlcGVuZGVuY3kuRW52RW50cnkSQgoHdm9sdW1lcxgIIAMoCzIxLm1hdmlvLnBsdWdpbi52MS5Db250YWluZXJEZXBlbmRlbmN5LlZvbHVtZXNFbnRyeRIoCgNncHUYCSABKA4yGy5tYXZpby5wbHVnaW4udjEuR3B1U3VwcG9ydBIRCglncHVfaW1hZ2UYCiABKAkSEgoKbWVtb3J5X21pYhgLIAEoDRIMCgRjcHVzGAwgASgBEhAKCHJlcXVpcmVkGA0gASgIEhMKC2hvc3RfYWNjZXNzGA4gASgIEg4KBmRpcmVjdBgPIAEoCBIaChJub19wcm94eV9pcHY0X29ubHkYECABKAgSMQoHZm9sZGVycxgRIAMoCzIgLm1hdmlvLnBsdWdpbi52MS5Db250YWluZXJGb2xkZXISEQoJcGVlcl9wb3J0GBIgASgNEhIKCmVudHJ5cG9pbnQYEyABKAkaKgoIRW52RW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ARouCgxWb2x1bWVzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASJCCg9Db250YWluZXJGb2xkZXISDAoEbmFtZRgBIAEoCRIMCgRwYXRoGAIgASgJEhMKC2Rlc2NyaXB0aW9uGAMgASgJIq8CCg9Db250YWluZXJTdGF0dXMSDAoEbmFtZRgBIAEoCRIsCgRtb2RlGAIgASgOMh4ubWF2aW8ucGx1Z2luLnYxLkNvbnRhaW5lck1vZGUSDwoHYWRkcmVzcxgDIAEoCRIuCgVzdGF0ZRgEIAEoDjIfLm1hdmlvLnBsdWdpbi52MS5Db250YWluZXJTdGF0ZRINCgVlcnJvchgFIAEoCRIQCghwcm9ncmVzcxgGIAEoARIOCgZxdWV1ZWQYByABKAgSPgoHc2VjcmV0cxgIIAMoCzItLm1hdmlvLnBsdWdpbi52MS5Db250YWluZXJTdGF0dXMuU2VjcmV0c0VudHJ5Gi4KDFNlY3JldHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIhcKFUxpc3RDb250YWluZXJzUmVxdWVzdCJOChZMaXN0Q29udGFpbmVyc1Jlc3BvbnNlEjQKCmNvbnRhaW5lcnMYASADKAsyIC5tYXZpby5wbHVnaW4udjEuQ29udGFpbmVyU3RhdHVzKl0KCkdwdVN1cHBvcnQSGwoXR1BVX1NVUFBPUlRfVU5TUEVDSUZJRUQQABIYChRHUFVfU1VQUE9SVF9PUFRJT05BTBABEhgKFEdQVV9TVVBQT1JUX1JFUVVJUkVEEAIqaAoNQ29udGFpbmVyTW9kZRIeChpDT05UQUlORVJfTU9ERV9VTlNQRUNJRklFRBAAEhoKFkNPTlRBSU5FUl9NT0RFX01BTkFHRUQQARIbChdDT05UQUlORVJfTU9ERV9FWFRFUk5BTBACKscBCg5Db250YWluZXJTdGF0ZRIfChtDT05UQUlORVJfU1RBVEVfVU5TUEVDSUZJRUQQABIbChdDT05UQUlORVJfU1RBVEVfUFVMTElORxABEhwKGENPTlRBSU5FUl9TVEFURV9TVEFSVElORxACEhkKFUNPTlRBSU5FUl9TVEFURV9SRUFEWRADEh0KGUNPTlRBSU5FUl9TVEFURV9VTkhFQUxUSFkQBBIfChtDT05UQUlORVJfU1RBVEVfVU5BVkFJTEFCTEUQBULIAQoTY29tLm1hdmlvLnBsdWdpbi52MUIOQ29udGFpbmVyUHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3BsdWdpbi92MTtwbHVnaW52MaICA01QWKoCD01hdmlvLlBsdWdpbi5WMcoCD01hdmlvXFBsdWdpblxWMeICG01hdmlvXFBsdWdpblxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpQbHVnaW46OlYxYghlZGl0aW9uc3DoBw");
 
 /**
  * ContainerDependency is a service a plugin depends on that runs as a
@@ -69,8 +69,11 @@ export type ContainerDependency = Message<"mavio.plugin.v1.ContainerDependency">
 
   /**
    * Environment variables. A value may hold "${secret:<key>}", a random
-   * secret the server generates once for the dependency, and
-   * "${address}", the dependency's own address.
+   * secret the server generates once for the dependency, "${address}",
+   * the dependency's own address, "${peer_port}", the port peers reach
+   * it at (peer_port), and "${uid}" and "${gid}", the user and group the
+   * server runs as, for files in its folders the server can move and
+   * hard link; command takes the same.
    *
    * @generated from field: map<string, string> env = 7;
    */
@@ -148,6 +151,34 @@ export type ContainerDependency = Message<"mavio.plugin.v1.ContainerDependency">
    * @generated from field: bool no_proxy_ipv4_only = 16;
    */
   noProxyIpv4Only: boolean;
+
+  /**
+   * Folders of the server an administrator chooses, each mounted at its
+   * path, such as the folder a download client puts downloads in, which
+   * the server then reads.
+   *
+   * @generated from field: repeated mavio.plugin.v1.ContainerFolder folders = 17;
+   */
+  folders: ContainerFolder[];
+
+  /**
+   * A port peers connect to from outside, such as a BitTorrent client's:
+   * a managed container publishes it on every interface of the host, TCP
+   * and UDP, at the number an administrator chooses, this one by default,
+   * which "${peer_port}" gives the service. 0 for none.
+   *
+   * @generated from field: uint32 peer_port = 18;
+   */
+  peerPort: number;
+
+  /**
+   * The program replacing the image's entrypoint, such as "/bin/sh" for a
+   * command that prepares the container before running the image's own;
+   * empty keeps it.
+   *
+   * @generated from field: string entrypoint = 19;
+   */
+  entrypoint: string;
 };
 
 /**
@@ -156,6 +187,43 @@ export type ContainerDependency = Message<"mavio.plugin.v1.ContainerDependency">
  */
 export const ContainerDependencySchema: GenMessage<ContainerDependency> = /*@__PURE__*/
   messageDesc(file_mavio_plugin_v1_container, 0);
+
+/**
+ * ContainerFolder is a folder of the server mounted in a container
+ * dependency.
+ *
+ * @generated from message mavio.plugin.v1.ContainerFolder
+ */
+export type ContainerFolder = Message<"mavio.plugin.v1.ContainerFolder"> & {
+  /**
+   * Identifier within the dependency: lowercase letters, digits and
+   * dashes.
+   *
+   * @generated from field: string name = 1;
+   */
+  name: string;
+
+  /**
+   * The absolute path it is mounted at in the container.
+   *
+   * @generated from field: string path = 2;
+   */
+  path: string;
+
+  /**
+   * What it is for, shown to administrators.
+   *
+   * @generated from field: string description = 3;
+   */
+  description: string;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.ContainerFolder.
+ * Use `create(ContainerFolderSchema)` to create a new message.
+ */
+export const ContainerFolderSchema: GenMessage<ContainerFolder> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_container, 1);
 
 /**
  * ContainerStatus is how a container dependency is reached and whether it
@@ -207,6 +275,15 @@ export type ContainerStatus = Message<"mavio.plugin.v1.ContainerStatus"> & {
    * @generated from field: bool queued = 7;
    */
   queued: boolean;
+
+  /**
+   * The secrets the server generated for it, by key, which its
+   * environment names "${secret:<key>}", for the plugin to sign in with;
+   * only HostService.ListContainers tells them.
+   *
+   * @generated from field: map<string, string> secrets = 8;
+   */
+  secrets: { [key: string]: string };
 };
 
 /**
@@ -214,7 +291,7 @@ export type ContainerStatus = Message<"mavio.plugin.v1.ContainerStatus"> & {
  * Use `create(ContainerStatusSchema)` to create a new message.
  */
 export const ContainerStatusSchema: GenMessage<ContainerStatus> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_container, 1);
+  messageDesc(file_mavio_plugin_v1_container, 2);
 
 /**
  * @generated from message mavio.plugin.v1.ListContainersRequest
@@ -227,7 +304,7 @@ export type ListContainersRequest = Message<"mavio.plugin.v1.ListContainersReque
  * Use `create(ListContainersRequestSchema)` to create a new message.
  */
 export const ListContainersRequestSchema: GenMessage<ListContainersRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_container, 2);
+  messageDesc(file_mavio_plugin_v1_container, 3);
 
 /**
  * @generated from message mavio.plugin.v1.ListContainersResponse
@@ -246,7 +323,7 @@ export type ListContainersResponse = Message<"mavio.plugin.v1.ListContainersResp
  * Use `create(ListContainersResponseSchema)` to create a new message.
  */
 export const ListContainersResponseSchema: GenMessage<ListContainersResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_container, 3);
+  messageDesc(file_mavio_plugin_v1_container, 4);
 
 /**
  * GpuSupport is whether a container dependency uses a GPU.

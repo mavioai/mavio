@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1fmavio/plugin/v1/container.proto\x12\x0fmavio.plugin.v1\"\xb3\x05\n\x13\x43ontainerDependency\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12 \n\x0b\x64\x65scription\x18\x02 \x01(\tR\x0b\x64\x65scription\x12\x14\n\x05image\x18\x03 \x01(\tR\x05image\x12\x12\n\x04port\x18\x04 \x01(\rR\x04port\x12\x1f\n\x0bhealth_path\x18\x05 \x01(\tR\nhealthPath\x12\x18\n\x07\x63ommand\x18\x06 \x03(\tR\x07\x63ommand\x12?\n\x03\x65nv\x18\x07 \x03(\x0b\x32-.mavio.plugin.v1.ContainerDependency.EnvEntryR\x03\x65nv\x12K\n\x07volumes\x18\x08 \x03(\x0b\x32\x31.mavio.plugin.v1.ContainerDependency.VolumesEntryR\x07volumes\x12-\n\x03gpu\x18\t \x01(\x0e\x32\x1b.mavio.plugin.v1.GpuSupportR\x03gpu\x12\x1b\n\tgpu_image\x18\n \x01(\tR\x08gpuImage\x12\x1d\n\nmemory_mib\x18\x0b \x01(\rR\tmemoryMib\x12\x12\n\x04\x63pus\x18\x0c \x01(\x01R\x04\x63pus\x12\x1a\n\x08required\x18\r \x01(\x08R\x08required\x12\x1f\n\x0bhost_access\x18\x0e \x01(\x08R\nhostAccess\x12\x16\n\x06\x64irect\x18\x0f \x01(\x08R\x06\x64irect\x12+\n\x12no_proxy_ipv4_only\x18\x10 \x01(\x08R\x0fnoProxyIpv4Only\x1a\x36\n\x08\x45nvEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n\x05value\x18\x02 \x01(\tR\x05value:\x02\x38\x01\x1a:\n\x0cVolumesEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n\x05value\x18\x02 \x01(\tR\x05value:\x02\x38\x01\"\xf4\x01\n\x0f\x43ontainerStatus\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12\x32\n\x04mode\x18\x02 \x01(\x0e\x32\x1e.mavio.plugin.v1.ContainerModeR\x04mode\x12\x18\n\x07\x61\x64\x64ress\x18\x03 \x01(\tR\x07\x61\x64\x64ress\x12\x35\n\x05state\x18\x04 \x01(\x0e\x32\x1f.mavio.plugin.v1.ContainerStateR\x05state\x12\x14\n\x05\x65rror\x18\x05 \x01(\tR\x05\x65rror\x12\x1a\n\x08progress\x18\x06 \x01(\x01R\x08progress\x12\x16\n\x06queued\x18\x07 \x01(\x08R\x06queued\"\x17\n\x15ListContainersRequest\"Z\n\x16ListContainersResponse\x12@\n\ncontainers\x18\x01 \x03(\x0b\x32 .mavio.plugin.v1.ContainerStatusR\ncontainers*]\n\nGpuSupport\x12\x1b\n\x17GPU_SUPPORT_UNSPECIFIED\x10\x00\x12\x18\n\x14GPU_SUPPORT_OPTIONAL\x10\x01\x12\x18\n\x14GPU_SUPPORT_REQUIRED\x10\x02*h\n\rContainerMode\x12\x1e\n\x1a\x43ONTAINER_MODE_UNSPECIFIED\x10\x00\x12\x1a\n\x16\x43ONTAINER_MODE_MANAGED\x10\x01\x12\x1b\n\x17\x43ONTAINER_MODE_EXTERNAL\x10\x02*\xc7\x01\n\x0e\x43ontainerState\x12\x1f\n\x1b\x43ONTAINER_STATE_UNSPECIFIED\x10\x00\x12\x1b\n\x17\x43ONTAINER_STATE_PULLING\x10\x01\x12\x1c\n\x18\x43ONTAINER_STATE_STARTING\x10\x02\x12\x19\n\x15\x43ONTAINER_STATE_READY\x10\x03\x12\x1d\n\x19\x43ONTAINER_STATE_UNHEALTHY\x10\x04\x12\x1f\n\x1b\x43ONTAINER_STATE_UNAVAILABLE\x10\x05\x42\xc8\x01\n\x13\x63om.mavio.plugin.v1B\x0e\x43ontainerProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\x08\x65\x64itionsp\xe8\x07')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1fmavio/plugin/v1/container.proto\x12\x0fmavio.plugin.v1\"\xac\x06\n\x13\x43ontainerDependency\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12 \n\x0b\x64\x65scription\x18\x02 \x01(\tR\x0b\x64\x65scription\x12\x14\n\x05image\x18\x03 \x01(\tR\x05image\x12\x12\n\x04port\x18\x04 \x01(\rR\x04port\x12\x1f\n\x0bhealth_path\x18\x05 \x01(\tR\nhealthPath\x12\x18\n\x07\x63ommand\x18\x06 \x03(\tR\x07\x63ommand\x12?\n\x03\x65nv\x18\x07 \x03(\x0b\x32-.mavio.plugin.v1.ContainerDependency.EnvEntryR\x03\x65nv\x12K\n\x07volumes\x18\x08 \x03(\x0b\x32\x31.mavio.plugin.v1.ContainerDependency.VolumesEntryR\x07volumes\x12-\n\x03gpu\x18\t \x01(\x0e\x32\x1b.mavio.plugin.v1.GpuSupportR\x03gpu\x12\x1b\n\tgpu_image\x18\n \x01(\tR\x08gpuImage\x12\x1d\n\nmemory_mib\x18\x0b \x01(\rR\tmemoryMib\x12\x12\n\x04\x63pus\x18\x0c \x01(\x01R\x04\x63pus\x12\x1a\n\x08required\x18\r \x01(\x08R\x08required\x12\x1f\n\x0bhost_access\x18\x0e \x01(\x08R\nhostAccess\x12\x16\n\x06\x64irect\x18\x0f \x01(\x08R\x06\x64irect\x12+\n\x12no_proxy_ipv4_only\x18\x10 \x01(\x08R\x0fnoProxyIpv4Only\x12:\n\x07\x66olders\x18\x11 \x03(\x0b\x32 .mavio.plugin.v1.ContainerFolderR\x07\x66olders\x12\x1b\n\tpeer_port\x18\x12 \x01(\rR\x08peerPort\x12\x1e\n\nentrypoint\x18\x13 \x01(\tR\nentrypoint\x1a\x36\n\x08\x45nvEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n\x05value\x18\x02 \x01(\tR\x05value:\x02\x38\x01\x1a:\n\x0cVolumesEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n\x05value\x18\x02 \x01(\tR\x05value:\x02\x38\x01\"[\n\x0f\x43ontainerFolder\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n\x04path\x18\x02 \x01(\tR\x04path\x12 \n\x0b\x64\x65scription\x18\x03 \x01(\tR\x0b\x64\x65scription\"\xf9\x02\n\x0f\x43ontainerStatus\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12\x32\n\x04mode\x18\x02 \x01(\x0e\x32\x1e.mavio.plugin.v1.ContainerModeR\x04mode\x12\x18\n\x07\x61\x64\x64ress\x18\x03 \x01(\tR\x07\x61\x64\x64ress\x12\x35\n\x05state\x18\x04 \x01(\x0e\x32\x1f.mavio.plugin.v1.ContainerStateR\x05state\x12\x14\n\x05\x65rror\x18\x05 \x01(\tR\x05\x65rror\x12\x1a\n\x08progress\x18\x06 \x01(\x01R\x08progress\x12\x16\n\x06queued\x18\x07 \x01(\x08R\x06queued\x12G\n\x07secrets\x18\x08 \x03(\x0b\x32-.mavio.plugin.v1.ContainerStatus.SecretsEntryR\x07secrets\x1a:\n\x0cSecretsEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n\x05value\x18\x02 \x01(\tR\x05value:\x02\x38\x01\"\x17\n\x15ListContainersRequest\"Z\n\x16ListContainersResponse\x12@\n\ncontainers\x18\x01 \x03(\x0b\x32 .mavio.plugin.v1.ContainerStatusR\ncontainers*]\n\nGpuSupport\x12\x1b\n\x17GPU_SUPPORT_UNSPECIFIED\x10\x00\x12\x18\n\x14GPU_SUPPORT_OPTIONAL\x10\x01\x12\x18\n\x14GPU_SUPPORT_REQUIRED\x10\x02*h\n\rContainerMode\x12\x1e\n\x1a\x43ONTAINER_MODE_UNSPECIFIED\x10\x00\x12\x1a\n\x16\x43ONTAINER_MODE_MANAGED\x10\x01\x12\x1b\n\x17\x43ONTAINER_MODE_EXTERNAL\x10\x02*\xc7\x01\n\x0e\x43ontainerState\x12\x1f\n\x1b\x43ONTAINER_STATE_UNSPECIFIED\x10\x00\x12\x1b\n\x17\x43ONTAINER_STATE_PULLING\x10\x01\x12\x1c\n\x18\x43ONTAINER_STATE_STARTING\x10\x02\x12\x19\n\x15\x43ONTAINER_STATE_READY\x10\x03\x12\x1d\n\x19\x43ONTAINER_STATE_UNHEALTHY\x10\x04\x12\x1f\n\x1b\x43ONTAINER_STATE_UNAVAILABLE\x10\x05\x42\xc8\x01\n\x13\x63om.mavio.plugin.v1B\x0e\x43ontainerProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\x08\x65\x64itionsp\xe8\x07')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -36,22 +36,28 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_CONTAINERDEPENDENCY_ENVENTRY']._serialized_options = b'8\001'
   _globals['_CONTAINERDEPENDENCY_VOLUMESENTRY']._loaded_options = None
   _globals['_CONTAINERDEPENDENCY_VOLUMESENTRY']._serialized_options = b'8\001'
-  _globals['_GPUSUPPORT']._serialized_start=1110
-  _globals['_GPUSUPPORT']._serialized_end=1203
-  _globals['_CONTAINERMODE']._serialized_start=1205
-  _globals['_CONTAINERMODE']._serialized_end=1309
-  _globals['_CONTAINERSTATE']._serialized_start=1312
-  _globals['_CONTAINERSTATE']._serialized_end=1511
+  _globals['_CONTAINERSTATUS_SECRETSENTRY']._loaded_options = None
+  _globals['_CONTAINERSTATUS_SECRETSENTRY']._serialized_options = b'8\001'
+  _globals['_GPUSUPPORT']._serialized_start=1457
+  _globals['_GPUSUPPORT']._serialized_end=1550
+  _globals['_CONTAINERMODE']._serialized_start=1552
+  _globals['_CONTAINERMODE']._serialized_end=1656
+  _globals['_CONTAINERSTATE']._serialized_start=1659
+  _globals['_CONTAINERSTATE']._serialized_end=1858
   _globals['_CONTAINERDEPENDENCY']._serialized_start=53
-  _globals['_CONTAINERDEPENDENCY']._serialized_end=744
-  _globals['_CONTAINERDEPENDENCY_ENVENTRY']._serialized_start=630
-  _globals['_CONTAINERDEPENDENCY_ENVENTRY']._serialized_end=684
-  _globals['_CONTAINERDEPENDENCY_VOLUMESENTRY']._serialized_start=686
-  _globals['_CONTAINERDEPENDENCY_VOLUMESENTRY']._serialized_end=744
-  _globals['_CONTAINERSTATUS']._serialized_start=747
-  _globals['_CONTAINERSTATUS']._serialized_end=991
-  _globals['_LISTCONTAINERSREQUEST']._serialized_start=993
-  _globals['_LISTCONTAINERSREQUEST']._serialized_end=1016
-  _globals['_LISTCONTAINERSRESPONSE']._serialized_start=1018
-  _globals['_LISTCONTAINERSRESPONSE']._serialized_end=1108
+  _globals['_CONTAINERDEPENDENCY']._serialized_end=865
+  _globals['_CONTAINERDEPENDENCY_ENVENTRY']._serialized_start=751
+  _globals['_CONTAINERDEPENDENCY_ENVENTRY']._serialized_end=805
+  _globals['_CONTAINERDEPENDENCY_VOLUMESENTRY']._serialized_start=807
+  _globals['_CONTAINERDEPENDENCY_VOLUMESENTRY']._serialized_end=865
+  _globals['_CONTAINERFOLDER']._serialized_start=867
+  _globals['_CONTAINERFOLDER']._serialized_end=958
+  _globals['_CONTAINERSTATUS']._serialized_start=961
+  _globals['_CONTAINERSTATUS']._serialized_end=1338
+  _globals['_CONTAINERSTATUS_SECRETSENTRY']._serialized_start=1280
+  _globals['_CONTAINERSTATUS_SECRETSENTRY']._serialized_end=1338
+  _globals['_LISTCONTAINERSREQUEST']._serialized_start=1340
+  _globals['_LISTCONTAINERSREQUEST']._serialized_end=1363
+  _globals['_LISTCONTAINERSRESPONSE']._serialized_start=1365
+  _globals['_LISTCONTAINERSRESPONSE']._serialized_end=1455
 # @@protoc_insertion_point(module_scope)

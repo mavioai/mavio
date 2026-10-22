@@ -39,6 +39,7 @@ type container struct {
 	spec    containers.ContainerSpec
 	running bool
 	port    int
+	mounts  []containers.Mount
 }
 
 // New returns an engine with nothing.
@@ -47,6 +48,14 @@ func New() *Engine {
 		images: map[string]bool{}, networks: map[string]map[string]containers.NetworkMember{}, containers: map[string]*container{},
 		volumes: map[string]map[string]string{}, nextPort: 49000,
 	}
+}
+
+// Self adds a running container of this name, not created through the
+// engine, with these mounts: the server's own.
+func (e *Engine) Self(name string, mounts ...containers.Mount) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.containers[name] = &container{id: name, spec: containers.ContainerSpec{Name: name}, running: true, mounts: mounts}
 }
 
 func (e *Engine) call(format string, args ...any) {
@@ -195,6 +204,7 @@ func (e *Engine) InspectContainer(_ context.Context, id string) (containers.Cont
 	out.ID, out.Name = c.id, "/"+c.spec.Name
 	out.Config.Labels = c.spec.Labels
 	out.State.Running = c.running
+	out.Mounts = c.mounts
 	if c.running && c.spec.PublishLoopback {
 		out.NetworkSettings.Ports = map[string][]containers.PortBinding{
 			fmt.Sprintf("%d/tcp", c.spec.Port): {{HostIP: "127.0.0.1", HostPort: fmt.Sprint(c.port)}},

@@ -31,7 +31,7 @@ func (s *DownloadService) UpdateDownloadClientPaths(ctx context.Context, req *ac
 	}
 	in := make([]acquisition.ClientPath, len(req.GetPaths()))
 	for i, p := range req.GetPaths() {
-		in[i] = acquisition.ClientPath{RemotePath: p.GetRemotePath(), LocalPath: p.GetLocalPath()}
+		in[i] = acquisition.ClientPath{RemotePath: p.GetRemotePath(), LocalPath: p.GetLocalPath(), Container: p.GetContainer()}
 	}
 	paths, failure, err := s.rt.SetClientPaths(ctx, req.GetPluginId(), req.GetClientId(), in)
 	if err != nil {
@@ -53,7 +53,7 @@ func clientPathsToProto(paths []acquisition.ClientPath) []*acquisitionv1.Downloa
 		out[i] = acquisitionv1.DownloadClientPath_builder{
 			RemotePath: new(p.RemotePath), LocalPath: new(p.LocalPath), RootFolder: new(p.RootFolder),
 			SuggestedPath: new(p.SuggestedPath), Readable: new(p.Readable), Error: new(p.Error),
-			LinkLibraryPaths: p.LinkLibraryPaths,
+			LinkLibraryPaths: p.LinkLibraryPaths, Container: new(p.Container),
 		}.Build()
 	}
 	return out
