@@ -1,6 +1,8 @@
 package dev.mavio.app
 
+import android.net.Uri
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -44,13 +46,18 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -76,6 +83,7 @@ import dev.mavio.ui.R
 import dev.mavio.ui.Reload
 import dev.mavio.ui.Shelf
 import dev.mavio.ui.StatusView
+import dev.mavio.ui.Wordmark
 import dev.mavio.ui.blurAvailable
 import dev.mavio.ui.countryText
 import dev.mavio.ui.crewLabels
@@ -111,6 +119,7 @@ import mavio.acquisition.v1.getTitleRequest
 import mavio.library.v1.ItemOuterClass.CreditKind
 import mavio.plugin.v1.Discovery.CatalogKind
 import mavio.plugin.v1.MetadataOuterClass.ProductionStatus
+import mavio.plugin.v1.Ratings.Rating
 import mavio.plugin.v1.Ratings.RatingSource
 
 /** A discovered title as GetTitle answers, null while it is on its way. */
@@ -224,7 +233,11 @@ private fun TitleDetails(serverId: String, title: Title) {
                     }
                 }
             } else {
-                TitleOverview(serverId, title, credits, Modifier.padding(horizontal = margin))
+                // A column holds the facts under the overview, as the web UI's.
+                Column(Modifier.padding(horizontal = margin), verticalArrangement = Arrangement.spacedBy(MavioSpacing.s24)) {
+                    TitleOverview(serverId, title, credits, Modifier)
+                    TitleFacts(serverId, title, Modifier.padding(bottom = MavioSpacing.s12))
+                }
             }
         }
         if (series && title.seasonsCount > 0) item(key = "seasons") { Seasons(serverId, title.tmdbId, title.seasonsList) }
@@ -250,7 +263,6 @@ private fun TitleDetails(serverId: String, title: Title) {
                 tmdbId = title.tmdbId,
             )
         }
-        if (!columns) item(key = "facts") { TitleFacts(serverId, title, Modifier.padding(horizontal = margin, vertical = MavioSpacing.s12)) }
     }
 }
 
@@ -679,8 +691,10 @@ private fun TitleFacts(serverId: String, title: Title, modifier: Modifier) {
     }
     rows += {
         ExternalLinks(
-            titleLinks(title),
+            titleLinks(title, titleRatings(serverId, title)),
             if (title.itemId.isNotEmpty()) ({ navigator.open(Route.Item(serverId, title.itemId)) }) else null,
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            start = true,
         )
     }
     Column(
@@ -696,25 +710,39 @@ private fun TitleFacts(serverId: String, title: Title, modifier: Modifier) {
     }
 }
 
-/** A link to a title or person elsewhere. */
-internal data class ExternalLink(val name: String, val url: String)
+/**
+ * A link to a title or person elsewhere, with the site's [logo] [width]
+ * wide, as Seerr's; a [mono] logo is white alone, drawn in the text's color.
+ */
+internal data class ExternalLink(val name: String, val url: String, val logo: Int, val width: Dp = 32.dp, val mono: Boolean = false)
 
-/** The sites linking a title elsewhere, as Seerr's. */
-private fun titleLinks(title: Title): List<ExternalLink> {
+/** The sites linking a title elsewhere, as Seerr's, Rotten Tomatoes' once its [ratings] tell its page. */
+private fun titleLinks(title: Title, ratings: List<Rating>): List<ExternalLink> {
     val series = title.mediaKind == MediaKind.MEDIA_KIND_SERIES
     val imdb = title.externalIdsMap["imdb"].orEmpty()
     val tvdb = title.externalIdsMap["tvdb"]?.ifEmpty { null } ?: title.tvdbId.takeIf { it > 0 }?.toString().orEmpty()
     val language = Locale.getDefault().toLanguageTag()
+    val rt = ratings.firstOrNull { it.source != RatingSource.RATING_SOURCE_IMDB && it.url.isNotEmpty() }?.url
     return listOfNotNull(
-        ExternalLink("TMDB", "https://www.themoviedb.org/${if (series) "tv" else "movie"}/${title.tmdbId}?language=$language"),
-        if (series && tvdb.isNotEmpty()) ExternalLink("TVDB", "https://www.thetvdb.com/dereferrer/series/$tvdb") else null,
-        if (imdb.isNotEmpty()) ExternalLink("IMDb", "https://www.imdb.com/title/$imdb") else null,
-        if (imdb.isNotEmpty()) ExternalLink("Trakt", "https://trakt.tv/${if (series) "shows" else "movies"}/$imdb") else null,
-        if (!series) ExternalLink("Letterboxd", "https://letterboxd.com/tmdb/${title.tmdbId}") else null,
+        ExternalLink("TMDB", "https://www.themoviedb.org/${if (series) "tv" else "movie"}/${title.tmdbId}?language=$language", R.drawable.service_tmdb),
+        if (series && tvdb.isNotEmpty()) ExternalLink("TVDB", "https://www.thetvdb.com/dereferrer/series/$tvdb", R.drawable.service_tvdb, 36.dp, mono = true) else null,
+        if (imdb.isNotEmpty()) ExternalLink("IMDb", "https://www.imdb.com/title/$imdb", R.drawable.service_imdb) else null,
+        rt?.let { ExternalLink("Rotten Tomatoes", it, R.drawable.service_rt, 56.dp) },
+        if (imdb.isNotEmpty()) ExternalLink("Trakt", "https://trakt.tv/${if (series) "shows" else "movies"}/$imdb", R.drawable.service_trakt) else null,
+        if (imdb.isNotEmpty()) {
+            ExternalLink("Simkl", "https://api.simkl.com/redirect?to=Simkl&imdb=${Uri.encode(imdb)}", R.drawable.service_simkl, mono = true)
+        } else {
+            null
+        },
+        if (!series) ExternalLink("Letterboxd", "https://letterboxd.com/tmdb/${title.tmdbId}", R.drawable.service_letterboxd) else null,
     )
 }
 
-/** The links to a title or person elsewhere, centered; first, Open in Library when the server has it. */
+/**
+ * The logos linking a title or person elsewhere, as Seerr's, faint, centered
+ * unless [start]; first, Mavio's opening its item when the server has it,
+ * where Seerr links its media server.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun ExternalLinks(
@@ -724,41 +752,35 @@ internal fun ExternalLinks(
     start: Boolean = false,
 ) {
     val uri = LocalUriHandler.current
-    val colors = theme.colors
     FlowRow(
         modifier,
-        horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s8, if (start) Alignment.Start else Alignment.CenterHorizontally),
-        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s8),
+        horizontalArrangement = Arrangement.spacedBy(20.dp, if (start) Alignment.Start else Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(MavioSpacing.s12),
+        itemVerticalAlignment = Alignment.CenterVertically,
     ) {
-        val chip = Modifier.clip(CircleShape).background(colors.fill)
+        val faint = Modifier.alpha(0.5f)
+        val label = stringResource(R.string.discover_open_item)
         openItem?.let {
-            Text(
-                stringResource(R.string.discover_open_item),
-                chip.clickable(onClick = it).padding(horizontal = 12.dp, vertical = 6.dp),
-                style = theme.type.footnote.text,
-                fontWeight = FontWeight.SemiBold,
-                color = colors.accentText,
-            )
+            Box(faint.clickable(onClick = it).semantics { contentDescription = label }) { Wordmark(height = 14.dp) }
         }
         links.forEach { l ->
-            Text(
+            Image(
+                painterResource(l.logo),
                 l.name,
-                chip.clickable { runCatching { uri.openUri(l.url) } }.padding(horizontal = 12.dp, vertical = 6.dp),
-                style = theme.type.footnote.text,
-                fontWeight = FontWeight.SemiBold,
+                faint
+                    .clickable { runCatching { uri.openUri(l.url) } }
+                    .width(l.width)
+                    .then(if (l.mono) Modifier.height(24.dp) else Modifier),
+                contentScale = ContentScale.Fit,
+                colorFilter = if (l.mono) ColorFilter.tint(theme.colors.textPrimary) else null,
             )
         }
     }
 }
 
-/** Rotten Tomatoes' least fresh score, and least upright audience score. */
-private const val FRESH_SCORE = 60.0
-
-/** A title's ratings as Seerr's: Rotten Tomatoes' and IMDb's, then TMDB's score, each opening its page. */
-@OptIn(ExperimentalLayoutApi::class)
+/** A title's ratings, as its ratings and its links show them. */
 @Composable
-private fun TitleRatings(serverId: String, title: Title) {
-    val uri = LocalUriHandler.current
+private fun titleRatings(serverId: String, title: Title): List<Rating> {
     val result by discovered(
         serverId,
         "GetRatings",
@@ -770,7 +792,18 @@ private fun TitleRatings(serverId: String, title: Title) {
         },
         GetRatingsResponse::parseFrom,
     )
-    val ratings = result?.getOrNull()?.ratingsList.orEmpty()
+    return result?.getOrNull()?.ratingsList.orEmpty()
+}
+
+/** Rotten Tomatoes' least fresh score, and least upright audience score. */
+private const val FRESH_SCORE = 60.0
+
+/** A title's ratings as Seerr's: Rotten Tomatoes' and IMDb's, then TMDB's score, each opening its page. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TitleRatings(serverId: String, title: Title) {
+    val uri = LocalUriHandler.current
+    val ratings = titleRatings(serverId, title)
     val order = listOf(RatingSource.RATING_SOURCE_ROTTEN_TOMATOES_CRITICS, RatingSource.RATING_SOURCE_ROTTEN_TOMATOES_AUDIENCE, RatingSource.RATING_SOURCE_IMDB)
     val shown = order.mapNotNull { s -> ratings.firstOrNull { it.source == s } }
     val language = LocalLocale.current.platformLocale.toLanguageTag()

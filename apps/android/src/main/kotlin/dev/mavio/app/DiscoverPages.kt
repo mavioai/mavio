@@ -93,8 +93,8 @@ fun DiscoveredPersonScreen(route: Route.DiscoveredPerson) {
         )
         val language = LocalLocale.current.platformLocale.toLanguageTag()
         val links = listOfNotNull(
-            p.externalIdsMap["tmdb"]?.let { ExternalLink("TMDB", "https://www.themoviedb.org/person/$it?language=$language") },
-            p.externalIdsMap["imdb"]?.let { ExternalLink("IMDb", "https://www.imdb.com/name/$it") },
+            p.externalIdsMap["tmdb"]?.let { ExternalLink("TMDB", "https://www.themoviedb.org/person/$it?language=$language", R.drawable.service_tmdb) },
+            p.externalIdsMap["imdb"]?.let { ExternalLink("IMDb", "https://www.imdb.com/name/$it", R.drawable.service_imdb) },
         )
         val cast = of(p.castList)
         val crew = of(p.crewList)
