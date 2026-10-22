@@ -210,26 +210,27 @@
             trailingViews.append(factsHolder)
             let trailing = NSStackView.vertical(trailingViews, spacing: MavioSpacing.s24)
             for v in trailingViews { v.widthAnchor.constraint(equalTo: trailing.widthAnchor).isActive = true }
-            // At the top, as tall as its views beside taller facts: the
-            // keywords follow the crew without a gap.
-            let top = NSView()
-            top.translatesAutoresizingMaskIntoConstraints = false
-            top.addSubview(leading)
-            leading.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                leading.leadingAnchor.constraint(equalTo: top.leadingAnchor),
-                leading.trailingAnchor.constraint(equalTo: top.trailingAnchor),
-                leading.topAnchor.constraint(equalTo: top.topAnchor),
-                leading.bottomAnchor.constraint(lessThanOrEqualTo: top.bottomAnchor),
-            ])
-            let left = RegionView(top)
+            // The overview takes the width the facts leave; each column is
+            // as tall as its views, from the top, and the row as the taller.
+            let left = RegionView(leading)
             let right = RegionView(trailing)
-            let row = NSStackView.horizontal([left, right], spacing: MavioSpacing.s32, alignment: .top)
-            // The overview takes the width the facts leave, rather than a
-            // gap after them.
-            row.distribution = .fill
-            right.widthAnchor.constraint(equalToConstant: theme.isTV ? 480 : 380).isActive = true
-            left.setContentHuggingPriority(.init(1), for: .horizontal)
+            let row = NSView()
+            row.translatesAutoresizingMaskIntoConstraints = false
+            row.addSubview(left)
+            row.addSubview(right)
+            let snug = row.heightAnchor.constraint(equalToConstant: 0)
+            snug.priority = .init(1)
+            NSLayoutConstraint.activate([
+                left.leadingAnchor.constraint(equalTo: row.leadingAnchor),
+                left.topAnchor.constraint(equalTo: row.topAnchor),
+                right.leadingAnchor.constraint(equalTo: left.trailingAnchor, constant: MavioSpacing.s32),
+                right.trailingAnchor.constraint(equalTo: row.trailingAnchor),
+                right.topAnchor.constraint(equalTo: row.topAnchor),
+                right.widthAnchor.constraint(equalToConstant: theme.isTV ? 480 : 380),
+                row.bottomAnchor.constraint(greaterThanOrEqualTo: left.bottomAnchor),
+                row.bottomAnchor.constraint(greaterThanOrEqualTo: right.bottomAnchor),
+                snug,
+            ])
             return margined(row, top: MavioSpacing.s24, bottom: MavioSpacing.s12)
         }
 
@@ -335,7 +336,7 @@
                 }
                 if name == studiosLabel(info), hasMoreStudios(info) {
                     let icon = IconView("expand", size: 14, color: theme.colors.textSecondary)
-                    if allStudios { icon.frameCenterRotation = 180 }
+                    icon.upsideDown = allStudios
                     let more = Pressable(
                         NSStackView.horizontal(
                             [
@@ -360,7 +361,9 @@
             if !info.watchProviders.isEmpty { rows.append(watchProviders(info.watchProviders)) }
             let item = info.itemID.isEmpty ? nil : Route.item(serverId: serverId, itemId: info.itemID)
             if let links = externalLinks(titleLinks(info, ratings), item: item) {
-                rows.append(NSStackView.horizontal([Spacer(), links, Spacer()], spacing: 0))
+                // Across the box from its left, under the streaming services, as
+                // the web UI's.
+                rows.append(links)
             }
             let box = Box(radius: 14)
             box.border = theme.colors.border

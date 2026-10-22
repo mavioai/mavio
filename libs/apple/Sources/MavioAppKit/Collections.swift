@@ -160,7 +160,12 @@
             let label = NSTextField.label(title, theme.fonts.title3, color: theme.colors.textPrimary)
             var header: [NSView] = [label]
             if let accessory { header.append(accessory) }
-            header.append(Spacer())
+            // Stretching less than an accessory's own space, so that an
+            // accessory starting with one, as See All, ends at the arrows
+            // rather than either taking the room by chance.
+            let rest = Spacer()
+            rest.setContentHuggingPriority(.init(200), for: .horizontal)
+            header.append(rest)
             if !theme.isTV {
                 let back = MavioButton(icon: "back", kind: .circle, theme: theme) { [weak self] in
                     self?.row.page(forward: false)

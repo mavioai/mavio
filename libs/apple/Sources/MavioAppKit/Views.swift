@@ -63,9 +63,13 @@
     /// An icon of the design system, tinted.
     public final class IconView: NSImageView {
         /// The icon's name.
-        public var name: String { didSet { image = .icon(name, fill: fillIcon) } }
+        public var name: String { didSet { image = drawn() } }
         /// Whether the icon is the filled one, for an active state.
-        public var fillIcon: Bool { didSet { image = .icon(name, fill: fillIcon) } }
+        public var fillIcon: Bool { didSet { image = drawn() } }
+        /// Whether the icon is drawn upside down, as an open section's
+        /// chevron: turning the view itself would move it off its place,
+        /// its frame being Auto Layout's.
+        public var upsideDown = false { didSet { image = drawn() } }
 
         /// The icon of name, size points square, in color.
         public init(_ name: String, fill: Bool = false, size: CGFloat = 20, color: NSColor? = nil) {
@@ -83,6 +87,21 @@
         /// Unavailable: the view is made in code.
         @available(*, unavailable)
         public required init?(coder: NSCoder) { fatalError() }
+
+        private func drawn() -> NSImage {
+            let icon = NSImage.icon(name, fill: fillIcon)
+            guard upsideDown else { return icon }
+            let turned = NSImage(size: icon.size, flipped: false) { rect in
+                let turn = NSAffineTransform()
+                turn.translateX(by: rect.width, yBy: rect.height)
+                turn.rotate(byDegrees: 180)
+                turn.concat()
+                icon.draw(in: rect)
+                return true
+            }
+            turned.isTemplate = true
+            return turned
+        }
     }
 
     extension NSTextField {

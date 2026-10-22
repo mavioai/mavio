@@ -231,7 +231,7 @@
 
         private func toggle() {
             open.toggle()
-            expand.frameCenterRotation = open ? 180 : 0
+            expand.upsideDown = open
             header.setAccessibilitySelected(open)
             list.isHidden = !open
             if open, episodes == nil, task == nil { load() }
@@ -260,10 +260,18 @@
             guard open else { return }
             var rows: [NSView] = []
             if let episodes, !episodes.isEmpty {
-                for e in episodes.reversed() {
-                    rows.append(divider(theme))
-                    rows.append(episode(e))
+                // Only the episodes near the page's view are made, a season
+                // having up to hundreds, each with its still.
+                let latest = Array(episodes.reversed())
+                let lazy = LazyRows(estimate: 64)
+                lazy.show(keys: latest.map { String($0.episodeNumber) }) { [weak self] i in
+                    guard let self else { return NSView() }
+                    let rows = [divider(self.theme), self.episode(latest[i])]
+                    let stack = NSStackView.vertical(rows, spacing: 0)
+                    for r in rows { r.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true }
+                    return stack
                 }
+                rows.append(lazy)
             } else if episodes != nil || failed {
                 let text = NSTextField.label(
                     failed ? MavioStrings.stateError : MavioStrings.discoverNoEpisodes, theme.fonts.callout,
@@ -278,8 +286,12 @@
                 spinner.style = .spinning
                 spinner.controlSize = .small
                 spinner.startAnimation(nil)
+                // Beside a space taking the rest of the row: pinned to both
+                // sides, the spinner's own width would narrow the window.
                 rows.append(
-                    inset(spinner, NSEdgeInsets(top: 0, left: MavioSpacing.s16, bottom: MavioSpacing.s16, right: 0)))
+                    inset(
+                        NSStackView.horizontal([spinner, Spacer()], spacing: 0),
+                        NSEdgeInsets(top: 0, left: MavioSpacing.s16, bottom: MavioSpacing.s16, right: 0)))
             }
             list.setViews([])
             for r in rows {
