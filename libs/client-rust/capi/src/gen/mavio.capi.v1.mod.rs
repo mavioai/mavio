@@ -48,6 +48,10 @@ pub use self::__buffa::view::RunIntentView;
 #[doc(inline)]
 pub use self::__buffa::view::RunIntentOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::SetLanguagesView;
+#[doc(inline)]
+pub use self::__buffa::view::SetLanguagesOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ServerResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ServerResponseOwnedView;

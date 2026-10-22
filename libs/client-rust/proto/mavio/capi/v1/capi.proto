@@ -54,6 +54,7 @@ message Request {
     SwitchUser switch_user = 39;
     CallServerStream call_server_stream = 40;
     RunIntent run_intent = 41;
+    SetLanguages set_languages = 42;
   }
 }
 
@@ -89,6 +90,13 @@ message RunIntent {
   string function = 1;
   // The function's request, encoded as protobuf.
   bytes request = 2;
+}
+
+// Sets the languages the app is shown in, most wanted first, as BCP 47
+// tags such as "zh-Hans", which every call to a server asks for in its
+// Accept-Language header; none asks for none. Answered with Done.
+message SetLanguages {
+  repeated string tags = 1;
 }
 
 // A CallServer's response.

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -107,7 +108,12 @@ func TestCalls(t *testing.T) {
 		check    func(*capiv1.Message) bool
 		wantCode capiv1.Error_Code
 	}{
-		{"version", version, func(m *capiv1.Message) bool { return m.GetVersion() == "0.0.0" }, 0},
+		// The core's version is a release's, else 0.0.0 and the commit.
+		{"version", version, func(m *capiv1.Message) bool { return strings.HasPrefix(m.GetVersion(), "0.0.0") }, 0},
+		{
+			"languages", capiv1.Request_builder{SetLanguages: capiv1.SetLanguages_builder{Tags: []string{"zh-Hans", "en"}}.Build()}.Build(),
+			func(m *capiv1.Message) bool { return m.HasDone() }, 0,
+		},
 		{
 			"no servers", capiv1.Request_builder{ListServers: &capiv1.ListServers{}}.Build(),
 			func(m *capiv1.Message) bool { return m.HasServers() && len(m.GetServers().GetServers()) == 0 }, 0,
@@ -167,7 +173,7 @@ func TestConcurrentCalls(t *testing.T) {
 	for range 200 {
 		wg.Go(func() {
 			m, err := c.Call(t.Context(), capiv1.Request_builder{GetVersion: &capiv1.GetVersion{}}.Build())
-			if err == nil && m.GetVersion() != "0.0.0" {
+			if err == nil && !strings.HasPrefix(m.GetVersion(), "0.0.0") {
 				err = errors.New("got version " + m.GetVersion())
 			}
 			if err != nil {

@@ -211,6 +211,11 @@ pub mod request {
                 super::super::super::super::__buffa::view::RunIntentView<'a>,
             >,
         ),
+        SetLanguages(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::SetLanguagesView<'a>,
+            >,
+        ),
     }
 }
 pub mod message {

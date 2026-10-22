@@ -648,6 +648,10 @@ impl Client {
                 answer(streamed, |_| done())
             }
             Call::RunIntent(r) => run_intent(&r.function, &r.request),
+            Call::SetLanguages(l) => {
+                mavio_core::set_languages(&l.tags);
+                done()
+            }
             Call::SyncAccount(_) => answer(core.sync_account().await, |()| done()),
             Call::SignOut(_) => answer(core.sign_out().await, |()| done()),
             Call::LoadHome(_) => {

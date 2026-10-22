@@ -67,6 +67,7 @@ pub mod request {
             ::buffa::alloc::boxed::Box<super::super::super::CallServerStream>,
         ),
         RunIntent(::buffa::alloc::boxed::Box<super::super::super::RunIntent>),
+        SetLanguages(::buffa::alloc::boxed::Box<super::super::super::SetLanguages>),
     }
     impl ::buffa::Oneof for Kind {}
     impl From<super::super::super::Open> for Kind {
@@ -479,6 +480,16 @@ pub mod request {
     }
     impl From<super::super::super::RunIntent> for ::core::option::Option<Kind> {
         fn from(v: super::super::super::RunIntent) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::SetLanguages> for Kind {
+        fn from(v: super::super::super::SetLanguages) -> Self {
+            Self::SetLanguages(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::SetLanguages> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::SetLanguages) -> Self {
             Self::Some(Kind::from(v))
         }
     }
