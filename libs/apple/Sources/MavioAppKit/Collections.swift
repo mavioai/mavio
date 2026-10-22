@@ -5,6 +5,13 @@
     /// A scroll view that scrolls sideways only, passing vertical scrolling
     /// on to the page around it.
     public final class HorizontalScrollView: NSScrollView {
+        // No scroller, as the web UI's shelves: the collection view in it
+        // turns one on for its horizontal layout, so it stays off.
+        override public var hasHorizontalScroller: Bool {
+            get { false }
+            set { super.hasHorizontalScroller = false }
+        }
+
         override public func scrollWheel(with event: NSEvent) {
             if abs(event.scrollingDeltaY) > abs(event.scrollingDeltaX) {
                 nextResponder?.scrollWheel(with: event)
