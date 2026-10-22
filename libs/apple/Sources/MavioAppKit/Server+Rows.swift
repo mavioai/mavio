@@ -151,10 +151,7 @@
             // The content takes the room left, so that the controls end the
             // row at their own width; a stack's hugging is its own setting.
             (content as? NSStackView)?.setHuggingPriority(.init(1), for: .horizontal)
-            // The content takes the rest of the row, a stack too, which hugs
-            // its views otherwise.
             content.setContentHuggingPriority(.init(1), for: .horizontal)
-            (content as? NSStackView)?.setHuggingPriority(.init(1), for: .horizontal)
             content.setContentCompressionResistancePriority(.init(249), for: .horizontal)
             for control in controls {
                 control.setContentHuggingPriority(.required, for: .horizontal)
