@@ -37,6 +37,17 @@
             section, _, context in PendingPage(context: context, name: section.title)
         }
 
+        /// The page of a plugin of a server's, by its ID, which the shell
+        /// sets.
+        public var pluginPage: @MainActor (String, ServerRecord, MacContext) -> NSViewController = {
+            id, _, context in PendingPage(context: context, name: id)
+        }
+        /// The page of a remote of a server's storage, by its name, which
+        /// the shell sets.
+        public var remotePage: @MainActor (String, ServerRecord, MacContext) -> NSViewController = {
+            name, _, context in PendingPage(context: context, name: name)
+        }
+
         /// The Assistant settings of the user on a server, which the shell
         /// sets.
         public var assistantPage: @MainActor (ServerRecord?, MacContext) -> NSViewController = { _, context in
@@ -74,6 +85,8 @@
             context.openRemote = openRemote
             context.page = page
             context.sectionPage = sectionPage
+            context.pluginPage = pluginPage
+            context.remotePage = remotePage
             context.assistantPage = assistantPage
             return context
         }

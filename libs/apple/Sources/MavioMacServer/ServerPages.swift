@@ -26,5 +26,10 @@
             default: nil
             }
         }
+
+        /// The page of the remote of server's storage named name.
+        public static func remote(_ name: String, server: ServerRecord, context: MacContext) -> NSViewController {
+            RemotePage(context: context, server: server, name: name, changed: {})
+        }
     }
 #endif

@@ -95,17 +95,19 @@
             return views
         }
 
-        /// The link to where the client is set up: its remote's storage, or its plugin's page.
+        /// The link to where the client is set up: its remote's page, or its plugin's.
         private func settingsLink() -> NSView {
             let context = context
             let server = server
+            let remote = client.id
+            let plugin = client.pluginID
             if offline {
                 return tileRow(MavioStrings.clientRemote, subtitle: client.id, icon: "cloud", tint: 0x30B0C7) {
-                    [weak self] in self?.push(context.sectionPage(.storage, server, context))
+                    [weak self] in self?.push(context.remotePage(remote, server, context))
                 }
             }
             return tileRow(MavioStrings.clientSettings, subtitle: pluginName, icon: "plugins", tint: 0x5856D6) {
-                [weak self] in self?.push(context.sectionPage(.plugins, server, context))
+                [weak self] in self?.push(context.pluginPage(plugin, server, context))
             }
         }
 

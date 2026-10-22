@@ -16,6 +16,11 @@
             }
         }
 
+        /// The page of the plugin of server whose ID is id.
+        public static func plugin(_ id: String, server: ServerRecord, context: MacContext) -> NSViewController {
+            PluginPage(context: context, store: PluginsStore(server: server, model: context.model), id: id)
+        }
+
         /// The Assistant settings of the user on server.
         public static func assistant(server: ServerRecord?, context: MacContext) -> NSViewController {
             AssistantPrefsPage(context: context, server: server)
