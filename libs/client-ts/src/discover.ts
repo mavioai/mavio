@@ -65,6 +65,16 @@ export function useDiscovery(language: string): { server?: ServerEntry; catalogs
   });
 }
 
+/** A server's discovery catalogs, in the language given. */
+export function useCatalogs(server: ServerEntry, language: string) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "discover", "catalogs", language),
+    queryFn: async () => (await servers.client(DiscoverService, server).listCatalogs({ language })).catalogs,
+    staleTime: 10 * 60_000,
+  });
+}
+
 /** A filter value chosen by its provider's ID, with its name to show. */
 export interface NamedValue {
   id: string;
@@ -161,17 +171,17 @@ export function useCatalog(server: ServerEntry | undefined, catalog: string, med
 /**
  * The values a catalog's filter takes: all of them for genres and watch
  * providers, those matching a query for studios and keywords, none
- * without one.
+ * without one, or those of the IDs given, for their names.
  */
 export function useFilterValues(
   server: ServerEntry | undefined,
-  v: { catalog: string; filter: DiscoverFilter; mediaKind: MediaKind; query?: string; language: string; region?: string },
+  v: { catalog: string; filter: DiscoverFilter; mediaKind: MediaKind; query?: string; ids?: string[]; language: string; region?: string },
   enabled = true,
 ) {
   const servers = useServersStore();
   return useQuery({
     queryKey: serverKey(server?.id ?? "", "discover", "filterValues", v),
-    queryFn: async () => (await servers.client(DiscoverService, server!).listFilterValues({ ...v, query: v.query ?? "", region: v.region ?? "" })).values,
+    queryFn: async () => (await servers.client(DiscoverService, server!).listFilterValues({ ...v, query: v.query ?? "", ids: v.ids ?? [], region: v.region ?? "" })).values,
     enabled: !!server && enabled,
     staleTime: 60 * 60_000,
   });

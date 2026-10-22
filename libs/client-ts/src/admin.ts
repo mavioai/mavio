@@ -4,6 +4,7 @@
 // what it runs and plays, what happened on it, its tasks and jobs, and
 // its settings.
 import { ProfileService } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
+import { RequestService, type RequestSettings } from "@mavio/proto/mavio/acquisition/v1/request_pb";
 import type { AcquisitionSettings } from "@mavio/proto/mavio/acquisition/v1/settings_pb";
 import { LibraryService, type LibrarySpec } from "@mavio/proto/mavio/library/v1/library_pb";
 import { type HardwareAcceleration, PlaybackService, type TranscodingSettings } from "@mavio/proto/mavio/playback/v1/playback_pb";
@@ -303,5 +304,17 @@ export function useAcquisitionSettings(server: ServerEntry) {
     "acquisition",
     async () => (await c().getAcquisitionSettings({})).settings,
     async (settings: AcquisitionSettings) => (await c().updateAcquisitionSettings({ settings })).settings,
+  );
+}
+
+/** A server's request settings: new users' permissions and quotas, and where approved requests go. */
+export function useRequestSettings(server: ServerEntry) {
+  const servers = useServersStore();
+  const c = () => servers.client(RequestService, server);
+  return useSettingsGroup(
+    server,
+    "requests",
+    async () => (await c().getRequestSettings({})).settings,
+    async (settings: RequestSettings) => (await c().updateRequestSettings({ settings })).settings,
   );
 }

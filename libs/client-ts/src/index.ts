@@ -11,6 +11,7 @@ export {
   rowsOf,
   titlesOf,
   useCatalog,
+  useCatalogs,
   useCollection,
   useDiscoveredPerson,
   useDiscovery,
@@ -85,6 +86,7 @@ export {
 export {
   invitationLink,
   useAcquisitionSettings,
+  useRequestSettings,
   useActivities,
   useAllSessions,
   useDirectory,

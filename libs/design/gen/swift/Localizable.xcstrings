@@ -20377,6 +20377,654 @@
         }
       }
     },
+    "requestsettings.title": {
+      "comment": "Page of the request settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requests"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请求"
+          }
+        }
+      }
+    },
+    "requestsettings.detail": {
+      "comment": "Detail of the request settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Where approved requests go, new users' permissions and blocklisted tags"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "获批请求的去处、新用户的权限和屏蔽标签"
+          }
+        }
+      }
+    },
+    "requestsettings.message": {
+      "comment": "Message of the request settings page",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Which library and quality profile approved requests are added with, what new users may request, and the keywords whose titles are blocklisted."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "获批的请求以哪个媒体库和质量配置添加、新用户可以请求什么，以及哪些关键词的影片会被屏蔽。"
+          }
+        }
+      }
+    },
+    "requestsettings.movies": {
+      "comment": "Group of where approved movie requests go",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电影"
+          }
+        }
+      }
+    },
+    "requestsettings.moviesFooter": {
+      "comment": "Footer of the movies group",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approved movies are added to this library with this quality profile and searched for. Without them, approving a movie request fails."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "获批的电影以此质量配置添加到此媒体库并开始搜索。未设置时，批准电影请求会失败。"
+          }
+        }
+      }
+    },
+    "requestsettings.series": {
+      "comment": "Group of where approved show requests go",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剧集"
+          }
+        }
+      }
+    },
+    "requestsettings.seriesFooter": {
+      "comment": "Footer of the shows group",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approved shows are added to this library with this quality profile and searched for. Without them, approving a show request fails."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "获批的剧集以此质量配置添加到此媒体库并开始搜索。未设置时，批准剧集请求会失败。"
+          }
+        }
+      }
+    },
+    "requestsettings.anime": {
+      "comment": "Group of where approved anime requests go",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anime"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "动画"
+          }
+        }
+      }
+    },
+    "requestsettings.animeFooter": {
+      "comment": "Footer of the anime group",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anime shows go to their own library and quality profile, and are numbered absolutely either way."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "动画剧集使用单独的媒体库和质量配置；无论是否设置，都按绝对集数编号。"
+          }
+        }
+      }
+    },
+    "requestsettings.library": {
+      "comment": "Library approved requests are added to",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Library"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "媒体库"
+          }
+        }
+      }
+    },
+    "requestsettings.profile": {
+      "comment": "Quality profile approved requests are added with",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quality Profile"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "质量配置"
+          }
+        }
+      }
+    },
+    "requestsettings.none": {
+      "comment": "No library or quality profile chosen",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无"
+          }
+        }
+      }
+    },
+    "requestsettings.sameAsSeries": {
+      "comment": "Anime using the shows' library or profile",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Same as shows"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "与剧集相同"
+          }
+        }
+      }
+    },
+    "requestsettings.minimumAvailability": {
+      "comment": "When a movie is searched for",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minimum Availability"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最低可用性"
+          }
+        }
+      }
+    },
+    "requestsettings.minimumAvailabilityDetail": {
+      "comment": "Detail of the minimum availability",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When a requested movie starts being searched for"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请求的电影从何时开始搜索"
+          }
+        }
+      }
+    },
+    "requestsettings.announced": {
+      "comment": "Minimum availability: announced",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Announced"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已公布"
+          }
+        }
+      }
+    },
+    "requestsettings.inCinemas": {
+      "comment": "Minimum availability: in cinemas",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In Cinemas"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "院线上映"
+          }
+        }
+      }
+    },
+    "requestsettings.released": {
+      "comment": "Minimum availability: released",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Released"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已发行"
+          }
+        }
+      }
+    },
+    "requestsettings.seasonFolder": {
+      "comment": "Toggle putting a show's episodes in season folders",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Season Folders"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "季文件夹"
+          }
+        }
+      }
+    },
+    "requestsettings.seasonFolderDetail": {
+      "comment": "Detail of season folders",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Put each season's episodes in a folder of its own"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每季的剧集放在单独的文件夹中"
+          }
+        }
+      }
+    },
+    "requestsettings.monitorNew": {
+      "comment": "How a show monitors seasons added later",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitor New Seasons"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "监控新季"
+          }
+        }
+      }
+    },
+    "requestsettings.monitorNewDetail": {
+      "comment": "Detail of monitoring new seasons",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whether seasons added later are searched for"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "之后新增的季是否会被搜索"
+          }
+        }
+      }
+    },
+    "requestsettings.monitorAll": {
+      "comment": "Monitor all new seasons",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部"
+          }
+        }
+      }
+    },
+    "requestsettings.monitorNone": {
+      "comment": "Monitor no new seasons",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不监控"
+          }
+        }
+      }
+    },
+    "requestsettings.specials": {
+      "comment": "Toggle allowing specials to be requested",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Specials"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "特别篇"
+          }
+        }
+      }
+    },
+    "requestsettings.specialsDetail": {
+      "comment": "Detail of allowing specials",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow requesting season 0"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许请求第 0 季"
+          }
+        }
+      }
+    },
+    "requestsettings.defaults": {
+      "comment": "Group of new users' request permissions",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Users"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新用户"
+          }
+        }
+      }
+    },
+    "requestsettings.defaultsFooter": {
+      "comment": "Footer of the new users group",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What new users may request, and the quotas of users without their own."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新用户可以请求的内容，以及没有单独配额的用户的配额。"
+          }
+        }
+      }
+    },
+    "requestsettings.quotaDetail": {
+      "comment": "Detail of a quota",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0 requests is unlimited; 0 days counts all time"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请求数为 0 表示不限；天数为 0 表示不限时间"
+          }
+        }
+      }
+    },
+    "requestsettings.tags": {
+      "comment": "Group of keywords whose titles are blocklisted",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blocklisted Tags"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "屏蔽标签"
+          }
+        }
+      }
+    },
+    "requestsettings.tagsFooter": {
+      "comment": "Footer of blocklisted tags",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every week, the movies and shows with these keywords are blocklisted, so they can't be requested."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每周屏蔽带有这些关键词的电影和剧集，使其无法被请求。"
+          }
+        }
+      }
+    },
+    "requestsettings.searchKeywords": {
+      "comment": "Field finding keywords to blocklist",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search keywords"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索关键词"
+          }
+        }
+      }
+    },
+    "requestsettings.noKeywords": {
+      "comment": "No keyword matches the search",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No keywords found."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有找到关键词。"
+          }
+        }
+      }
+    },
+    "requestsettings.noProvider": {
+      "comment": "No provider can search keywords",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No discovery provider searches keywords."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有可以搜索关键词的发现提供者。"
+          }
+        }
+      }
+    },
+    "requestsettings.tagsLimit": {
+      "comment": "How many pages of each keyword's titles are blocklisted",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pages per Keyword"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每个关键词的页数"
+          }
+        }
+      }
+    },
+    "requestsettings.tagsLimitDetail": {
+      "comment": "Detail of the pages per keyword",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How many pages of each order of a keyword's titles are blocklisted"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每个关键词的影片，每种排序屏蔽多少页"
+          }
+        }
+      }
+    },
     "options.naming": {
       "comment": "Group of the naming options",
       "extractionState": "manual",

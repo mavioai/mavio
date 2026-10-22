@@ -1120,6 +1120,42 @@ export type MessageKey =
   | 'options.options'
   | 'options.optionsDetail'
   | 'options.optionsMessage'
+  | 'requestsettings.title'
+  | 'requestsettings.detail'
+  | 'requestsettings.message'
+  | 'requestsettings.movies'
+  | 'requestsettings.moviesFooter'
+  | 'requestsettings.series'
+  | 'requestsettings.seriesFooter'
+  | 'requestsettings.anime'
+  | 'requestsettings.animeFooter'
+  | 'requestsettings.library'
+  | 'requestsettings.profile'
+  | 'requestsettings.none'
+  | 'requestsettings.sameAsSeries'
+  | 'requestsettings.minimumAvailability'
+  | 'requestsettings.minimumAvailabilityDetail'
+  | 'requestsettings.announced'
+  | 'requestsettings.inCinemas'
+  | 'requestsettings.released'
+  | 'requestsettings.seasonFolder'
+  | 'requestsettings.seasonFolderDetail'
+  | 'requestsettings.monitorNew'
+  | 'requestsettings.monitorNewDetail'
+  | 'requestsettings.monitorAll'
+  | 'requestsettings.monitorNone'
+  | 'requestsettings.specials'
+  | 'requestsettings.specialsDetail'
+  | 'requestsettings.defaults'
+  | 'requestsettings.defaultsFooter'
+  | 'requestsettings.quotaDetail'
+  | 'requestsettings.tags'
+  | 'requestsettings.tagsFooter'
+  | 'requestsettings.searchKeywords'
+  | 'requestsettings.noKeywords'
+  | 'requestsettings.noProvider'
+  | 'requestsettings.tagsLimit'
+  | 'requestsettings.tagsLimitDetail'
   | 'options.naming'
   | 'options.replaceIllegal'
   | 'options.replaceIllegalDetail'
@@ -3222,6 +3258,42 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "options.options": "Options",
     "options.optionsDetail": "Naming, importing, releases and the recycle bin",
     "options.optionsMessage": "How the server names and imports what it downloads, which releases it takes and where replaced files go.",
+    "requestsettings.title": "Requests",
+    "requestsettings.detail": "Where approved requests go, new users' permissions and blocklisted tags",
+    "requestsettings.message": "Which library and quality profile approved requests are added with, what new users may request, and the keywords whose titles are blocklisted.",
+    "requestsettings.movies": "Movies",
+    "requestsettings.moviesFooter": "Approved movies are added to this library with this quality profile and searched for. Without them, approving a movie request fails.",
+    "requestsettings.series": "Shows",
+    "requestsettings.seriesFooter": "Approved shows are added to this library with this quality profile and searched for. Without them, approving a show request fails.",
+    "requestsettings.anime": "Anime",
+    "requestsettings.animeFooter": "Anime shows go to their own library and quality profile, and are numbered absolutely either way.",
+    "requestsettings.library": "Library",
+    "requestsettings.profile": "Quality Profile",
+    "requestsettings.none": "None",
+    "requestsettings.sameAsSeries": "Same as shows",
+    "requestsettings.minimumAvailability": "Minimum Availability",
+    "requestsettings.minimumAvailabilityDetail": "When a requested movie starts being searched for",
+    "requestsettings.announced": "Announced",
+    "requestsettings.inCinemas": "In Cinemas",
+    "requestsettings.released": "Released",
+    "requestsettings.seasonFolder": "Season Folders",
+    "requestsettings.seasonFolderDetail": "Put each season's episodes in a folder of its own",
+    "requestsettings.monitorNew": "Monitor New Seasons",
+    "requestsettings.monitorNewDetail": "Whether seasons added later are searched for",
+    "requestsettings.monitorAll": "All",
+    "requestsettings.monitorNone": "None",
+    "requestsettings.specials": "Specials",
+    "requestsettings.specialsDetail": "Allow requesting season 0",
+    "requestsettings.defaults": "New Users",
+    "requestsettings.defaultsFooter": "What new users may request, and the quotas of users without their own.",
+    "requestsettings.quotaDetail": "0 requests is unlimited; 0 days counts all time",
+    "requestsettings.tags": "Blocklisted Tags",
+    "requestsettings.tagsFooter": "Every week, the movies and shows with these keywords are blocklisted, so they can't be requested.",
+    "requestsettings.searchKeywords": "Search keywords",
+    "requestsettings.noKeywords": "No keywords found.",
+    "requestsettings.noProvider": "No discovery provider searches keywords.",
+    "requestsettings.tagsLimit": "Pages per Keyword",
+    "requestsettings.tagsLimitDetail": "How many pages of each order of a keyword's titles are blocklisted",
     "options.naming": "Naming",
     "options.replaceIllegal": "Replace Illegal Characters",
     "options.replaceIllegalDetail": "Otherwise they are removed",
@@ -5322,6 +5394,42 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "options.options": "选项",
     "options.optionsDetail": "命名、导入、发布和回收站",
     "options.optionsMessage": "服务器如何命名和导入下载的内容、接受哪些发布，以及被替换的文件去向。",
+    "requestsettings.title": "请求",
+    "requestsettings.detail": "获批请求的去处、新用户的权限和屏蔽标签",
+    "requestsettings.message": "获批的请求以哪个媒体库和质量配置添加、新用户可以请求什么，以及哪些关键词的影片会被屏蔽。",
+    "requestsettings.movies": "电影",
+    "requestsettings.moviesFooter": "获批的电影以此质量配置添加到此媒体库并开始搜索。未设置时，批准电影请求会失败。",
+    "requestsettings.series": "剧集",
+    "requestsettings.seriesFooter": "获批的剧集以此质量配置添加到此媒体库并开始搜索。未设置时，批准剧集请求会失败。",
+    "requestsettings.anime": "动画",
+    "requestsettings.animeFooter": "动画剧集使用单独的媒体库和质量配置；无论是否设置，都按绝对集数编号。",
+    "requestsettings.library": "媒体库",
+    "requestsettings.profile": "质量配置",
+    "requestsettings.none": "无",
+    "requestsettings.sameAsSeries": "与剧集相同",
+    "requestsettings.minimumAvailability": "最低可用性",
+    "requestsettings.minimumAvailabilityDetail": "请求的电影从何时开始搜索",
+    "requestsettings.announced": "已公布",
+    "requestsettings.inCinemas": "院线上映",
+    "requestsettings.released": "已发行",
+    "requestsettings.seasonFolder": "季文件夹",
+    "requestsettings.seasonFolderDetail": "每季的剧集放在单独的文件夹中",
+    "requestsettings.monitorNew": "监控新季",
+    "requestsettings.monitorNewDetail": "之后新增的季是否会被搜索",
+    "requestsettings.monitorAll": "全部",
+    "requestsettings.monitorNone": "不监控",
+    "requestsettings.specials": "特别篇",
+    "requestsettings.specialsDetail": "允许请求第 0 季",
+    "requestsettings.defaults": "新用户",
+    "requestsettings.defaultsFooter": "新用户可以请求的内容，以及没有单独配额的用户的配额。",
+    "requestsettings.quotaDetail": "请求数为 0 表示不限；天数为 0 表示不限时间",
+    "requestsettings.tags": "屏蔽标签",
+    "requestsettings.tagsFooter": "每周屏蔽带有这些关键词的电影和剧集，使其无法被请求。",
+    "requestsettings.searchKeywords": "搜索关键词",
+    "requestsettings.noKeywords": "没有找到关键词。",
+    "requestsettings.noProvider": "没有可以搜索关键词的发现提供者。",
+    "requestsettings.tagsLimit": "每个关键词的页数",
+    "requestsettings.tagsLimitDetail": "每个关键词的影片，每种排序屏蔽多少页",
     "options.naming": "命名",
     "options.replaceIllegal": "替换非法字符",
     "options.replaceIllegalDetail": "否则直接删除",

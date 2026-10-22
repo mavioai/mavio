@@ -3589,6 +3589,114 @@ public enum MavioStrings {
     /// Message of the acquisition options page
     public static var optionsOptionsMessage: String { NSLocalizedString("options.optionsMessage", bundle: .module, comment: "") }
 
+    /// Page of the request settings
+    public static var requestsettingsTitle: String { NSLocalizedString("requestsettings.title", bundle: .module, comment: "") }
+
+    /// Detail of the request settings
+    public static var requestsettingsDetail: String { NSLocalizedString("requestsettings.detail", bundle: .module, comment: "") }
+
+    /// Message of the request settings page
+    public static var requestsettingsMessage: String { NSLocalizedString("requestsettings.message", bundle: .module, comment: "") }
+
+    /// Group of where approved movie requests go
+    public static var requestsettingsMovies: String { NSLocalizedString("requestsettings.movies", bundle: .module, comment: "") }
+
+    /// Footer of the movies group
+    public static var requestsettingsMoviesFooter: String { NSLocalizedString("requestsettings.moviesFooter", bundle: .module, comment: "") }
+
+    /// Group of where approved show requests go
+    public static var requestsettingsSeries: String { NSLocalizedString("requestsettings.series", bundle: .module, comment: "") }
+
+    /// Footer of the shows group
+    public static var requestsettingsSeriesFooter: String { NSLocalizedString("requestsettings.seriesFooter", bundle: .module, comment: "") }
+
+    /// Group of where approved anime requests go
+    public static var requestsettingsAnime: String { NSLocalizedString("requestsettings.anime", bundle: .module, comment: "") }
+
+    /// Footer of the anime group
+    public static var requestsettingsAnimeFooter: String { NSLocalizedString("requestsettings.animeFooter", bundle: .module, comment: "") }
+
+    /// Library approved requests are added to
+    public static var requestsettingsLibrary: String { NSLocalizedString("requestsettings.library", bundle: .module, comment: "") }
+
+    /// Quality profile approved requests are added with
+    public static var requestsettingsProfile: String { NSLocalizedString("requestsettings.profile", bundle: .module, comment: "") }
+
+    /// No library or quality profile chosen
+    public static var requestsettingsNone: String { NSLocalizedString("requestsettings.none", bundle: .module, comment: "") }
+
+    /// Anime using the shows' library or profile
+    public static var requestsettingsSameAsSeries: String { NSLocalizedString("requestsettings.sameAsSeries", bundle: .module, comment: "") }
+
+    /// When a movie is searched for
+    public static var requestsettingsMinimumAvailability: String { NSLocalizedString("requestsettings.minimumAvailability", bundle: .module, comment: "") }
+
+    /// Detail of the minimum availability
+    public static var requestsettingsMinimumAvailabilityDetail: String { NSLocalizedString("requestsettings.minimumAvailabilityDetail", bundle: .module, comment: "") }
+
+    /// Minimum availability: announced
+    public static var requestsettingsAnnounced: String { NSLocalizedString("requestsettings.announced", bundle: .module, comment: "") }
+
+    /// Minimum availability: in cinemas
+    public static var requestsettingsInCinemas: String { NSLocalizedString("requestsettings.inCinemas", bundle: .module, comment: "") }
+
+    /// Minimum availability: released
+    public static var requestsettingsReleased: String { NSLocalizedString("requestsettings.released", bundle: .module, comment: "") }
+
+    /// Toggle putting a show's episodes in season folders
+    public static var requestsettingsSeasonFolder: String { NSLocalizedString("requestsettings.seasonFolder", bundle: .module, comment: "") }
+
+    /// Detail of season folders
+    public static var requestsettingsSeasonFolderDetail: String { NSLocalizedString("requestsettings.seasonFolderDetail", bundle: .module, comment: "") }
+
+    /// How a show monitors seasons added later
+    public static var requestsettingsMonitorNew: String { NSLocalizedString("requestsettings.monitorNew", bundle: .module, comment: "") }
+
+    /// Detail of monitoring new seasons
+    public static var requestsettingsMonitorNewDetail: String { NSLocalizedString("requestsettings.monitorNewDetail", bundle: .module, comment: "") }
+
+    /// Monitor all new seasons
+    public static var requestsettingsMonitorAll: String { NSLocalizedString("requestsettings.monitorAll", bundle: .module, comment: "") }
+
+    /// Monitor no new seasons
+    public static var requestsettingsMonitorNone: String { NSLocalizedString("requestsettings.monitorNone", bundle: .module, comment: "") }
+
+    /// Toggle allowing specials to be requested
+    public static var requestsettingsSpecials: String { NSLocalizedString("requestsettings.specials", bundle: .module, comment: "") }
+
+    /// Detail of allowing specials
+    public static var requestsettingsSpecialsDetail: String { NSLocalizedString("requestsettings.specialsDetail", bundle: .module, comment: "") }
+
+    /// Group of new users' request permissions
+    public static var requestsettingsDefaults: String { NSLocalizedString("requestsettings.defaults", bundle: .module, comment: "") }
+
+    /// Footer of the new users group
+    public static var requestsettingsDefaultsFooter: String { NSLocalizedString("requestsettings.defaultsFooter", bundle: .module, comment: "") }
+
+    /// Detail of a quota
+    public static var requestsettingsQuotaDetail: String { NSLocalizedString("requestsettings.quotaDetail", bundle: .module, comment: "") }
+
+    /// Group of keywords whose titles are blocklisted
+    public static var requestsettingsTags: String { NSLocalizedString("requestsettings.tags", bundle: .module, comment: "") }
+
+    /// Footer of blocklisted tags
+    public static var requestsettingsTagsFooter: String { NSLocalizedString("requestsettings.tagsFooter", bundle: .module, comment: "") }
+
+    /// Field finding keywords to blocklist
+    public static var requestsettingsSearchKeywords: String { NSLocalizedString("requestsettings.searchKeywords", bundle: .module, comment: "") }
+
+    /// No keyword matches the search
+    public static var requestsettingsNoKeywords: String { NSLocalizedString("requestsettings.noKeywords", bundle: .module, comment: "") }
+
+    /// No provider can search keywords
+    public static var requestsettingsNoProvider: String { NSLocalizedString("requestsettings.noProvider", bundle: .module, comment: "") }
+
+    /// How many pages of each keyword's titles are blocklisted
+    public static var requestsettingsTagsLimit: String { NSLocalizedString("requestsettings.tagsLimit", bundle: .module, comment: "") }
+
+    /// Detail of the pages per keyword
+    public static var requestsettingsTagsLimitDetail: String { NSLocalizedString("requestsettings.tagsLimitDetail", bundle: .module, comment: "") }
+
     /// Group of the naming options
     public static var optionsNaming: String { NSLocalizedString("options.naming", bundle: .module, comment: "") }
 
