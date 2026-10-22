@@ -181,8 +181,11 @@
         /// The episodes' panel, clipped as it grows and shrinks.
         private let panel = NSView()
         private var panelHeight: NSLayoutConstraint!
-        /// The episodes' rows, made as they come into view.
-        private weak var lazy: LazyRows?
+        /// How far the season is open, from 0 to 1, and where it goes from
+        /// when, as MavioGO's.
+        private var progress: CGFloat = 0
+        private var motion: (from: CGFloat, to: CGFloat, start: CFTimeInterval)?
+        private var link: CADisplayLink?
         private let expand: IconView
         private let header: Pressable
         private var open = false
@@ -231,8 +234,9 @@
             panel.addSubview(list)
             list.translatesAutoresizingMaskIntoConstraints = false
             // The panel is its episodes' height, but while it grows or
-            // shrinks the height it is given, the episodes cut at its end.
-            let fits = list.bottomAnchor.constraint(equalTo: panel.bottomAnchor)
+            // shrinks a share of it, the episodes cut at its end rather
+            // than squeezed.
+            let fits = panel.heightAnchor.constraint(equalTo: list.heightAnchor)
             fits.priority = .init(999)
             panelHeight = panel.heightAnchor.constraint(equalToConstant: 0)
             NSLayoutConstraint.activate([
@@ -250,7 +254,10 @@
         @available(*, unavailable)
         required init?(coder: NSCoder) { fatalError() }
 
-        isolated deinit { task?.cancel() }
+        isolated deinit {
+            task?.cancel()
+            link?.invalidate()
+        }
 
         private func toggle() {
             open.toggle()
@@ -262,43 +269,48 @@
         }
 
         /// Grows the episodes into view as the season opens and shrinks them
-        /// away as it closes, as MavioGO's and the web UI's collapsible: from
-        /// the height shown to the episodes' own or none.
+        /// away as it closes, as MavioGO's collapsible: the open share goes
+        /// from where it is to all or none along a cubic ease-out, and the
+        /// panel is that share of the height the episodes have each frame,
+        /// so that they may load or be made on the way.
         private func slide() {
-            let root = window?.contentView
-            let from = panel.isHidden ? 0 : panel.frame.height
-            panel.isHidden = false
-            panelHeight.isActive = false
-            root?.layoutSubtreeIfNeeded()
-            // The rows in view made and measured first, so that the panel
-            // grows to their height rather than an estimate's.
-            if open, let lazy {
-                lazy.updateNow()
-                root?.layoutSubtreeIfNeeded()
-            }
-            let to = open ? list.frame.height : 0
-            panelHeight.constant = from
-            panelHeight.isActive = true
-            root?.layoutSubtreeIfNeeded()
-            let opening = open
-            let settle: @MainActor @Sendable () -> Void = { [weak self] in
-                guard let self, self.open == opening else { return }
-                // Open, the panel follows its episodes as they load or wrap.
-                self.panelHeight.isActive = !opening
-                self.panel.isHidden = !opening
-            }
+            let to: CGFloat = open ? 1 : 0
             guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else {
-                settle()
+                motion = nil
+                apply(to)
                 return
             }
-            NSAnimationContext.runAnimationGroup(
-                { context in
-                    context.duration = MavioDuration.normal
-                    context.timingFunction = MavioEasings.standard.timingFunction
-                    context.allowsImplicitAnimation = true
-                    panelHeight.animator().constant = to
-                    root?.layoutSubtreeIfNeeded()
-                }, completionHandler: { MainActor.assumeIsolated { settle() } })
+            motion = (progress, to, CACurrentMediaTime())
+            if link == nil {
+                let link = displayLink(target: self, selector: #selector(tick))
+                link.add(to: .main, forMode: .common)
+                self.link = link
+            }
+            tick()
+        }
+
+        @objc private func tick(_ link: CADisplayLink? = nil) {
+            guard let motion else { return }
+            let t = min(1, (CACurrentMediaTime() - motion.start) / MavioDuration.normal)
+            let u = 1 - t
+            apply(motion.from + (motion.to - motion.from) * (1 - u * u * u))
+            if t >= 1 {
+                self.motion = nil
+                self.link?.invalidate()
+                self.link = nil
+            }
+        }
+
+        /// Shows the share p of the episodes: none hides the panel, all
+        /// lets it follow them.
+        private func apply(_ p: CGFloat) {
+            progress = p
+            panel.isHidden = p <= 0
+            panelHeight.isActive = p > 0 && p < 1
+            guard panelHeight.isActive else { return }
+            // The height the episodes had in the last frame, as MavioGO's.
+            let full = list.frame.height > 0 ? list.frame.height : list.fittingSize.height
+            panelHeight.constant = (p * full).rounded()
         }
 
         private func load() {
@@ -314,24 +326,19 @@
                     guard let self, !Task.isCancelled else { return }
                     self.failed = !(error is CancellationError)
                 }
-                guard let self else { return }
-                self.task = nil
-                self.renderList()
-                // From the spinner's height to the episodes', as they come.
-                if self.open { self.slide() }
+                self?.task = nil
+                self?.renderList()
             }
         }
 
         private func renderList() {
             guard open else { return }
             var rows: [NSView] = []
-            lazy = nil
             if let episodes, !episodes.isEmpty {
                 // Only the episodes near the page's view are made, a season
                 // having up to hundreds, each with its still.
                 let latest = Array(episodes.reversed())
                 let lazy = LazyRows(estimate: 64)
-                self.lazy = lazy
                 lazy.show(keys: latest.map { String($0.episodeNumber) }) { [weak self] i in
                     guard let self else { return NSView() }
                     let rows = [divider(self.theme), self.episode(latest[i])]
@@ -403,6 +410,8 @@
             }
             let row = NSStackView.horizontal(views, spacing: MavioSpacing.s12)
             row.alignment = .top
+            // The text takes the width the still leaves, which ends the row.
+            row.distribution = .fill
             // In television mode an episode takes focus, so that its list scrolls.
             let content: NSView =
                 theme.isTV

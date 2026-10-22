@@ -399,11 +399,6 @@
             return row.fittingSize(width: width)
         }
 
-        /// Makes the rows near the page's view now rather than once the
-        /// layout under way ends, so that the height is theirs, as before
-        /// the rows grow into view.
-        public func updateNow() { update() }
-
         /// Updates once the layout under way ends.
         private func schedule() {
             guard !pending else { return }
