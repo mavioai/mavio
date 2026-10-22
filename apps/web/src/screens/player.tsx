@@ -38,7 +38,7 @@ import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { prefs, type Quality, qualities, qualityBitrates, usePrefs } from "../prefs.ts";
 import { useGroupPlayer } from "../syncplay.tsx";
-import { StatusView } from "../ui.tsx";
+import { Spinner, StatusView } from "../ui.tsx";
 import { LyricsView } from "./lyrics.tsx";
 import { GroupChip } from "./syncplay.tsx";
 
@@ -111,6 +111,8 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   // Where the next start begins, in milliseconds: the resume position, then where a track change happened.
   const startAt = useRef(search.start ?? 0);
   const [paused, setPaused] = useState(true);
+  // Until the video plays, and while it waits for data.
+  const [loading, setLoading] = useState(true);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [muted, setMuted] = useState(false);
@@ -149,6 +151,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   useEffect(() => {
     const v = video.current;
     if (!v) return;
+    setLoading(true);
     let hls: Hls | undefined;
     let cancelled = false;
     const state = () => ({ positionMs: v.currentTime * 1000, paused: v.paused });
@@ -517,6 +520,10 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
           void playback.current?.report();
         }}
         onSeeked={() => void playback.current?.report()}
+        onWaiting={() => setLoading(true)}
+        onPlaying={() => setLoading(false)}
+        // Paused with enough to play, as a group's member waiting for the group.
+        onCanPlay={(e) => e.currentTarget.paused && setLoading(false)}
         onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
         onDurationChange={(e) => Number.isFinite(e.currentTarget.duration) && setDuration(e.currentTarget.duration)}
         onVolumeChange={(e) => setMuted(e.currentTarget.muted)}
@@ -537,6 +544,12 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
 
       {lyrics.data && showLyrics && (
         <LyricsView lyrics={lyrics.data} time={time} onSeek={seekTo} onBackground={() => (panel !== undefined ? setPanel(undefined) : toggle())} />
+      )}
+
+      {loading && !error && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <Spinner size={48} className="text-white/70!" />
+        </div>
       )}
 
       {error && (
