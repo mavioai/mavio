@@ -100,6 +100,7 @@ import dev.mavio.core.Source
 import dev.mavio.core.SubtitleStream
 import dev.mavio.design.MavioSpacing
 import dev.mavio.player.GroupControls
+import dev.mavio.player.NetworkRetry
 import dev.mavio.player.PlayerEngine
 import dev.mavio.player.chooseTracks
 import dev.mavio.player.createPlayer
@@ -237,6 +238,7 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
         }
     }
     DisposableEffect(player) {
+        val retry = player?.let { NetworkRetry(it) }
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED && p != null && !position.ended) {
@@ -256,6 +258,7 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
             }
 
             override fun onPlayerError(error: PlaybackException) {
+                if (retry?.retries(error) == true) return
                 if (p != null && engine == PlayerEngine.MEDIA3 && p.info.kind == PlayKind.DIRECT_PLAY) {
                     startMs = player?.currentPosition ?: startMs
                     engine = PlayerEngine.MPV
@@ -265,7 +268,9 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
             }
         }
         player?.addListener(listener)
+        retry?.let { player?.addListener(it) }
         onDispose {
+            retry?.cancel()
             player?.removeListener(listener)
             player?.release()
         }
