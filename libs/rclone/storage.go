@@ -374,8 +374,8 @@ func (s *Storage) LinkFrom(ctx context.Context, src, to string) error {
 }
 
 // Link implements core.Storage on remotes whose backend hard links files,
-// such as SFTP servers with OpenSSH's hardlink extension: the fork's
-// operations/hardlink.
+// such as SFTP servers with OpenSSH's hardlink extension and SMB shares
+// whose file system has hard links: the fork's operations/hardlink.
 func (s *Storage) Link(ctx context.Context, from, to string) error {
 	if !fs.ValidPath(from) || from == "." {
 		return &fs.PathError{Op: "link", Path: from, Err: fs.ErrInvalid}
