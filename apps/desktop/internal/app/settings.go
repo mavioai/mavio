@@ -257,6 +257,9 @@ func (a *App) settings(c *ui.Context, r *ui.Route) {
 					})
 				})
 			})
+			// The band under the title bar drags the window, and zooms it
+			// when double-clicked, as the home screen's.
+			ui.Box(c).Absolute().Top(0).Left(0).Right(0).Height(max(c.TitleBar().Height, 12) + 16).DragWindow()
 		})
 	})
 	if c.Shortcut(0, ui.KeyEscape) {
@@ -268,8 +271,8 @@ func (a *App) settingsSidebar(c *ui.Context, current string) {
 	colors := style.Colors(c)
 	top := max(c.TitleBar().Height, 12)
 	// The title stays under the window's buttons; what follows it scrolls.
-	ui.Column(c).Padding(top+8, 16, 12).Shrink(0).Children(func() {
-		ui.Box(c).Height(4).FillWidth().DragWindow()
+	ui.Column(c).Padding(top+8, 16, 12).Shrink(0).DragWindow().Children(func() {
+		ui.Box(c).Height(4).FillWidth()
 		home := ui.ButtonBase(c).AlignSelf(ui.Start).Gap(4).AlignItems(ui.Center).Margin(0, 0, 10).Label(style.T(c, "nav.home"))
 		home.Children(func() {
 			ui.Icon(c, style.Icon("back", false)).Size(18, 18).TextColor(style.Color(colors.AccentText))
