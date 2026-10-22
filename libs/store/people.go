@@ -59,7 +59,8 @@ func (r people) Upsert(ctx context.Context, list ...core.Person) error {
 					SetNillableBirthDate(p.BirthDate).
 					SetNillableDeathDate(p.DeathDate).
 					SetBirthPlace(p.BirthPlace).
-					SetExternalIds(fromProviderMap(p.ExternalIDs))
+					SetExternalIds(fromProviderMap(p.ExternalIDs)).
+					SetNillableDetailsFetchedAt(p.DetailsFetchedAt)
 			}
 			err := tx.write.Person.CreateBulk(builders...).OnConflictColumns(person.FieldID).UpdateNewValues().Exec(ctx)
 			if err != nil {
@@ -176,13 +177,14 @@ func (r people) ReplaceCredits(ctx context.Context, itemID core.ID, credits []co
 
 func toPerson(p *ent.Person) core.Person {
 	return core.Person{
-		ID:          p.ID,
-		Name:        p.Name,
-		SortName:    p.SortName,
-		Overview:    p.Overview,
-		BirthDate:   utcPtr(p.BirthDate),
-		DeathDate:   utcPtr(p.DeathDate),
-		BirthPlace:  p.BirthPlace,
-		ExternalIDs: toProviderMap(p.ExternalIds),
+		ID:               p.ID,
+		Name:             p.Name,
+		SortName:         p.SortName,
+		Overview:         p.Overview,
+		BirthDate:        utcPtr(p.BirthDate),
+		DeathDate:        utcPtr(p.DeathDate),
+		BirthPlace:       p.BirthPlace,
+		ExternalIDs:      toProviderMap(p.ExternalIds),
+		DetailsFetchedAt: utcPtr(p.DetailsFetchedAt),
 	}
 }

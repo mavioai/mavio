@@ -201,7 +201,7 @@ erDiagram
 ## 6. 图片、人员与署名
 
 * `Image` 属于某个条目或人员（`OwnerID`），并有 `Kind`；同一种类的多张图片按 `Index` 排序（如多张背景图）。它记录本地 `Path` 和/或来源 `RemoteURL`、尺寸，以及 `Blurhash` / `Thumbhash` 占位图。图片至少要有本地路径或远程地址之一。
-* `Person` 记录姓名、简介、生卒信息与 `ExternalIDs`。
+* `Person` 记录姓名、简介、生卒信息、`ExternalIDs`，以及 `DetailsFetchedAt`：上次向探索提供者询问其简介的时间，此前为 nil。
 * `Credit` 把人员关联到条目，包含 `CreditKind`、可选的 `Role`（饰演的角色或更具体的职务）以及署名顺序 `Order`。
 
 ---

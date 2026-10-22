@@ -31629,29 +31629,30 @@ func (m *PendingReleaseMutation) ResetEdge(name string) error {
 // PersonMutation represents an operation that mutates the Person nodes in the graph.
 type PersonMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *core.ID
-	name           *string
-	name_key       *string
-	sort_name      *string
-	search_key     *string
-	sort_key       *string
-	overview       *string
-	birth_date     *time.Time
-	death_date     *time.Time
-	birth_place    *string
-	external_ids   *map[string]string
-	clearedFields  map[string]struct{}
-	credits        map[int]struct{}
-	removedcredits map[int]struct{}
-	clearedcredits bool
-	images         map[core.ID]struct{}
-	removedimages  map[core.ID]struct{}
-	clearedimages  bool
-	done           bool
-	oldValue       func(context.Context) (*Person, error)
-	predicates     []predicate.Person
+	op                 Op
+	typ                string
+	id                 *core.ID
+	name               *string
+	name_key           *string
+	sort_name          *string
+	search_key         *string
+	sort_key           *string
+	overview           *string
+	birth_date         *time.Time
+	death_date         *time.Time
+	birth_place        *string
+	external_ids       *map[string]string
+	details_fetched_at *time.Time
+	clearedFields      map[string]struct{}
+	credits            map[int]struct{}
+	removedcredits     map[int]struct{}
+	clearedcredits     bool
+	images             map[core.ID]struct{}
+	removedimages      map[core.ID]struct{}
+	clearedimages      bool
+	done               bool
+	oldValue           func(context.Context) (*Person, error)
+	predicates         []predicate.Person
 }
 
 var _ ent.Mutation = (*PersonMutation)(nil)
@@ -32157,6 +32158,55 @@ func (m *PersonMutation) ResetExternalIds() {
 	delete(m.clearedFields, person.FieldExternalIds)
 }
 
+// SetDetailsFetchedAt sets the "details_fetched_at" field.
+func (m *PersonMutation) SetDetailsFetchedAt(t time.Time) {
+	m.details_fetched_at = &t
+}
+
+// DetailsFetchedAt returns the value of the "details_fetched_at" field in the mutation.
+func (m *PersonMutation) DetailsFetchedAt() (r time.Time, exists bool) {
+	v := m.details_fetched_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDetailsFetchedAt returns the old "details_fetched_at" field's value of the Person entity.
+// If the Person object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PersonMutation) OldDetailsFetchedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDetailsFetchedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDetailsFetchedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDetailsFetchedAt: %w", err)
+	}
+	return oldValue.DetailsFetchedAt, nil
+}
+
+// ClearDetailsFetchedAt clears the value of the "details_fetched_at" field.
+func (m *PersonMutation) ClearDetailsFetchedAt() {
+	m.details_fetched_at = nil
+	m.clearedFields[person.FieldDetailsFetchedAt] = struct{}{}
+}
+
+// DetailsFetchedAtCleared returns if the "details_fetched_at" field was cleared in this mutation.
+func (m *PersonMutation) DetailsFetchedAtCleared() bool {
+	_, ok := m.clearedFields[person.FieldDetailsFetchedAt]
+	return ok
+}
+
+// ResetDetailsFetchedAt resets all changes to the "details_fetched_at" field.
+func (m *PersonMutation) ResetDetailsFetchedAt() {
+	m.details_fetched_at = nil
+	delete(m.clearedFields, person.FieldDetailsFetchedAt)
+}
+
 // AddCreditIDs adds the "credits" edge to the Credit entity by ids.
 func (m *PersonMutation) AddCreditIDs(ids ...int) {
 	if m.credits == nil {
@@ -32299,7 +32349,7 @@ func (m *PersonMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PersonMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.name != nil {
 		fields = append(fields, person.FieldName)
 	}
@@ -32330,6 +32380,9 @@ func (m *PersonMutation) Fields() []string {
 	if m.external_ids != nil {
 		fields = append(fields, person.FieldExternalIds)
 	}
+	if m.details_fetched_at != nil {
+		fields = append(fields, person.FieldDetailsFetchedAt)
+	}
 	return fields
 }
 
@@ -32358,6 +32411,8 @@ func (m *PersonMutation) Field(name string) (ent.Value, bool) {
 		return m.BirthPlace()
 	case person.FieldExternalIds:
 		return m.ExternalIds()
+	case person.FieldDetailsFetchedAt:
+		return m.DetailsFetchedAt()
 	}
 	return nil, false
 }
@@ -32387,6 +32442,8 @@ func (m *PersonMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldBirthPlace(ctx)
 	case person.FieldExternalIds:
 		return m.OldExternalIds(ctx)
+	case person.FieldDetailsFetchedAt:
+		return m.OldDetailsFetchedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Person field %s", name)
 }
@@ -32466,6 +32523,13 @@ func (m *PersonMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetExternalIds(v)
 		return nil
+	case person.FieldDetailsFetchedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDetailsFetchedAt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Person field %s", name)
 }
@@ -32505,6 +32569,9 @@ func (m *PersonMutation) ClearedFields() []string {
 	if m.FieldCleared(person.FieldExternalIds) {
 		fields = append(fields, person.FieldExternalIds)
 	}
+	if m.FieldCleared(person.FieldDetailsFetchedAt) {
+		fields = append(fields, person.FieldDetailsFetchedAt)
+	}
 	return fields
 }
 
@@ -32527,6 +32594,9 @@ func (m *PersonMutation) ClearField(name string) error {
 		return nil
 	case person.FieldExternalIds:
 		m.ClearExternalIds()
+		return nil
+	case person.FieldDetailsFetchedAt:
+		m.ClearDetailsFetchedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Person nullable field %s", name)
@@ -32565,6 +32635,9 @@ func (m *PersonMutation) ResetField(name string) error {
 		return nil
 	case person.FieldExternalIds:
 		m.ResetExternalIds()
+		return nil
+	case person.FieldDetailsFetchedAt:
+		m.ResetDetailsFetchedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Person field %s", name)

@@ -39,6 +39,8 @@ type Person struct {
 	BirthPlace string `json:"birth_place,omitempty"`
 	// ExternalIds holds the value of the "external_ids" field.
 	ExternalIds map[string]string `json:"external_ids,omitempty"`
+	// DetailsFetchedAt holds the value of the "details_fetched_at" field.
+	DetailsFetchedAt *time.Time `json:"details_fetched_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PersonQuery when eager-loading is set.
 	Edges        PersonEdges `json:"edges"`
@@ -85,7 +87,7 @@ func (*Person) scanValues(columns []string) ([]any, error) {
 			values[i] = new(core.ID)
 		case person.FieldName, person.FieldNameKey, person.FieldSortName, person.FieldSearchKey, person.FieldSortKey, person.FieldOverview, person.FieldBirthPlace:
 			values[i] = new(sql.NullString)
-		case person.FieldBirthDate, person.FieldDeathDate:
+		case person.FieldBirthDate, person.FieldDeathDate, person.FieldDetailsFetchedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -172,6 +174,13 @@ func (_m *Person) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field external_ids: %w", err)
 				}
 			}
+		case person.FieldDetailsFetchedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field details_fetched_at", values[i])
+			} else if value.Valid {
+				_m.DetailsFetchedAt = new(time.Time)
+				*_m.DetailsFetchedAt = value.Time
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -251,6 +260,11 @@ func (_m *Person) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("external_ids=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ExternalIds))
+	builder.WriteString(", ")
+	if v := _m.DetailsFetchedAt; v != nil {
+		builder.WriteString("details_fetched_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

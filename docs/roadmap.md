@@ -1179,7 +1179,7 @@ flowchart TD
 - [x] API: items presented in the client's language, missing languages queued, edits in the client's language, search by the names in every language
 - [x] Web UI: Follow Client Language, the default, first among the general settings' metadata languages
 - [x] End-to-end test
-- [ ] Not yet: images in the client's language (posters with titles on them), genres' names, people's roles, and sorting by the names in the client's language
+- [ ] Not yet: images in the client's language (posters with titles on them), genres' names, people's roles, people's biographies (kept in the language last asked for), and sorting by the names in the client's language
 
 ---
 

@@ -101,6 +101,11 @@ func BirthPlace(v string) predicate.Person {
 	return predicate.Person(sql.FieldEQ(FieldBirthPlace, v))
 }
 
+// DetailsFetchedAt applies equality check predicate on the "details_fetched_at" field. It's identical to DetailsFetchedAtEQ.
+func DetailsFetchedAt(v time.Time) predicate.Person {
+	return predicate.Person(sql.FieldEQ(FieldDetailsFetchedAt, v))
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Person {
 	return predicate.Person(sql.FieldEQ(FieldName, v))
@@ -664,6 +669,56 @@ func ExternalIdsIsNil() predicate.Person {
 // ExternalIdsNotNil applies the NotNil predicate on the "external_ids" field.
 func ExternalIdsNotNil() predicate.Person {
 	return predicate.Person(sql.FieldNotNull(FieldExternalIds))
+}
+
+// DetailsFetchedAtEQ applies the EQ predicate on the "details_fetched_at" field.
+func DetailsFetchedAtEQ(v time.Time) predicate.Person {
+	return predicate.Person(sql.FieldEQ(FieldDetailsFetchedAt, v))
+}
+
+// DetailsFetchedAtNEQ applies the NEQ predicate on the "details_fetched_at" field.
+func DetailsFetchedAtNEQ(v time.Time) predicate.Person {
+	return predicate.Person(sql.FieldNEQ(FieldDetailsFetchedAt, v))
+}
+
+// DetailsFetchedAtIn applies the In predicate on the "details_fetched_at" field.
+func DetailsFetchedAtIn(vs ...time.Time) predicate.Person {
+	return predicate.Person(sql.FieldIn(FieldDetailsFetchedAt, vs...))
+}
+
+// DetailsFetchedAtNotIn applies the NotIn predicate on the "details_fetched_at" field.
+func DetailsFetchedAtNotIn(vs ...time.Time) predicate.Person {
+	return predicate.Person(sql.FieldNotIn(FieldDetailsFetchedAt, vs...))
+}
+
+// DetailsFetchedAtGT applies the GT predicate on the "details_fetched_at" field.
+func DetailsFetchedAtGT(v time.Time) predicate.Person {
+	return predicate.Person(sql.FieldGT(FieldDetailsFetchedAt, v))
+}
+
+// DetailsFetchedAtGTE applies the GTE predicate on the "details_fetched_at" field.
+func DetailsFetchedAtGTE(v time.Time) predicate.Person {
+	return predicate.Person(sql.FieldGTE(FieldDetailsFetchedAt, v))
+}
+
+// DetailsFetchedAtLT applies the LT predicate on the "details_fetched_at" field.
+func DetailsFetchedAtLT(v time.Time) predicate.Person {
+	return predicate.Person(sql.FieldLT(FieldDetailsFetchedAt, v))
+}
+
+// DetailsFetchedAtLTE applies the LTE predicate on the "details_fetched_at" field.
+func DetailsFetchedAtLTE(v time.Time) predicate.Person {
+	return predicate.Person(sql.FieldLTE(FieldDetailsFetchedAt, v))
+}
+
+// DetailsFetchedAtIsNil applies the IsNil predicate on the "details_fetched_at" field.
+func DetailsFetchedAtIsNil() predicate.Person {
+	return predicate.Person(sql.FieldIsNull(FieldDetailsFetchedAt))
+}
+
+// DetailsFetchedAtNotNil applies the NotNil predicate on the "details_fetched_at" field.
+func DetailsFetchedAtNotNil() predicate.Person {
+	return predicate.Person(sql.FieldNotNull(FieldDetailsFetchedAt))
 }
 
 // HasCredits applies the HasEdge predicate on the "credits" edge.

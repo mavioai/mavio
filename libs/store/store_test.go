@@ -595,12 +595,17 @@ func TestPeopleAndCredits(t *testing.T) {
 		lib := newLibrary(t, s, "/media")
 		heat, ronin := newItem(lib, core.KindMovie, "Heat"), newItem(lib, core.KindMovie, "Ronin")
 		upsert(t, s, heat, ronin)
-		deNiro := core.Person{ID: core.NewID(), Name: "Robert De Niro", ExternalIDs: map[core.Provider]string{core.ProviderTMDB: "380"}}
+		fetched := time.Date(2026, 10, 22, 12, 0, 0, 0, time.UTC)
+		deNiro := core.Person{
+			ID: core.NewID(), Name: "Robert De Niro", ExternalIDs: map[core.Provider]string{core.ProviderTMDB: "380"},
+			DetailsFetchedAt: &fetched,
+		}
 		pacino := core.Person{ID: core.NewID(), Name: "Al Pacino"}
 		if err := s.People().Upsert(ctx, deNiro, pacino); err != nil {
 			t.Fatal(err)
 		}
-		if p, err := s.People().FindByName(ctx, "robert de niro"); err != nil || p.ID != deNiro.ID || p.ExternalIDs[core.ProviderTMDB] != "380" {
+		if p, err := s.People().FindByName(ctx, "robert de niro"); err != nil || p.ID != deNiro.ID || p.ExternalIDs[core.ProviderTMDB] != "380" ||
+			p.DetailsFetchedAt == nil || !p.DetailsFetchedAt.Equal(fetched) {
 			t.Errorf("FindByName = %+v, %v", p, err)
 		}
 		credits := []core.Credit{

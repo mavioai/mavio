@@ -113,6 +113,9 @@ type ItemService struct {
 	// Storages opens the storage of library paths; nil opens local
 	// folders only.
 	Storages *library.Storages
+	// PersonDetails tells of the people clients open, whose biographies
+	// are kept for a while; nil keeps people as their credits made them.
+	PersonDetails PersonDetails
 }
 
 var _ libraryv1connect.ItemServiceHandler = (*ItemService)(nil)
@@ -634,7 +637,8 @@ func (a *ancestry) describe(ctx context.Context, it *core.Item, out *libraryv1.I
 	return nil
 }
 
-// GetPerson returns a person with their images.
+// GetPerson returns a person with their images, asking for their
+// biography first when it was never asked for or is stale.
 func (s *ItemService) GetPerson(ctx context.Context, req *libraryv1.GetPersonRequest) (*libraryv1.GetPersonResponse, error) {
 	if _, err := principal(ctx); err != nil {
 		return nil, err
@@ -645,6 +649,9 @@ func (s *ItemService) GetPerson(ctx context.Context, req *libraryv1.GetPersonReq
 	}
 	images, err := s.store.Images().ListForOwner(ctx, person.ID)
 	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	if err := s.fillPerson(ctx, &person, &images); err != nil {
 		return nil, connectError(ctx, err)
 	}
 	out := personToProto(ctx, &person, images)

@@ -142,6 +142,20 @@ func (_c *PersonCreate) SetExternalIds(v map[string]string) *PersonCreate {
 	return _c
 }
 
+// SetDetailsFetchedAt sets the "details_fetched_at" field.
+func (_c *PersonCreate) SetDetailsFetchedAt(v time.Time) *PersonCreate {
+	_c.mutation.SetDetailsFetchedAt(v)
+	return _c
+}
+
+// SetNillableDetailsFetchedAt sets the "details_fetched_at" field if the given value is not nil.
+func (_c *PersonCreate) SetNillableDetailsFetchedAt(v *time.Time) *PersonCreate {
+	if v != nil {
+		_c.SetDetailsFetchedAt(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *PersonCreate) SetID(v core.ID) *PersonCreate {
 	_c.mutation.SetID(v)
@@ -350,6 +364,10 @@ func (_c *PersonCreate) createSpec() (*Person, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ExternalIds(); ok {
 		_spec.SetField(person.FieldExternalIds, field.TypeJSON, value)
 		_node.ExternalIds = value
+	}
+	if value, ok := _c.mutation.DetailsFetchedAt(); ok {
+		_spec.SetField(person.FieldDetailsFetchedAt, field.TypeTime, value)
+		_node.DetailsFetchedAt = &value
 	}
 	if nodes := _c.mutation.CreditsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -573,6 +591,24 @@ func (u *PersonUpsert) ClearExternalIds() *PersonUpsert {
 	return u
 }
 
+// SetDetailsFetchedAt sets the "details_fetched_at" field.
+func (u *PersonUpsert) SetDetailsFetchedAt(v time.Time) *PersonUpsert {
+	u.Set(person.FieldDetailsFetchedAt, v)
+	return u
+}
+
+// UpdateDetailsFetchedAt sets the "details_fetched_at" field to the value that was provided on create.
+func (u *PersonUpsert) UpdateDetailsFetchedAt() *PersonUpsert {
+	u.SetExcluded(person.FieldDetailsFetchedAt)
+	return u
+}
+
+// ClearDetailsFetchedAt clears the value of the "details_fetched_at" field.
+func (u *PersonUpsert) ClearDetailsFetchedAt() *PersonUpsert {
+	u.SetNull(person.FieldDetailsFetchedAt)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -779,6 +815,27 @@ func (u *PersonUpsertOne) UpdateExternalIds() *PersonUpsertOne {
 func (u *PersonUpsertOne) ClearExternalIds() *PersonUpsertOne {
 	return u.Update(func(s *PersonUpsert) {
 		s.ClearExternalIds()
+	})
+}
+
+// SetDetailsFetchedAt sets the "details_fetched_at" field.
+func (u *PersonUpsertOne) SetDetailsFetchedAt(v time.Time) *PersonUpsertOne {
+	return u.Update(func(s *PersonUpsert) {
+		s.SetDetailsFetchedAt(v)
+	})
+}
+
+// UpdateDetailsFetchedAt sets the "details_fetched_at" field to the value that was provided on create.
+func (u *PersonUpsertOne) UpdateDetailsFetchedAt() *PersonUpsertOne {
+	return u.Update(func(s *PersonUpsert) {
+		s.UpdateDetailsFetchedAt()
+	})
+}
+
+// ClearDetailsFetchedAt clears the value of the "details_fetched_at" field.
+func (u *PersonUpsertOne) ClearDetailsFetchedAt() *PersonUpsertOne {
+	return u.Update(func(s *PersonUpsert) {
+		s.ClearDetailsFetchedAt()
 	})
 }
 
@@ -1155,6 +1212,27 @@ func (u *PersonUpsertBulk) UpdateExternalIds() *PersonUpsertBulk {
 func (u *PersonUpsertBulk) ClearExternalIds() *PersonUpsertBulk {
 	return u.Update(func(s *PersonUpsert) {
 		s.ClearExternalIds()
+	})
+}
+
+// SetDetailsFetchedAt sets the "details_fetched_at" field.
+func (u *PersonUpsertBulk) SetDetailsFetchedAt(v time.Time) *PersonUpsertBulk {
+	return u.Update(func(s *PersonUpsert) {
+		s.SetDetailsFetchedAt(v)
+	})
+}
+
+// UpdateDetailsFetchedAt sets the "details_fetched_at" field to the value that was provided on create.
+func (u *PersonUpsertBulk) UpdateDetailsFetchedAt() *PersonUpsertBulk {
+	return u.Update(func(s *PersonUpsert) {
+		s.UpdateDetailsFetchedAt()
+	})
+}
+
+// ClearDetailsFetchedAt clears the value of the "details_fetched_at" field.
+func (u *PersonUpsertBulk) ClearDetailsFetchedAt() *PersonUpsertBulk {
+	return u.Update(func(s *PersonUpsert) {
+		s.ClearDetailsFetchedAt()
 	})
 }
 

@@ -83,3 +83,26 @@ func (s *Service) personTitles(ctx context.Context, u *core.User, pluginID strin
 	}
 	return out, nil
 }
+
+// PersonDetails tells of a person by their external IDs through the first
+// discovery provider knowing them, in a language (ISO 639-1), without
+// their titles; nil when no provider knows them.
+func (s *Service) PersonDetails(ctx context.Context, ids map[core.Provider]string, language string) (*pluginv1.Person, error) {
+	external := make(map[string]string, len(ids))
+	for k, v := range ids {
+		external[string(k)] = v
+	}
+	req := pluginv1.GetPersonRequest_builder{ExternalIds: external, Language: &language}.Build()
+	for _, p := range s.discoveryProviders() {
+		res, err := p.Client.GetPerson(ctx, req)
+		switch {
+		case connect.CodeOf(err) == connect.CodeUnimplemented:
+			continue
+		case err != nil:
+			return nil, fmt.Errorf("person %s: %w", p.ID, err)
+		case res.GetFound():
+			return res.GetPerson(), nil
+		}
+	}
+	return nil, nil
+}

@@ -33,6 +33,8 @@ const (
 	FieldBirthPlace = "birth_place"
 	// FieldExternalIds holds the string denoting the external_ids field in the database.
 	FieldExternalIds = "external_ids"
+	// FieldDetailsFetchedAt holds the string denoting the details_fetched_at field in the database.
+	FieldDetailsFetchedAt = "details_fetched_at"
 	// EdgeCredits holds the string denoting the credits edge name in mutations.
 	EdgeCredits = "credits"
 	// EdgeImages holds the string denoting the images edge name in mutations.
@@ -68,6 +70,7 @@ var Columns = []string{
 	FieldDeathDate,
 	FieldBirthPlace,
 	FieldExternalIds,
+	FieldDetailsFetchedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -148,6 +151,11 @@ func ByDeathDate(opts ...sql.OrderTermOption) OrderOption {
 // ByBirthPlace orders the results by the birth_place field.
 func ByBirthPlace(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBirthPlace, opts...).ToFunc()
+}
+
+// ByDetailsFetchedAt orders the results by the details_fetched_at field.
+func ByDetailsFetchedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDetailsFetchedAt, opts...).ToFunc()
 }
 
 // ByCreditsCount orders the results by credits count.

@@ -16,6 +16,9 @@ type Person struct {
 	DeathDate   *time.Time
 	BirthPlace  string
 	ExternalIDs map[Provider]string
+	// DetailsFetchedAt is when the person's biography was last asked of
+	// the discovery providers; nil until then.
+	DetailsFetchedAt *time.Time
 }
 
 // Validate checks the person's invariants.

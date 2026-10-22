@@ -201,7 +201,7 @@ A virtual item is a movie, series, season or episode known from metadata whose f
 ## 6. Images, People and Credits
 
 * An `Image` belongs to an item or a person (`OwnerID`) and has a `Kind`; several images of one kind are ordered by `Index` (e.g. multiple backdrops). It records the local `Path` and/or the `RemoteURL` it came from, its dimensions, and `Blurhash` / `Thumbhash` placeholders. An image needs at least a path or a remote URL.
-* A `Person` has a name, biography, birth/death data and `ExternalIDs`.
+* A `Person` has a name, biography, birth/death data, `ExternalIDs`, and `DetailsFetchedAt`: when their biography was last asked of the discovery providers, nil until then.
 * A `Credit` links a person to an item with a `CreditKind`, an optional `Role` (the character played or a more specific job) and a billing `Order`.
 
 ---

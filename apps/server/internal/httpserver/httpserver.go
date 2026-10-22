@@ -258,6 +258,9 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(libraryv1connect.NewLibraryServiceHandler(libraries, interceptors))
 	items := rpc.NewItemService(opts.Store)
 	items.Wake, items.ExternalIDKinds, items.Storages = opts.Wake, opts.ExternalIDKinds, opts.Storages
+	if opts.Requests != nil {
+		items.PersonDetails = opts.Requests.PersonDetails
+	}
 	mux.Handle(libraryv1connect.NewItemServiceHandler(items, interceptors))
 	mux.Handle(libraryv1connect.NewCollectionServiceHandler(rpc.NewCollectionService(opts.Store), interceptors))
 	refresher, subFiles := opts.Refresher, opts.Subtitles

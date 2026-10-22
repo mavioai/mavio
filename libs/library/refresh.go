@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
+	"maps"
 	"path"
 	"path/filepath"
 	"slices"
@@ -677,13 +678,23 @@ func replaceCredits(ctx context.Context, tx core.Store, itemID core.ID, people [
 	credits := make([]core.Credit, 0, len(people))
 	for i, p := range people {
 		person, err := tx.People().FindByName(ctx, p.Name)
+		found := err == nil
 		if errors.Is(err, core.ErrNotFound) {
 			person = core.Person{ID: core.NewID(), Name: p.Name}
+		} else if err != nil {
+			return err
+		}
+		ids := mergeIDs(maps.Clone(person.ExternalIDs), p.ExternalIDs)
+		if !found || !maps.Equal(ids, person.ExternalIDs) {
+			person.ExternalIDs = ids
 			if err := tx.People().Upsert(ctx, person); err != nil {
 				return err
 			}
-		} else if err != nil {
-			return err
+		}
+		if p.ImageURL != "" {
+			if err := keepHeadshot(ctx, tx, person.ID, p.ImageURL); err != nil {
+				return err
+			}
 		}
 		order := i
 		if p.Order != nil {
@@ -692,6 +703,18 @@ func replaceCredits(ctx context.Context, tx core.Store, itemID core.ID, people [
 		credits = append(credits, core.Credit{PersonID: person.ID, Kind: p.Kind, Role: p.Role, Order: order})
 	}
 	return tx.People().ReplaceCredits(ctx, itemID, credits)
+}
+
+// keepHeadshot gives a person without images the headshot a provider names.
+func keepHeadshot(ctx context.Context, tx core.Store, personID core.ID, url string) error {
+	existing, err := tx.Images().ListForOwner(ctx, personID)
+	if err != nil {
+		return err
+	}
+	if len(existing) > 0 {
+		return nil
+	}
+	return tx.Images().Replace(ctx, personID, []core.Image{{ID: core.NewID(), OwnerID: personID, Kind: core.ImagePrimary, RemoteURL: url}})
 }
 
 func imagesOf(owner core.ID, res *metadata.Result) []core.Image {

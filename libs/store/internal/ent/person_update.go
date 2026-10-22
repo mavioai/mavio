@@ -182,6 +182,26 @@ func (_u *PersonUpdate) ClearExternalIds() *PersonUpdate {
 	return _u
 }
 
+// SetDetailsFetchedAt sets the "details_fetched_at" field.
+func (_u *PersonUpdate) SetDetailsFetchedAt(v time.Time) *PersonUpdate {
+	_u.mutation.SetDetailsFetchedAt(v)
+	return _u
+}
+
+// SetNillableDetailsFetchedAt sets the "details_fetched_at" field if the given value is not nil.
+func (_u *PersonUpdate) SetNillableDetailsFetchedAt(v *time.Time) *PersonUpdate {
+	if v != nil {
+		_u.SetDetailsFetchedAt(*v)
+	}
+	return _u
+}
+
+// ClearDetailsFetchedAt clears the value of the "details_fetched_at" field.
+func (_u *PersonUpdate) ClearDetailsFetchedAt() *PersonUpdate {
+	_u.mutation.ClearDetailsFetchedAt()
+	return _u
+}
+
 // AddCreditIDs adds the "credits" edge to the Credit entity by IDs.
 func (_u *PersonUpdate) AddCreditIDs(ids ...int) *PersonUpdate {
 	_u.mutation.AddCreditIDs(ids...)
@@ -352,6 +372,12 @@ func (_u *PersonUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.ExternalIdsCleared() {
 		_spec.ClearField(person.FieldExternalIds, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DetailsFetchedAt(); ok {
+		_spec.SetField(person.FieldDetailsFetchedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DetailsFetchedAtCleared() {
+		_spec.ClearField(person.FieldDetailsFetchedAt, field.TypeTime)
 	}
 	if _u.mutation.CreditsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -615,6 +641,26 @@ func (_u *PersonUpdateOne) ClearExternalIds() *PersonUpdateOne {
 	return _u
 }
 
+// SetDetailsFetchedAt sets the "details_fetched_at" field.
+func (_u *PersonUpdateOne) SetDetailsFetchedAt(v time.Time) *PersonUpdateOne {
+	_u.mutation.SetDetailsFetchedAt(v)
+	return _u
+}
+
+// SetNillableDetailsFetchedAt sets the "details_fetched_at" field if the given value is not nil.
+func (_u *PersonUpdateOne) SetNillableDetailsFetchedAt(v *time.Time) *PersonUpdateOne {
+	if v != nil {
+		_u.SetDetailsFetchedAt(*v)
+	}
+	return _u
+}
+
+// ClearDetailsFetchedAt clears the value of the "details_fetched_at" field.
+func (_u *PersonUpdateOne) ClearDetailsFetchedAt() *PersonUpdateOne {
+	_u.mutation.ClearDetailsFetchedAt()
+	return _u
+}
+
 // AddCreditIDs adds the "credits" edge to the Credit entity by IDs.
 func (_u *PersonUpdateOne) AddCreditIDs(ids ...int) *PersonUpdateOne {
 	_u.mutation.AddCreditIDs(ids...)
@@ -815,6 +861,12 @@ func (_u *PersonUpdateOne) sqlSave(ctx context.Context) (_node *Person, err erro
 	}
 	if _u.mutation.ExternalIdsCleared() {
 		_spec.ClearField(person.FieldExternalIds, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DetailsFetchedAt(); ok {
+		_spec.SetField(person.FieldDetailsFetchedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DetailsFetchedAtCleared() {
+		_spec.ClearField(person.FieldDetailsFetchedAt, field.TypeTime)
 	}
 	if _u.mutation.CreditsCleared() {
 		edge := &sqlgraph.EdgeSpec{

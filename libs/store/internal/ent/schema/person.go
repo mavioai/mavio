@@ -36,6 +36,7 @@ func (Person) Fields() []ent.Field {
 		field.Time("death_date").Optional().Nillable(),
 		field.String("birth_place").Default(""),
 		field.JSON("external_ids", map[string]string{}).Optional(),
+		field.Time("details_fetched_at").Optional().Nillable(),
 	}
 }
 

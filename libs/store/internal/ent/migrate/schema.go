@@ -1154,6 +1154,7 @@ var (
 		{Name: "death_date", Type: field.TypeTime, Nullable: true},
 		{Name: "birth_place", Type: field.TypeString, Default: ""},
 		{Name: "external_ids", Type: field.TypeJSON, Nullable: true},
+		{Name: "details_fetched_at", Type: field.TypeTime, Nullable: true},
 	}
 	// PeopleTable holds the schema information for the "people" table.
 	PeopleTable = &schema.Table{
