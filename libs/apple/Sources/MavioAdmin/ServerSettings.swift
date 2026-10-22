@@ -261,20 +261,20 @@ struct GeneralView: View {
     @ViewBuilder private func form(_ settings: Mavio_System_V1_GeneralSettings) -> some View {
         Section {
             TextRow(label: MavioStrings.generalName, detail: MavioStrings.generalNameDetail, text: $draft.name)
-            Picker(selection: $draft.language) {
-                Text(MavioStrings.generalLanguageDefault).tag("")
-                ForEach(choices(languages, draft.language), id: \.code) { Text($0.name).tag($0.code) }
-            } label: {
+            SearchingPicker(
+                MavioStrings.generalLanguage, selection: $draft.language,
+                options: [("", MavioStrings.generalLanguageDefault)]
+                    + choices(languages, draft.language).map { ($0.code, $0.name) }
+            ) {
                 RowLabel(label: MavioStrings.generalLanguage, detail: MavioStrings.generalLanguageDetail)
             }
-            .listPicker()
-            Picker(selection: $draft.country) {
-                Text(MavioStrings.generalCountryDefault).tag("")
-                ForEach(choices(countries, draft.country), id: \.code) { Text($0.name).tag($0.code) }
-            } label: {
+            SearchingPicker(
+                MavioStrings.generalCountry, selection: $draft.country,
+                options: [("", MavioStrings.generalCountryDefault)]
+                    + choices(countries, draft.country).map { ($0.code, $0.name) }
+            ) {
                 RowLabel(label: MavioStrings.generalCountry, detail: MavioStrings.generalCountryDetail)
             }
-            .listPicker()
         }
         Section(MavioStrings.generalSignIn) {
             NumberRow(

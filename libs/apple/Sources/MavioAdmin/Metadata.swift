@@ -99,6 +99,8 @@ private struct EditMetadataView: View {
         }
         .interactiveDismissDisabled(before != nil && form != before)
         .task {
+            // Once: coming back from a picker's page keeps what was chosen.
+            guard before == nil else { return }
             do {
                 let item = try await model.item(serverId, itemId)
                 kind = item.kind
@@ -169,16 +171,14 @@ private struct EditMetadataView: View {
             // the kinds they identify, its library's by default.
             if identifiable(kind) {
                 Section {
-                    Picker(MavioStrings.librariesLanguage, selection: $form.metadataLanguage) {
-                        Text(MavioStrings.metadataLibraryDefault).tag("")
-                        ForEach(choices(languages, form.metadataLanguage), id: \.code) { Text($0.name).tag($0.code) }
-                    }
-                    .listPicker()
-                    Picker(MavioStrings.librariesCountry, selection: $form.metadataCountry) {
-                        Text(MavioStrings.metadataLibraryDefault).tag("")
-                        ForEach(choices(countries, form.metadataCountry), id: \.code) { Text($0.name).tag($0.code) }
-                    }
-                    .listPicker()
+                    SearchingPicker(
+                        MavioStrings.librariesLanguage, selection: $form.metadataLanguage,
+                        options: [("", MavioStrings.metadataLibraryDefault)]
+                            + choices(languages, form.metadataLanguage).map { ($0.code, $0.name) })
+                    SearchingPicker(
+                        MavioStrings.librariesCountry, selection: $form.metadataCountry,
+                        options: [("", MavioStrings.metadataLibraryDefault)]
+                            + choices(countries, form.metadataCountry).map { ($0.code, $0.name) })
                 }
             }
             if !idKinds.isEmpty {

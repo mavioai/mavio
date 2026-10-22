@@ -412,13 +412,18 @@
         @objc private func changed() { onChange(state == .on) }
     }
 
-    /// A menu of options that calls back with the index chosen.
-    public final class ActionPopUp: NSPopUpButton {
+    /// A menu of options that calls back with the index chosen; clicked,
+    /// one of sixteen options or more opens a popover searching them
+    /// instead, as the web UI's long selects.
+    public final class ActionPopUp: NSPopUpButton, NSPopoverDelegate {
         private let onChange: @MainActor (Int) -> Void
+        private let options: [String]
+        private var popover: NSPopover?
 
         /// A menu of options, the one at selected chosen.
         public init(options: [String], selected: Int, onChange: @escaping @MainActor (Int) -> Void) {
             self.onChange = onChange
+            self.options = options
             super.init(frame: .zero, pullsDown: false)
             translatesAutoresizingMaskIntoConstraints = false
             addItems(withTitles: options)
@@ -437,6 +442,41 @@
         public required init?(coder: NSCoder) { fatalError() }
 
         @objc private func changed() { onChange(indexOfSelectedItem) }
+
+        private var searches: Bool { options.count >= 16 }
+
+        override public func mouseDown(with event: NSEvent) {
+            guard searches, isEnabled else { return super.mouseDown(with: event) }
+            search()
+        }
+
+        override public func accessibilityPerformPress() -> Bool {
+            guard searches, isEnabled else { return super.accessibilityPerformPress() }
+            search()
+            return true
+        }
+
+        /// Opens the options' search under the menu.
+        private func search() {
+            guard popover == nil, window != nil else { return }
+            let list = OptionSearch(options: options, chosen: indexOfSelectedItem) { [weak self] i in
+                guard let self else { return }
+                self.popover?.close()
+                self.selectItem(at: i)
+                self.onChange(i)
+            }
+            let pop = NSPopover()
+            pop.behavior = .transient
+            pop.delegate = self
+            pop.contentViewController = list
+            list.popover = pop
+            popover = pop
+            pop.show(relativeTo: bounds, of: self, preferredEdge: .maxY)
+            list.view.window?.makeFirstResponder(list.searchField)
+        }
+
+        /// Forgets the closed popover.
+        public func popoverDidClose(_ notification: Notification) { popover = nil }
     }
 
     /// A text field that calls back with its text when it is committed.

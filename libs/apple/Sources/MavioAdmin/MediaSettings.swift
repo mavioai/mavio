@@ -343,16 +343,14 @@ private struct ManagedLibraryView: View {
             }
             folders
             Section(MavioStrings.librariesMetadata) {
-                Picker(MavioStrings.librariesLanguage, selection: $draft.language) {
-                    Text(MavioStrings.librariesServerDefault).tag("")
-                    ForEach(choices(languages, draft.language), id: \.code) { Text($0.name).tag($0.code) }
-                }
-                .listPicker()
-                Picker(MavioStrings.librariesCountry, selection: $draft.country) {
-                    Text(MavioStrings.librariesServerDefault).tag("")
-                    ForEach(choices(countries, draft.country), id: \.code) { Text($0.name).tag($0.code) }
-                }
-                .listPicker()
+                SearchingPicker(
+                    MavioStrings.librariesLanguage, selection: $draft.language,
+                    options: [("", MavioStrings.librariesServerDefault)]
+                        + choices(languages, draft.language).map { ($0.code, $0.name) })
+                SearchingPicker(
+                    MavioStrings.librariesCountry, selection: $draft.country,
+                    options: [("", MavioStrings.librariesServerDefault)]
+                        + choices(countries, draft.country).map { ($0.code, $0.name) })
                 toggle(
                     $draft.saveLocalMetadata, MavioStrings.librariesSaveLocalMetadata,
                     MavioStrings.librariesSaveLocalMetadataDetail)
