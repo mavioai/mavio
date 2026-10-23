@@ -272,6 +272,12 @@ struct PlayerScreen: View {
             cachedSources = sources(details)
             source = cachedSources.first { $0.mediaSourceId == request.mediaSourceId } ?? cachedSources.first
             artwork = (details.card.thumb ?? details.card.poster).flatMap { URL(string: $0.url) }
+            player.trickplay = TrickplaySheets.choose(
+                details.trickplay.map {
+                    TrickplaySheets(
+                        width: Int($0.width), height: Int($0.height), columns: Int($0.columns), rows: Int($0.rows),
+                        count: Int($0.count), interval: $0.interval, url: $0.url)
+                }, wide: Int(ScrubPreview.width * 2))
             player.nowPlaying.next = next.map { _ in { playNext() } }
         }
         let local = model.server(request.serverId).map { isLocalAddress(address: $0.address) } ?? false
