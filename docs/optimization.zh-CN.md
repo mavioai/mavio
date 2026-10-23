@@ -135,8 +135,8 @@ Mavio 对媒体存储的全部读写，及其代价和时机：
 | probe | ffprobe 读容器头部，索引在文件尾时再读文件尾 | 几 MB，2–5 次 Range | 新文件和变化的文件 |
 | keyframes | 容器的索引：Matroska Cues，或 MP4 的样本表、`mfra`、`sidx`（§2.4）；没有索引时，ffprobe 读视频流的每个包 | 读几次头部和索引；没有索引时整个文件 | 随 probe 一起；没有索引时在 probe 之后，策略允许整文件读取时 |
 | 黑边检测 | 在 5 个点各 seek 一次并解码几帧 | 每点约 3–4 MB | probe 之后，策略允许抽样时 |
-| trickplay | Matroska：每张缩略图通过 Cues 读一个关键帧（§2.5）；其他文件：ffmpeg 只解码关键帧，失败时解码每一帧 | 每张缩略图一个关键帧；没有索引时整个文件 | 媒体库开启时；没有索引时，策略允许整文件读取时 |
-| 章节图 | 每个章节 seek 一次 | 每章约 3–4 MB | 媒体库开启且策略允许抽样时 |
+| trickplay | Matroska 和 MP4：每张缩略图通过 Cues 或样本表读一个关键帧（§2.5）；其他文件：ffmpeg 只解码关键帧，失败时解码每一帧 | 每张缩略图一个关键帧；没有索引时整个文件 | 媒体库开启时；没有索引时，策略允许整文件读取时 |
+| 章节图 | Matroska 和 MP4：每个章节通过索引读一个关键帧（§2.5）；其他文件：每个章节 seek 一次 | 每章一个关键帧；没有索引时每章约 3–4 MB | 媒体库开启时；没有索引时，策略允许抽样时 |
 | 响度 | ffmpeg 读整条音轨 | 整个文件 | 媒体库开启且策略允许整文件读取时 |
 | NFO、图片、歌词、外挂字幕 | 小文件 | 小 | 刷新、扫描 |
 | OpenSubtitles 哈希 | 文件头尾各 64 KB | 2 次 Range | 搜索字幕时；自 P26 起每个文件一次，保存到文件变化为止 |
@@ -152,7 +152,7 @@ Mavio 对媒体存储的全部读写，及其代价和时机：
 | 读取方 | 本地和网络 | 云 |
 | :--- | :--- | :--- |
 | 整文件读取：没有索引的文件的 keyframes 和 trickplay、响度 | 是 | 否；没有关键帧的文件走 HLS 时转码视频，也没有 trickplay |
-| 抽样：黑边、章节图 | 是 | 否；黑边保持未知 |
+| 抽样：黑边、没有索引的文件的章节图 | 是 | 否；黑边保持未知，这类文件没有章节图 |
 | 推测式读取：probe 前的头尾预读、起播预读、保活和唤醒 | 是 | 否；只按播放的需要读取 |
 | 扫描时跳过未变化的目录 | 是 | 否；云盘目录的修改时间反映不了下层的变化 |
 | 扫描同时 list 的目录数 | 按设备（§1.3） | 2 |
@@ -176,7 +176,8 @@ HLS 在关键帧处切分直接复制的视频，因此每个视频文件都需�
 
 一张 trickplay 缩略图只需要它所在时间附近的一幅画面，不需要之前的每一帧：
 
-* **按索引抽样**（Matroska 和 WebM）：对每个缩略图时间，取不晚于它的 cue，由它得到关键帧所在的 cluster，再由 cue 的相对位置得到 cluster 中的块（没有相对位置时，依次读 cluster 中各块的头部，直到找到视频轨的关键帧）。Mavio 写出一个 Matroska 流：EBML 头、Info、视频轨的条目，以及每张缩略图一个 cluster，内含该关键帧并以缩略图的时间呈现（`Matroska.WriteSamples`）；这个流通过管道交给一次 ffmpeg 运行，缩放并拼接画面。每张缩略图读一个关键帧，相邻时间对应同一个关键帧时只读一次，其余什么都不解码。
+* **按索引抽样**（Matroska、WebM 和 MP4）：对每个缩略图时间，取不晚于它的 cue，由它得到关键帧所在的 cluster，再由 cue 的相对位置得到 cluster 中的块（没有相对位置时，依次读 cluster 中各块的头部，直到找到视频轨的关键帧）。Mavio 写出一个 Matroska 流：EBML 头、Info、视频轨的条目，以及每张缩略图一个 cluster，内含该关键帧并以缩略图的时间呈现（`Matroska.WriteSamples`）；这个流通过管道交给一次 ffmpeg 运行，缩放并拼接画面。MP4 文件的同步样本同样由样本表找到（§2.4），样本表给出每个样本的偏移和大小：Mavio 把它们写进一个自己的 Matroska 流，轨道条目的 codec private 数据就是样本条目的配置 box（`avcC`、`hvcC` 或 `av1C`；VP9 不需要），因为 Matroska 承载的是同样带长度前缀的样本（`MP4.WriteSamples`）。分片 MP4 的索引指向分片而不是样本，不做抽样。每张缩略图读一个关键帧，相邻时间对应同一个关键帧时只读一次，其余什么都不解码。
+* **章节图**用同样的流，每个章节一个关键帧：取不早于章节时间的第一个关键帧，使画面属于这一章而不是上一章的结尾；几个章节对应同一个关键帧时只读一次；一次 ffmpeg 运行写出全部图片（`Maker.ChapterImages`）。只有没有索引的文件才对每个章节 seek，且要策略允许抽样。
 * **只解码关键帧**（其他文件，允许整文件读取时）：ffmpeg 只解码关键帧（`-skip_frame nokey`）。仍要读整个文件，但解码量只是一小部分。
 * **解码每一帧**：只解码关键帧失败时的兜底。
 * 每种方式下，缩略图都取不早于其时间的第一幅画面（`fps=…:round=down:eof_action=pass`），因此关键帧在下一个时间之前结束时，最后一张缩略图仍然保留。ffmpeg 单线程、低优先级运行（nice 10，Windows 上为低于正常的优先级类），把 CPU 留给播放。
@@ -198,7 +199,7 @@ HLS 在关键帧处切分直接复制的视频，因此每个视频文件都需�
 | FUSE 与本机回环识别 | `libs/library/storage/fuse.go`（`fuseKind`、`loopbackSource`、`findMount`、`mountKind`）；由 `device_{linux,darwin,windows}.go` 使用 | P24 |
 | 存储策略 | `libs/library/policy.go`（`StoragePolicy`、`PolicyOf`）；由 `scan.go`（`scan.policy`、`Scanner.walkers`、`scan.state`）、`jobs.go`（`Jobs.probeFile`）、`keyframes.go`、`borders.go`、`mediaextras.go`（`Jobs.extrasJobs`、`trickplay`、`chapterImages`、`loudness`）使用 | P24 |
 | 从容器索引读取关键帧 | `libs/media/keyframes/index.go`（`FromIndex`、`FromFile`、`ErrNoIndex`）、`matroska.go`、`mp4.go`；`apps/server/internal/providers/keyframes.go`；`libs/library/jobs.go`（`Jobs.probe`）、`keyframes.go`（`KeyframeExtractor`） | P24 |
-| 用关键帧生成 trickplay | `libs/media/keyframes/sample.go`（`Matroska.WriteSamples`）、`matroska.go`（`ReadMatroska`）；`libs/media/thumbnails/thumbnails.go`（`Mode`、`TrickplayArgs`、`Maker.Trickplay`）、`priority_{unix,windows,other}.go`；`libs/library/mediaextras.go`（`Thumbnailer`、`Jobs.trickplay`） | P24 |
+| 用关键帧生成 trickplay 和章节图 | `libs/media/keyframes/sample.go`（`Sampler`、`ReadSampler`、`Matroska.WriteSamples`）、`sample_mp4.go`（`ReadMP4`、`MP4.WriteSamples`）、`matroska.go`（`ReadMatroska`）、`mp4.go`（`readMP4`）；`libs/media/thumbnails/thumbnails.go`（`Mode`、`TrickplayArgs`、`Maker.Trickplay`、`ChapterImagesArgs`、`Maker.ChapterImages`）、`priority_{unix,windows,other}.go`；`libs/library/mediaextras.go`（`Thumbnailer`、`Jobs.trickplay`、`Jobs.chapterImages`） | P24 |
 | 内嵌字幕 | `apps/server/internal/playback/subcache.go`（`Manager.extracted`、`extractAll`）、`subtitles.go`（`Playback.liveSubtitles`、`liveSubtitle`、`Manager.loadSubtitle`）、`manager.go`（`Manager.Start`）；`libs/library/mediaextras.go`（`SubtitlesDir`）；`libs/media/decision/source.go`（`Source.StreamedSubtitles`）、`subtitles.go`；`libs/media/planner/command.go`（`HLSOutput.Subtitles`）；`libs/streaming/subtitles.go`（`Stream.Subtitle`） | P24 |
 | 不对云存储做推测式读取 | `libs/library/storage/keeper.go`（`Keeper.Class`）；`apps/server/internal/playback/resume.go`（`Manager.prepareStart`）；在 `apps/server/internal/server/server.go` 中装配 | P24 |
 | 存储端口 | `libs/core/storage.go`（`Storage`、`StorageCapabilities`、`StorageTransfers`、`StorageFS`、`StorageName`、`StoragePath`）；`libs/library/localstorage.go`（`Storages`、`OpenLocalStorage`、`RootOf`）、`mediafile.go`（`MediaFile`）；`libs/media/planner/inputs.go`（`InputURL`）；`apps/server/internal/acquisition/files.go`（`Runtime.transfer`） | P25 |

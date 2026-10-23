@@ -144,6 +144,9 @@ type mp4Track struct {
 	id, timescale, duration uint64
 	stbl                    []byte
 	elst                    []byte
+	// sizes holds the size of each keyframe sample, beside the offsets of
+	// the Data samples returns; nil when they are not known.
+	sizes []int64
 }
 
 // mp4 reads the keyframes of the first video track of an MP4 or QuickTime
@@ -151,6 +154,13 @@ type mp4Track struct {
 // from its mfra index or a sidx. It reads the top-level box headers and
 // those boxes, not the media data.
 func mp4(r io.ReaderAt, size int64) (Data, error) {
+	_, d, err := readMP4(r, size)
+	return d, err
+}
+
+// readMP4 reads the index of the first video track of an MP4 file, as mp4
+// does, and returns the track with it.
+func readMP4(r io.ReaderAt, size int64) (*mp4Track, Data, error) {
 	var (
 		moov []byte
 		sidx []box
@@ -159,17 +169,17 @@ func mp4(r io.ReaderAt, size int64) (Data, error) {
 		b, err := readBoxHeader(r, off, size)
 		if err != nil {
 			if off == 0 {
-				return Data{}, ErrNoIndex
+				return nil, Data{}, ErrNoIndex
 			}
 			break
 		}
 		if off == 0 && b.kind != "ftyp" && b.kind != "moov" && b.kind != "free" && b.kind != "skip" && b.kind != "wide" {
-			return Data{}, ErrNoIndex
+			return nil, Data{}, ErrNoIndex
 		}
 		switch b.kind {
 		case "moov":
 			if moov, err = readBox(r, b); err != nil {
-				return Data{}, err
+				return nil, Data{}, err
 			}
 		case "sidx":
 			sidx = append(sidx, b)
@@ -184,7 +194,7 @@ func mp4(r io.ReaderAt, size int64) (Data, error) {
 		off = b.data + b.size
 	}
 	if moov == nil {
-		return Data{}, fmt.Errorf("mp4: no moov: %w", ErrNoIndex)
+		return nil, Data{}, fmt.Errorf("mp4: no moov: %w", ErrNoIndex)
 	}
 	movie := boxes(moov)
 	movieScale := uint64(0)
@@ -214,12 +224,12 @@ func mp4(r io.ReaderAt, size int64) (Data, error) {
 		t.timescale = f.u32()
 		t.duration = f.uv(v)
 		if f.err || t.timescale == 0 {
-			return Data{}, fmt.Errorf("mp4: bad video track: %w", ErrNoIndex)
+			return nil, Data{}, fmt.Errorf("mp4: bad video track: %w", ErrNoIndex)
 		}
 		break
 	}
 	if t == nil {
-		return Data{}, fmt.Errorf("mp4: no video track: %w", ErrNoIndex)
+		return nil, Data{}, fmt.Errorf("mp4: no video track: %w", ErrNoIndex)
 	}
 	if f := (fields{b: path(moov, "mvex", "mehd")}); t.duration == 0 && f.b != nil && movieScale > 0 {
 		// A fragmented file may give its duration here, in the movie's
@@ -228,21 +238,21 @@ func mp4(r io.ReaderAt, size int64) (Data, error) {
 		t.duration = f.uv(v) * t.timescale / movieScale
 	}
 	if d, ok := t.samples(movieScale); ok {
-		return d, nil
+		return t, d, nil
 	}
 	if d, ok, err := t.mfra(r, size); err != nil || ok {
-		return d, err
+		return t, d, err
 	}
 	for _, b := range sidx {
 		buf, err := readBox(r, b)
 		if err != nil {
-			return Data{}, err
+			return nil, Data{}, err
 		}
 		if d, ok := t.sidx(buf, b.data+b.size); ok {
-			return d, nil
+			return t, d, nil
 		}
 	}
-	return Data{}, fmt.Errorf("mp4: no index of the video track: %w", ErrNoIndex)
+	return nil, Data{}, fmt.Errorf("mp4: no index of the video track: %w", ErrNoIndex)
 }
 
 // at converts a time in the track's timescale to 100 ns ticks.
@@ -349,6 +359,7 @@ func (t *mp4Track) samples(movieScale uint64) (Data, bool) {
 			d.Keyframes = append(d.Keyframes, t.at(pts))
 			if located {
 				d.Offsets = append(d.Offsets, loc.offset)
+				t.sizes = append(t.sizes, int64(loc.sizeOf(sample)))
 			}
 			next++
 			if sync != nil && next == len(sync) {
@@ -373,7 +384,7 @@ func (t *mp4Track) samples(movieScale uint64) (Data, bool) {
 		sample++
 	}
 	if !located || len(d.Offsets) != len(d.Keyframes) || slices.ContainsFunc(d.Offsets, func(o int64) bool { return o < 0 }) {
-		d.Offsets = nil
+		d.Offsets, t.sizes = nil, nil
 	}
 	return d, len(d.Keyframes) > 0
 }
@@ -451,14 +462,18 @@ func newLocator(tables map[string][][]byte, total uint64) (*locator, bool) {
 	return l, true
 }
 
+// sizeOf returns the size of a 1-based sample.
+func (l *locator) sizeOf(sample uint64) uint64 {
+	if l.sizes != nil {
+		return l.sizes[sample-1]
+	}
+	return l.size
+}
+
 // next moves from the 1-based sample to the one after it; false when the
 // tables end first.
 func (l *locator) next(sample uint64) bool {
-	size := l.size
-	if l.sizes != nil {
-		size = l.sizes[sample-1]
-	}
-	l.offset += int64(size)
+	l.offset += int64(l.sizeOf(sample))
 	if l.left--; l.left > 0 {
 		return true
 	}

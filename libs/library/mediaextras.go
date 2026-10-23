@@ -41,8 +41,12 @@ type Thumbnailer interface {
 	// decoding the whole file. made is false when the sheets are not made:
 	// the file has no index and whole is unset.
 	Trickplay(ctx context.Context, f MediaFile, v VideoFrame, dir string, whole bool) (t core.Trickplay, made bool, err error)
-	// ChapterImage writes the frame at a time into file.
-	ChapterImage(ctx context.Context, f MediaFile, at time.Duration, v VideoFrame, file string) error
+	// ChapterImages writes the picture at each time, which must increase,
+	// into the file of files at the same index: from its keyframe read
+	// through the container's index, and for a file without one when seek
+	// is set, by seeking to the time. made is false when the images are not
+	// made: the file has no index and seek is unset.
+	ChapterImages(ctx context.Context, f MediaFile, at []time.Duration, v VideoFrame, files []string, seek bool) (made bool, err error)
 }
 
 // VideoFrame describes the picture of a video.
@@ -170,13 +174,14 @@ func (j *Jobs) extrasJobs(lib core.Library, it core.Item, video *core.MediaSourc
 	var out []core.Job
 	switch {
 	case video != nil:
-		policy := j.policy(&lib, video.Path)
 		// Trickplay of a file without an index reads it whole where the
-		// policy allows.
+		// storage policy allows.
 		if j.Thumbnails != nil && lib.ExtractTrickplay {
 			out = append(out, ItemJob(JobTrickplay, it.ID, now))
 		}
-		if j.Thumbnails != nil && lib.ExtractChapterImages && len(video.Chapters) > 0 && policy.Samples {
+		// Chapter images of one seek to each chapter where it allows
+		// samples.
+		if j.Thumbnails != nil && lib.ExtractChapterImages && len(video.Chapters) > 0 {
 			out = append(out, ItemJob(JobChapterImages, it.ID, now))
 		}
 		if j.Segments != nil && it.Extra == "" && (it.Kind == core.KindMovie || it.Kind == core.KindEpisode) {
@@ -347,7 +352,7 @@ func (j *Jobs) chapterImages(ctx context.Context, job core.Job) ([]core.Job, err
 		return nil, ignoreGone(err)
 	}
 	src, st := videoSource(sources)
-	if src == nil || len(src.Chapters) == 0 || !j.policy(&lib, src.Path).Samples {
+	if src == nil || len(src.Chapters) == 0 {
 		return nil, nil
 	}
 	key := failKey(JobChapterImages, src)
@@ -358,29 +363,44 @@ func (j *Jobs) chapterImages(ctx context.Context, job core.Job) ([]core.Job, err
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, err
 	}
+	var (
+		chapters []int
+		at       []time.Duration
+		files    []string
+	)
+	for i := range src.Chapters {
+		if src.Chapters[i].ImagePath == "" {
+			chapters = append(chapters, i)
+			at = append(at, chapterTime(src.Chapters, i, src.Duration))
+			files = append(files, ChapterImagePath(j.MetadataDir, it.ID, src.ID, i))
+		}
+	}
+	if len(chapters) == 0 {
+		return nil, nil
+	}
+	if err := j.quiet(ctx); err != nil {
+		return nil, err
+	}
 	f, err := j.Storages.Media(core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadBackground}), src.Path)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
-	images := map[int]string{}
-	for i := range src.Chapters {
-		if src.Chapters[i].ImagePath != "" {
-			continue
-		}
-		if err := j.quiet(ctx); err != nil {
+	made, err := j.Thumbnails.ChapterImages(ctx, f, at, frameOf(src, st), files, j.policy(&lib, src.Path).Samples)
+	if err != nil {
+		if ctx.Err() != nil {
 			return nil, err
 		}
-		file := ChapterImagePath(j.MetadataDir, it.ID, src.ID, i)
-		if err := j.Thumbnails.ChapterImage(ctx, f, chapterTime(src.Chapters, i, src.Duration), frameOf(src, st), file); err != nil {
-			if ctx.Err() != nil {
-				return nil, err
-			}
-			j.Fails.Note(key)
-			j.logger().WarnContext(ctx, "chapter image failed", "item", it.ID, "chapter", i, "err", err)
-			break
-		}
-		images[i] = file
+		j.Fails.Note(key)
+		j.logger().WarnContext(ctx, "chapter images failed", "item", it.ID, "err", err)
+		return nil, nil
+	}
+	if !made {
+		return nil, nil
+	}
+	images := map[int]string{}
+	for k, i := range chapters {
+		images[i] = files[k]
 	}
 	if len(images) == 0 {
 		return nil, nil

@@ -10,11 +10,13 @@ import (
 // its own, apart from what playback reads.
 type StoragePolicy struct {
 	// WholeFiles allows background jobs that read whole files: keyframes
-	// read by ffprobe, trickplay sheets decoded from the whole video and
-	// loudness measured over the whole track.
+	// read by ffprobe, trickplay sheets decoded from the whole video of a
+	// file without an index and loudness measured over the whole track.
 	WholeFiles bool
 	// Samples allows background jobs that seek to a few points of a video:
-	// black border detection and chapter images.
+	// black border detection, and chapter images of files without an
+	// index. Keyframes read through a container's index, for trickplay and
+	// chapter images, are allowed everywhere.
 	Samples bool
 	// Speculative allows reads no one asked for: head, tail and start
 	// position prefetches, keep-alive and wake reads.

@@ -3,6 +3,7 @@ package keyframes
 import (
 	"context"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"math/bits"
@@ -13,6 +14,43 @@ import (
 // maxScannedBlocks bounds the elements of a cluster read to find a
 // keyframe whose cue does not give its position.
 const maxScannedBlocks = 256
+
+// Sampler writes chosen keyframes of a file's video track as a stream of
+// their own, each read on its own through the container's index, so that
+// pictures at intervals take a read of a keyframe each instead of the
+// whole file.
+type Sampler interface {
+	// Keyframes returns the presentation times of the track's keyframes,
+	// increasing.
+	Keyframes() []time.Duration
+	// WriteSamples writes to w a Matroska stream of the video track alone
+	// that holds, for each time in at, which must increase, the keyframe
+	// at or before it, presented at that time: r is the file of size bytes
+	// the index was read from.
+	WriteSamples(ctx context.Context, w io.Writer, r io.ReaderAt, size int64, at []time.Duration) error
+}
+
+// ReadSampler reads the index of the first video track of a Matroska, WebM
+// or MP4 file, as [ReadMatroska] and [ReadMP4] do.
+func ReadSampler(r io.ReaderAt, size int64) (Sampler, error) {
+	m, err := ReadMatroska(r, size)
+	if errors.Is(err, errNotMatroska) {
+		return ReadMP4(r, size)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// Keyframes returns the times of the cue points.
+func (m *Matroska) Keyframes() []time.Duration {
+	out := make([]time.Duration, len(m.Cues))
+	for i, c := range m.Cues {
+		out[i] = c.Time
+	}
+	return out
+}
 
 // WriteSamples writes to w a Matroska stream of the video track alone that
 // holds, for each time in at, which must increase, the keyframe at or
@@ -27,27 +65,40 @@ func (m *Matroska) WriteSamples(ctx context.Context, w io.Writer, r io.ReaderAt,
 	b = append(b, 0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF)
 	b = appendElement(b, mkvInfo, m.info)
 	b = appendElement(b, mkvTracks, appendElement(nil, mkvTrackEntry, m.track))
-	if _, err := w.Write(b); err != nil {
+	return writeSamples(ctx, w, b, m.scale, m.Keyframes(), at, func(i int) ([]byte, error) {
+		return m.keyframe(r, size, m.Cues[i])
+	})
+}
+
+// writeSamples writes head, then for each time in at the keyframe at or
+// before it among times, as block returns the contents of its SimpleBlock,
+// in a cluster of its own presented at the time, in ticks of scale
+// nanoseconds.
+func writeSamples(ctx context.Context, w io.Writer, head []byte, scale uint64, times, at []time.Duration, block func(i int) ([]byte, error)) error {
+	if len(times) == 0 {
+		return ErrNoIndex
+	}
+	if _, err := w.Write(head); err != nil {
 		return err
 	}
-	last, block := -1, []byte(nil)
+	last, b := -1, []byte(nil)
 	for _, t := range at {
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		// The last cue at or before the time, else the first.
-		i := max(0, sort.Search(len(m.Cues), func(i int) bool { return m.Cues[i].Time > t })-1)
+		// The last keyframe at or before the time, else the first.
+		i := max(0, sort.Search(len(times), func(i int) bool { return times[i] > t })-1)
 		if i != last {
 			var err error
-			if block, err = m.keyframe(r, size, m.Cues[i]); err != nil {
-				return fmt.Errorf("keyframe at %v: %w", m.Cues[i].Time, err)
+			if b, err = block(i); err != nil {
+				return fmt.Errorf("keyframe at %v: %w", times[i], err)
 			}
 			last = i
 		}
 		ts := make([]byte, 8)
-		binary.BigEndian.PutUint64(ts, uint64(t.Nanoseconds())/m.scale)
+		binary.BigEndian.PutUint64(ts, uint64(t.Nanoseconds())/scale)
 		cluster := appendElement(nil, mkvTimestamp, ts)
-		cluster = appendElement(cluster, mkvSimpleBlock, block)
+		cluster = appendElement(cluster, mkvSimpleBlock, b)
 		if _, err := w.Write(appendElement(nil, mkvCluster, cluster)); err != nil {
 			return err
 		}

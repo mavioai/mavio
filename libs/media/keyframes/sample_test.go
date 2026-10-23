@@ -2,6 +2,7 @@ package keyframes
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -28,6 +29,7 @@ func TestWriteSamples(t *testing.T) {
 		{"scanned clusters", "keyframes.mkv", true},
 		{"webm", "vp9_opus.webm", false},
 		{"hevc", "hevc_main10_hdr10.mkv", false},
+		{"mp4", "keyframes.mp4", false},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			path := fixtures.Require(t, tt.fixture)
@@ -41,20 +43,21 @@ func TestWriteSamples(t *testing.T) {
 				t.Fatal(err)
 			}
 			cr := &countingReader{r: f}
-			m, err := ReadMatroska(cr, fi.Size())
+			m, err := ReadSampler(cr, fi.Size())
 			if err != nil {
 				t.Fatal(err)
 			}
 			if tt.scan {
-				for i := range m.Cues {
-					m.Cues[i].block = -1
+				mkv := m.(*Matroska)
+				for i := range mkv.Cues {
+					mkv.Cues[i].block = -1
 				}
 			}
 			var out bytes.Buffer
 			if err := m.WriteSamples(t.Context(), &out, cr, fi.Size(), at); err != nil {
 				t.Fatalf("WriteSamples() error = %v", err)
 			}
-			if tt.fixture == "keyframes.mkv" {
+			if strings.HasPrefix(tt.fixture, "keyframes.") {
 				// Five pictures from keyframes 2 s apart: four distinct ones.
 				if n := cr.n.Load(); n*4 > fi.Size() {
 					t.Errorf("WriteSamples() read %d bytes of %d, want = under a quarter", n, fi.Size())
@@ -78,6 +81,26 @@ func TestWriteSamples(t *testing.T) {
 			want := []string{"1,0.000000", "1,3.000000", "1,5.000000", "1,10.000000", "1,19.000000", "5"}
 			if strings.Join(lines, " ") != strings.Join(want, " ") {
 				t.Errorf("decoded frames = %v, want = %v", lines, want)
+			}
+		})
+	}
+}
+
+func TestReadSamplerFragmented(t *testing.T) {
+	// The index of a fragmented file points to fragments, not samples.
+	for _, fixture := range []string{"keyframes_fragmented.mp4", "keyframes_sidx.mp4"} {
+		t.Run(fixture, func(t *testing.T) {
+			f, err := os.Open(fixtures.Require(t, fixture))
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer f.Close()
+			fi, err := f.Stat()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := ReadSampler(f, fi.Size()); !errors.Is(err, ErrNoIndex) {
+				t.Errorf("ReadSampler() error = %v, want = %v", err, ErrNoIndex)
 			}
 		})
 	}

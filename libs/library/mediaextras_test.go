@@ -30,8 +30,9 @@ func (chapteredProber) Probe(_ context.Context, _ MediaFile, audio bool) (ProbeR
 	}}, nil
 }
 
-// fakeThumbs writes empty images, failing when fail is set; files without
-// an index, when noIndex is set, are made only when they may be read whole.
+// fakeThumbs writes empty images, failing trickplay when fail is set;
+// files without an index, when noIndex is set, are made only when they may
+// be read whole or seeked.
 type fakeThumbs struct {
 	trickplays, chapters int
 	at                   []time.Duration
@@ -54,10 +55,18 @@ func (f *fakeThumbs) Trickplay(_ context.Context, _ MediaFile, v VideoFrame, dir
 	return core.Trickplay{Width: 320, Height: 133, TileWidth: 10, TileHeight: 10, ThumbnailCount: 180, Interval: 10 * time.Second}, true, nil
 }
 
-func (f *fakeThumbs) ChapterImage(_ context.Context, _ MediaFile, at time.Duration, _ VideoFrame, file string) error {
-	f.chapters++
-	f.at = append(f.at, at)
-	return os.WriteFile(file, []byte("jpg"), 0o644)
+func (f *fakeThumbs) ChapterImages(_ context.Context, _ MediaFile, at []time.Duration, _ VideoFrame, files []string, seek bool) (bool, error) {
+	if f.noIndex && !seek {
+		return false, nil
+	}
+	f.chapters += len(files)
+	f.at = append(f.at, at...)
+	for _, file := range files {
+		if err := os.WriteFile(file, []byte("jpg"), 0o644); err != nil {
+			return false, err
+		}
+	}
+	return true, nil
 }
 
 type fakeLoudness map[string]float64
@@ -136,12 +145,13 @@ func TestTrickplayCloud(t *testing.T) {
 		made    int
 	}{
 		{"index", false, 1},
-		// A file without an index is not read whole on cloud storage.
+		// A file without an index is not read whole, or seeked, on cloud
+		// storage.
 		{"no index", true, 0},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			f := newScan(t, core.LibraryMovies)
-			f.lib.ExtractTrickplay = true
+			f.lib.ExtractTrickplay, f.lib.ExtractChapterImages = true, true
 			f.lib.StorageClasses = map[string]core.StorageClass{f.root: core.StorageCloud}
 			if err := f.store.Libraries().Create(t.Context(), &f.lib); err != nil {
 				t.Fatal(err)
@@ -161,9 +171,8 @@ func TestTrickplayCloud(t *testing.T) {
 			if got := len(f.store.tricks[up.ID]); thumbs.trickplays != tt.made || got != tt.made {
 				t.Errorf("trickplays = %d, stored %d, want = %d", thumbs.trickplays, got, tt.made)
 			}
-			// Chapter images take samples, which cloud storage does not.
-			if thumbs.chapters != 0 {
-				t.Errorf("chapter images = %d, want = 0", thumbs.chapters)
+			if thumbs.chapters != 2*tt.made {
+				t.Errorf("chapter images = %d, want = %d", thumbs.chapters, 2*tt.made)
 			}
 		})
 	}

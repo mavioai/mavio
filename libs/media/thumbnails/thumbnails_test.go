@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -64,9 +65,10 @@ func TestTrickplay(t *testing.T) {
 		// noIndex is set when the file is not read without an index.
 		noIndex bool
 	}{
-		{"sampled through the index", "mkv", false, false},
-		{"keyframes of the whole file", "mp4", true, false},
-		{"no index", "mp4", false, true},
+		{"sampled through the Matroska index", "mkv", false, false},
+		{"sampled through the MP4 index", "mp4", false, false},
+		{"keyframes of the whole file", "ts", true, false},
+		{"no index", "ts", false, true},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			film := letterboxed(t, ffmpeg, tt.ext)
@@ -113,6 +115,57 @@ func TestTrickplayArgs(t *testing.T) {
 			strings.Contains(args, "-skip_frame nokey") != tt.skipFrames || !strings.Contains(args, "-threads 1") {
 			t.Errorf("TrickplayArgs(%v) = %s", tt.mode, args)
 		}
+	}
+}
+
+func TestChapterImages(t *testing.T) {
+	ffmpeg := ffmpegOrSkip(t)
+	m := &Maker{FFmpeg: ffmpeg}
+	v := Video{Duration: 25 * time.Second, Width: 320, Height: 240, Crop: core.Crop{Top: 30, Bottom: 30}}
+	// Keyframes every second: the first two times share the one at 1 s.
+	at := []time.Duration{500 * time.Millisecond, time.Second, 12 * time.Second, time.Hour}
+	for _, tt := range []struct {
+		name, ext string
+		seek      bool
+		// noIndex is set when the file is not read without an index.
+		noIndex bool
+	}{
+		{"sampled through the Matroska index", "mkv", false, false},
+		{"sampled through the MP4 index", "mp4", false, false},
+		{"seeks without an index", "ts", true, false},
+		{"no index", "ts", false, true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			film := letterboxed(t, ffmpeg, tt.ext)
+			dir := t.TempDir()
+			times, files := at, make([]string, len(at))
+			if tt.seek {
+				// A seek past the end finds no picture.
+				times = at[:3]
+				files = files[:3]
+			}
+			for i := range files {
+				files[i] = filepath.Join(dir, strconv.Itoa(i)+".jpg")
+			}
+			err := m.ChapterImages(t.Context(), LocalInput(film), times, v, 160, files, tt.seek)
+			if tt.noIndex {
+				if !errors.Is(err, keyframes.ErrNoIndex) {
+					t.Errorf("ChapterImages() error = %v, want = %v", err, keyframes.ErrNoIndex)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, file := range files {
+				if w, h := dims(t, file); w != 160 || h != 90 {
+					t.Errorf("%s = %dx%d, want 160x90", filepath.Base(file), w, h)
+				}
+			}
+			if entries, _ := os.ReadDir(dir); len(entries) != len(files) {
+				t.Errorf("files in the folder = %d, want = %d", len(entries), len(files))
+			}
+		})
 	}
 }
 

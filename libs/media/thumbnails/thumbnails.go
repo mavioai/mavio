@@ -16,6 +16,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -99,7 +100,7 @@ type Mode int
 
 const (
 	// Sampled decodes a keyframe a thumbnail, each read on its own through
-	// the Matroska index, from a stream on stdin.
+	// the container's index, from a stream on stdin.
 	Sampled Mode = iota
 	// KeyframesOnly decodes the keyframes alone, reading the whole file.
 	KeyframesOnly
@@ -134,8 +135,8 @@ func TrickplayArgs(input string, mode Mode, v Video, o Options, dir string) []st
 }
 
 // Trickplay writes the sheets of a video into dir, which must exist and be
-// empty, and describes them. It samples a Matroska file's keyframes
-// through its index; when whole is set, it otherwise decodes the keyframes
+// empty, and describes them. It samples a Matroska or MP4 file's
+// keyframes through its index; when whole is set, it otherwise decodes the keyframes
 // of the whole file, or failing that every frame, and when it is not,
 // files without an index give keyframes.ErrNoIndex.
 func (m *Maker) Trickplay(ctx context.Context, in Input, v Video, o Options, dir string, whole bool) (core.Trickplay, error) {
@@ -183,36 +184,53 @@ func (m *Maker) Trickplay(ctx context.Context, in Input, v Video, o Options, dir
 }
 
 // sampled writes the sheets from the keyframe at or before each
-// thumbnail's time, read through the file's Matroska index.
+// thumbnail's time, read through the file's index.
 func (m *Maker) sampled(ctx context.Context, in Input, v Video, o Options, dir string, count int) error {
-	if in.Open == nil {
-		return keyframes.ErrNoIndex
-	}
-	f, err := in.Open()
+	f, size, s, err := openSampler(in)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	fi, err := f.Stat()
-	if err != nil {
-		return err
-	}
-	idx, err := keyframes.ReadMatroska(f, fi.Size())
-	if err != nil {
-		return err
-	}
 	at := make([]time.Duration, count)
 	for i := range at {
 		at[i] = time.Duration(i) * o.Interval
 	}
+	return m.runSamples(ctx, s, f, size, at, TrickplayArgs("", Sampled, v, o, dir))
+}
+
+// openSampler opens a video and reads its index for sampling.
+func openSampler(in Input) (File, int64, keyframes.Sampler, error) {
+	if in.Open == nil {
+		return nil, 0, nil, keyframes.ErrNoIndex
+	}
+	f, err := in.Open()
+	if err != nil {
+		return nil, 0, nil, err
+	}
+	fi, err := f.Stat()
+	if err != nil {
+		f.Close()
+		return nil, 0, nil, err
+	}
+	s, err := keyframes.ReadSampler(f, fi.Size())
+	if err != nil {
+		f.Close()
+		return nil, 0, nil, err
+	}
+	return f, fi.Size(), s, nil
+}
+
+// runSamples runs ffmpeg with args on the stream of the keyframes at or
+// before the times, on its stdin.
+func (m *Maker) runSamples(ctx context.Context, s keyframes.Sampler, f File, size int64, at []time.Duration, args []string) error {
 	pr, pw := io.Pipe()
 	written := make(chan error, 1)
 	go func() {
-		err := idx.WriteSamples(ctx, pw, f, fi.Size(), at)
+		err := s.WriteSamples(ctx, pw, f, size, at)
 		pw.CloseWithError(err)
 		written <- err
 	}()
-	err = m.run(ctx, TrickplayArgs("", Sampled, v, o, dir), pr)
+	err := m.run(ctx, args, pr)
 	// ffmpeg stopping early ends the writer.
 	pr.CloseWithError(io.ErrClosedPipe)
 	if werr := <-written; werr != nil && !errors.Is(werr, io.ErrClosedPipe) {
@@ -239,6 +257,80 @@ func empty(dir string) error {
 	}
 	for _, e := range entries {
 		if err := os.RemoveAll(filepath.Join(dir, e.Name())); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ChapterImagesArgs returns the ffmpeg arguments writing each picture on
+// stdin as a JPEG file width pixels wide into dir, as 0.jpg, 1.jpg, ….
+func ChapterImagesArgs(v Video, width int, dir string) []string {
+	return []string{
+		"-v", "error", "-filter_threads", "1", "-threads", "1", "-f", "matroska", "-i", "pipe:0",
+		"-map", "0:v:0", "-an", "-sn", "-dn", "-fps_mode", "passthrough", "-vf", strings.Join(v.filters(width), ","),
+		"-q:v", "3", "-f", "image2", "-start_number", "0", filepath.Join(dir, "%d.jpg"),
+	}
+}
+
+// ChapterImages writes the picture at each time of a video, which must
+// increase, into the file of files at the same index: the keyframe at or
+// after the time, else the last, read through the container's index, so
+// that a picture takes a read of its keyframe. When seek is set and that
+// fails, as for a file without an index, ffmpeg seeks to each time
+// instead; when it is not, such files give keyframes.ErrNoIndex.
+func (m *Maker) ChapterImages(ctx context.Context, in Input, at []time.Duration, v Video, width int, files []string, seek bool) error {
+	if len(at) != len(files) {
+		return errors.New("thumbnails: a file a chapter image")
+	}
+	if len(at) == 0 {
+		return nil
+	}
+	err := m.sampledImages(ctx, in, at, v, width, files)
+	if err != nil && seek && ctx.Err() == nil {
+		for i, t := range at {
+			if err := m.ChapterImage(ctx, in.URL, t, v, width, files[i]); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	return err
+}
+
+// sampledImages writes the chapter images from keyframes read through the
+// file's index.
+func (m *Maker) sampledImages(ctx context.Context, in Input, at []time.Duration, v Video, width int, files []string) error {
+	f, size, s, err := openSampler(in)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	kf := s.Keyframes()
+	// Each picture is read and decoded once, for every time it serves.
+	var times []time.Duration
+	picture := make([]int, len(at))
+	for i, t := range at {
+		k := min(sort.Search(len(kf), func(k int) bool { return kf[k] >= t }), len(kf)-1)
+		if len(times) == 0 || times[len(times)-1] != kf[k] {
+			times = append(times, kf[k])
+		}
+		picture[i] = len(times) - 1
+	}
+	tmp, err := os.MkdirTemp(filepath.Dir(files[0]), ".new-")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmp)
+	if err := m.runSamples(ctx, s, f, size, times, ChapterImagesArgs(v, width, tmp)); err != nil {
+		return fmt.Errorf("chapter images of %s: %w", in.URL, err)
+	}
+	for i, file := range files {
+		b, err := os.ReadFile(filepath.Join(tmp, strconv.Itoa(picture[i])+".jpg"))
+		if err != nil || len(b) == 0 {
+			return fmt.Errorf("chapter images of %s: ffmpeg wrote no picture at %v", in.URL, at[i])
+		}
+		if err := os.WriteFile(file, b, 0o644); err != nil {
 			return err
 		}
 	}

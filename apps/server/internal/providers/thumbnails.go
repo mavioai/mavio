@@ -36,9 +36,16 @@ func (t Thumbnails) Trickplay(ctx context.Context, f library.MediaFile, v librar
 	return tp, err == nil, err
 }
 
-// ChapterImage writes the frame at a time into file.
-func (t Thumbnails) ChapterImage(ctx context.Context, f library.MediaFile, at time.Duration, v library.VideoFrame, file string) error {
-	return t.Maker.ChapterImage(ctx, f.URL, at, video(v), ChapterImageWidth, file)
+// ChapterImages writes the picture at each time into the file of files at
+// the same index: through the video's index, or when seek is set and it
+// has none, by seeking to each time.
+func (t Thumbnails) ChapterImages(ctx context.Context, f library.MediaFile, at []time.Duration, v library.VideoFrame, files []string, seek bool) (bool, error) {
+	in := thumbnails.Input{URL: f.URL, Open: func() (thumbnails.File, error) { return f.Open(ctx) }}
+	err := t.Maker.ChapterImages(ctx, in, at, video(v), ChapterImageWidth, files, seek)
+	if !seek && errors.Is(err, keyframes.ErrNoIndex) {
+		return false, nil
+	}
+	return err == nil, err
 }
 
 // Loudness measures the integrated loudness of tracks with ffmpeg, as a
