@@ -265,8 +265,8 @@
     <string name="player_quality_original">原画</string>
     <string name="player_info">信息</string>
     <string name="player_direct_play">直接播放文件</string>
-    <string name="player_direct_stream">为这个浏览器转封装</string>
-    <string name="player_transcode">为这个浏览器转码</string>
+    <string name="player_direct_stream">为此设备转封装</string>
+    <string name="player_transcode">为此设备转码</string>
     <string name="player_source">来源</string>
     <string name="player_method">播放方式</string>
     <string name="player_options">播放选项</string>

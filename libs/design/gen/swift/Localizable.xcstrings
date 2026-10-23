@@ -4634,13 +4634,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Remuxing for this browser"
+            "value": "Remuxing for this device"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "为这个浏览器转封装"
+            "value": "为此设备转封装"
           }
         }
       }
@@ -4652,13 +4652,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Transcoding for this browser"
+            "value": "Transcoding for this device"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "为这个浏览器转码"
+            "value": "为此设备转码"
           }
         }
       }

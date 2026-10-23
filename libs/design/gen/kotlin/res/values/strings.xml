@@ -522,9 +522,9 @@
     <!-- How an item plays: the file as is. -->
     <string name="player_direct_play">Playing the file directly</string>
     <!-- How an item plays: its streams copied into another container. -->
-    <string name="player_direct_stream">Remuxing for this browser</string>
+    <string name="player_direct_stream">Remuxing for this device</string>
     <!-- How an item plays: re-encoded. -->
-    <string name="player_transcode">Transcoding for this browser</string>
+    <string name="player_transcode">Transcoding for this device</string>
     <!-- Label of the file playing. -->
     <string name="player_source">Source</string>
     <!-- Label of how the item plays. -->
