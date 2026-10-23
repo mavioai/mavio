@@ -225,6 +225,38 @@ pub struct Source {
     pub video: Option<VideoStream>,
     /// The file's subtitles, in it and beside it, for a file of this server.
     pub subtitles: Vec<SubtitleStream>,
+    /// The file's chapters by their start, for a file of this server.
+    pub chapters: Vec<Chapter>,
+}
+
+/// A chapter of a file.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Chapter {
+    /// Where it starts.
+    pub start: Duration,
+    /// Its name.
+    pub name: Option<String>,
+}
+
+/// Thumbnail sheets of one width for seeking: a thumbnail every interval,
+/// row by row, columns across and rows down a sheet, count in all; sheet
+/// n is at `{url}/{n}.jpg`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Trickplay {
+    /// A thumbnail's width, in pixels.
+    pub width: i32,
+    /// A thumbnail's height, in pixels.
+    pub height: i32,
+    /// The thumbnails across a sheet.
+    pub columns: i32,
+    /// The thumbnails down a sheet.
+    pub rows: i32,
+    /// The thumbnails in all.
+    pub count: i32,
+    /// The time between thumbnails.
+    pub interval: Duration,
+    /// The signed URL the sheets are under.
+    pub url: String,
 }
 
 /// An audio stream of a file, to choose it.
@@ -347,6 +379,8 @@ pub struct Details {
     pub extras: Vec<Extra>,
     /// The collection a movie belongs to.
     pub collection: Option<CollectionLink>,
+    /// Its thumbnail sheets for seeking, by width.
+    pub trickplay: Vec<Trickplay>,
 }
 
 /// What the details fetch beyond the item.
@@ -1328,6 +1362,18 @@ impl Core {
                     .map(str::to_owned),
                 video: details::video(&m.streams),
                 subtitles: details::subtitles(&m.streams),
+                chapters: m
+                    .chapters
+                    .iter()
+                    .map(|c| Chapter {
+                        start: c
+                            .start
+                            .as_option()
+                            .and_then(|d| Duration::try_from(d.clone()).ok())
+                            .unwrap_or_default(),
+                        name: c.title.clone().filter(|t| !t.is_empty()),
+                    })
+                    .collect(),
             })
             .collect();
         sources.extend(others);
@@ -1466,6 +1512,25 @@ impl Core {
                 .filter_map(|e| details::extra(&base, server_id, e))
                 .collect(),
             collection: details::collection_link(&base, &item, &more.collections),
+            trickplay: r
+                .trickplay
+                .iter()
+                .filter(|t| t.url.as_deref().is_some_and(|u| !u.is_empty()))
+                .map(|t| Trickplay {
+                    width: t.width.unwrap_or_default(),
+                    height: t.height.unwrap_or_default(),
+                    columns: t.tile_width.unwrap_or_default(),
+                    rows: t.tile_height.unwrap_or_default(),
+                    count: t.thumbnail_count.unwrap_or_default(),
+                    interval: t
+                        .interval
+                        .as_option()
+                        .and_then(|d| Duration::try_from(d.clone()).ok())
+                        .unwrap_or_default(),
+                    url: base.url(t.url.as_deref().unwrap_or_default()),
+                })
+                .filter(|t| t.columns > 0 && t.rows > 0 && t.count > 0 && !t.interval.is_zero())
+                .collect(),
             card,
         })
     }
@@ -1626,6 +1691,7 @@ impl Core {
                         file_name: None,
                         video: None,
                         subtitles: Vec::new(),
+                        chapters: Vec::new(),
                     },
                 ))
             });
@@ -2126,6 +2192,15 @@ mod tests {
 
     #[tokio::test]
     async fn details_offer_the_other_servers_copies_and_work_offline() {
+        use mavio_api::proto::mavio::library::v1::{
+            Chapter as ProtoChapter, Trickplay as ProtoTrickplay,
+        };
+        fn seconds(s: i64) -> buffa_types::google::protobuf::Duration {
+            buffa_types::google::protobuf::Duration {
+                seconds: s,
+                ..Default::default()
+            }
+        }
         let (core, _) = core();
         let a = fake_server("sa", "Home");
         a.unary(
@@ -2150,8 +2225,39 @@ mod tests {
                                 ..stream(1, StreamKind::STREAM_KIND_AUDIO, "ac3")
                             },
                         ],
+                        chapters: vec![
+                            ProtoChapter {
+                                title: Some("Opening".into()),
+                                ..Default::default()
+                            },
+                            ProtoChapter {
+                                start: seconds(754).into(),
+                                ..Default::default()
+                            },
+                        ],
                         ..Default::default()
                     }],
+                    trickplay: vec![
+                        ProtoTrickplay {
+                            width: Some(320),
+                            height: Some(134),
+                            tile_width: Some(10),
+                            tile_height: Some(10),
+                            thumbnail_count: Some(850),
+                            interval: seconds(10).into(),
+                            url: Some("signed/t/images/trickplay/a-brazil/320".into()),
+                            ..Default::default()
+                        },
+                        // Sheets without a URL, for callers without a session.
+                        ProtoTrickplay {
+                            width: Some(640),
+                            tile_width: Some(10),
+                            tile_height: Some(10),
+                            thumbnail_count: Some(850),
+                            interval: seconds(10).into(),
+                            ..Default::default()
+                        },
+                    ],
                     ..Default::default()
                 })
             },
@@ -2203,6 +2309,30 @@ mod tests {
                 channels: 6,
                 default: false,
             }]
+        );
+        assert_eq!(
+            d.sources[0].chapters,
+            [
+                Chapter {
+                    start: Duration::ZERO,
+                    name: Some("Opening".into()),
+                },
+                Chapter {
+                    start: Duration::from_secs(754),
+                    name: None,
+                },
+            ]
+        );
+        assert_eq!(d.trickplay.len(), 1);
+        let t = &d.trickplay[0];
+        assert_eq!(
+            (t.width, t.height, t.columns, t.rows, t.count, t.interval),
+            (320, 134, 10, 10, 850, Duration::from_secs(10))
+        );
+        assert!(
+            t.url.ends_with("/signed/t/images/trickplay/a-brazil/320"),
+            "got = {}",
+            t.url
         );
 
         // a goes away: its details come from the offline store.

@@ -4,10 +4,11 @@ use std::collections::HashMap;
 use std::time::{Duration, SystemTime};
 
 use mavio_core::{
-    Account, AccountMode, Artwork, AudioStream, Card, CardKind, CreditEntry, Details, DeviceInfo,
-    DownloadEntry, DownloadState, Filter, FoundServer, Libraries, LibraryEntry, LibraryType, Page,
-    PersonDetails, PlaybackOptions, Row, RowContent, RowKind, SearchResults, ServerInfo,
-    ServerRecord, SignInState, Sort, Source, StreamState, TitleCard, Transfer, Version,
+    Account, AccountMode, Artwork, AudioStream, Card, CardKind, Chapter, CreditEntry, Details,
+    DeviceInfo, DownloadEntry, DownloadState, Filter, FoundServer, Libraries, LibraryEntry,
+    LibraryType, Page, PersonDetails, PlaybackOptions, Row, RowContent, RowKind, SearchResults,
+    ServerInfo, ServerRecord, SignInState, Sort, Source, StreamState, TitleCard, Transfer,
+    Trickplay, Version,
 };
 use mavio_core::{
     AccountSecurity, DeviceSession, Passkey, PlaybackPreferences, RemoteCommand, RemotePlayback,
@@ -292,6 +293,24 @@ pub struct Source {
     pub file_name: Option<String>,
     pub video: Option<VideoStream>,
     pub subtitles: Vec<SubtitleStream>,
+    pub chapters: Vec<Chapter>,
+}
+
+#[uniffi::remote(Record)]
+pub struct Chapter {
+    pub start: Duration,
+    pub name: Option<String>,
+}
+
+#[uniffi::remote(Record)]
+pub struct Trickplay {
+    pub width: i32,
+    pub height: i32,
+    pub columns: i32,
+    pub rows: i32,
+    pub count: i32,
+    pub interval: Duration,
+    pub url: String,
 }
 
 #[uniffi::remote(Enum)]
@@ -373,6 +392,7 @@ pub struct Details {
     pub next: Option<Episode>,
     pub extras: Vec<Extra>,
     pub collection: Option<CollectionLink>,
+    pub trickplay: Vec<Trickplay>,
 }
 
 #[uniffi::remote(Record)]
