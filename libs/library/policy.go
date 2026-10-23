@@ -13,10 +13,10 @@ type StoragePolicy struct {
 	// read by ffprobe, trickplay sheets decoded from the whole video of a
 	// file without an index and loudness measured over the whole track.
 	WholeFiles bool
-	// Samples allows background jobs that seek to a few points of a video:
-	// black border detection, and chapter images of files without an
-	// index. Keyframes read through a container's index, for trickplay and
-	// chapter images, are allowed everywhere.
+	// Samples allows background jobs that seek to a few points of a video
+	// without an index: black border detection and chapter images. Keyframes
+	// read through a container's index, for trickplay, chapter images and
+	// black borders, are allowed everywhere.
 	Samples bool
 	// Speculative allows reads no one asked for: head, tail and start
 	// position prefetches, keep-alive and wake reads.

@@ -365,7 +365,7 @@ libs/media/
 * **滤镜图中间表示（IR）**：`planner` 先产出结构化的滤镜图（节点为 decode / hwupload / scale / tonemap / overlay / encode，带上各自的像素格式与硬件上下文），再序列化为 ffmpeg 参数。测试可以对 IR 断言，而不是对脆弱的命令行字符串断言。
 * **按硬件厂商拆分**：`planner` 内按 Intel、NVIDIA、AMD、Apple、Rockchip、V4L2、软件编码各自实现策略，避免 Jellyfin `EncodingHelper.cs`（8000+ 行）式的单文件膨胀。移植时以行为与测试为准重新组织结构。
 * **`supervisor`**：每个转码会话一个 goroutine 组；客户端断开或空闲超时后终止 ffmpeg；按客户端播放进度节流；用 `testing/synctest` 编写确定性的超时测试。
-* **黑边**：低优先级任务（`media.borders`，`libs/media/borders`）用 ffmpeg 把每个已探测视频的五帧采样为 8-bit 亮度，并用 `libs/imaging` 的检测器测量（对行与列采样，支持 8-bit 与 10-bit P010 平面）；只有每个非全黑样本都有的黑边才计入，且至少占画面的 2%，取偶数像素，记录在视频流上（`core.MediaStream.Crop`）。转码重新编码视频、且视频未旋转、未烧录字幕时，规划器在缩放之前裁掉黑边（服务端设置 `CropBlackBorders`），使宽银幕电影不必为黑边耗费码率；直接复制的视频从不裁剪。缩略图拼图与章节图片同样裁去黑边。
+* **黑边**：低优先级任务（`media.borders`，`libs/media/borders`）用 ffmpeg 把每个已探测视频的五帧采样为 8-bit 亮度（通过 Matroska 或 MP4 文件的索引读取不早于五个采样点的关键帧；没有索引的文件在存储类别允许时 seek 到各点），并用 `libs/imaging` 的检测器测量（对行与列采样，支持 8-bit 与 10-bit P010 平面）；只有每个非全黑样本都有的黑边才计入，且至少占画面的 2%，取偶数像素，记录在视频流上（`core.MediaStream.Crop`）。转码重新编码视频、且视频未旋转、未烧录字幕时，规划器在缩放之前裁掉黑边（服务端设置 `CropBlackBorders`），使宽银幕电影不必为黑边耗费码率；直接复制的视频从不裁剪。缩略图拼图与章节图片同样裁去黑边。
 * **杜比视界 Profile 7**：独立的增强层轨道只根据明确的信令识别，即杜比视界配置有增强层而没有基础层（`core.MediaStream.IsDolbyVisionEnhancement`），从不依据轨道顺序、分辨率或名称。只要文件还有其他视频轨道，流选择就不会选中这样的轨道，因此播放、转码与复制都使用基础层。单轨 Profile 7 流交给声明支持带增强层杜比视界的客户端；对只支持 HDR10 的客户端，规划器去掉杜比视界元数据，保留兼容 HDR10 的基础层，为 SDR 客户端重新编码时进行色调映射（`libs/media/planner/hdr.go`，沿用 Jellyfin 的规则）。
 * **立体声下混**：规划器带有 Jellyfin 的立体声下混算法（`libs/media/planner/audio.go`：Dave750、夜间对白模式、RFC 7845、AC-4，以及中置声道满电平的 ITU-R BS.775，7.1 先折叠为 5.1）；未指定算法时使用 ffmpeg 的下混。下混后的音频按服务端的下混增益放大（`DownmixBoost`，默认 2，与 Jellyfin 相同），使立体声设备上的对白清晰可闻。
 

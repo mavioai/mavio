@@ -1,5 +1,6 @@
-// Package borders finds the black borders of a video by sampling frames
-// with ffmpeg and measuring their luma with imaging.DetectBlackBordersY.
+// Package borders finds the black borders of a video by sampling frames,
+// keyframes read through the container's index or else seeked to, with
+// ffmpeg and measuring their luma with imaging.DetectBlackBordersY.
 // Borders count only where every sampled frame has them, so that a dark
 // scene does not pass for a letterbox.
 package borders
@@ -9,12 +10,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os/exec"
 	"strconv"
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/imaging"
+	"github.com/mavioai/mavio/libs/media/keyframes"
 )
 
 // Defaults of a Detector.
@@ -48,9 +51,33 @@ func Args(input string, offset time.Duration, width, height int) []string {
 	}
 }
 
+// Input is a video as a Detector reads it.
+type Input struct {
+	// URL is what ffmpeg reads to seek: a file: URL, or an HTTP URL.
+	URL string
+	// Open opens the video for reads at offsets, which sampling through
+	// its index takes.
+	Open func() (keyframes.File, error)
+}
+
+// SampledArgs returns the ffmpeg arguments writing each picture on stdin
+// as raw 8-bit luma of width × height.
+func SampledArgs(width, height int) []string {
+	return []string{
+		"-v", "error", "-threads", "1", "-f", "matroska", "-i", "pipe:0",
+		"-map", "0:v:0", "-fps_mode", "passthrough",
+		"-vf", fmt.Sprintf("scale=%d:%d,format=gray", width, height),
+		"-f", "rawvideo", "-",
+	}
+}
+
 // Detect returns the borders of a video of the given duration and frame
-// size, read from input, the URL ffmpeg reads: zero when it has none.
-func (d *Detector) Detect(ctx context.Context, input string, duration time.Duration, width, height int) (core.Crop, error) {
+// size: zero when it has none. Its frames are the keyframes at or after
+// times spread over it, each read on its own through the container's
+// index; when seek is set and that fails, as for a file without an index,
+// ffmpeg seeks to each time instead, and when it is not, such files give
+// keyframes.ErrNoIndex.
+func (d *Detector) Detect(ctx context.Context, in Input, duration time.Duration, width, height int, seek bool) (core.Crop, error) {
 	if duration <= 0 || width < 16 || height < 16 {
 		return core.Crop{}, errors.New("borders: unknown duration or frame size")
 	}
@@ -58,28 +85,90 @@ func (d *Detector) Detect(ctx context.Context, input string, duration time.Durat
 	if n <= 0 {
 		n = DefaultSamples
 	}
-	var frames []imaging.BlackBorders
-	for i := range n {
-		offset := duration * time.Duration(i+1) / time.Duration(n+1)
+	at := make([]time.Duration, n)
+	for i := range at {
+		at[i] = duration * time.Duration(i+1) / time.Duration(n+1)
+	}
+	frames, err := d.sampled(ctx, in, at, width, height)
+	if err != nil && seek && ctx.Err() == nil {
+		frames, err = d.seeked(ctx, in.URL, at, width, height)
+	}
+	if err != nil {
+		return core.Crop{}, err
+	}
+	var found []imaging.BlackBorders
+	for _, luma := range frames {
+		b, ok := imaging.DetectBlackBordersY(luma, width, height, width, d.Threshold)
+		if !ok && b.IsZero() {
+			// No border, or a frame too dark to tell.
+			if isBlack(luma, d.threshold()) {
+				continue
+			}
+		}
+		found = append(found, b)
+	}
+	return Combine(found, width, height), nil
+}
+
+// sampled returns the luma of the keyframes at or after the times, read
+// through the file's index and decoded by one ffmpeg run.
+func (d *Detector) sampled(ctx context.Context, in Input, at []time.Duration, width, height int) ([][]byte, error) {
+	f, size, s, err := keyframes.OpenSampler(in.Open)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	times, _ := keyframes.AtOrAfter(s.Keyframes(), at)
+	if len(times) == 0 {
+		return nil, keyframes.ErrNoIndex
+	}
+	pr, pw := io.Pipe()
+	written := make(chan error, 1)
+	go func() {
+		err := s.WriteSamples(ctx, pw, f, size, times)
+		pw.CloseWithError(err)
+		written <- err
+	}()
+	var out, stderr bytes.Buffer
+	cmd := exec.CommandContext(ctx, d.FFmpeg, SampledArgs(width, height)...)
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = pr, &out, &stderr
+	err = cmd.Run()
+	// ffmpeg stopping early ends the writer.
+	pr.CloseWithError(io.ErrClosedPipe)
+	if werr := <-written; werr != nil && !errors.Is(werr, io.ErrClosedPipe) {
+		return nil, fmt.Errorf("borders: %w", werr)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("borders: sampled frames: %w: %s", err, bytes.TrimSpace(stderr.Bytes()))
+	}
+	frame := width * height
+	if out.Len() < frame {
+		return nil, fmt.Errorf("borders: sampled %d bytes, want %d a frame", out.Len(), frame)
+	}
+	var frames [][]byte
+	for b := out.Bytes(); len(b) >= frame; b = b[frame:] {
+		frames = append(frames, b[:frame])
+	}
+	return frames, nil
+}
+
+// seeked returns the luma of the frames at the times, an ffmpeg seek
+// each.
+func (d *Detector) seeked(ctx context.Context, input string, at []time.Duration, width, height int) ([][]byte, error) {
+	var frames [][]byte
+	for _, offset := range at {
 		var out, stderr bytes.Buffer
 		cmd := exec.CommandContext(ctx, d.FFmpeg, Args(input, offset, width, height)...)
 		cmd.Stdout, cmd.Stderr = &out, &stderr
 		if err := cmd.Run(); err != nil {
-			return core.Crop{}, fmt.Errorf("borders: frame at %v: %w: %s", offset, err, bytes.TrimSpace(stderr.Bytes()))
+			return nil, fmt.Errorf("borders: frame at %v: %w: %s", offset, err, bytes.TrimSpace(stderr.Bytes()))
 		}
 		if out.Len() < width*height {
-			return core.Crop{}, fmt.Errorf("borders: frame at %v has %d bytes, want %d", offset, out.Len(), width*height)
+			return nil, fmt.Errorf("borders: frame at %v has %d bytes, want %d", offset, out.Len(), width*height)
 		}
-		b, ok := imaging.DetectBlackBordersY(out.Bytes(), width, height, width, d.Threshold)
-		if !ok && b.IsZero() {
-			// No border, or a frame too dark to tell.
-			if isBlack(out.Bytes()[:width*height], d.threshold()) {
-				continue
-			}
-		}
-		frames = append(frames, b)
+		frames = append(frames, out.Bytes()[:width*height])
 	}
-	return Combine(frames, width, height), nil
+	return frames, nil
 }
 
 func (d *Detector) threshold() uint8 {

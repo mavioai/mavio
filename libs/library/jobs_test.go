@@ -297,44 +297,74 @@ func TestJobsRefreshNewSeries(t *testing.T) {
 	}
 }
 
-type fakeBorders struct{ calls int }
+// fakeBorders finds letterbox borders; files without an index, when
+// noIndex is set, are measured only when they may be seeked.
+type fakeBorders struct {
+	calls   int
+	noIndex bool
+}
 
-func (b *fakeBorders) Borders(_ context.Context, _ MediaFile, duration time.Duration, width, height int) (core.Crop, error) {
+func (b *fakeBorders) Borders(_ context.Context, _ MediaFile, duration time.Duration, width, height int, seek bool) (core.Crop, bool, error) {
+	if b.noIndex && !seek {
+		return core.Crop{}, false, nil
+	}
 	b.calls++
 	if duration <= 0 || width == 0 || height == 0 {
-		return core.Crop{}, errors.New("no size")
+		return core.Crop{}, false, errors.New("no size")
 	}
-	return core.Crop{Top: 140, Bottom: 140}, nil
+	return core.Crop{Top: 140, Bottom: 140}, true, nil
 }
 
 func TestJobsBorders(t *testing.T) {
-	f := newScan(t, core.LibraryMovies)
-	tree(t, f.root, "Up (2009)/Up (2009).mkv")
-	if err := f.store.Libraries().Create(t.Context(), &f.lib); err != nil {
-		t.Fatal(err)
-	}
-	borders := &fakeBorders{}
-	prober := &sizedProber{}
-	jobs := &Jobs{
-		Store: f.store, Scanner: f.sc, Prober: prober, Borders: borders, Now: func() time.Time { return f.clock },
-		Refresher: &Refresher{Store: f.store, Now: func() time.Time { return f.clock }},
-	}
-	w := &Worker{Queue: f.store.Jobs(), Owner: "test", Handlers: jobs.Handlers()}
-	if err := jobs.Schedule(t.Context()); err != nil {
-		t.Fatal(err)
-	}
-	// The scan, the probe, the refresh and the borders.
-	if n := drain(t, w); n != 4 {
-		t.Errorf("jobs run = %d, want 4", n)
-	}
-	up := f.item("Up (2009)/Up (2009).mkv")
-	video := f.store.sources[up.ID][0].Streams[0]
-	if video.Crop == nil || *video.Crop != (core.Crop{Top: 140, Bottom: 140}) || borders.calls != 1 {
-		t.Errorf("crop = %v after %d detections", video.Crop, borders.calls)
-	}
-	// Looked for once: another run does nothing.
-	if _, err := jobs.borders(t.Context(), BordersJob(up.ID, f.clock)); err != nil || borders.calls != 1 {
-		t.Errorf("second run: %v, %d detections", err, borders.calls)
+	for _, tt := range []struct {
+		name           string
+		cloud, noIndex bool
+		found          bool
+	}{
+		{"local", false, false, true},
+		{"cloud", true, false, true},
+		// A file without an index is not seeked on cloud storage.
+		{"cloud without an index", true, true, false},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			f := newScan(t, core.LibraryMovies)
+			tree(t, f.root, "Up (2009)/Up (2009).mkv")
+			if tt.cloud {
+				f.lib.StorageClasses = map[string]core.StorageClass{f.root: core.StorageCloud}
+			}
+			if err := f.store.Libraries().Create(t.Context(), &f.lib); err != nil {
+				t.Fatal(err)
+			}
+			borders := &fakeBorders{noIndex: tt.noIndex}
+			prober := &sizedProber{}
+			jobs := &Jobs{
+				Store: f.store, Scanner: f.sc, Prober: prober, Borders: borders, Now: func() time.Time { return f.clock },
+				Refresher: &Refresher{Store: f.store, Now: func() time.Time { return f.clock }},
+			}
+			w := &Worker{Queue: f.store.Jobs(), Owner: "test", Handlers: jobs.Handlers()}
+			if err := jobs.Schedule(t.Context()); err != nil {
+				t.Fatal(err)
+			}
+			// The scan, the probe, the refresh and the borders.
+			if n := drain(t, w); n != 4 {
+				t.Errorf("jobs run = %d, want 4", n)
+			}
+			up := f.item("Up (2009)/Up (2009).mkv")
+			video := f.store.sources[up.ID][0].Streams[0]
+			if !tt.found {
+				if video.Crop != nil || borders.calls != 0 {
+					t.Errorf("crop = %v after %d detections, want = none", video.Crop, borders.calls)
+				}
+				return
+			}
+			if video.Crop == nil || *video.Crop != (core.Crop{Top: 140, Bottom: 140}) || borders.calls != 1 {
+				t.Errorf("crop = %v after %d detections", video.Crop, borders.calls)
+			}
+			// Looked for once: another run does nothing.
+			if _, err := jobs.borders(t.Context(), BordersJob(up.ID, f.clock)); err != nil || borders.calls != 1 {
+				t.Errorf("second run: %v, %d detections", err, borders.calls)
+			}
+		})
 	}
 }
 

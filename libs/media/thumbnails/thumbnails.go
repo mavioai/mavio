@@ -10,13 +10,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -40,11 +38,7 @@ type Input struct {
 }
 
 // File is an open video.
-type File interface {
-	io.ReaderAt
-	io.Closer
-	Stat() (fs.FileInfo, error)
-}
+type File = keyframes.File
 
 // LocalInput returns the input of the local file at path.
 func LocalInput(path string) Input {
@@ -186,7 +180,7 @@ func (m *Maker) Trickplay(ctx context.Context, in Input, v Video, o Options, dir
 // sampled writes the sheets from the keyframe at or before each
 // thumbnail's time, read through the file's index.
 func (m *Maker) sampled(ctx context.Context, in Input, v Video, o Options, dir string, count int) error {
-	f, size, s, err := openSampler(in)
+	f, size, s, err := keyframes.OpenSampler(in.Open)
 	if err != nil {
 		return err
 	}
@@ -196,28 +190,6 @@ func (m *Maker) sampled(ctx context.Context, in Input, v Video, o Options, dir s
 		at[i] = time.Duration(i) * o.Interval
 	}
 	return m.runSamples(ctx, s, f, size, at, TrickplayArgs("", Sampled, v, o, dir))
-}
-
-// openSampler opens a video and reads its index for sampling.
-func openSampler(in Input) (File, int64, keyframes.Sampler, error) {
-	if in.Open == nil {
-		return nil, 0, nil, keyframes.ErrNoIndex
-	}
-	f, err := in.Open()
-	if err != nil {
-		return nil, 0, nil, err
-	}
-	fi, err := f.Stat()
-	if err != nil {
-		f.Close()
-		return nil, 0, nil, err
-	}
-	s, err := keyframes.ReadSampler(f, fi.Size())
-	if err != nil {
-		f.Close()
-		return nil, 0, nil, err
-	}
-	return f, fi.Size(), s, nil
 }
 
 // runSamples runs ffmpeg with args on the stream of the keyframes at or
@@ -301,21 +273,15 @@ func (m *Maker) ChapterImages(ctx context.Context, in Input, at []time.Duration,
 // sampledImages writes the chapter images from keyframes read through the
 // file's index.
 func (m *Maker) sampledImages(ctx context.Context, in Input, at []time.Duration, v Video, width int, files []string) error {
-	f, size, s, err := openSampler(in)
+	f, size, s, err := keyframes.OpenSampler(in.Open)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	kf := s.Keyframes()
 	// Each picture is read and decoded once, for every time it serves.
-	var times []time.Duration
-	picture := make([]int, len(at))
-	for i, t := range at {
-		k := min(sort.Search(len(kf), func(k int) bool { return kf[k] >= t }), len(kf)-1)
-		if len(times) == 0 || times[len(times)-1] != kf[k] {
-			times = append(times, kf[k])
-		}
-		picture[i] = len(times) - 1
+	times, picture := keyframes.AtOrAfter(s.Keyframes(), at)
+	if len(times) == 0 {
+		return keyframes.ErrNoIndex
 	}
 	tmp, err := os.MkdirTemp(filepath.Dir(files[0]), ".new-")
 	if err != nil {

@@ -18,9 +18,12 @@ const JobBorders = "media.borders"
 const BordersPriority = -20
 
 // BorderDetector finds the black borders of a video file's frames, such as
-// by sampling them with ffmpeg.
+// by sampling them with ffmpeg: keyframes read through the container's
+// index, and for a file without one when seek is set, frames seeked to.
+// made is false when they are not found: the file has no index and seek
+// is unset.
 type BorderDetector interface {
-	Borders(ctx context.Context, f MediaFile, duration time.Duration, width, height int) (core.Crop, error)
+	Borders(ctx context.Context, f MediaFile, duration time.Duration, width, height int, seek bool) (crop core.Crop, made bool, err error)
 }
 
 // BordersJob returns a job finding the black borders of an item's video
@@ -71,11 +74,6 @@ func (j *Jobs) borders(ctx context.Context, job core.Job) ([]core.Job, error) {
 		if err != nil {
 			return nil, ignoreGone(err)
 		}
-		if !policy.Samples {
-			// The borders stay unknown where the storage policy allows no
-			// sampling.
-			continue
-		}
 		if j.Scanner != nil && j.Scanner.QuietGate != nil {
 			if err := j.Scanner.QuietGate.PauseOrCancel(ctx); err != nil {
 				return nil, err
@@ -85,10 +83,15 @@ func (j *Jobs) borders(ctx context.Context, job core.Job) ([]core.Job, error) {
 		if err != nil {
 			return nil, fmt.Errorf("borders of %s: %w", src.Path, err)
 		}
-		crop, err := j.Borders.Borders(ctx, f, src.Duration, st.Width, st.Height)
+		// The borders of a file without an index stay unknown where the
+		// storage policy allows no seeks.
+		crop, made, err := j.Borders.Borders(ctx, f, src.Duration, st.Width, st.Height, policy.Samples)
 		_ = f.Close()
 		if err != nil {
 			return nil, fmt.Errorf("borders of %s: %w", src.Path, err)
+		}
+		if !made {
+			continue
 		}
 		found[src.Path] = crop
 	}

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"math/bits"
 	"sort"
 	"time"
@@ -28,6 +29,56 @@ type Sampler interface {
 	// at or before it, presented at that time: r is the file of size bytes
 	// the index was read from.
 	WriteSamples(ctx context.Context, w io.Writer, r io.ReaderAt, size int64, at []time.Duration) error
+}
+
+// File is an open file sampled through its index.
+type File interface {
+	io.ReaderAt
+	io.Closer
+	Stat() (fs.FileInfo, error)
+}
+
+// OpenSampler opens a file with open, which nil leaves without an index,
+// and reads its index with [ReadSampler]; the file stays open with the
+// sampler, with its size.
+func OpenSampler(open func() (File, error)) (File, int64, Sampler, error) {
+	if open == nil {
+		return nil, 0, nil, ErrNoIndex
+	}
+	f, err := open()
+	if err != nil {
+		return nil, 0, nil, err
+	}
+	fi, err := f.Stat()
+	if err != nil {
+		f.Close()
+		return nil, 0, nil, err
+	}
+	s, err := ReadSampler(f, fi.Size())
+	if err != nil {
+		f.Close()
+		return nil, 0, nil, err
+	}
+	return f, fi.Size(), s, nil
+}
+
+// AtOrAfter returns, for each time of at, which must increase, the
+// keyframe at or after it among keyframes, else the last, and the
+// distinct ones of those in order with the index of each time's among
+// them. Pictures of times so taken show what follows each time.
+func AtOrAfter(keyframes, at []time.Duration) (distinct []time.Duration, of []int) {
+	if len(keyframes) == 0 {
+		return nil, nil
+	}
+	of = make([]int, len(at))
+	for i, t := range at {
+		k := min(sort.Search(len(keyframes), func(k int) bool { return keyframes[k] >= t }), len(keyframes)-1)
+		if len(distinct) == 0 || distinct[len(distinct)-1] != keyframes[k] {
+			distinct = append(distinct, keyframes[k])
+		}
+		of[i] = len(distinct) - 1
+	}
+	return distinct, of
 }
 
 // ReadSampler reads the index of the first video track of a Matroska, WebM
