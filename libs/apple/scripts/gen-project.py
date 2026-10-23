@@ -89,6 +89,8 @@ PLATFORMS = {
             # The microphone, for the assistant's voice sessions.
             "ENABLE_RESOURCE_ACCESS_AUDIO_INPUT": "YES",
             "ENABLE_USER_SELECTED_FILES": "readonly",
+            # The player's screenshots, saved in the Pictures folder.
+            "ENABLE_FILE_ACCESS_PICTURE_FOLDER": "readwrite",
             "INFOPLIST_KEY_LSApplicationCategoryType": '"public.app-category.entertainment"',
             "INFOPLIST_KEY_NSPrincipalClass": "NSApplication",
             # As on the iPhone: plain HTTP on the local network, links of the

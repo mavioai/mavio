@@ -1,6 +1,7 @@
 import AVFoundation
 import AVKit
 import AetherEngine
+import CoreImage
 import Observation
 
 /// What the player's controls ask instead of the player while it follows a
@@ -41,6 +42,19 @@ public final class Player {
     public private(set) var failure: String?
     /// The speed.
     public private(set) var rate: Float = 1
+    /// The volume, from 0 to 1, kept from one item to the next.
+    public private(set) var volume: Float = 1
+    /// Whether the sound is muted, kept from one item to the next.
+    public private(set) var isMuted = false
+    /// How much later the subtitles AetherEngine hands over show, in
+    /// seconds.
+    public var subtitleOffset: TimeInterval = 0
+    /// How much later the sound comes than the picture, in seconds, on
+    /// AetherEngine.
+    public private(set) var audioOffset: TimeInterval = 0
+    /// The unique ID of the audio device AVPlayer plays to, nil for the
+    /// system's.
+    public private(set) var audioDevice: String?
     /// AetherEngine's subtitle cues, which the overlay draws.
     public private(set) var cues: [SubtitleCue] = []
     /// The source time the cues are drawn against.
@@ -60,6 +74,9 @@ public final class Player {
     /// Playing's and the remote's ask instead, its speed staying the
     /// group's; nil while it plays on its own.
     public var group: (any PlayerGroup)?
+    /// The server's thumbnail sheets of what plays, which the scrubber's
+    /// pictures come from first; the app sets them with each item.
+    @ObservationIgnored public var trickplay: TrickplaySheets?
     /// Now Playing and the remote commands, which the app gives the item.
     @ObservationIgnored public private(set) lazy var nowPlaying = NowPlaying(player: self)
 
@@ -69,6 +86,8 @@ public final class Player {
         @ObservationIgnored private var aetherPictureInPicture: AetherPictureInPicture?
     #endif
     @ObservationIgnored private var endObserver: NSObjectProtocol?
+    /// AVPlayer's frames, for the frame shown now.
+    @ObservationIgnored private var videoOutput: AVPlayerItemVideoOutput?
     /// The file AVPlayer plays directly, whose pictures the scrubber shows.
     @ObservationIgnored private var thumbnails: Thumbnails?
     /// The still being fetched after a paused seek.
@@ -102,9 +121,19 @@ public final class Player {
 
     private func loadAVPlayer(_ media: Media) async {
         let item = AVPlayerItem(url: media.url)
+        let output = AVPlayerItemVideoOutput(pixelBufferAttributes: [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+        ])
+        item.add(output)
+        videoOutput = output
         let player = AVPlayer(playerItem: item)
         player.allowsExternalPlayback = true
         player.defaultRate = rate
+        player.volume = volume
+        player.isMuted = isMuted
+        #if os(macOS)
+            player.audioOutputDeviceUniqueID = audioDevice
+        #endif
         avPlayer = player
         engine = .avPlayer
         if media.url.pathExtension.lowercased() != "m3u8" { thumbnails = Thumbnails(asset: item.asset) }
@@ -145,13 +174,16 @@ public final class Player {
     private func loadAether(_ media: Media) async {
         do {
             let engine = try AetherEngine()
+            engine.volume = isMuted ? 0 : volume
             aether = engine
             self.engine = .aether
+            // ASS tracks keep their event lines, which libass draws.
+            var options = LoadOptions(preserveASSMarkup: true)
+            options.audioDelaySeconds = audioOffset
             _ = try await engine.load(
                 url: media.url,
                 startPosition: media.start > 0 ? media.start : nil,
-                // ASS tracks keep their event lines, which libass draws.
-                options: LoadOptions(preserveASSMarkup: true),
+                options: options,
                 audioSourceStreamIndex: media.audioStream.map(Int32.init)
             )
             if let file = media.subtitleFile {
@@ -188,6 +220,8 @@ public final class Player {
             if d.isFinite, d > 0 { duration = d }
             isPlaying = player.timeControlStatus != .paused
             isBuffering = player.timeControlStatus == .waitingToPlayAtSpecifiedRate || item.status == .unknown
+            let size = item.presentationSize
+            if size.width > 0, size.height > 0, size != videoSize { videoSize = size }
             if item.status == .failed, failure == nil {
                 failure = item.error?.localizedDescription ?? "AVPlayer failed"
             }
@@ -195,7 +229,7 @@ public final class Player {
             if !isSeeking { currentTime = engine.clock.currentTime }
             duration = engine.duration
             cues = engine.subtitleCues
-            cueTime = engine.clock.sourceTime
+            cueTime = engine.clock.sourceTime - subtitleOffset
             updateStyledSubtitles(engine)
             let size = CGSize(
                 width: Double(engine.sourceVideoWidth) * engine.sourceVideoPixelAspectRatio,
@@ -289,14 +323,32 @@ public final class Player {
         nowPlaying.sync(force: true)
     }
 
-    /// A small picture of a position, for the scrubber: AetherEngine's from
-    /// what it has read, or a file's that AVPlayer plays directly; nil for
-    /// HLS on AVPlayer and while none is at hand.
+    /// A small picture of a position, for the scrubber: from the server's
+    /// thumbnail sheets, else AetherEngine's from what it has read, or a
+    /// file's that AVPlayer plays directly; nil for HLS on AVPlayer without
+    /// sheets and while none is at hand.
     public func thumbnail(at seconds: TimeInterval) async -> CGImage? {
+        if let trickplay, let image = await trickplay.thumbnail(at: seconds) { return image }
         if let engine = aether {
             return await engine.scrubThumbnail(atSeconds: seconds, maxWidth: 320)
         }
         return await thumbnails?.image(at: seconds)
+    }
+
+    /// The frame shown now, at the video's size, for Live Text and
+    /// screenshots; nil while there is none.
+    public func frame() async -> CGImage? {
+        if let engine = aether {
+            let width = max(Int(videoSize.width), 640)
+            return await engine.scrubPreviewFrame(atSeconds: currentTime, refined: true, maxWidth: width) {
+                false
+            }?.image
+        }
+        guard let output = videoOutput, let item = avPlayer?.currentItem,
+            let buffer = output.copyPixelBuffer(forItemTime: item.currentTime(), itemTimeForDisplay: nil)
+        else { return nil }
+        let image = CIImage(cvPixelBuffer: buffer)
+        return CIContext().createCGImage(image, from: image.extent)
     }
 
     /// Shows the frame at a position AetherEngine moved to while paused, which
@@ -338,6 +390,46 @@ public final class Player {
         }
         aether?.setRate(rate)
         nowPlaying.sync()
+    }
+
+    /// Sets the volume, from 0 to 1, which unmutes.
+    public func setVolume(_ volume: Float) {
+        self.volume = min(max(volume, 0), 1)
+        isMuted = false
+        applyVolume()
+    }
+
+    /// Mutes or unmutes the sound.
+    public func setMuted(_ muted: Bool) {
+        isMuted = muted
+        applyVolume()
+    }
+
+    /// Whether the subtitles' and the sound's offsets apply: AetherEngine
+    /// draws its subtitles and times its sound, AVPlayer does both itself.
+    public var canOffset: Bool { aether != nil }
+
+    /// Has the sound come later than the picture by seconds, or earlier.
+    public func setAudioOffset(_ seconds: TimeInterval) {
+        audioOffset = seconds
+        aether?.setAudioDelay(seconds)
+    }
+
+    /// Whether the sound's device can be chosen: AVPlayer's can.
+    public var canChooseAudioDevice: Bool { avPlayer != nil }
+
+    /// Plays the sound to the device of a unique ID, nil for the system's.
+    public func setAudioDevice(_ id: String?) {
+        audioDevice = id
+        #if os(macOS)
+            avPlayer?.audioOutputDeviceUniqueID = id
+        #endif
+    }
+
+    private func applyVolume() {
+        avPlayer?.volume = volume
+        avPlayer?.isMuted = isMuted
+        aether?.volume = isMuted ? 0 : volume
     }
 
     /// Whether Picture in Picture can start.
@@ -391,6 +483,7 @@ public final class Player {
         poll = nil
         if let endObserver { NotificationCenter.default.removeObserver(endObserver) }
         endObserver = nil
+        videoOutput = nil
         avPlayer?.pause()
         avPlayer?.replaceCurrentItem(with: nil)
         avPlayer = nil

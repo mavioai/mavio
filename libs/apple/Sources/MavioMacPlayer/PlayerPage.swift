@@ -8,9 +8,15 @@
     /// a controller of the title, the timeline, play and pause, seeking, the
     /// next episode, the Watch Together group's chip while the player
     /// follows one, the subtitles, the audio, Picture in Picture and full
-    /// screen. Space and K play and pause, the arrows and J and L seek, F
-    /// puts the window in full screen and Escape takes it out; a click plays
-    /// and pauses, a double click puts the window in full screen.
+    /// screen, with the volume, the speed, and the window floating on top.
+    /// Space and K play and pause, left and right and J and L seek, up and
+    /// down set the volume and M mutes, [ and ] change the speed and \
+    /// resets it, Z and X move the subtitles, S saves a screenshot in the
+    /// Pictures folder and ⇧S copies it, F puts the window in full screen
+    /// and Escape takes it out; a click plays and pauses, a double click
+    /// puts the window in full screen, the wheel and trackpad seek and set
+    /// the volume, and a pinch resizes the window. The window keeps the
+    /// video's aspect, and a paused picture's text can be selected.
     ///
     /// In television mode (docs/tv.md §7) the controller is the title, the
     /// timeline and a row of buttons — the group's chip, the next episode,
@@ -23,7 +29,10 @@
     final class PlayerPage: Page {
         /// The pickers of television mode's side panel, and of the desktop's
         /// menus.
-        private enum Picker { case subtitles, audio }
+        private enum Picker { case subtitles, audio, speed }
+
+        /// What a gesture of the wheel or trackpad changes.
+        private enum ScrollAxis { case seek, volume }
 
         /// What television mode's focus is on: nothing, the picture taking
         /// the keys; a button of the controller's row; a choice of the panel.
@@ -52,8 +61,30 @@
         private var controllerShown = true
         private var menuOpen = false
         private var scrubbing: TimeInterval?
+        /// Whether a drag of the seek bar paused what played, which plays
+        /// on as it ends.
+        private var resumeAfterScrub = false
+        /// What a gesture of the wheel or trackpad changes, taken at its
+        /// start.
+        private var scrollAxis: ScrollAxis?
+        /// Where the wheel or trackpad seeks to.
+        private var scrollTarget: TimeInterval?
+        /// Whether the wheel's or trackpad's seek is on its way.
+        private var scrollSeeking = false
+        /// Whether the gesture seeking has ended, for the playback to go on.
+        private var scrollEnded = true
+        /// Whether a trackpad's seek paused what played, which plays on as
+        /// it ends.
+        private var resumeAfterScroll = false
+        /// The video's size the window was last fitted to.
+        private var fittedSize = CGSize.zero
+        /// How far a pinch has gone in full screen, and whether it entered
+        /// or left full screen already.
+        private var pinch: CGFloat = 0
+        private var pinchDone = false
         private var stopped = false
         private var wasPlaying = false
+        private var wasBuffering = false
         private var lastFailure: String?
         private var lastEnded = false
         private var panel: Picker?
@@ -66,19 +97,34 @@
         private var reportTask: Task<Void, Never>?
         private var hideTask: Task<Void, Never>?
         private var clickTask: Task<Void, Never>?
+        private var previewTask: Task<Void, Never>?
         private var stateObserver: Observer?
         private var timeObserver: Observer?
 
         // MARK: Views
 
         private let picture: PictureView
+        private let liveText = LiveTextView()
+        /// Where the paused picture's text was looked for, nil while it plays.
+        private var liveTextAt: TimeInterval?
         private let spinner = NSProgressIndicator()
         private let controller = PassThroughView()
         private let statusHolder = PassThroughView()
         private let seriesLabel: NSTextField
         private let titleLabel: NSTextField
         // The desktop's controller.
-        private let slider = NSSlider()
+        private let seekBar = SeekBar()
+        private let preview: ScrubPreview
+        private let notice: PlayerNotice
+        private let muteButton: IconButton
+        private let speedButton: IconButton
+        private let floatButton: IconButton
+        private let volumeSlider = NSSlider()
+        /// The controls the pointer keeps showing while it is over them.
+        private var controlsArea: NSView?
+        private var previewLeading: NSLayoutConstraint?
+        private var previewAbove: NSLayoutConstraint?
+        private var previewBelow: NSLayoutConstraint?
         private let elapsedLabel: NSTextField
         private let remainingLabel: NSTextField
         private let playButton: IconButton
@@ -120,6 +166,11 @@
             subtitlesButton = IconButton("subtitles", MavioStrings.playerSubtitles, fill: false) {}
             audioButton = IconButton("audio", MavioStrings.playerAudio, fill: false) {}
             pictureInPictureButton = IconButton("pictureInPicture", MavioStrings.playerPictureInPicture) {}
+            preview = ScrubPreview(theme: theme)
+            notice = PlayerNotice(theme: theme)
+            muteButton = IconButton("volume", MavioStrings.playerMute) {}
+            speedButton = IconButton("speed", MavioStrings.playerSpeed, fill: false) {}
+            floatButton = IconButton("pin", MavioStrings.playerFloatOnTop, fill: false) {}
             timeline = TimelineBar(theme: theme)
             tvGroup = MavioButton("", icon: "users", kind: .artworkSecondary, theme: theme)
             tvNext = MavioButton(MavioStrings.playerNextEpisode, icon: "next", kind: .artworkSecondary, theme: theme)
@@ -153,10 +204,23 @@
                 self.poke()
             }
             root.onClick = { [weak self] in self?.clicked($0) }
+            root.onExit = { [weak self] in
+                guard let self, !self.theme.isTV else { return }
+                self.pointerLeft()
+            }
+            root.onMagnify = { [weak self] in
+                guard let self, !self.theme.isTV else { return }
+                self.pinched($0)
+            }
+            root.onScroll = { [weak self] in
+                guard let self, !self.theme.isTV else { return }
+                self.scrolled($0)
+            }
             root.onWindow = { [weak self] window in
                 guard let self else { return }
                 if let window {
                     window.makeFirstResponder(self.view)
+                    if !self.theme.isTV { self.applyFloating() }
                 } else {
                     // The window closed, or another video took its place.
                     self.stop()
@@ -164,6 +228,7 @@
             }
             view = root
             root.addFilling(picture)
+            if !theme.isTV, LiveTextView.isSupported { root.addFilling(liveText) }
             spinner.style = .spinning
             spinner.controlSize = .large
             spinner.isDisplayedWhenStopped = false
@@ -173,28 +238,29 @@
             if theme.isTV { buildTV() } else { buildDesktop() }
             controller.addFilling(statusHolder)
             if theme.isTV { buildPanel(in: root) }
+            root.addSubview(notice)
+            NSLayoutConstraint.activate([
+                notice.topAnchor.constraint(equalTo: root.topAnchor, constant: 40),
+                notice.leadingAnchor.constraint(equalTo: root.leadingAnchor, constant: MavioSpacing.s20),
+            ])
         }
 
         private func buildDesktop() {
             controller.addFilling(
                 ShadeView([(0, 0.5), (0.2, 0), (0.6, 0), (1, 0.8)]))
             let titles = NSStackView.vertical([seriesLabel, titleLabel], spacing: MavioSpacing.s2)
-            slider.controlSize = .small
-            slider.minValue = 0
-            slider.maxValue = 1
-            slider.isContinuous = true
-            slider.refusesFirstResponder = true
-            slider.trackFillColor = .white
-            slider.target = self
-            slider.action = #selector(scrub)
-            slider.setAccessibilityLabel(MavioStrings.playerPosition)
-            slider.setContentHuggingPriority(.init(1), for: .horizontal)
-            slider.setContentCompressionResistancePriority(.init(1), for: .horizontal)
+            seekBar.onHover = { [weak self] in self?.hover($0, at: $1) }
+            seekBar.onScrubStart = { [weak self] in self?.scrubStarted() }
+            seekBar.onScrub = { [weak self] in
+                self?.scrubbing = $0
+                self?.timeChanged()
+            }
+            seekBar.onScrubEnd = { [weak self] in self?.scrubEnded(at: $0) }
             for label in [elapsedLabel, remainingLabel] {
                 label.setContentCompressionResistancePriority(.required, for: .horizontal)
                 label.setContentHuggingPriority(.required, for: .horizontal)
             }
-            let timeRow = NSStackView.horizontal([elapsedLabel, slider, remainingLabel], spacing: MavioSpacing.s12)
+            let timeRow = NSStackView.horizontal([elapsedLabel, seekBar, remainingLabel], spacing: MavioSpacing.s12)
             let seekBack = IconButton("seekBack", MavioStrings.playerSeekBack(count: 10)) { [weak self] in
                 self?.seek(by: -10)
             }
@@ -216,12 +282,31 @@
                 self.showMenu(.audio, from: self.audioButton)
             }
             pictureInPictureButton.onPress = { [weak self] in self?.player.togglePictureInPicture() }
+            muteButton.onPress = { [weak self] in self?.toggleMute() }
+            speedButton.onPress = { [weak self] in
+                guard let self else { return }
+                self.showMenu(.speed, from: self.speedButton)
+            }
+            floatButton.onPress = { [weak self] in self?.toggleFloating() }
+            volumeSlider.controlSize = .small
+            volumeSlider.minValue = 0
+            volumeSlider.maxValue = 1
+            volumeSlider.isContinuous = true
+            volumeSlider.refusesFirstResponder = true
+            volumeSlider.trackFillColor = .white
+            volumeSlider.target = self
+            volumeSlider.action = #selector(volumeSlid)
+            volumeSlider.setAccessibilityLabel(MavioStrings.playerVolume)
+            volumeSlider.widthAnchor.constraint(equalToConstant: 80).isActive = true
             let buttons = NSStackView.horizontal(
                 [
-                    seekBack, playButton, seekForward, nextButton, groupButton, Spacer(),
-                ] + assistantButton() + [subtitlesButton, audioButton, pictureInPictureButton, fullScreen],
+                    seekBack, playButton, seekForward, muteButton, volumeSlider, nextButton, groupButton, Spacer(),
+                ] + assistantButton() + [
+                    speedButton, subtitlesButton, audioButton, floatButton, pictureInPictureButton, fullScreen,
+                ],
                 spacing: MavioSpacing.s16)
             let bottom = NSStackView.vertical([titles, timeRow, buttons], spacing: MavioSpacing.s12)
+            controlsArea = bottom
             controller.addSubview(bottom)
             NSLayoutConstraint.activate([
                 bottom.leadingAnchor.constraint(equalTo: controller.leadingAnchor, constant: MavioSpacing.s24),
@@ -231,6 +316,12 @@
                 timeRow.widthAnchor.constraint(equalTo: bottom.widthAnchor),
                 buttons.widthAnchor.constraint(equalTo: bottom.widthAnchor),
             ])
+            controller.addSubview(preview)
+            previewLeading = preview.leadingAnchor.constraint(equalTo: controller.leadingAnchor)
+            previewAbove = preview.bottomAnchor.constraint(equalTo: seekBar.topAnchor, constant: -MavioSpacing.s8)
+            previewBelow = preview.topAnchor.constraint(equalTo: seekBar.bottomAnchor, constant: MavioSpacing.s8)
+            previewLeading?.isActive = true
+            previewAbove?.isActive = true
         }
 
         private func buildTV() {
@@ -270,6 +361,11 @@
 
         override func viewDidLoad() {
             super.viewDidLoad()
+            let defaults = UserDefaults.standard
+            player.setVolume(defaults.object(forKey: DeviceSetting.playerVolume) as? Float ?? 1)
+            player.setMuted(defaults.bool(forKey: DeviceSetting.playerMuted))
+            player.setAudioOffset(defaults.double(forKey: DeviceSetting.audioOffset))
+            updateVolume()
             updateDetails()
             stateObserver = Observer { [weak self] in self?.playerChanged() }
             groupObserver = Observer { [weak self] in
@@ -284,6 +380,11 @@
             }
         }
 
+        override func viewDidLayout() {
+            super.viewDidLayout()
+            liftSubtitles()
+        }
+
         override func viewDidAppear() {
             super.viewDidAppear()
             view.window?.makeFirstResponder(view)
@@ -294,6 +395,10 @@
         /// Follows the player's state: the button, the spinner, the
         /// controller, and the failures and the end, as they come.
         private func playerChanged() {
+            let size = player.videoSize
+            if size.width > 0, size.height > 0, size != fittedSize {
+                Task { [weak self] in self?.fitWindow(to: size) }
+            }
             let playing = player.isPlaying
             let buffering = player.isBuffering
             let failed = player.failure
@@ -302,6 +407,13 @@
             playButton.set(
                 playing ? "pause" : "play", playing ? MavioStrings.playerPause : MavioStrings.playerPlay)
             if buffering && failure == nil { spinner.startAnimation(nil) } else { spinner.stopAnimation(nil) }
+            if playing != wasPlaying || buffering != wasBuffering {
+                wasBuffering = buffering
+                Task { [weak self] in
+                    guard let self else { return }
+                    self.updateLiveText(at: self.player.currentTime)
+                }
+            }
             if playing != wasPlaying {
                 wasPlaying = playing
                 updateController()
@@ -320,6 +432,9 @@
         private func timeChanged() {
             let duration = player.duration
             let position = scrubbing ?? player.currentTime
+            updateLiveText(at: position)
+            // The time is told only while the controller shows it.
+            guard controllerShown else { return }
             if theme.isTV {
                 timeline.set(position: position, duration: duration)
                 return
@@ -327,8 +442,7 @@
             elapsedLabel.stringValue = clock(position)
             remainingLabel.stringValue = "-" + clock(max(duration - position, 0))
             guard scrubbing == nil else { return }
-            slider.maxValue = max(duration, 1)
-            slider.doubleValue = min(position, max(duration, 1))
+            seekBar.set(position: position, duration: duration)
         }
 
         private func playerFailed(_ message: String) {
@@ -378,6 +492,7 @@
             tvSubtitles.isHidden = !hasSubtitles
             tvAudio.isHidden = !hasAudio
             tvRow.isHidden = group == nil && !hasNext && !hasSubtitles && !hasAudio
+            seekBar.set(chapters: source?.chapters.map(\.start) ?? [])
             if case .row = focus, rowButtons.isEmpty { setFocus(.picture) }
         }
 
@@ -437,7 +552,11 @@
             let visible = controls || failure != nil || (!theme.isTV && !player.isPlaying)
             guard visible != controllerShown else { return }
             controllerShown = visible
-            if visible { controller.isHidden = false }
+            if visible {
+                controller.isHidden = false
+                timeChanged()
+            }
+            liftSubtitles()
             nonisolated(unsafe) weak var page = self
             NSAnimationContext.runAnimationGroup { context in
                 context.duration = MavioDuration.fast
@@ -461,9 +580,37 @@
             hideTask = Task { [weak self] in
                 try? await Task.sleep(for: .seconds(MavioDuration.controlsHide))
                 guard !Task.isCancelled, let self else { return }
+                if self.pointerOverControls {
+                    self.scheduleHide()
+                    return
+                }
                 self.setControls(false)
                 if !self.theme.isTV { NSCursor.setHiddenUntilMouseMoves(true) }
             }
+        }
+
+        /// Keeps text subtitles above the controls while they show.
+        private func liftSubtitles() {
+            guard !theme.isTV, let area = controlsArea else { return }
+            let top = picture.convert(area.bounds, from: area).minY
+            picture.subtitleLift = controllerShown ? picture.bounds.height - top + MavioSpacing.s8 : 0
+        }
+
+        /// Whether the pointer is over the controls, which stay while it is.
+        private var pointerOverControls: Bool {
+            guard !theme.isTV, let area = controlsArea, let window = view.window, window.isKeyWindow else {
+                return false
+            }
+            let point = area.convert(window.mouseLocationOutsideOfEventStream, from: nil)
+            return area.bounds.contains(point)
+        }
+
+        /// The pointer left the window: the controls hide at once while it
+        /// plays.
+        private func pointerLeft() {
+            guard controls, player.isPlaying, !menuOpen, scrubbing == nil, failure == nil else { return }
+            hideTask?.cancel()
+            setControls(false)
         }
 
         // MARK: Keys and pointer
@@ -477,6 +624,8 @@
             switch event.keyCode {
             case 123: seek(by: -5)
             case 124: seek(by: 5)
+            case 126: changeVolume(by: 0.05)
+            case 125: changeVolume(by: -0.05)
             case 53:
                 guard let window = view.window, window.styleMask.contains(.fullScreen) else { return false }
                 window.toggleFullScreen(nil)
@@ -486,6 +635,13 @@
                 case "j": seek(by: -10)
                 case "l": seek(by: 10)
                 case "f": toggleFullScreen()
+                case "m": toggleMute()
+                case "s": screenshot(copy: event.modifierFlags.contains(.shift))
+                case "[": stepRate(up: false)
+                case "]": stepRate(up: true)
+                case "\\": setRate(1)
+                case "z" where player.canOffset: offsetSubtitles(to: player.subtitleOffset - 0.1)
+                case "x" where player.canOffset: offsetSubtitles(to: player.subtitleOffset + 0.1)
                 default: return false
                 }
             }
@@ -597,8 +753,10 @@
             }
             clickTask = Task { [weak self] in
                 try? await Task.sleep(for: .seconds(NSEvent.doubleClickInterval))
-                guard !Task.isCancelled else { return }
-                self?.toggle()
+                guard !Task.isCancelled, let self else { return }
+                self.toggle()
+                // The click shows the pointer no more than a move would.
+                if !self.controls { NSCursor.setHiddenUntilMouseMoves(true) }
             }
         }
 
@@ -622,21 +780,363 @@
             return [AssistantButton(assistant: assistant, theme: theme, side: 36, size: 22, color: .white)]
         }
 
-        @objc private func scrub(_ sender: NSSlider) {
-            let target = sender.doubleValue
-            scrubbing = target
-            timeChanged()
-            guard NSApp.currentEvent?.type == .leftMouseUp else {
-                hideTask?.cancel()
+        // MARK: Offsets, speed and floating
+
+        /// Shows the subtitles seconds later, or earlier.
+        private func offsetSubtitles(to seconds: TimeInterval) {
+            player.subtitleOffset = (seconds * 10).rounded() / 10
+            notice.show("subtitles", "\(MavioStrings.playerSubtitleOffset) \(Self.offsetLabel(player.subtitleOffset))")
+        }
+
+        /// Has the sound come seconds later, or earlier, kept for the
+        /// next videos as it is the setup's.
+        private func offsetAudio(to seconds: TimeInterval) {
+            let offset = (seconds * 10).rounded() / 10
+            player.setAudioOffset(offset)
+            UserDefaults.standard.set(offset, forKey: DeviceSetting.audioOffset)
+            notice.show("audio", "\(MavioStrings.playerAudioOffset) \(Self.offsetLabel(offset))")
+        }
+
+        private func setRate(_ rate: Float) {
+            guard !grouped else { return }
+            player.setRate(min(max(rate, 0.25), 4))
+            notice.show("speed", Self.rateLabel(player.rate))
+        }
+
+        /// Moves the speed to the next of the menu's speeds up or down.
+        private func stepRate(up: Bool) {
+            let rates: [Float] = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
+            let rate = player.rate
+            let next = up ? rates.first { $0 > rate + 0.01 } : rates.last { $0 < rate - 0.01 }
+            setRate(next ?? rate)
+        }
+
+        /// Keeps the window above the others, or no longer.
+        private func toggleFloating() {
+            let floats = !UserDefaults.standard.bool(forKey: DeviceSetting.playerFloats)
+            UserDefaults.standard.set(floats, forKey: DeviceSetting.playerFloats)
+            applyFloating()
+        }
+
+        private func applyFloating() {
+            let floats = UserDefaults.standard.bool(forKey: DeviceSetting.playerFloats)
+            view.window?.level = floats ? .floating : .normal
+            floatButton.set("pin", MavioStrings.playerFloatOnTop, fill: floats)
+        }
+
+        private static func offsetLabel(_ seconds: TimeInterval) -> String {
+            seconds == 0 ? "0 s" : String(format: "%+.1f s", seconds)
+        }
+
+        private static func rateLabel(_ rate: Float) -> String {
+            rate == 1 ? "1×" : "\(rate.formatted(.number.precision(.fractionLength(0...2))))×"
+        }
+
+        // MARK: Live Text and screenshots
+
+        /// Looks for the text of the picture once it stays paused at a
+        /// place, and lets it go as it plays or moves.
+        private func updateLiveText(at position: TimeInterval) {
+            guard !theme.isTV, LiveTextView.isSupported else { return }
+            guard !player.isPlaying, !player.isBuffering, player.duration > 0, scrubbing == nil else {
+                if liveTextAt != nil {
+                    liveTextAt = nil
+                    liveText.clear()
+                }
                 return
             }
+            if let at = liveTextAt, abs(at - position) < 0.05 { return }
+            liveTextAt = position
+            liveText.analyze { [weak self] in await self?.player.frame() }
+        }
+
+        /// Saves the picture in the Pictures folder, or copies it.
+        private func screenshot(copy: Bool) {
+            let name = "\(itemTitle) \(clock(player.currentTime))"
+            Task { [weak self] in
+                guard let self, let image = await self.player.frame() else { return }
+                if copy {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.writeObjects([NSImage(cgImage: image, size: .zero)])
+                    self.notice.show("copy", MavioStrings.playerScreenshotCopied)
+                    return
+                }
+                guard let data = NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]),
+                    let folder = FileManager.default.urls(for: .picturesDirectory, in: .userDomainMask).first
+                else { return }
+                let base = name.replacing("/", with: "-").replacing(":", with: ".")
+                var url = folder.appending(path: base + ".png")
+                var n = 2
+                while FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) {
+                    url = folder.appending(path: "\(base) \(n).png")
+                    n += 1
+                }
+                do {
+                    try data.write(to: url)
+                    self.notice.show("photos", MavioStrings.playerScreenshotSaved)
+                } catch {
+                    self.notice.show("error", error.localizedDescription)
+                }
+            }
+        }
+
+        // MARK: The window
+
+        /// Locks the window to the video's aspect and sizes it: at a pixel
+        /// a pixel for its first video, keeping its area for the next,
+        /// about its center and within the screen's visible frame.
+        private func fitWindow(to size: CGSize) {
+            guard let window = view.window, !window.styleMask.contains(.fullScreen) else { return }
+            let first = fittedSize == .zero
+            fittedSize = size
+            window.contentAspectRatio = size
+            let current = window.contentRect(forFrameRect: window.frame).size
+            var target: CGSize
+            if first {
+                target = window.convertFromBacking(NSRect(origin: .zero, size: size)).size
+            } else {
+                let scale = (current.width * current.height / (size.width * size.height)).squareRoot()
+                target = CGSize(width: size.width * scale, height: size.height * scale)
+            }
+            resize(window, to: target)
+        }
+
+        /// Resizes the window's content about its center to size, of the
+        /// video's aspect, no smaller than the window allows and no larger
+        /// than the screen's visible frame.
+        private func resize(_ window: NSWindow, to size: CGSize) {
+            guard size.width > 0, size.height > 0 else { return }
+            var target = size
+            if let visible = (window.screen ?? NSScreen.main)?.visibleFrame {
+                let most = window.contentRect(forFrameRect: visible).size
+                let shrink = min(1, most.width / target.width, most.height / target.height)
+                target = CGSize(width: target.width * shrink, height: target.height * shrink)
+            }
+            let least = window.contentMinSize
+            let grow = max(1, least.width / target.width, least.height / target.height)
+            target = CGSize(width: (target.width * grow).rounded(), height: (target.height * grow).rounded())
+            let old = window.frame
+            var frame = window.frameRect(forContentRect: NSRect(origin: .zero, size: target))
+            frame.origin = NSPoint(x: old.midX - frame.width / 2, y: old.midY - frame.height / 2)
+            if let visible = (window.screen ?? NSScreen.main)?.visibleFrame {
+                frame.origin.x = min(max(frame.minX, visible.minX), visible.maxX - frame.width)
+                frame.origin.y = min(max(frame.minY, visible.minY), visible.maxY - frame.height)
+            }
+            window.setFrame(frame, display: true)
+        }
+
+        /// A pinch resizes the window about its center; pinching out past
+        /// the screen enters full screen, and pinching in full screen
+        /// leaves it.
+        private func pinched(_ event: NSEvent) {
+            guard let window = view.window else { return }
+            if event.phase.contains(.began) {
+                pinch = 0
+                pinchDone = false
+            }
+            guard !pinchDone, event.phase.intersection([.ended, .cancelled]).isEmpty else { return }
+            if window.styleMask.contains(.fullScreen) {
+                pinch += event.magnification
+                if pinch < -0.15 {
+                    pinchDone = true
+                    window.toggleFullScreen(nil)
+                }
+                return
+            }
+            let current = window.contentRect(forFrameRect: window.frame).size
+            let factor = 1 + event.magnification
+            let target = CGSize(width: current.width * factor, height: current.height * factor)
+            if event.magnification > 0, let visible = window.screen?.visibleFrame {
+                let most = window.contentRect(forFrameRect: visible).size
+                if current.width >= most.width - 1 || current.height >= most.height - 1 {
+                    pinch += event.magnification
+                    if pinch > 0.15 {
+                        pinchDone = true
+                        window.toggleFullScreen(nil)
+                    }
+                    return
+                }
+            }
+            resize(window, to: target)
+        }
+
+        // MARK: The volume
+
+        /// Changes the volume by an amount, unmuting, with a tap of the
+        /// trackpad as it reaches all of it.
+        private func changeVolume(by amount: Float) {
+            let old = player.isMuted ? 0 : player.volume
+            let new = min(max(old + amount, 0), 1)
+            player.setVolume(new)
+            if new == 1, old < 1 {
+                NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+            }
+            volumeChanged()
+        }
+
+        private func toggleMute() {
+            player.setMuted(!player.isMuted)
+            volumeChanged()
+        }
+
+        @objc private func volumeSlid(_ sender: NSSlider) {
+            player.setVolume(Float(sender.doubleValue))
+            volumeChanged()
+        }
+
+        /// Keeps the volume for the next videos and tells it.
+        private func volumeChanged() {
+            UserDefaults.standard.set(player.volume, forKey: DeviceSetting.playerVolume)
+            UserDefaults.standard.set(player.isMuted, forKey: DeviceSetting.playerMuted)
+            updateVolume()
+            let level = player.isMuted ? 0 : Double(player.volume)
+            notice.show(level == 0 ? "mute" : "volume", "\(Int((level * 100).rounded()))%", level: level)
+        }
+
+        private func updateVolume() {
+            let muted = player.isMuted || player.volume == 0
+            muteButton.set(muted ? "mute" : "volume", muted ? MavioStrings.playerUnmute : MavioStrings.playerMute)
+            volumeSlider.doubleValue = player.isMuted ? 0 : Double(player.volume)
+        }
+
+        // MARK: The wheel and trackpad
+
+        /// The wheel and trackpad: sideways seeks and up and down sets the
+        /// volume, which of them taken at a gesture's start, and over the
+        /// seek bar always seeking. A trackpad's seek pauses until the
+        /// fingers lift; the momentum after moves nothing.
+        private func scrolled(_ event: NSEvent) {
+            guard event.momentumPhase.isEmpty else { return }
+            let gesture = !event.phase.isEmpty
+            if event.phase.contains(.began) { scrollAxis = nil }
+            if gesture, !event.phase.intersection([.ended, .cancelled]).isEmpty {
+                scrollAxis = nil
+                scrollEnded = true
+                finishScroll()
+                return
+            }
+            // How the fingers or the wheel moved, whichever way the system scrolls.
+            let inverted = event.isDirectionInvertedFromDevice
+            let right = Double(inverted ? event.scrollingDeltaX : -event.scrollingDeltaX)
+            let up = Double(inverted ? -event.scrollingDeltaY : event.scrollingDeltaY)
+            guard right != 0 || up != 0 else { return }
+            let overBar =
+                controllerShown && seekBar.bounds.contains(seekBar.convert(event.locationInWindow, from: nil))
+            if !gesture || scrollAxis == nil {
+                scrollAxis = overBar || abs(right) > abs(up) ? .seek : .volume
+            }
+            let precise = event.hasPreciseScrollingDeltas
+            switch scrollAxis {
+            case .seek:
+                let delta = overBar && abs(up) > abs(right) ? up : right
+                if scrollTarget == nil {
+                    scrollEnded = !gesture
+                    resumeAfterScroll = gesture && player.isPlaying && !grouped
+                    if resumeAfterScroll { player.pause() }
+                }
+                let duration = player.duration
+                let target = min(
+                    max((scrollTarget ?? player.currentTime) + delta * (precise ? 0.25 : 5), 0),
+                    duration > 0 ? duration : .infinity)
+                scrollTarget = target
+                notice.show(
+                    delta >= 0 ? "seekForward" : "seekBack", "\(clock(target)) / \(clock(duration))",
+                    level: duration > 0 ? target / duration : nil)
+                seekToScrollTarget()
+            case .volume:
+                changeVolume(by: Float(up) * (precise ? 0.005 : 0.05))
+            case nil:
+                break
+            }
+        }
+
+        /// Seeks to where the wheel or trackpad points, one seek at a time,
+        /// the last place it pointed to once the one on its way is done.
+        private func seekToScrollTarget() {
+            guard !scrollSeeking, let target = scrollTarget else { return }
+            scrollSeeking = true
+            Task { [weak self] in
+                guard let self else { return }
+                await self.player.seek(to: target)
+                self.scrollSeeking = false
+                if let latest = self.scrollTarget, latest != target {
+                    self.seekToScrollTarget()
+                } else {
+                    self.finishScroll()
+                }
+            }
+        }
+
+        /// Once the gesture has ended and its seek is done, plays on what
+        /// it paused.
+        private func finishScroll() {
+            guard scrollEnded, !scrollSeeking else { return }
+            scrollTarget = nil
+            if resumeAfterScroll { player.play() }
+            resumeAfterScroll = false
+        }
+
+        // MARK: Seeking on the bar
+
+        /// A drag of the seek bar pauses what plays on its own, until it
+        /// ends.
+        private func scrubStarted() {
+            hideTask?.cancel()
+            scrubbing = player.currentTime
+            resumeAfterScrub = player.isPlaying && !grouped
+            if resumeAfterScrub { player.pause() }
+        }
+
+        private func scrubEnded(at target: TimeInterval) {
+            scrubbing = target
+            timeChanged()
             Task { [weak self] in
                 guard let self else { return }
                 await self.player.seek(to: target)
                 self.scrubbing = nil
+                if self.resumeAfterScrub { self.player.play() }
+                self.resumeAfterScrub = false
                 self.timeChanged()
                 self.scheduleHide()
             }
+        }
+
+        /// Shows over the pointer's time on the seek bar its picture, the
+        /// chapter's name and the time, above the bar or, where that does
+        /// not fit, below it; nil hides them.
+        private func hover(_ time: TimeInterval?, at x: CGFloat) {
+            previewTask?.cancel()
+            guard let time else {
+                preview.isHidden = true
+                return
+            }
+            let chapter = source?.chapters.last { $0.start <= time }?.name
+            preview.set(time: time, chapter: chapter)
+            if preview.isHidden { preview.set(picture: nil) }
+            preview.isHidden = false
+            place(preview: x)
+            previewTask = Task { [weak self] in
+                guard let self else { return }
+                let picture = await self.player.thumbnail(at: time)
+                guard !Task.isCancelled else { return }
+                if let picture {
+                    self.preview.set(picture: picture)
+                    self.place(preview: x)
+                }
+            }
+        }
+
+        private func place(preview x: CGFloat) {
+            controller.layoutSubtreeIfNeeded()
+            let size = preview.fittingSize
+            let center = seekBar.convert(NSPoint(x: x, y: 0), to: controller).x
+            let margin = MavioSpacing.s8
+            previewLeading?.constant = min(
+                max(center - size.width / 2, margin), max(controller.bounds.width - size.width - margin, margin))
+            // The controller is flipped: the bar's top is how much room there is above it.
+            let above = seekBar.convert(seekBar.bounds, to: controller).minY - MavioSpacing.s8 >= size.height + margin
+            previewAbove?.isActive = above
+            previewBelow?.isActive = !above
         }
 
         // MARK: Tracks
@@ -654,6 +1154,12 @@
                     let label = trackLabel(track.language, track.title, track.format, track.streamIndex)
                     menu.addItem(choice(label, track.streamIndex == current) { $0.subtitle = track.streamIndex })
                 }
+                if player.canOffset {
+                    menu.addItem(.separator())
+                    addOffset(to: menu, MavioStrings.playerSubtitleOffset, player.subtitleOffset) {
+                        $0.offsetSubtitles(to: $1)
+                    }
+                }
             case .audio:
                 let current = info?.audioStreamIndex ?? -1
                 menu.addItem(.sectionHeader(title: MavioStrings.playerAudio))
@@ -661,12 +1167,66 @@
                     let label = trackLabel(stream.language, stream.title, stream.codec, stream.index)
                     menu.addItem(choice(label, stream.index == current) { $0.audio = stream.index })
                 }
+                if player.canOffset {
+                    menu.addItem(.separator())
+                    addOffset(to: menu, MavioStrings.playerAudioOffset, player.audioOffset) {
+                        $0.offsetAudio(to: $1)
+                    }
+                }
+                if player.canChooseAudioDevice {
+                    menu.addItem(.separator())
+                    menu.addItem(.sectionHeader(title: MavioStrings.playerAudioDevice))
+                    let current = player.audioDevice
+                    let system = MenuAction(MavioStrings.playerAudioDeviceSystem) { [weak self] in
+                        self?.player.setAudioDevice(nil)
+                    }
+                    system.state = current == nil ? .on : .off
+                    menu.addItem(system)
+                    for device in AudioDevice.outputs() {
+                        let item = MenuAction(device.name) { [weak self] in self?.player.setAudioDevice(device.id) }
+                        item.state = device.id == current ? .on : .off
+                        menu.addItem(item)
+                    }
+                }
+            case .speed:
+                menu.addItem(.sectionHeader(title: MavioStrings.playerSpeed))
+                for rate: Float in [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2] {
+                    let item = MenuAction(Self.rateLabel(rate)) { [weak self] in self?.setRate(rate) }
+                    item.state = rate == player.rate ? .on : .off
+                    item.isEnabled = !grouped
+                    menu.addItem(item)
+                }
             }
             menuOpen = true
             hideTask?.cancel()
             menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height + 4), in: button)
             menuOpen = false
             poke()
+        }
+
+        /// An offset's header with its value, and the items moving it a
+        /// tenth of a second earlier or later and back to none.
+        private func addOffset(
+            to menu: NSMenu, _ title: String, _ value: TimeInterval,
+            set: @escaping @MainActor (PlayerPage, TimeInterval) -> Void
+        ) {
+            menu.addItem(.sectionHeader(title: "\(title): \(Self.offsetLabel(value))"))
+            menu.addItem(
+                MenuAction(MavioStrings.playerOffsetEarlier) { [weak self] in
+                    guard let self else { return }
+                    set(self, value - 0.1)
+                })
+            menu.addItem(
+                MenuAction(MavioStrings.playerOffsetLater) { [weak self] in
+                    guard let self else { return }
+                    set(self, value + 0.1)
+                })
+            let reset = MenuAction(MavioStrings.playerOffsetReset) { [weak self] in
+                guard let self else { return }
+                set(self, 0)
+            }
+            reset.isEnabled = value != 0
+            menu.addItem(reset)
         }
 
         private func choice(_ label: String, _ checked: Bool, pick: @escaping @MainActor (PlayerPage) -> Void)
@@ -712,6 +1272,9 @@
                             stream.index == chosen
                         ) { $0.audio = stream.index })
                 }
+            case .speed:
+                // Television mode has no speed picker.
+                break
             }
             panelRows = rows
             let heading = NSTextField.label(
@@ -807,6 +1370,12 @@
                 sources = details.sources.filter { $0.serverId == request.serverId && $0.itemId == request.itemId }
                 source = sources.first { $0.mediaSourceId == request.mediaSourceId } ?? sources.first
                 artwork = (details.card.thumb ?? details.card.poster).flatMap { URL(string: $0.url) }
+                player.trickplay = TrickplaySheets.choose(
+                    details.trickplay.map {
+                        TrickplaySheets(
+                            width: Int($0.width), height: Int($0.height), columns: Int($0.columns),
+                            rows: Int($0.rows), count: Int($0.count), interval: $0.interval, url: $0.url)
+                    }, wide: Int(ScrubPreview.width * 2))
                 player.nowPlaying.next = next.map { _ in
                     { [weak self] in self?.playNext() }
                 }
@@ -957,6 +1526,7 @@
             request = PlayRequest(serverId: request.serverId, itemId: episode.card.itemId, title: episode.card.title)
             itemTitle = episode.card.title
             (info, source, sources, audio, subtitle, next, series) = (nil, nil, [], nil, nil, nil, nil)
+            player.trickplay = nil
             triedAether = false
             if panel != nil { closePanel() }
             setFocus(.picture)
@@ -968,7 +1538,7 @@
         private func stop() {
             guard !stopped else { return }
             stopped = true
-            for task in [loadTask, reportTask, hideTask, clickTask] { task?.cancel() }
+            for task in [loadTask, reportTask, hideTask, clickTask, previewTask] { task?.cancel() }
             stateObserver?.cancel()
             timeObserver?.cancel()
             groupObserver?.cancel()
@@ -997,6 +1567,12 @@
         var onMove: (@MainActor () -> Void)?
         /// A click, of its count.
         var onClick: (@MainActor (Int) -> Void)?
+        /// The wheel or trackpad scrolled.
+        var onScroll: (@MainActor (NSEvent) -> Void)?
+        /// The trackpad pinched.
+        var onMagnify: (@MainActor (NSEvent) -> Void)?
+        /// The pointer left the view.
+        var onExit: (@MainActor () -> Void)?
         /// The view moved into a window, or out of one.
         var onWindow: (@MainActor (NSWindow?) -> Void)?
         private var tracking: NSTrackingArea?
@@ -1023,6 +1599,9 @@
 
         override func mouseMoved(with event: NSEvent) { onMove?() }
         override func mouseEntered(with event: NSEvent) { onMove?() }
+        override func scrollWheel(with event: NSEvent) { onScroll?(event) }
+        override func magnify(with event: NSEvent) { onMagnify?(event) }
+        override func mouseExited(with event: NSEvent) { onExit?() }
 
         override func mouseDown(with event: NSEvent) {
             window?.makeFirstResponder(self)

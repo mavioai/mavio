@@ -194,6 +194,72 @@
         func activate() { onPress?() }
     }
 
+    /// A brief notice at the player's top leading corner of what a key, the
+    /// wheel or a control changed — the volume, the speed, a seek — with a
+    /// bar of the level where there is one: shown at once, faded out a
+    /// second after the last change.
+    @MainActor
+    final class PlayerNotice: Box {
+        private let icon = IconView("volume", fill: true, size: 18, color: .white)
+        private let label: NSTextField
+        private let track = Box(fill: .white.withAlphaComponent(0.3), radius: 999)
+        private let filled = Box(fill: .white, radius: 999)
+        private var level: NSLayoutConstraint?
+        private var hideTask: Task<Void, Never>?
+
+        /// A notice in theme.
+        init(theme: Theme) {
+            label = .label("", theme.fonts.headline, color: .white)
+            label.font = NSFont.monospacedDigitSystemFont(ofSize: theme.fonts.headline.size, weight: .semibold)
+            super.init(fill: NSColor.black.withAlphaComponent(0.6), radius: 10)
+            track.addSubview(filled)
+            let row = NSStackView.horizontal([icon, label, track], spacing: MavioSpacing.s12)
+            addFilling(row, insets: NSEdgeInsets(top: 8, left: 14, bottom: 8, right: 16))
+            NSLayoutConstraint.activate([
+                track.widthAnchor.constraint(equalToConstant: 100),
+                track.heightAnchor.constraint(equalToConstant: 6),
+                filled.leadingAnchor.constraint(equalTo: track.leadingAnchor),
+                filled.topAnchor.constraint(equalTo: track.topAnchor),
+                filled.bottomAnchor.constraint(equalTo: track.bottomAnchor),
+            ])
+            alphaValue = 0
+            setAccessibilityElement(true)
+            setAccessibilityRole(.staticText)
+        }
+
+        @available(*, unavailable)
+        required init?(coder: NSCoder) { fatalError() }
+
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
+        /// Shows icon and text, with a bar at level, from 0 to 1, when given.
+        func show(_ icon: String, _ text: String, level: Double? = nil) {
+            self.icon.name = icon
+            label.stringValue = text
+            setAccessibilityLabel(text)
+            track.isHidden = level == nil
+            self.level?.isActive = false
+            self.level = filled.widthAnchor.constraint(
+                equalTo: track.widthAnchor, multiplier: max(CGFloat(min(level ?? 0, 1)), 0.0001))
+            self.level?.isActive = true
+            hideTask?.cancel()
+            NSAnimationContext.runAnimationGroup(
+                { context in
+                    context.duration = 0
+                    animator().alphaValue = 1
+                }, completionHandler: nil)
+            hideTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled, let self else { return }
+                NSAnimationContext.runAnimationGroup(
+                    { context in
+                        context.duration = 0.5
+                        self.animator().alphaValue = 0
+                    }, completionHandler: nil)
+            }
+        }
+    }
+
     /// A time as the player shows it: minutes and seconds, with hours
     /// before them from an hour on.
     func clock(_ t: TimeInterval) -> String {

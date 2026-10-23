@@ -23,6 +23,15 @@ public enum DeviceSetting {
     /// Whether each video plays in a window of its own, on the Mac, rather
     /// than in place of what plays in the player's window.
     public static let playerWindows = "player.windows"
+    /// The player's volume, from 0 to 1, on the Mac.
+    public static let playerVolume = "player.volume"
+    /// Whether the player's sound is muted, on the Mac.
+    public static let playerMuted = "player.muted"
+    /// Whether the Mac's player windows float above other windows.
+    public static let playerFloats = "player.floats"
+    /// How much later the audio plays than the picture, in seconds, on the
+    /// Mac: the delay of this device's speakers, which every video takes.
+    public static let audioOffset = "player.audioOffset"
     /// Whether the Mac shows television mode (docs/tv.md).
     public static let tvMode = "tvMode"
 }

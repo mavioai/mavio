@@ -58,6 +58,12 @@
 
         isolated deinit { release() }
 
+        /// How far above the view's bottom text subtitles keep, out of the
+        /// way of the controls while they show.
+        var subtitleLift: CGFloat = 0 {
+            didSet { if subtitleLift != oldValue { subtitleView.lift = subtitleLift } }
+        }
+
         /// Clicks go to what the picture lies in.
         override func hitTest(_ point: NSPoint) -> NSView? { nil }
 
@@ -133,7 +139,7 @@
             let scale = window?.backingScaleFactor ?? 2
             let size = CGSize(width: (picture.width * scale).rounded(), height: (picture.height * scale).rounded())
             guard size.width > 0, size.height > 0 else { return }
-            let rendered = renderer.render(at: engine.clock.sourceTime, size: size)
+            let rendered = renderer.render(at: engine.clock.sourceTime - player.subtitleOffset, size: size)
             if rendered.changed || styledView.layer?.contents == nil {
                 styledView.layer?.contents = rendered.image
             }
@@ -184,6 +190,8 @@
         private var time: TimeInterval = 0
         private var videoSize: CGSize = .zero
         private var showing: [Int] = []
+        /// How far above the bottom the text keeps.
+        var lift: CGFloat = 0 { didSet { needsDisplay = true } }
 
         init() {
             super.init(frame: .zero)
@@ -233,7 +241,7 @@
                     with: NSSize(width: width, height: .greatestFiniteMagnitude),
                     options: [.usesLineFragmentOrigin, .usesFontLeading]
                 ).size
-                let bottom = picture.maxY - picture.height * 0.06
+                let bottom = min(picture.maxY - picture.height * 0.06, bounds.height - lift)
                 string.draw(
                     with: NSRect(
                         x: picture.minX + 24, y: bottom - ceil(size.height), width: width, height: ceil(size.height)),

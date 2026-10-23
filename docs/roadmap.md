@@ -664,7 +664,8 @@ flowchart TD
   - [ ] The rest of the core's calls in the C ABI and the Go binding (`capi`, `proto`): Quick Connect, Home, libraries, details, search, playback and downloads, with the desktop app
   - [x] SyncPlay over the event stream: the device's session and its groups' updates through a listener of their own (`SyncPlayListener`), with the Android player that follows the group
   - [ ] Remote control commands over the event stream, with the players of the apps that take them
-  - [ ] The items' trickplay sheets and their sources' chapters in the core's models and its C ABI, which the Apple, Android and desktop apps' seek bars draw on ([Clients §6.5](clients.md)); the web UI reads them from `GetItem` itself
+  - [x] The items' trickplay sheets and their sources' chapters in the core's models, which the Apple and Android apps' seek bars draw on ([Clients §6.5](clients.md)); the web UI reads them from `GetItem` itself
+  - [ ] The same in the core's C ABI, for the desktop app's seek bar
 - [x] Web UI (`apps/web`, `libs/client-ts`): sign-in (password, first user, Quick Connect), several servers and their order, the merged Home, libraries with their Recommended and All tabs, hubs, search across servers, details with versions and copies on other servers, the player (direct play and HLS, audio and subtitle tracks, external players), authorizing devices; refreshed by the event streams
   - [x] Discovery and request screens, with P20
   - [x] Administration screens: libraries, users, devices, plugins, tasks, settings
@@ -690,7 +691,7 @@ flowchart TD
   - [x] Gestures: a press held plays at double speed with a 2× pill while held, and vertical swipes set the brightness on the left half and the volume on the right (through a hidden `MPVolumeView`, which also keeps the system's volume HUD away), with the level shown at the top
   - [x] External subtitle files while the server sends HLS: such a playback goes to AetherEngine, which plays the HLS and draws the file, ASS in its styles
   - [x] A redrawn frame when AetherEngine seeks while paused, and scrub thumbnails: the software path's still of the new position is drawn over the picture until it plays, and the scrubber shows a picture over its time, AetherEngine's from what it has read and AVAssetImageGenerator's for a file AVPlayer plays directly
-  - [ ] Scrub thumbnails from the server's trickplay sheets, for HLS on AVPlayer, HLS on AetherEngine's native path and positions not yet read: the shared core does not hand the sheets to the apps yet
+  - [ ] Scrub thumbnails from the server's trickplay sheets, for HLS on AVPlayer, HLS on AetherEngine's native path and positions not yet read: the core hands the sheets over and `Player.thumbnail(at:)` takes them first, as the Mac app's player does; the iPhone's player has yet to set `Player.trickplay`
   - [ ] Chapter marks on the scrubber, with the chapter's name over its time; the subtitle offset ([Clients §6.5](clients.md))
   - [ ] Live Text on a paused picture (VisionKit's `ImageAnalysisInteraction`), out of the controls' way and cleared as the picture changes size; on the iPad a trackpad's scroll seeking
   - [ ] The multicast entitlement, so that servers on the network are found on a device and not only in the simulator
@@ -861,14 +862,15 @@ flowchart TD
   - [ ] Mac app: the Features group and the assistant, whose voice buffers the microphone's audio from capture until the session's socket is open; television mode's menus in glass, its sheets reachable by focus, reporting an issue and the microphone's button; unsaved changes warned of on leaving a settings page; manual import from a title's Manage
   - [ ] Mac app: the AI conversations at the end of the AI section, as the web UI's, no longer in the Advanced group
   - [x] Mac app and desktop app: the sidebars dragged between 200 and 320 px, as the web UI's, the settings' sidebar of the Mac from 200 too
-  - [ ] Mac app: the player's seek bar with chapter marks and, over the time the pointer is on, a thumbnail with the chapter's name, from the trickplay sheets once the core hands them over and else `Player.thumbnail(at:)` for files AVPlayer plays directly; below the bar where it does not fit above; dragging pauses and releasing plays on
-  - [ ] Mac app: the wheel and trackpad in the player, sideways seeking and up and down setting the volume, the axis taken at the gesture's start, momentum only after a real end, and over the seek bar always seeking; a trackpad's seek pausing until it ends
-  - [ ] Mac app: the player's volume, and a notice of the volume, the speed and a seek at the top leading corner, shown at once and faded out after a second, with a haptic as the volume reaches 100 %
-  - [ ] Mac app: the player's window locked to the video's aspect (`contentAspectRatio`), sized to the video when it opens, at one pixel a pixel (`convertFromBacking`) within the screen's visible frame, keeping its area for the next entry; a pinch resizing it about its center, and in full screen entering or leaving it
-  - [ ] Mac app: the controls staying while the pointer is over them and hiding at once as it leaves the window, the pointer hidden again after a click, and the time's timer running only while the controls show
-  - [ ] Mac app: Live Text on a paused picture (VisionKit's `ImageAnalyzer` and `ImageAnalysisOverlayView`, the frame from `AVPlayerItemVideoOutput` or AetherEngine's layer), out of the controls' way; a screenshot copied or saved
-  - [ ] Mac app: the subtitle and audio offsets, the speed among the controls, and the audio's output device (`AVPlayer.audioOutputDeviceUniqueID`)
-  - [ ] Mac app: the player's window floating on top, and a mini player for music
+  - [x] Mac app: the player's seek bar with chapter marks and, over the time the pointer is on, a thumbnail with the chapter's name, from the trickplay sheets once the core hands them over and else `Player.thumbnail(at:)` for files AVPlayer plays directly; below the bar where it does not fit above; dragging pauses and releasing plays on
+  - [x] Mac app: the wheel and trackpad in the player, sideways seeking and up and down setting the volume, the axis taken at the gesture's start, momentum only after a real end, and over the seek bar always seeking; a trackpad's seek pausing until it ends
+  - [x] Mac app: the player's volume, and a notice of the volume, the speed and a seek at the top leading corner, shown at once and faded out after a second, with a haptic as the volume reaches 100 %
+  - [x] Mac app: the player's window locked to the video's aspect (`contentAspectRatio`), sized to the video when it opens, at one pixel a pixel (`convertFromBacking`) within the screen's visible frame, keeping its area for the next entry; a pinch resizing it about its center, and in full screen entering or leaving it
+  - [x] Mac app: the controls staying while the pointer is over them and hiding at once as it leaves the window, the pointer hidden again after a click, and the time's timer running only while the controls show
+  - [x] Mac app: Live Text on a paused picture (VisionKit's `ImageAnalyzer` and `ImageAnalysisOverlayView`, the frame from `AVPlayerItemVideoOutput` or AetherEngine's layer), out of the controls' way; a screenshot copied or saved
+  - [x] Mac app: the subtitle and audio offsets, the speed among the controls, and the audio's output device (`AVPlayer.audioOutputDeviceUniqueID`)
+  - [x] Mac app: the player's window floating on top, a pin among the controls, kept for the next windows
+  - [ ] Mac app: a mini player for music
   - [ ] Mac app: full screen as a state machine that reverts each step that fails, and changes of the screens compared before they are acted on, since EDR's brightness ramps send many
 - [ ] Desktop app (macOS, Windows and Linux)
   - [x] On macOS: sign-in as the web UI does (a link code with its QR code, and TV mode), Home, libraries, details and search, and the player: libmpv loaded with purego into MyGo's video element, direct play and HLS as the server decides from the app's capabilities, audio, subtitles and their offset, speed and quality, the keyboard shortcuts, progress reported and resumed, and the season's next episodes played in turn; tested with a fake core and a fake video, and libmpv's binding with a fixture
