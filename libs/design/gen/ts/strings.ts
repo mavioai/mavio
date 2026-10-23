@@ -226,6 +226,13 @@ export type MessageKey =
   | 'player.subtitles'
   | 'player.subtitlesOff'
   | 'player.subtitleOffset'
+  | 'player.audioOffset'
+  | 'player.offsetEarlier'
+  | 'player.offsetLater'
+  | 'player.offsetReset'
+  | 'player.audioDevice'
+  | 'player.audioDeviceSystem'
+  | 'player.floatOnTop'
   | 'player.speed'
   | 'player.fullScreen'
   | 'player.pictureInPicture'
@@ -236,6 +243,9 @@ export type MessageKey =
   | 'player.copyLink'
   | 'player.mute'
   | 'player.unmute'
+  | 'player.volume'
+  | 'player.screenshotSaved'
+  | 'player.screenshotCopied'
   | 'player.quality'
   | 'player.qualityAuto'
   | 'player.qualityOriginal'
@@ -2365,6 +2375,13 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.subtitles": "Subtitles",
     "player.subtitlesOff": "Off",
     "player.subtitleOffset": "Subtitle Offset",
+    "player.audioOffset": "Audio Offset",
+    "player.offsetEarlier": "Earlier",
+    "player.offsetLater": "Later",
+    "player.offsetReset": "Reset",
+    "player.audioDevice": "Audio Output",
+    "player.audioDeviceSystem": "System Default",
+    "player.floatOnTop": "Float on Top",
     "player.speed": "Speed",
     "player.fullScreen": "Full Screen",
     "player.pictureInPicture": "Picture in Picture",
@@ -2375,6 +2392,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.copyLink": "Copy Stream Link",
     "player.mute": "Mute",
     "player.unmute": "Unmute",
+    "player.volume": "Volume",
+    "player.screenshotSaved": "Screenshot saved to Pictures",
+    "player.screenshotCopied": "Screenshot copied",
     "player.quality": "Quality",
     "player.qualityAuto": "Automatic",
     "player.qualityOriginal": "Original",
@@ -4502,6 +4522,13 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.subtitles": "字幕",
     "player.subtitlesOff": "关闭",
     "player.subtitleOffset": "字幕偏移",
+    "player.audioOffset": "音频偏移",
+    "player.offsetEarlier": "提前",
+    "player.offsetLater": "延后",
+    "player.offsetReset": "复位",
+    "player.audioDevice": "音频输出",
+    "player.audioDeviceSystem": "系统默认",
+    "player.floatOnTop": "浮动在最前",
     "player.speed": "播放速度",
     "player.fullScreen": "全屏",
     "player.pictureInPicture": "画中画",
@@ -4512,6 +4539,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.copyLink": "复制串流链接",
     "player.mute": "静音",
     "player.unmute": "取消静音",
+    "player.volume": "音量",
+    "player.screenshotSaved": "截图已存到“图片”",
+    "player.screenshotCopied": "截图已拷贝",
     "player.quality": "画质",
     "player.qualityAuto": "自动",
     "player.qualityOriginal": "原画",

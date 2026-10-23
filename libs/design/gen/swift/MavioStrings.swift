@@ -768,6 +768,27 @@ public enum MavioStrings {
     /// Control shifting subtitles earlier or later.
     public static var playerSubtitleOffset: String { NSLocalizedString("player.subtitleOffset", bundle: .module, comment: "") }
 
+    /// Control shifting the sound earlier or later than the picture.
+    public static var playerAudioOffset: String { NSLocalizedString("player.audioOffset", bundle: .module, comment: "") }
+
+    /// Menu item shifting subtitles or the sound earlier by a tenth of a second.
+    public static var playerOffsetEarlier: String { NSLocalizedString("player.offsetEarlier", bundle: .module, comment: "") }
+
+    /// Menu item shifting subtitles or the sound later by a tenth of a second.
+    public static var playerOffsetLater: String { NSLocalizedString("player.offsetLater", bundle: .module, comment: "") }
+
+    /// Menu item putting an offset of subtitles or the sound back to none.
+    public static var playerOffsetReset: String { NSLocalizedString("player.offsetReset", bundle: .module, comment: "") }
+
+    /// Menu of the device the player's sound plays to.
+    public static var playerAudioDevice: String { NSLocalizedString("player.audioDevice", bundle: .module, comment: "") }
+
+    /// Choice of the audio output following the system's.
+    public static var playerAudioDeviceSystem: String { NSLocalizedString("player.audioDeviceSystem", bundle: .module, comment: "") }
+
+    /// Menu item keeping the player's window above other windows.
+    public static var playerFloatOnTop: String { NSLocalizedString("player.floatOnTop", bundle: .module, comment: "") }
+
     /// Picker of the playback speed.
     public static var playerSpeed: String { NSLocalizedString("player.speed", bundle: .module, comment: "") }
 
@@ -797,6 +818,15 @@ public enum MavioStrings {
 
     /// Accessibility label of the button restoring the sound.
     public static var playerUnmute: String { NSLocalizedString("player.unmute", bundle: .module, comment: "") }
+
+    /// Accessibility label of the player's volume slider.
+    public static var playerVolume: String { NSLocalizedString("player.volume", bundle: .module, comment: "") }
+
+    /// Notice of the player as a screenshot of the picture was saved in the Pictures folder.
+    public static var playerScreenshotSaved: String { NSLocalizedString("player.screenshotSaved", bundle: .module, comment: "") }
+
+    /// Notice of the player as a screenshot of the picture was copied.
+    public static var playerScreenshotCopied: String { NSLocalizedString("player.screenshotCopied", bundle: .module, comment: "") }
 
     /// Tab of the player's quality options.
     public static var playerQuality: String { NSLocalizedString("player.quality", bundle: .module, comment: "") }

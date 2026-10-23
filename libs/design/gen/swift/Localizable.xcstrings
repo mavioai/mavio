@@ -4177,6 +4177,132 @@
         }
       }
     },
+    "player.audioOffset": {
+      "comment": "Control shifting the sound earlier or later than the picture.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio Offset"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音频偏移"
+          }
+        }
+      }
+    },
+    "player.offsetEarlier": {
+      "comment": "Menu item shifting subtitles or the sound earlier by a tenth of a second.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Earlier"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提前"
+          }
+        }
+      }
+    },
+    "player.offsetLater": {
+      "comment": "Menu item shifting subtitles or the sound later by a tenth of a second.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Later"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "延后"
+          }
+        }
+      }
+    },
+    "player.offsetReset": {
+      "comment": "Menu item putting an offset of subtitles or the sound back to none.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复位"
+          }
+        }
+      }
+    },
+    "player.audioDevice": {
+      "comment": "Menu of the device the player's sound plays to.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio Output"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音频输出"
+          }
+        }
+      }
+    },
+    "player.audioDeviceSystem": {
+      "comment": "Choice of the audio output following the system's.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Default"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统默认"
+          }
+        }
+      }
+    },
+    "player.floatOnTop": {
+      "comment": "Menu item keeping the player's window above other windows.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Float on Top"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浮动在最前"
+          }
+        }
+      }
+    },
     "player.speed": {
       "comment": "Picker of the playback speed.",
       "extractionState": "manual",
@@ -4353,6 +4479,60 @@
           "stringUnit": {
             "state": "translated",
             "value": "取消静音"
+          }
+        }
+      }
+    },
+    "player.volume": {
+      "comment": "Accessibility label of the player's volume slider.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volume"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音量"
+          }
+        }
+      }
+    },
+    "player.screenshotSaved": {
+      "comment": "Notice of the player as a screenshot of the picture was saved in the Pictures folder.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screenshot saved to Pictures"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "截图已存到“图片”"
+          }
+        }
+      }
+    },
+    "player.screenshotCopied": {
+      "comment": "Notice of the player as a screenshot of the picture was copied.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screenshot copied"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "截图已拷贝"
           }
         }
       }

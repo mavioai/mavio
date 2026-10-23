@@ -241,6 +241,13 @@
     <string name="player_subtitles">字幕</string>
     <string name="player_subtitles_off">关闭</string>
     <string name="player_subtitle_offset">字幕偏移</string>
+    <string name="player_audio_offset">音频偏移</string>
+    <string name="player_offset_earlier">提前</string>
+    <string name="player_offset_later">延后</string>
+    <string name="player_offset_reset">复位</string>
+    <string name="player_audio_device">音频输出</string>
+    <string name="player_audio_device_system">系统默认</string>
+    <string name="player_float_on_top">浮动在最前</string>
     <string name="player_speed">播放速度</string>
     <string name="player_picture_in_picture">画中画</string>
     <string name="player_chapters">章节</string>
@@ -250,6 +257,9 @@
     <string name="player_copy_link">复制串流链接</string>
     <string name="player_mute">静音</string>
     <string name="player_unmute">取消静音</string>
+    <string name="player_volume">音量</string>
+    <string name="player_screenshot_saved">截图已存到“图片”</string>
+    <string name="player_screenshot_copied">截图已拷贝</string>
     <string name="player_quality">画质</string>
     <string name="player_quality_auto">自动</string>
     <string name="player_quality_original">原画</string>

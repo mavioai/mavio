@@ -473,6 +473,20 @@
     <string name="player_subtitles_off">Off</string>
     <!-- Control shifting subtitles earlier or later. -->
     <string name="player_subtitle_offset">Subtitle Offset</string>
+    <!-- Control shifting the sound earlier or later than the picture. -->
+    <string name="player_audio_offset">Audio Offset</string>
+    <!-- Menu item shifting subtitles or the sound earlier by a tenth of a second. -->
+    <string name="player_offset_earlier">Earlier</string>
+    <!-- Menu item shifting subtitles or the sound later by a tenth of a second. -->
+    <string name="player_offset_later">Later</string>
+    <!-- Menu item putting an offset of subtitles or the sound back to none. -->
+    <string name="player_offset_reset">Reset</string>
+    <!-- Menu of the device the player's sound plays to. -->
+    <string name="player_audio_device">Audio Output</string>
+    <!-- Choice of the audio output following the system's. -->
+    <string name="player_audio_device_system">System Default</string>
+    <!-- Menu item keeping the player's window above other windows. -->
+    <string name="player_float_on_top">Float on Top</string>
     <!-- Picker of the playback speed. -->
     <string name="player_speed">Speed</string>
     <!-- Moves the video into a floating window. -->
@@ -491,6 +505,12 @@
     <string name="player_mute">Mute</string>
     <!-- Accessibility label of the button restoring the sound. -->
     <string name="player_unmute">Unmute</string>
+    <!-- Accessibility label of the player's volume slider. -->
+    <string name="player_volume">Volume</string>
+    <!-- Notice of the player as a screenshot of the picture was saved in the Pictures folder. -->
+    <string name="player_screenshot_saved">Screenshot saved to Pictures</string>
+    <!-- Notice of the player as a screenshot of the picture was copied. -->
+    <string name="player_screenshot_copied">Screenshot copied</string>
     <!-- Tab of the player's quality options. -->
     <string name="player_quality">Quality</string>
     <!-- Quality limited only by what this device plays well. -->
