@@ -324,6 +324,14 @@ pub use self::__buffa::view::SourceView;
 #[doc(inline)]
 pub use self::__buffa::view::SourceOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ChapterView;
+#[doc(inline)]
+pub use self::__buffa::view::ChapterOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::TrickplayView;
+#[doc(inline)]
+pub use self::__buffa::view::TrickplayOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::AudioStreamView;
 #[doc(inline)]
 pub use self::__buffa::view::AudioStreamOwnedView;

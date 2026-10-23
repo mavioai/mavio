@@ -22601,6 +22601,13 @@ pub struct SourceView<'a> {
         'a,
         super::super::__buffa::view::AudioStreamView<'a>,
     >,
+    /// The file's chapters, in order, for a file of this server.
+    ///
+    /// Field 9: `chapters`
+    pub chapters: ::buffa::RepeatedView<
+        'a,
+        super::super::__buffa::view::ChapterView<'a>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for SourceView<'a> {
@@ -22702,6 +22709,24 @@ impl<'a> ::buffa::MessageView<'a> for SourceView<'a> {
                         )?,
                     );
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                ctx.register_element_memory(
+                    ::core::mem::size_of::<super::super::__buffa::view::ChapterView>(),
+                )?;
+                view.chapters
+                    .push(
+                        <super::super::__buffa::view::ChapterView as ::buffa::MessageView>::decode_view_ctx(
+                            sub,
+                            __sub_ctx,
+                        )?,
+                    );
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -22733,6 +22758,11 @@ impl<'a> ::buffa::MessageView<'a> for SourceView<'a> {
             container: self.container.to_string(),
             audio: self
                 .audio
+                .iter()
+                .map(|v| v.to_owned_from_source(__buffa_src))
+                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
+            chapters: self
+                .chapters
                 .iter()
                 .map(|v| v.to_owned_from_source(__buffa_src))
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
@@ -22778,6 +22808,14 @@ impl<'a> ::buffa::ViewEncode<'a> for SourceView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        for v in &self.chapters {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -22813,6 +22851,14 @@ impl<'a> ::buffa::ViewEncode<'a> for SourceView<'a> {
         for v in &self.audio {
             ::buffa::types::put_len_delimited_header(
                 8u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        for v in &self.chapters {
+            ::buffa::types::put_len_delimited_header(
+                9u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
@@ -22957,6 +23003,15 @@ impl SourceOwnedView {
     ) -> &::buffa::RepeatedView<'_, super::super::__buffa::view::AudioStreamView<'_>> {
         &self.0.reborrow().audio
     }
+    /// The file's chapters, in order, for a file of this server.
+    ///
+    /// Field 9: `chapters`
+    #[must_use]
+    pub fn chapters(
+        &self,
+    ) -> &::buffa::RepeatedView<'_, super::super::__buffa::view::ChapterView<'_>> {
+        &self.0.reborrow().chapters
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<SourceView<'static>>> for SourceOwnedView {
     fn from(inner: ::buffa::OwnedView<SourceView<'static>>) -> Self {
@@ -22977,6 +23032,605 @@ for SourceOwnedView {
 impl ::buffa::HasMessageView for super::super::Source {
     type View<'a> = SourceView<'a>;
     type ViewHandle = SourceOwnedView;
+}
+/// A chapter of a file.
+#[derive(Clone, Debug, Default)]
+pub struct ChapterView<'a> {
+    /// Where it starts, in milliseconds.
+    ///
+    /// Field 1: `start_ms`
+    pub start_ms: i64,
+    /// Field 2: `name`
+    pub name: &'a str,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for ChapterView<'a> {
+    type Owned = super::super::Chapter;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.start_ms = ::buffa::types::decode_int64(&mut cur)?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.name = ::buffa::types::borrow_str(&mut cur)?;
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::Chapter, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::Chapter, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::Chapter {
+            start_ms: self.start_ms,
+            name: self.name.to_string(),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for ChapterView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.start_ms != 0i64 {
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.start_ms) as u64;
+        }
+        if !self.name.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.name) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.start_ms != 0i64 {
+            ::buffa::types::put_int64_field(1u32, self.start_ms, buf);
+        }
+        if !self.name.is_empty() {
+            ::buffa::types::put_string_field(2u32, &self.name, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for ChapterView<'a> {
+    const PACKAGE: &'static str = "mavio.capi.v1";
+    const NAME: &'static str = "Chapter";
+    const FULL_NAME: &'static str = "mavio.capi.v1.Chapter";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.capi.v1.Chapter";
+}
+::buffa::impl_default_view_instance!(ChapterView);
+::buffa::impl_view_reborrow!(ChapterView);
+/** Self-contained, `'static` owned view of a `Chapter` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`ChapterView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ChapterView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct ChapterOwnedView(::buffa::OwnedView<ChapterView<'static>>);
+impl ChapterOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(ChapterOwnedView(::buffa::OwnedView::decode(bytes)?))
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ChapterOwnedView(::buffa::OwnedView::decode_with_options(bytes, opts)?),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::Chapter,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ChapterOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`ChapterView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &ChapterView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::Chapter {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Where it starts, in milliseconds.
+    ///
+    /// Field 1: `start_ms`
+    #[must_use]
+    pub fn start_ms(&self) -> i64 {
+        self.0.reborrow().start_ms
+    }
+    /// Field 2: `name`
+    #[must_use]
+    pub fn name(&self) -> &'_ str {
+        self.0.reborrow().name
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<ChapterView<'static>>>
+for ChapterOwnedView {
+    fn from(inner: ::buffa::OwnedView<ChapterView<'static>>) -> Self {
+        ChapterOwnedView(inner)
+    }
+}
+impl ::core::convert::From<ChapterOwnedView>
+for ::buffa::OwnedView<ChapterView<'static>> {
+    fn from(wrapper: ChapterOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<ChapterView<'static>>>
+for ChapterOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<ChapterView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::Chapter {
+    type View<'a> = ChapterView<'a>;
+    type ViewHandle = ChapterOwnedView;
+}
+/// Thumbnail sheets of one width for seeking: a thumbnail every interval,
+/// row by row, columns across and rows down a sheet, count in all; sheet n
+/// is at "{url}/{n}.jpg".
+#[derive(Clone, Debug, Default)]
+pub struct TrickplayView<'a> {
+    /// A thumbnail's width and height, in pixels.
+    ///
+    /// Field 1: `width`
+    pub width: i32,
+    /// Field 2: `height`
+    pub height: i32,
+    /// The thumbnails across and down a sheet.
+    ///
+    /// Field 3: `columns`
+    pub columns: i32,
+    /// Field 4: `rows`
+    pub rows: i32,
+    /// The thumbnails in all.
+    ///
+    /// Field 5: `count`
+    pub count: i32,
+    /// The time between thumbnails, in milliseconds.
+    ///
+    /// Field 6: `interval_ms`
+    pub interval_ms: i64,
+    /// The signed URL the sheets are under.
+    ///
+    /// Field 7: `url`
+    pub url: &'a str,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for TrickplayView<'a> {
+    type Owned = super::super::Trickplay;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.width = ::buffa::types::decode_int32(&mut cur)?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.height = ::buffa::types::decode_int32(&mut cur)?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.columns = ::buffa::types::decode_int32(&mut cur)?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.rows = ::buffa::types::decode_int32(&mut cur)?;
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.count = ::buffa::types::decode_int32(&mut cur)?;
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.interval_ms = ::buffa::types::decode_int64(&mut cur)?;
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.url = ::buffa::types::borrow_str(&mut cur)?;
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::Trickplay, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::Trickplay, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::Trickplay {
+            width: self.width,
+            height: self.height,
+            columns: self.columns,
+            rows: self.rows,
+            count: self.count,
+            interval_ms: self.interval_ms,
+            url: self.url.to_string(),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for TrickplayView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.width != 0i32 {
+            size += 1u64 + ::buffa::types::int32_encoded_len(self.width) as u64;
+        }
+        if self.height != 0i32 {
+            size += 1u64 + ::buffa::types::int32_encoded_len(self.height) as u64;
+        }
+        if self.columns != 0i32 {
+            size += 1u64 + ::buffa::types::int32_encoded_len(self.columns) as u64;
+        }
+        if self.rows != 0i32 {
+            size += 1u64 + ::buffa::types::int32_encoded_len(self.rows) as u64;
+        }
+        if self.count != 0i32 {
+            size += 1u64 + ::buffa::types::int32_encoded_len(self.count) as u64;
+        }
+        if self.interval_ms != 0i64 {
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.interval_ms) as u64;
+        }
+        if !self.url.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.url) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.width != 0i32 {
+            ::buffa::types::put_int32_field(1u32, self.width, buf);
+        }
+        if self.height != 0i32 {
+            ::buffa::types::put_int32_field(2u32, self.height, buf);
+        }
+        if self.columns != 0i32 {
+            ::buffa::types::put_int32_field(3u32, self.columns, buf);
+        }
+        if self.rows != 0i32 {
+            ::buffa::types::put_int32_field(4u32, self.rows, buf);
+        }
+        if self.count != 0i32 {
+            ::buffa::types::put_int32_field(5u32, self.count, buf);
+        }
+        if self.interval_ms != 0i64 {
+            ::buffa::types::put_int64_field(6u32, self.interval_ms, buf);
+        }
+        if !self.url.is_empty() {
+            ::buffa::types::put_string_field(7u32, &self.url, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for TrickplayView<'a> {
+    const PACKAGE: &'static str = "mavio.capi.v1";
+    const NAME: &'static str = "Trickplay";
+    const FULL_NAME: &'static str = "mavio.capi.v1.Trickplay";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.capi.v1.Trickplay";
+}
+::buffa::impl_default_view_instance!(TrickplayView);
+::buffa::impl_view_reborrow!(TrickplayView);
+/** Self-contained, `'static` owned view of a `Trickplay` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`TrickplayView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`TrickplayView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct TrickplayOwnedView(::buffa::OwnedView<TrickplayView<'static>>);
+impl TrickplayOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            TrickplayOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            TrickplayOwnedView(::buffa::OwnedView::decode_with_options(bytes, opts)?),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::Trickplay,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            TrickplayOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`TrickplayView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &TrickplayView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::Trickplay {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// A thumbnail's width and height, in pixels.
+    ///
+    /// Field 1: `width`
+    #[must_use]
+    pub fn width(&self) -> i32 {
+        self.0.reborrow().width
+    }
+    /// Field 2: `height`
+    #[must_use]
+    pub fn height(&self) -> i32 {
+        self.0.reborrow().height
+    }
+    /// The thumbnails across and down a sheet.
+    ///
+    /// Field 3: `columns`
+    #[must_use]
+    pub fn columns(&self) -> i32 {
+        self.0.reborrow().columns
+    }
+    /// Field 4: `rows`
+    #[must_use]
+    pub fn rows(&self) -> i32 {
+        self.0.reborrow().rows
+    }
+    /// The thumbnails in all.
+    ///
+    /// Field 5: `count`
+    #[must_use]
+    pub fn count(&self) -> i32 {
+        self.0.reborrow().count
+    }
+    /// The time between thumbnails, in milliseconds.
+    ///
+    /// Field 6: `interval_ms`
+    #[must_use]
+    pub fn interval_ms(&self) -> i64 {
+        self.0.reborrow().interval_ms
+    }
+    /// The signed URL the sheets are under.
+    ///
+    /// Field 7: `url`
+    #[must_use]
+    pub fn url(&self) -> &'_ str {
+        self.0.reborrow().url
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<TrickplayView<'static>>>
+for TrickplayOwnedView {
+    fn from(inner: ::buffa::OwnedView<TrickplayView<'static>>) -> Self {
+        TrickplayOwnedView(inner)
+    }
+}
+impl ::core::convert::From<TrickplayOwnedView>
+for ::buffa::OwnedView<TrickplayView<'static>> {
+    fn from(wrapper: TrickplayOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<TrickplayView<'static>>>
+for TrickplayOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<TrickplayView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::Trickplay {
+    type View<'a> = TrickplayView<'a>;
+    type ViewHandle = TrickplayOwnedView;
 }
 /// An audio stream of a file, to choose it.
 #[derive(Clone, Debug, Default)]
@@ -23363,6 +24017,13 @@ pub struct DetailsView<'a> {
     ///
     /// Field 16: `offline`
     pub offline: bool,
+    /// Its thumbnail sheets for seeking, one per width.
+    ///
+    /// Field 17: `trickplay`
+    pub trickplay: ::buffa::RepeatedView<
+        'a,
+        super::super::__buffa::view::TrickplayView<'a>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for DetailsView<'a> {
@@ -23597,6 +24258,24 @@ impl<'a> ::buffa::MessageView<'a> for DetailsView<'a> {
                         )?,
                     );
             }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                ctx.register_element_memory(
+                    ::core::mem::size_of::<super::super::__buffa::view::TrickplayView>(),
+                )?;
+                view.trickplay
+                    .push(
+                        <super::super::__buffa::view::TrickplayView as ::buffa::MessageView>::decode_view_ctx(
+                            sub,
+                            __sub_ctx,
+                        )?,
+                    );
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -23675,6 +24354,11 @@ impl<'a> ::buffa::MessageView<'a> for DetailsView<'a> {
                 .map(|v| v.to_owned_from_source(__buffa_src))
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
             offline: self.offline,
+            trickplay: self
+                .trickplay
+                .iter()
+                .map(|v| v.to_owned_from_source(__buffa_src))
+                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -23771,6 +24455,14 @@ impl<'a> ::buffa::ViewEncode<'a> for DetailsView<'a> {
         if self.offline {
             size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        for v in &self.trickplay {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -23864,6 +24556,14 @@ impl<'a> ::buffa::ViewEncode<'a> for DetailsView<'a> {
         }
         if self.offline {
             ::buffa::types::put_bool_field(16u32, self.offline, buf);
+        }
+        for v in &self.trickplay {
+            ::buffa::types::put_len_delimited_header(
+                17u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -24068,6 +24768,15 @@ impl DetailsOwnedView {
     #[must_use]
     pub fn offline(&self) -> bool {
         self.0.reborrow().offline
+    }
+    /// Its thumbnail sheets for seeking, one per width.
+    ///
+    /// Field 17: `trickplay`
+    #[must_use]
+    pub fn trickplay(
+        &self,
+    ) -> &::buffa::RepeatedView<'_, super::super::__buffa::view::TrickplayView<'_>> {
+        &self.0.reborrow().trickplay
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<DetailsView<'static>>>

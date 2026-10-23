@@ -799,6 +799,33 @@ message Source {
   string container = 7;
   // The file's audio streams, for a file of this server.
   repeated AudioStream audio = 8;
+  // The file's chapters, in order, for a file of this server.
+  repeated Chapter chapters = 9;
+}
+
+// A chapter of a file.
+message Chapter {
+  // Where it starts, in milliseconds.
+  int64 start_ms = 1;
+  string name = 2;
+}
+
+// Thumbnail sheets of one width for seeking: a thumbnail every interval,
+// row by row, columns across and rows down a sheet, count in all; sheet n
+// is at "{url}/{n}.jpg".
+message Trickplay {
+  // A thumbnail's width and height, in pixels.
+  int32 width = 1;
+  int32 height = 2;
+  // The thumbnails across and down a sheet.
+  int32 columns = 3;
+  int32 rows = 4;
+  // The thumbnails in all.
+  int32 count = 5;
+  // The time between thumbnails, in milliseconds.
+  int64 interval_ms = 6;
+  // The signed URL the sheets are under.
+  string url = 7;
 }
 
 // An audio stream of a file, to choose it.
@@ -842,6 +869,8 @@ message Details {
   repeated Card similar = 15;
   // Whether it comes from the offline store.
   bool offline = 16;
+  // Its thumbnail sheets for seeking, one per width.
+  repeated Trickplay trickplay = 17;
 }
 
 // What every server found, in the user's order of servers.

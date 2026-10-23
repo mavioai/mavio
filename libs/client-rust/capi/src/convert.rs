@@ -263,6 +263,29 @@ pub(crate) fn details(d: Details) -> pb::Details {
                         ..Default::default()
                     })
                     .collect(),
+                chapters: s
+                    .chapters
+                    .into_iter()
+                    .map(|c| pb::Chapter {
+                        start_ms: millis(c.start),
+                        name: c.name.unwrap_or_default(),
+                        ..Default::default()
+                    })
+                    .collect(),
+                ..Default::default()
+            })
+            .collect(),
+        trickplay: d
+            .trickplay
+            .into_iter()
+            .map(|t| pb::Trickplay {
+                width: t.width,
+                height: t.height,
+                columns: t.columns,
+                rows: t.rows,
+                count: t.count,
+                interval_ms: millis(t.interval),
+                url: t.url,
                 ..Default::default()
             })
             .collect(),

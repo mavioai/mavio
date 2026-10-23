@@ -12916,6 +12916,10 @@ pub struct Source {
     ///
     /// Field 8: `audio`
     pub audio: ::buffa::alloc::vec::Vec<AudioStream>,
+    /// The file's chapters, in order, for a file of this server.
+    ///
+    /// Field 9: `chapters`
+    pub chapters: ::buffa::alloc::vec::Vec<Chapter>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -12930,6 +12934,7 @@ impl ::core::fmt::Debug for Source {
             .field("size", &self.size)
             .field("container", &self.container)
             .field("audio", &self.audio)
+            .field("chapters", &self.chapters)
             .finish()
     }
 }
@@ -12991,6 +12996,14 @@ impl ::buffa::Message for Source {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        for v in &self.chapters {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -13025,6 +13038,14 @@ impl ::buffa::Message for Source {
         for v in &self.audio {
             ::buffa::types::put_len_delimited_header(
                 8u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        for v in &self.chapters {
+            ::buffa::types::put_len_delimited_header(
+                9u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
@@ -13104,6 +13125,18 @@ impl ::buffa::Message for Source {
                 ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
                 self.audio.push(elem);
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.chapters.push(elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -13120,11 +13153,343 @@ impl ::buffa::Message for Source {
         self.size = 0u64;
         self.container.clear();
         self.audio.clear();
+        self.chapters.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
 impl ::buffa::ExtensionSet for Source {
     const PROTO_FQN: &'static str = "mavio.capi.v1.Source";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// A chapter of a file.
+#[derive(Clone, PartialEq, Default)]
+pub struct Chapter {
+    /// Where it starts, in milliseconds.
+    ///
+    /// Field 1: `start_ms`
+    pub start_ms: i64,
+    /// Field 2: `name`
+    pub name: ::buffa::alloc::string::String,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for Chapter {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("Chapter")
+            .field("start_ms", &self.start_ms)
+            .field("name", &self.name)
+            .finish()
+    }
+}
+impl Chapter {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.capi.v1.Chapter";
+}
+::buffa::impl_default_instance!(Chapter);
+impl ::buffa::MessageName for Chapter {
+    const PACKAGE: &'static str = "mavio.capi.v1";
+    const NAME: &'static str = "Chapter";
+    const FULL_NAME: &'static str = "mavio.capi.v1.Chapter";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.capi.v1.Chapter";
+}
+impl ::buffa::Message for Chapter {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.start_ms != 0i64 {
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.start_ms) as u64;
+        }
+        if !self.name.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.name) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.start_ms != 0i64 {
+            ::buffa::types::put_int64_field(1u32, self.start_ms, buf);
+        }
+        if !self.name.is_empty() {
+            ::buffa::types::put_string_field(2u32, &self.name, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.start_ms = ::buffa::types::decode_int64(buf)?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.name, buf)?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.start_ms = 0i64;
+        self.name.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for Chapter {
+    const PROTO_FQN: &'static str = "mavio.capi.v1.Chapter";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// Thumbnail sheets of one width for seeking: a thumbnail every interval,
+/// row by row, columns across and rows down a sheet, count in all; sheet n
+/// is at "{url}/{n}.jpg".
+#[derive(Clone, PartialEq, Default)]
+pub struct Trickplay {
+    /// A thumbnail's width and height, in pixels.
+    ///
+    /// Field 1: `width`
+    pub width: i32,
+    /// Field 2: `height`
+    pub height: i32,
+    /// The thumbnails across and down a sheet.
+    ///
+    /// Field 3: `columns`
+    pub columns: i32,
+    /// Field 4: `rows`
+    pub rows: i32,
+    /// The thumbnails in all.
+    ///
+    /// Field 5: `count`
+    pub count: i32,
+    /// The time between thumbnails, in milliseconds.
+    ///
+    /// Field 6: `interval_ms`
+    pub interval_ms: i64,
+    /// The signed URL the sheets are under.
+    ///
+    /// Field 7: `url`
+    pub url: ::buffa::alloc::string::String,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for Trickplay {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("Trickplay")
+            .field("width", &self.width)
+            .field("height", &self.height)
+            .field("columns", &self.columns)
+            .field("rows", &self.rows)
+            .field("count", &self.count)
+            .field("interval_ms", &self.interval_ms)
+            .field("url", &self.url)
+            .finish()
+    }
+}
+impl Trickplay {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.capi.v1.Trickplay";
+}
+::buffa::impl_default_instance!(Trickplay);
+impl ::buffa::MessageName for Trickplay {
+    const PACKAGE: &'static str = "mavio.capi.v1";
+    const NAME: &'static str = "Trickplay";
+    const FULL_NAME: &'static str = "mavio.capi.v1.Trickplay";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.capi.v1.Trickplay";
+}
+impl ::buffa::Message for Trickplay {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.width != 0i32 {
+            size += 1u64 + ::buffa::types::int32_encoded_len(self.width) as u64;
+        }
+        if self.height != 0i32 {
+            size += 1u64 + ::buffa::types::int32_encoded_len(self.height) as u64;
+        }
+        if self.columns != 0i32 {
+            size += 1u64 + ::buffa::types::int32_encoded_len(self.columns) as u64;
+        }
+        if self.rows != 0i32 {
+            size += 1u64 + ::buffa::types::int32_encoded_len(self.rows) as u64;
+        }
+        if self.count != 0i32 {
+            size += 1u64 + ::buffa::types::int32_encoded_len(self.count) as u64;
+        }
+        if self.interval_ms != 0i64 {
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.interval_ms) as u64;
+        }
+        if !self.url.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.url) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.width != 0i32 {
+            ::buffa::types::put_int32_field(1u32, self.width, buf);
+        }
+        if self.height != 0i32 {
+            ::buffa::types::put_int32_field(2u32, self.height, buf);
+        }
+        if self.columns != 0i32 {
+            ::buffa::types::put_int32_field(3u32, self.columns, buf);
+        }
+        if self.rows != 0i32 {
+            ::buffa::types::put_int32_field(4u32, self.rows, buf);
+        }
+        if self.count != 0i32 {
+            ::buffa::types::put_int32_field(5u32, self.count, buf);
+        }
+        if self.interval_ms != 0i64 {
+            ::buffa::types::put_int64_field(6u32, self.interval_ms, buf);
+        }
+        if !self.url.is_empty() {
+            ::buffa::types::put_string_field(7u32, &self.url, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.width = ::buffa::types::decode_int32(buf)?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.height = ::buffa::types::decode_int32(buf)?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.columns = ::buffa::types::decode_int32(buf)?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.rows = ::buffa::types::decode_int32(buf)?;
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.count = ::buffa::types::decode_int32(buf)?;
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.interval_ms = ::buffa::types::decode_int64(buf)?;
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.url, buf)?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.width = 0i32;
+        self.height = 0i32;
+        self.columns = 0i32;
+        self.rows = 0i32;
+        self.count = 0i32;
+        self.interval_ms = 0i64;
+        self.url.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for Trickplay {
+    const PROTO_FQN: &'static str = "mavio.capi.v1.Trickplay";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -13376,6 +13741,10 @@ pub struct Details {
     ///
     /// Field 16: `offline`
     pub offline: bool,
+    /// Its thumbnail sheets for seeking, one per width.
+    ///
+    /// Field 17: `trickplay`
+    pub trickplay: ::buffa::alloc::vec::Vec<Trickplay>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -13398,6 +13767,7 @@ impl ::core::fmt::Debug for Details {
             .field("children", &self.children)
             .field("similar", &self.similar)
             .field("offline", &self.offline)
+            .field("trickplay", &self.trickplay)
             .finish()
     }
 }
@@ -13529,6 +13899,14 @@ impl ::buffa::Message for Details {
         if self.offline {
             size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        for v in &self.trickplay {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -13621,6 +13999,14 @@ impl ::buffa::Message for Details {
         }
         if self.offline {
             ::buffa::types::put_bool_field(16u32, self.offline, buf);
+        }
+        for v in &self.trickplay {
+            ::buffa::types::put_len_delimited_header(
+                17u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -13787,6 +14173,18 @@ impl ::buffa::Message for Details {
                 )?;
                 self.offline = ::buffa::types::decode_bool(buf)?;
             }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.trickplay.push(elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -13811,6 +14209,7 @@ impl ::buffa::Message for Details {
         self.children.clear();
         self.similar.clear();
         self.offline = false;
+        self.trickplay.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
