@@ -665,7 +665,7 @@ flowchart TD
   - [x] SyncPlay over the event stream: the device's session and its groups' updates through a listener of their own (`SyncPlayListener`), with the Android player that follows the group
   - [ ] Remote control commands over the event stream, with the players of the apps that take them
   - [x] The items' trickplay sheets and their sources' chapters in the core's models, which the Apple and Android apps' seek bars draw on ([Clients §6.5](clients.md)); the web UI reads them from `GetItem` itself
-  - [ ] The same in the core's C ABI, for the desktop app's seek bar
+  - [x] The same in the core's C ABI (`Source.chapters`, `Details.trickplay`), for the desktop app's seek bar
 - [x] Web UI (`apps/web`, `libs/client-ts`): sign-in (password, first user, Quick Connect), several servers and their order, the merged Home, libraries with their Recommended and All tabs, hubs, search across servers, details with versions and copies on other servers, the player (direct play and HLS, audio and subtitle tracks, external players), authorizing devices; refreshed by the event streams
   - [x] Discovery and request screens, with P20
   - [x] Administration screens: libraries, users, devices, plugins, tasks, settings
@@ -691,7 +691,7 @@ flowchart TD
   - [x] Gestures: a press held plays at double speed with a 2× pill while held, and vertical swipes set the brightness on the left half and the volume on the right (through a hidden `MPVolumeView`, which also keeps the system's volume HUD away), with the level shown at the top
   - [x] External subtitle files while the server sends HLS: such a playback goes to AetherEngine, which plays the HLS and draws the file, ASS in its styles
   - [x] A redrawn frame when AetherEngine seeks while paused, and scrub thumbnails: the software path's still of the new position is drawn over the picture until it plays, and the scrubber shows a picture over its time, AetherEngine's from what it has read and AVAssetImageGenerator's for a file AVPlayer plays directly
-  - [ ] Scrub thumbnails from the server's trickplay sheets, for HLS on AVPlayer, HLS on AetherEngine's native path and positions not yet read: the core hands the sheets over and `Player.thumbnail(at:)` takes them first, as the Mac app's player does; the iPhone's player has yet to set `Player.trickplay`
+  - [x] Scrub thumbnails from the server's trickplay sheets, for HLS on AVPlayer, HLS on AetherEngine's native path and positions not yet read: the core hands the sheets over, the iPhone's and the Mac's players set `Player.trickplay`, and `Player.thumbnail(at:)` takes them first
   - [ ] Chapter marks on the scrubber, with the chapter's name over its time; the subtitle offset ([Clients §6.5](clients.md))
   - [ ] Live Text on a paused picture (VisionKit's `ImageAnalysisInteraction`), out of the controls' way and cleared as the picture changes size; on the iPad a trackpad's scroll seeking
   - [ ] The multicast entitlement, so that servers on the network are found on a device and not only in the simulator
@@ -870,6 +870,7 @@ flowchart TD
   - [x] Mac app: Live Text on a paused picture (VisionKit's `ImageAnalyzer` and `ImageAnalysisOverlayView`, the frame from `AVPlayerItemVideoOutput` or AetherEngine's layer), out of the controls' way; a screenshot copied or saved
   - [x] Mac app: the subtitle and audio offsets, the speed among the controls, and the audio's output device (`AVPlayer.audioOutputDeviceUniqueID`)
   - [x] Mac app: the player's window floating on top, a pin among the controls, kept for the next windows
+  - [x] Mac app: the controller's buttons lit under the pointer, their tips and menus above them; Quality and Info menus as the web UI's tabs, the quality kept for the playback; Picture in Picture on AetherEngine as on AVPlayer
   - [ ] Mac app: a mini player for music
   - [ ] Mac app: full screen as a state machine that reverts each step that fails, and changes of the screens compared before they are acted on, since EDR's brightness ramps send many
 - [ ] Desktop app (macOS, Windows and Linux)

@@ -665,7 +665,7 @@ flowchart TD
   - [x] 经由事件流的 SyncPlay：设备的会话与其小组的更新经由专用的监听器（`SyncPlayListener`）送达，随跟随小组的 Android 播放器
   - [ ] 经由事件流的远程控制命令，随接收它们的应用播放器
   - [x] 核心的模型带上条目的 trickplay 拼图与其片源的章节，供 Apple 与 Android 应用的进度条使用（[客户端 §6.5](clients.zh-CN.md)）；Web UI 自行从 `GetItem` 读取
-  - [ ] 核心的 C ABI 同样带上它们，供桌面应用的进度条使用
+  - [x] 核心的 C ABI 同样带上它们（`Source.chapters`、`Details.trickplay`），供桌面应用的进度条使用
 - [x] Web UI（`apps/web`、`libs/client-ts`）：登录（密码、首个用户、Quick Connect）、多台服务器及其顺序、合并的首页、带推荐与全部标签的媒体库、推荐栏、跨服务器搜索、带版本与其他服务器副本的详情、播放器（直放与 HLS、音轨与字幕轨、外部播放器）、授权设备；由事件流刷新
   - [x] 发现与请求页面，随 P20
   - [x] 管理页面：媒体库、用户、设备、插件、任务、设置
@@ -691,7 +691,7 @@ flowchart TD
   - [x] 手势：长按时以两倍速播放并显示 2× 标记，左半边纵向滑动调节亮度、右半边调节音量（通过隐藏的 `MPVolumeView`，同时避开系统的音量提示），顶部显示当前值
   - [x] 服务端发送 HLS 时的外挂字幕文件：这样的播放交给 AetherEngine，由它播放 HLS 并绘制该文件，ASS 保留样式
   - [x] AetherEngine 暂停时跳转后重绘画面，以及拖动缩略图：软件路径在新位置的静帧盖在画面上直到播放，拖动条在时间上方显示画面，AetherEngine 的取自已读到的数据，AVPlayer 直接播放的文件由 AVAssetImageGenerator 生成
-  - [ ] 用服务器的 trickplay 拼图作拖动缩略图，用于 AVPlayer 播放的 HLS、AetherEngine 原生路径上的 HLS 以及尚未读到的位置：核心已交出拼图，`Player.thumbnail(at:)` 优先使用，Mac 应用的播放器已用上；iPhone 的播放器尚需设置 `Player.trickplay`
+  - [x] 用服务器的 trickplay 拼图作拖动缩略图，用于 AVPlayer 播放的 HLS、AetherEngine 原生路径上的 HLS 以及尚未读到的位置：核心交出拼图，iPhone 与 Mac 的播放器设置 `Player.trickplay`，`Player.thumbnail(at:)` 优先使用
   - [ ] 拖动条上的章节标记，在其时间上方显示章节名；字幕偏移（[客户端 §6.5](clients.zh-CN.md)）
   - [ ] 暂停画面上的实况文本（VisionKit 的 `ImageAnalysisInteraction`），避开控制器，画面尺寸变化时清除；iPad 上用触控板滚动跳转
   - [ ] 多播权限（entitlement），使真机而不只是模拟器能发现网络中的服务器
@@ -870,6 +870,7 @@ flowchart TD
   - [x] Mac 应用：暂停画面上的实况文本（VisionKit 的 `ImageAnalyzer` 与 `ImageAnalysisOverlayView`，画面取自 `AVPlayerItemVideoOutput` 或 AetherEngine 的图层），避开控制器；截图复制或保存
   - [x] Mac 应用：字幕与音频偏移、控制器中的倍速，以及音频输出设备（`AVPlayer.audioOutputDeviceUniqueID`）
   - [x] Mac 应用：播放器窗口置顶，控制器中的图钉按钮，之后的窗口沿用
+  - [x] Mac 应用：控制器的按钮在指针下高亮，其提示与菜单在按钮上方弹出；画质与信息菜单同 Web UI 的标签页，所选画质只用于本次播放；AetherEngine 与 AVPlayer 一样支持画中画
   - [ ] Mac 应用：音乐的迷你播放器
   - [ ] Mac 应用：全屏做成状态机，每一步失败时回退；屏幕变化先比较再处理，因为 EDR 的亮度渐变会发出大量通知
 - [ ] 桌面应用（macOS、Windows 与 Linux）
