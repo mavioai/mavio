@@ -50,6 +50,10 @@
         /// Whether television mode's focus is on it.
         public var isFocused = false { didSet { restyle() } }
 
+        /// Tells a page that shows its own tips that the pointer came over
+        /// the button, or left it.
+        public var onHover: (@MainActor (Bool) -> Void)?
+
         /// Starts or ends a conversation, as select does.
         public func activate() { assistant.tap() }
 
@@ -83,11 +87,13 @@
         override public func mouseEntered(with event: NSEvent) {
             hovering = true
             restyle()
+            onHover?(true)
         }
 
         override public func mouseExited(with event: NSEvent) {
             hovering = false
             restyle()
+            onHover?(false)
         }
 
         private func restyle() {

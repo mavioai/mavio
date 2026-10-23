@@ -1,4 +1,4 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
     import AVFoundation
     import AVKit
     import AetherEngine
@@ -35,7 +35,9 @@
             self.engine = engine
             super.init()
             controller.delegate = self
-            controller.canStartPictureInPictureAutomaticallyFromInline = true
+            #if os(iOS)
+                controller.canStartPictureInPictureAutomaticallyFromInline = true
+            #endif
         }
 
         /// Tells the window the playback changed, which it asks the software

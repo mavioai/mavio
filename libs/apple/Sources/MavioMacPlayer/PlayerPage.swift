@@ -29,7 +29,7 @@
     final class PlayerPage: Page {
         /// The pickers of television mode's side panel, and of the desktop's
         /// menus.
-        private enum Picker { case subtitles, audio, speed }
+        private enum Picker { case subtitles, audio, speed, quality, info }
 
         /// What a gesture of the wheel or trackpad changes.
         private enum ScrollAxis { case seek, volume }
@@ -55,6 +55,8 @@
         private var artwork: URL?
         private var audio: Int32?
         private var subtitle: Int32?
+        /// The quality picked for this playback, over the device's setting.
+        private var quality: PlaybackQuality?
         private var failure: String?
         private var triedAether = false
         private var controls = true
@@ -119,6 +121,9 @@
         private let muteButton: IconButton
         private let speedButton: IconButton
         private let floatButton: IconButton
+        private let qualityButton: IconButton
+        private let infoButton: IconButton
+        private let tip: PlayerTip
         private let volumeSlider = NSSlider()
         /// The controls the pointer keeps showing while it is over them.
         private var controlsArea: NSView?
@@ -171,6 +176,9 @@
             muteButton = IconButton("volume", MavioStrings.playerMute) {}
             speedButton = IconButton("speed", MavioStrings.playerSpeed, fill: false) {}
             floatButton = IconButton("pin", MavioStrings.playerFloatOnTop, fill: false) {}
+            qualityButton = IconButton("quality", MavioStrings.playerQuality, fill: false) {}
+            infoButton = IconButton("info", MavioStrings.playerInfo, fill: false) {}
+            tip = PlayerTip(theme: theme)
             timeline = TimelineBar(theme: theme)
             tvGroup = MavioButton("", icon: "users", kind: .artworkSecondary, theme: theme)
             tvNext = MavioButton(MavioStrings.playerNextEpisode, icon: "next", kind: .artworkSecondary, theme: theme)
@@ -288,6 +296,14 @@
                 self.showMenu(.speed, from: self.speedButton)
             }
             floatButton.onPress = { [weak self] in self?.toggleFloating() }
+            qualityButton.onPress = { [weak self] in
+                guard let self else { return }
+                self.showMenu(.quality, from: self.qualityButton)
+            }
+            infoButton.onPress = { [weak self] in
+                guard let self else { return }
+                self.showMenu(.info, from: self.infoButton)
+            }
             volumeSlider.controlSize = .small
             volumeSlider.minValue = 0
             volumeSlider.maxValue = 1
@@ -302,9 +318,20 @@
                 [
                     seekBack, playButton, seekForward, muteButton, volumeSlider, nextButton, groupButton, Spacer(),
                 ] + assistantButton() + [
-                    speedButton, subtitlesButton, audioButton, floatButton, pictureInPictureButton, fullScreen,
+                    speedButton, subtitlesButton, audioButton, qualityButton, infoButton, floatButton,
+                    pictureInPictureButton, fullScreen,
                 ],
                 spacing: MavioSpacing.s16)
+            for case let button as IconButton in buttons.arrangedSubviews {
+                let press = button.onPress
+                button.onPress = { [weak self] in
+                    self?.tip.hide()
+                    press()
+                }
+                button.onHover = { [weak self] button, on in
+                    if on { self?.tip.show(button.label, above: button) } else { self?.tip.hide() }
+                }
+            }
             let bottom = NSStackView.vertical([titles, timeRow, buttons], spacing: MavioSpacing.s12)
             controlsArea = bottom
             controller.addSubview(bottom)
@@ -322,6 +349,7 @@
             previewBelow = preview.topAnchor.constraint(equalTo: seekBar.bottomAnchor, constant: MavioSpacing.s8)
             previewLeading?.isActive = true
             previewAbove?.isActive = true
+            controller.addSubview(tip)
         }
 
         private func buildTV() {
@@ -483,6 +511,8 @@
             subtitlesButton.isHidden = !hasSubtitles
             audioButton.isHidden = !hasAudio
             groupButton.isHidden = group == nil
+            qualityButton.isHidden = request.file != nil
+            infoButton.isHidden = info == nil
             tvGroup.isHidden = group == nil
             if let group {
                 groupButton.title = groupChip(group)
@@ -552,6 +582,7 @@
             let visible = controls || failure != nil || (!theme.isTV && !player.isPlaying)
             guard visible != controllerShown else { return }
             controllerShown = visible
+            if !visible { tip.hide() }
             if visible {
                 controller.isHidden = false
                 timeChanged()
@@ -777,7 +808,13 @@
         /// The assistant button of the desktop's row, as the web UI's.
         private func assistantButton() -> [NSView] {
             guard let assistant = context.assistant else { return [] }
-            return [AssistantButton(assistant: assistant, theme: theme, side: 36, size: 22, color: .white)]
+            let button = AssistantButton(assistant: assistant, theme: theme, side: 36, size: 22, color: .white)
+            button.toolTip = nil
+            button.onHover = { [weak self, weak button] on in
+                guard let self, let button else { return }
+                if on { self.tip.show(MavioStrings.assistantTitle, above: button) } else { self.tip.hide() }
+            }
+            return [button]
         }
 
         // MARK: Offsets, speed and floating
@@ -830,6 +867,29 @@
 
         private static func rateLabel(_ rate: Float) -> String {
             rate == 1 ? "1×" : "\(rate.formatted(.number.precision(.fractionLength(0...2))))×"
+        }
+
+        /// How the server plays the item, as the web UI's info says.
+        private static func methodLabel(_ kind: PlayKind) -> String {
+            switch kind {
+            case .directPlay: MavioStrings.playerDirectPlay
+            case .directStream: MavioStrings.playerDirectStream
+            case .transcode: MavioStrings.playerTranscode
+            }
+        }
+
+        /// A line of the info menu that tells, not does.
+        private static func fact(_ text: String) -> NSMenuItem {
+            let item = NSMenuItem(title: text, action: nil, keyEquivalent: "")
+            item.isEnabled = false
+            return item
+        }
+
+        /// The quality picked for this playback, else the device's.
+        private var currentQuality: PlaybackQuality {
+            quality
+                ?? UserDefaults.standard.string(forKey: PlaybackQuality.key).flatMap(PlaybackQuality.init(rawValue:))
+                ?? .auto
         }
 
         // MARK: Live Text and screenshots
@@ -1188,6 +1248,40 @@
                         menu.addItem(item)
                     }
                 }
+            case .quality:
+                let current = currentQuality
+                menu.addItem(.sectionHeader(title: MavioStrings.playerQuality))
+                for quality in PlaybackQuality.allCases {
+                    let item = MenuAction(quality.label) { [weak self] in
+                        guard let self, quality != self.currentQuality else { return }
+                        self.quality = quality
+                        self.restart()
+                    }
+                    item.state = quality == current ? .on : .off
+                    menu.addItem(item)
+                }
+            case .info:
+                guard let info else { return }
+                menu.addItem(.sectionHeader(title: MavioStrings.playerMethod))
+                menu.addItem(Self.fact(Self.methodLabel(info.kind)))
+                if let source {
+                    menu.addItem(.sectionHeader(title: MavioStrings.playerSource))
+                    menu.addItem(
+                        Self.fact(
+                            [source.name, source.container?.uppercased()].compactMap(\.self).filter { !$0.isEmpty }
+                                .joined(separator: " · ")))
+                }
+                menu.addItem(.separator())
+                let url = info.url
+                menu.addItem(
+                    MenuAction(MavioStrings.playerOpenExternal) {
+                        if let url = URL(string: url) { NSWorkspace.shared.open(url) }
+                    })
+                menu.addItem(
+                    MenuAction(MavioStrings.playerCopyLink) {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(url, forType: .string)
+                    })
             case .speed:
                 menu.addItem(.sectionHeader(title: MavioStrings.playerSpeed))
                 for rate: Float in [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2] {
@@ -1199,7 +1293,9 @@
             }
             menuOpen = true
             hideTask?.cancel()
-            menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height + 4), in: button)
+            // Above the button, as the controller is at the bottom; AppKit
+            // moves it down where there is no room.
+            menu.popUp(positioning: nil, at: NSPoint(x: 0, y: -menu.size.height - 4), in: button)
             menuOpen = false
             poke()
         }
@@ -1272,8 +1368,8 @@
                             stream.index == chosen
                         ) { $0.audio = stream.index })
                 }
-            case .speed:
-                // Television mode has no speed picker.
+            case .speed, .quality, .info:
+                // Television mode has only the subtitles' and the audio's pickers.
                 break
             }
             panelRows = rows
@@ -1382,9 +1478,7 @@
                 updateDetails()
             }
             let local = model.server(request.serverId).map { isLocalAddress(address: $0.address) } ?? false
-            let quality =
-                UserDefaults.standard.string(forKey: PlaybackQuality.key).flatMap(PlaybackQuality.init(rawValue:))
-                ?? .auto
+            let quality = currentQuality
             do {
                 let session = try await model.client.play(
                     serverId: request.serverId, itemId: request.itemId,

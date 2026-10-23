@@ -39,13 +39,20 @@
         override func hitTest(_ point: NSPoint) -> NSView? { nil }
     }
 
-    /// An icon button of the player's controller: white, 36 pt square, with
-    /// a tooltip naming it.
+    /// An icon button of the player's controller: white, 36 pt square,
+    /// lit by a round fill under the pointer, with a label its page shows
+    /// as a tip above it.
     @MainActor
     final class IconButton: NSButton {
         /// What a click does.
         var onPress: @MainActor () -> Void
+        /// Tells the page the pointer came over the button, or left it.
+        var onHover: (@MainActor (IconButton, Bool) -> Void)?
+        /// What the button does, for its tip.
+        private(set) var label = ""
         private let iconSize: CGFloat
+        private var tracking: NSTrackingArea?
+        private var hovering = false
 
         /// A button of icon, filled when fill, size points large, labelled
         /// label, running run.
@@ -63,6 +70,8 @@
             refusesFirstResponder = true
             target = self
             action = #selector(pressed)
+            wantsLayer = true
+            layer?.cornerRadius = 18
             self.size(width: 36, height: 36)
             set(icon, label, fill: fill)
         }
@@ -76,11 +85,87 @@
             image.isTemplate = true
             image.size = NSSize(width: iconSize, height: iconSize)
             self.image = image
-            toolTip = label
+            self.label = label
             setAccessibilityLabel(label)
         }
 
+        override func updateTrackingAreas() {
+            super.updateTrackingAreas()
+            if let tracking { removeTrackingArea(tracking) }
+            let area = NSTrackingArea(
+                rect: bounds, options: [.mouseEnteredAndExited, .activeInActiveApp, .inVisibleRect], owner: self)
+            addTrackingArea(area)
+            tracking = area
+        }
+
+        override func mouseEntered(with event: NSEvent) { hover(true) }
+
+        override func mouseExited(with event: NSEvent) { hover(false) }
+
+        override var isHidden: Bool {
+            didSet { if isHidden { hover(false) } }
+        }
+
+        private func hover(_ on: Bool) {
+            guard on != hovering else { return }
+            hovering = on
+            layer?.backgroundColor = on ? NSColor.white.withAlphaComponent(0.15).cgColor : nil
+            onHover?(self, on)
+        }
+
         @objc private func pressed() { onPress() }
+    }
+
+    /// The tip of a controller's button, above it: its label, light on the
+    /// dark picture, after the pointer rests a moment on the button.
+    @MainActor
+    final class PlayerTip: Box {
+        private let label: NSTextField
+        private var anchor: [NSLayoutConstraint] = []
+        private var showTask: Task<Void, Never>?
+
+        /// A tip in theme.
+        init(theme: Theme) {
+            label = .label("", theme.fonts.footnote, color: .black)
+            super.init(fill: NSColor.white.withAlphaComponent(0.95), radius: 6)
+            addFilling(label, insets: NSEdgeInsets(top: 4, left: 8, bottom: 4, right: 8))
+            isHidden = true
+        }
+
+        @available(*, unavailable)
+        required init?(coder: NSCoder) { fatalError() }
+
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
+        /// Shows text above view after a moment, kept inside the superview.
+        func show(_ text: String, above view: NSView) {
+            hide()
+            guard let container = superview else { return }
+            label.stringValue = text
+            let center = centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            center.priority = .defaultHigh
+            anchor = [
+                center,
+                leadingAnchor.constraint(greaterThanOrEqualTo: container.leadingAnchor, constant: MavioSpacing.s8),
+                trailingAnchor.constraint(lessThanOrEqualTo: container.trailingAnchor, constant: -MavioSpacing.s8),
+                bottomAnchor.constraint(equalTo: view.topAnchor, constant: -6),
+            ]
+            NSLayoutConstraint.activate(anchor)
+            showTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .milliseconds(600))
+                guard !Task.isCancelled, let self else { return }
+                self.isHidden = false
+            }
+        }
+
+        /// Hides the tip, and one about to show.
+        func hide() {
+            showTask?.cancel()
+            showTask = nil
+            isHidden = true
+            NSLayoutConstraint.deactivate(anchor)
+            anchor = []
+        }
     }
 
     /// The timeline of television mode's controller: the bar, with the
