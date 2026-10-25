@@ -2,7 +2,6 @@ package rclone
 
 import (
 	"context"
-	"strings"
 	"time"
 )
 
@@ -32,17 +31,19 @@ type OfflineTask struct {
 	Created  time.Time `json:"created_at"`
 }
 
-// AddOffline has the remote of fsName, a folder of it, download link
-// there itself; name, when set, names the download.
-func (c *Client) AddOffline(ctx context.Context, fsName, link, name string) (OfflineTask, error) {
+// AddOffline has a remote download link into its folder dir itself;
+// name, when set, names the download. The folder is an option of the
+// remote's root rather than an fs of its own, so that the rcd asks the
+// drive through the one client, and the one pacer, it keeps for the
+// remote.
+func (c *Client) AddOffline(ctx context.Context, remote, dir, link, name string) (OfflineTask, error) {
 	var out struct {
 		Task OfflineTask `json:"task"`
 	}
-	in := map[string]any{"fs": fsName, "url": link}
+	in := map[string]any{"fs": remote + ":", "url": link, "opt": map[string]any{"path": dir}}
 	if name != "" {
 		in["name"] = name
 	}
-	remote, _, _ := strings.Cut(fsName, ":")
 	err := c.callRemote(ctx, remote, "operations/addurl", in, &out, false)
 	return out.Task, err
 }

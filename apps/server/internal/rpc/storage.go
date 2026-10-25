@@ -375,7 +375,9 @@ func (s *StorageService) ListFolders(ctx context.Context, req *storagev1.ListFol
 			Name string `json:"Name"`
 		} `json:"list"`
 	}
-	in := map[string]any{"fs": remote + ":" + dir, "remote": "", "opt": map[string]any{"dirsOnly": true, "noModTime": true, "noMimeType": true}}
+	// The folder is listed below the remote's root rather than as an fs
+	// of its own, which the rcd would make a client of the drive for.
+	in := map[string]any{"fs": remote + ":", "remote": dir, "opt": map[string]any{"dirsOnly": true, "noModTime": true, "noMimeType": true}}
 	if err := c.Call(ctx, "operations/list", in, &out); err != nil {
 		return nil, rcloneError(ctx, err)
 	}

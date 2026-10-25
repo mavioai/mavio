@@ -440,6 +440,7 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 * **扫描中的列目录：** 经 rcd 的列目录结果包含 stat 所告知的信息（`core.StorageCapabilities.ListedInfo`），因此扫描远端时不再 stat 已列出的条目：每个文件的大小、时间和 ID 取自其文件夹的列目录结果，根目录的则取自对根目录的唯一一次 stat。解析器为向前查看而列出的文件夹，扫描走进它时不再重新列出；列目录结果中没有 `.ignore` 的文件夹，也不再去读取它。在每次 stat 都要列出上级文件夹的 115 上，扫描对每个文件夹只列一次。
 * **扫描之外的查找：** 直接播放以上一次请求的文件信息打开文件，使播放器的大量范围请求只 stat 一次；某次请求失败后，下一次请求重新 stat。远端上图片的原图在图片缓存中保留一天，与客户端缓存所获内容的时长相同，远端失败时也从缓存提供。曲目是否有歌词由对其文件夹的一次列目录判断，播放预取（§3.4）打开其存储时也不检查文件夹。
 * **后台检查：** 云盘上的文件不被推迟（§1.7）。远端上的下载导入待定或受阻时，在 2 分钟后重试，每次加倍，最长 30 分钟，而不是在每次检查队列时重试，因为每次都要列出下载并探测其文件。离线下载只向云盘询问尚未完成的下载，并从其中最早的一个起列出云盘的任务：已完成的下载在被移除之前一直留在账本中。
+* **每个云盘一个客户端：** 服务器的每次调用都向 rcd 请求远端的根 `remote:`，并在其下指明文件夹：媒体库表单的文件夹列表与离线下载的文件夹（`opt.path`）。rcd 为每个 fs 名称保留一个 fs，从而一个登录、令牌与节流器，在 fs 名称中指明文件夹（`remote:dir`）会使其成倍增加。服务器运行的 rcd 取得其 rclone.conf 旁的锁文件，同一文件上的第二个服务器不运行 rcd：两个 rcd 会各自刷新云盘的令牌，其中一个用掉的刷新令牌会使另一个登出。
 
 ### 3.6 实测
 
@@ -469,4 +470,5 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 | 扫描中的列目录 | `core.StorageCapabilities.ListedInfo`；`libs/library/fs.go`（`newRootFS`、`listings`、`rootFS.readDir`、`rootFS.stat`）、`scan.go`（`scan.list`、`filtered.List`、`Scanner.root`）、`dotignore.go`（`IgnoreFiles.Listed`） | P25，已实现 |
 | 后台检查 | `libs/library/policy.go`（`StoragePolicy.DeferGrowing`）、`scan.go`（`scan.list`）；`apps/server/internal/acquisition/queue.go`（`Runtime.track`、`importDue`、`importTried`）；`apps/server/internal/downloads/offline.go`（`Offline.downloads`） | P25，已实现 |
 | 扫描之外的查找、播放中的读取 | `core.WithFileInfo`、`libs/rclone/storage.go`（`Storage.Open`）、`apps/server/internal/playback/http.go`（`Manager.serveFile`）；`apps/server/internal/images/images.go`（`Server.remote`）；`libs/library/lyrics.go`（`Lyrics.hasLyrics`）；`apps/server/internal/playback/prefetch.go`（`Manager.openPrefetch`）；`libs/rclone/blocks.go`（`blockItem.ReadAt`、`maxRetries`）；`libs/media/supervisor/session.go`（`Session.Request`）、`libs/streaming/stream.go`（`Stream.Segment`）、`libs/media/planner/command.go`（`Planner.HLSArgs`）、`apps/server/internal/playback/manager.go`（`cloudThrottleAhead`） | P25，已实现 |
+| 每个云盘一个客户端 | `libs/rclone/offline.go`（`Client.AddOffline`）、`apps/server/internal/rpc/storage.go`（`ListFolders`）；`libs/rclone/daemon.go`（`lockConfig`、`ErrConfigInUse`）、`lock_unix.go`、`lock_windows.go` |
 | 实测 | mavioai/rclone `MAVIO_PROVIDERS.md` | P25，计划中 |

@@ -324,7 +324,7 @@ func (o *Offline) AddDownload(ctx context.Context, req *pluginv1.AddDownloadRequ
 	if err := rc.Call(ctx, "operations/mkdir", map[string]any{"fs": remote + ":", "remote": target}, nil); err != nil {
 		return nil, offlineError(err)
 	}
-	task, err := rc.AddOffline(ctx, remote+":"+target, link, "")
+	task, err := rc.AddOffline(ctx, remote, target, link, "")
 	if err != nil {
 		return nil, offlineError(err)
 	}

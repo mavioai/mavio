@@ -127,7 +127,7 @@ func TestOffline(t *testing.T) {
 	if err != nil || resp.GetDownloadId() != hash {
 		t.Fatalf("AddDownload = %v, %v; want ID %s", resp, err, hash)
 	}
-	if len(drive.added) != 1 || drive.added[0]["fs"] != "pp:Downloads/mavio" || drive.added[0]["url"] != magnet || len(drive.mkdirs) != 1 {
+	if len(drive.added) != 1 || drive.added[0]["fs"] != "pp:" || drive.added[0]["opt"].(map[string]any)["path"] != "Downloads/mavio" || drive.added[0]["url"] != magnet || len(drive.mkdirs) != 1 {
 		t.Errorf("rcd got addurl %v after mkdir %v", drive.added, drive.mkdirs)
 	}
 	if _, err := add(magnet); connect.CodeOf(err) != connect.CodeFailedPrecondition {

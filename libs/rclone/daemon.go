@@ -25,7 +25,10 @@ type DaemonOptions struct {
 	Path string
 	// Config is the rclone.conf file, created when missing, and ConfigPass
 	// the password it is encrypted with; empty for a file not encrypted,
-	// or encrypted with the RCLONE_CONFIG_PASS of the environment.
+	// or encrypted with the RCLONE_CONFIG_PASS of the environment. One
+	// rcd runs on a file at a time, which its lock file beside it keeps:
+	// rcds sharing one would each refresh the tokens of its drives and
+	// log the others out.
 	Config, ConfigPass string
 	// CacheDir is rclone's cache folder.
 	CacheDir string
@@ -48,6 +51,8 @@ type Daemon struct {
 	dir    string
 	ep     Endpoint
 	client *Client
+	// lock holds the lock file of the configuration while the rcd runs.
+	lock *os.File
 
 	mu       sync.Mutex
 	cmd      *exec.Cmd
@@ -57,6 +62,10 @@ type Daemon struct {
 	stop context.CancelFunc
 	done chan struct{}
 }
+
+// ErrConfigInUse is returned by StartDaemon when another process runs an
+// rcd on the configuration file.
+var ErrConfigInUse = errors.New("another rclone rcd runs on the configuration file")
 
 // stableRun is how long an rcd runs before its restarts count afresh.
 const stableRun = time.Minute
@@ -72,12 +81,18 @@ func StartDaemon(ctx context.Context, opts DaemonOptions) (*Daemon, error) {
 	if opts.Logger == nil {
 		opts.Logger = slog.Default()
 	}
+	lock, err := lockConfig(opts.Config)
+	if err != nil {
+		return nil, err
+	}
 	dir, err := os.MkdirTemp(socketBase(), "mavio-rclone-")
 	if err != nil {
+		_ = lock.Close()
 		return nil, err
 	}
 	if err := os.Chmod(dir, 0o700); err != nil {
 		_ = os.RemoveAll(dir)
+		_ = lock.Close()
 		return nil, err
 	}
 	pass := make([]byte, 24)
@@ -86,26 +101,55 @@ func StartDaemon(ctx context.Context, opts DaemonOptions) (*Daemon, error) {
 		opts: opts,
 		log:  opts.Logger.With("component", "rclone"),
 		dir:  dir,
+		lock: lock,
 		ep:   Endpoint{URL: "unix://" + filepath.ToSlash(filepath.Join(dir, "rc.sock")), User: "mavio", Password: hex.EncodeToString(pass)},
 		done: make(chan struct{}),
 	}
 	if d.client, err = NewClient(d.ep, nil); err != nil {
-		_ = os.RemoveAll(dir)
+		_ = d.release()
 		return nil, err
 	}
 	d.client.Require(Version)
 	if err := d.prepareConfig(ctx); err != nil {
-		_ = os.RemoveAll(dir)
+		_ = d.release()
 		return nil, err
 	}
 	if err := d.launch(ctx); err != nil {
-		_ = os.RemoveAll(dir)
+		_ = d.release()
 		return nil, err
 	}
 	sctx, stop := context.WithCancel(context.WithoutCancel(ctx))
 	d.stop = stop
 	go d.supervise(sctx)
 	return d, nil
+}
+
+// lockConfig takes the lock file of a configuration file, which stays
+// beside it once taken; the lock goes with the process.
+func lockConfig(config string) (*os.File, error) {
+	if err := os.MkdirAll(filepath.Dir(config), 0o700); err != nil {
+		return nil, err
+	}
+	f, err := os.OpenFile(config+".lock", os.O_RDWR|os.O_CREATE, 0o600)
+	if err != nil {
+		return nil, fmt.Errorf("open rclone configuration lock: %w", err)
+	}
+	ok, err := lockFile(f)
+	if err == nil && !ok {
+		err = fmt.Errorf("%w: %s", ErrConfigInUse, config)
+	}
+	if err != nil {
+		_ = f.Close()
+		return nil, err
+	}
+	return f, nil
+}
+
+// release removes the rcd's folder and lets go of the configuration.
+func (d *Daemon) release() error {
+	err := os.RemoveAll(d.dir)
+	_ = d.lock.Close()
+	return err
 }
 
 // socketBase is a folder whose paths are short enough for Unix sockets.
@@ -323,5 +367,5 @@ func (d *Daemon) Close() error {
 		}
 	}
 	<-d.done
-	return os.RemoveAll(d.dir)
+	return d.release()
 }
