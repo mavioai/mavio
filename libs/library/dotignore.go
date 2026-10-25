@@ -126,6 +126,27 @@ type IgnoreFiles struct {
 	FS    fs.FS
 	mu    sync.Mutex
 	cache map[string]cachedIgnore
+	// absent are the folders known to have no .ignore file, from their
+	// listings or a stat finding none: an IgnoreFiles serves one scan,
+	// which looks for none of them again.
+	absent map[string]bool
+}
+
+// Listed tells the entries of folder dir, a slash-separated path relative
+// to the file system root, as a scan listed them, so that the .ignore file
+// of a folder without one is not looked for.
+func (f *IgnoreFiles) Listed(dir string, entries []fs.DirEntry) {
+	for _, e := range entries {
+		if e.Name() == ".ignore" {
+			return
+		}
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.absent == nil {
+		f.absent = map[string]bool{}
+	}
+	f.absent[dir] = true
 }
 
 type cachedIgnore struct {
@@ -162,11 +183,22 @@ func (f *IgnoreFiles) Ignored(p string, isDir bool) (bool, error) {
 }
 
 func (f *IgnoreFiles) load(name string) (IgnoreRules, bool, error) {
+	dir := path.Dir(name)
+	f.mu.Lock()
+	absent := f.absent[dir]
+	f.mu.Unlock()
+	if absent {
+		return IgnoreRules{}, false, nil
+	}
 	info, err := fs.Stat(f.FS, name)
 	if err != nil {
 		if isNotExist(err) {
 			f.mu.Lock()
 			delete(f.cache, name)
+			if f.absent == nil {
+				f.absent = map[string]bool{}
+			}
+			f.absent[dir] = true
 			f.mu.Unlock()
 			return IgnoreRules{}, false, nil
 		}

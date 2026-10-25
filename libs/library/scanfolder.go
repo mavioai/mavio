@@ -67,7 +67,7 @@ func (s *Scanner) ScanFolder(ctx context.Context, lib core.Library, dir string) 
 		return sc.stats, fmt.Errorf("library folder: %w", err)
 	}
 	defer st.Close()
-	rfs := rootFS{ctx: ctx, s: st, base: base}
+	rfs := newRootFS(ctx, st, base)
 	ignores := &IgnoreFiles{FS: core.StorageFS(ctx, st)}
 	t := task{dir: base, scope: Scope{Kind: lib.Kind, Root: base}}
 	for t.dir != dir {

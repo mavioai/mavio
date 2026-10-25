@@ -7,9 +7,11 @@ import (
 	"io/fs"
 	"maps"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -354,5 +356,93 @@ func TestScanStorageFailures(t *testing.T) {
 	failing = true
 	if st := f.scan(); st.Missing != 0 || st.Unreadable == 0 || len(f.store.present()) != 2 {
 		t.Errorf("failing storage: stats %+v, items %v, want B kept", st, f.store.present())
+	}
+}
+
+// countingStorage counts the calls of a storage whose listings tell what
+// Stat does, as an rclone remote's.
+type countingStorage struct {
+	core.Storage
+	mu    sync.Mutex
+	stats map[string]int
+	lists map[string]int
+}
+
+func (s *countingStorage) Capabilities() core.StorageCapabilities {
+	return core.StorageCapabilities{ListedInfo: true}
+}
+
+func (s *countingStorage) Stat(ctx context.Context, name string) (fs.FileInfo, error) {
+	s.mu.Lock()
+	s.stats[name]++
+	s.mu.Unlock()
+	return s.Storage.Stat(ctx, name)
+}
+
+func (s *countingStorage) ReadDir(ctx context.Context, name string) ([]fs.DirEntry, error) {
+	s.mu.Lock()
+	s.lists[name]++
+	s.mu.Unlock()
+	return s.Storage.ReadDir(ctx, name)
+}
+
+func TestScanListedInfo(t *testing.T) {
+	for _, tc := range []struct {
+		kind  core.LibraryKind
+		files []string
+	}{
+		{core.LibraryMovies, []string{
+			"A (2000)/A (2000).mkv", "A (2000)/A (2000).nfo", "A (2000)/extras/Making of.mkv",
+			"B (2001)/CD1/B (2001).mkv", "B (2001)/CD2/B (2001).mkv",
+			"C (2002)/C (2002).mkv", "C (2002)/.ignore", "C (2002)/sample.mkv",
+		}},
+		{core.LibraryShows, []string{
+			"Show/Season 1/Show S01E01.mkv", "Show/Season 1/Show S01E02.mkv", "Show/Specials/Show S00E01.mkv",
+			"Show/tvshow.nfo",
+		}},
+	} {
+		t.Run(string(tc.kind), func(t *testing.T) {
+			plain := newScan(t, tc.kind)
+			tree(t, plain.root, tc.files...)
+			if err := os.WriteFile(filepath.Join(plain.root, "C (2002)", ".ignore"), []byte("sample.mkv\n"), 0o644); err != nil && tc.kind == core.LibraryMovies {
+				t.Fatal(err)
+			}
+			plain.scan()
+
+			f := newScan(t, tc.kind)
+			f.root = plain.root
+			f.lib.Paths = []string{"remote:test:Media"}
+			st := &countingStorage{stats: map[string]int{}, lists: map[string]int{}}
+			f.sc.Storages = &Storages{Remote: func(context.Context, string, string) (core.Storage, error) {
+				local, err := OpenLocalStorage(f.root)
+				st.Storage = local
+				return st, err
+			}}
+			f.scan()
+			want, got := map[string]core.ItemKind{}, map[string]core.ItemKind{}
+			for p, it := range plain.store.present() {
+				want[strings.TrimPrefix(p, plain.root)] = it.Kind
+			}
+			for p, it := range f.store.present() {
+				got[strings.TrimPrefix(p, "remote:test:Media")] = it.Kind
+			}
+			if !maps.Equal(got, want) {
+				t.Errorf("items = %v, want = %v", got, want)
+			}
+			for name, n := range st.lists {
+				if n != 1 {
+					t.Errorf("folder %q listed %d times, want once", name, n)
+				}
+			}
+			// Only the root is stat'ed, and .ignore files where one is.
+			for name := range st.stats {
+				if name != "." && path.Base(name) != ".ignore" {
+					t.Errorf("stat of %q, want none of listed entries", name)
+				}
+			}
+			if n := st.stats[".ignore"]; n != 0 {
+				t.Errorf("stats of the root's .ignore = %d, want none: the root has none", n)
+			}
+		})
 	}
 }

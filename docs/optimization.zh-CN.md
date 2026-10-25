@@ -437,6 +437,7 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 * **任务的重试：** 说明了需等待多久的错误（`core.RetryAfter`），例如被暂停的远端的错误，会把任务的下一次尝试推迟至少这么久。
 * **扫描中的失败：** 存储未能告知其条目的文件夹——列目录、stat 或 `.ignore` 文件因文件不存在以外的原因失败——与无法读取的文件夹一样保留其条目。只有存储告知文件已不存在时，条目才被视为缺失。stat 失败的被推迟文件（§1.7）仍保持推迟。
 * **媒体读取：** 为 probe、后台任务或播放打开文件所在的存储时，不先检查其文件夹是否存在，因为扫描已找到了该文件：在 115 上，这一检查要把文件夹的上级目录列出两次。
+* **扫描中的列目录：** 经 rcd 的列目录结果包含 stat 所告知的信息（`core.StorageCapabilities.ListedInfo`），因此扫描远端时不再 stat 已列出的条目：每个文件的大小、时间和 ID 取自其文件夹的列目录结果，根目录的则取自对根目录的唯一一次 stat。解析器为向前查看而列出的文件夹，扫描走进它时不再重新列出；列目录结果中没有 `.ignore` 的文件夹，也不再去读取它。在每次 stat 都要列出上级文件夹的 115 上，扫描对每个文件夹只列一次。
 
 ### 3.6 实测
 
@@ -463,4 +464,5 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 | 连接数限制 | mavioai/rclone `lib/connlimit`、`fs/rc/rcserver/serveobject.go`（`Server.open`）、`fs/rc/rc.go`（选项）；`fs/features.go` 与 §3.3 中各后端的 `MaxFileStreams` 与 `MaxStreams` 特性 | P25，已实现 |
 | 块缓存 | `libs/rclone`（`blocks.go`、`ranges.go`、`cached.go`）、`storage.go`（`Storage.Open`、`Storage.MediaURL`）、`proxy.go`（`Proxy.serveCached`）；`core.ReadIntent` 来自 `libs/library`（probe、后台任务）、`apps/server/internal/playback`（播放）与 `apps/server/internal/acquisition`（导入时的 probe）；`apps/server/internal/server/rclone.go` 与设置 `rclone-cache-size`；已打开项内部的淘汰在 `blocks.go`（`BlockCache.trimOpen`、`blockItem.evict`）与 `punch_{linux,darwin,windows,other}.go`；按关键帧预取经 `core.Prefetcher`（`cachedFile.Prefetch`）、`libs/media/keyframes`（`Data.Offsets`）与 `apps/server/internal/playback/prefetch.go`（`sourcePrefetch`；`Manager.prepareStart`、`serveSegment`、`Manager.Progress`） | P25，已实现 |
 | 暂停与失败 | `libs/rclone/hold.go`（`holds`、`throttled`、`Client.callRemote`）、`storage.go`（`Remotes.Open`、`Remotes.features`）、`offline.go`、`config.go`；`core.RetryAfter` 与 `libs/store/jobs.go`（`jobs.Fail`）；`libs/library/scan.go`（`scan.list`、`filtered.List`）、`storage/growth_policy.go`（`GrowthPolicy.Reconcile`）、`deferred.go` | P25，已实现 |
+| 扫描中的列目录 | `core.StorageCapabilities.ListedInfo`；`libs/library/fs.go`（`newRootFS`、`listings`、`rootFS.readDir`、`rootFS.stat`）、`scan.go`（`scan.list`、`filtered.List`、`Scanner.root`）、`dotignore.go`（`IgnoreFiles.Listed`） | P25，已实现 |
 | 实测 | mavioai/rclone `MAVIO_PROVIDERS.md` | P25，计划中 |

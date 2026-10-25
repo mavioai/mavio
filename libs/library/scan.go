@@ -219,8 +219,9 @@ func (sc *scan) root(ctx context.Context, base string) error {
 	base = cleanRoot(base)
 	dev := sc.devices.Device(path.Join(base, "."))
 	s, err := sc.Storages.Open(ctx, base)
+	var info fs.FileInfo
 	if err == nil {
-		if _, err = s.Stat(ctx, "."); err != nil {
+		if info, err = s.Stat(ctx, "."); err != nil {
 			_ = s.Close()
 		}
 	}
@@ -232,7 +233,8 @@ func (sc *scan) root(ctx context.Context, base string) error {
 		return sc.Store.Items().MarkSeen(ctx, sc.lib.ID, base, sc.gen)
 	}
 	defer s.Close()
-	rfs := rootFS{ctx: ctx, s: s, base: base}
+	rfs := newRootFS(ctx, s, base)
+	rfs.keep(base, info)
 	ignores := &IgnoreFiles{FS: core.StorageFS(ctx, s)}
 	return sc.walk(ctx, rfs, ignores, sc.walkers(dev, sc.policy(base)), task{dir: base, scope: Scope{Kind: sc.lib.Kind, Root: base}})
 }
@@ -397,11 +399,13 @@ func (sc *scan) state(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, dir
 
 // list reads a folder's entries, without those .ignore files exclude.
 func (sc *scan) list(rfs rootFS, ignores *IgnoreFiles, st core.FolderState) (core.FolderState, bool, error) {
-	entries, err := rfs.List(st.Path)
+	des, err := rfs.readDir(st.Path, true)
 	if err != nil {
 		return st, false, err
 	}
-	for _, e := range entries {
+	ignores.Listed(slashRel(rfs, st.Path), des)
+	for _, de := range des {
+		e := Entry{Path: path.Join(st.Path, de.Name()), IsDir: de.IsDir()}
 		if !e.IsDir && sc.GrowthPolicy == nil && storage.HasDownloadSuffix(e.Path) {
 			continue
 		}
@@ -416,7 +420,12 @@ func (sc *scan) list(rfs rootFS, ignores *IgnoreFiles, st core.FolderState) (cor
 			continue
 		}
 		fe := core.FolderEntry{Name: path.Base(e.Path), IsDir: e.IsDir}
-		fi, err := rfs.stat(e.Path)
+		var fi fs.FileInfo
+		if rfs.listed != nil {
+			fi, err = de.Info()
+		} else {
+			fi, err = rfs.stat(e.Path)
+		}
 		if isNotExist(err) {
 			continue // gone since listed
 		}
@@ -463,9 +472,14 @@ func (e *listError) Error() string { return e.err.Error() }
 func (e *listError) Unwrap() error { return e.err }
 
 func (f filtered) List(dir string) ([]Entry, error) {
-	entries, err := f.rfs.List(dir)
+	des, err := f.rfs.readDir(dir, false)
 	if err != nil {
 		return nil, &listError{err}
+	}
+	f.ignores.Listed(slashRel(f.rfs, dir), des)
+	entries := make([]Entry, 0, len(des))
+	for _, de := range des {
+		entries = append(entries, Entry{Path: path.Join(dir, de.Name()), IsDir: de.IsDir()})
 	}
 	out := entries[:0]
 	for _, e := range entries {

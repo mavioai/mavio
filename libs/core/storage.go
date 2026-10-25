@@ -134,6 +134,10 @@ type StorageCapabilities struct {
 	// are added to or removed from it, so unchanged folders need no
 	// listing.
 	FolderModTimes bool
+	// ListedInfo: the infos of a folder's entries (fs.DirEntry.Info) are
+	// what Stat tells of them, at no further cost, so that a scan stats
+	// none of the entries it listed.
+	ListedInfo bool
 }
 
 // StorageTransfers is implemented by storages that move, copy and hard

@@ -65,7 +65,7 @@ func (r *Remotes) Open(ctx context.Context, remote, dir string) (core.Storage, e
 	if err != nil {
 		return nil, err
 	}
-	s := &Storage{r: r, remote: remote, dir: dir, caps: core.StorageCapabilities{ServerCopy: f["Copy"], HardLinks: f["Link"]}}
+	s := &Storage{r: r, remote: remote, dir: dir, caps: core.StorageCapabilities{ServerCopy: f["Copy"], HardLinks: f["Link"], ListedInfo: true}}
 	if r.Blocks != nil && (r.Class == nil || r.Class(ctx, "remote:"+remote+":"+dir) == core.StorageCloud) {
 		s.blocks, s.seq = r.Blocks, f["SeekReadsFromStart"]
 	}
