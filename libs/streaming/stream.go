@@ -162,7 +162,7 @@ func (s *Stream) Segment(ctx context.Context, index int) (io.ReadCloser, int64, 
 				return nil, 0, err
 			}
 		} else {
-			s.job.session.Touch()
+			s.job.session.Request(l.Start(index))
 		}
 		if err := s.wait(ctx, func() bool { return s.written(first, last) }); err != nil {
 			return nil, 0, fmt.Errorf("segment %d: %w", index, err)

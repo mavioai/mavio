@@ -1,6 +1,7 @@
 package rclone
 
 import (
+	"context"
 	"errors"
 	"io"
 	"io/fs"
@@ -115,3 +116,52 @@ func TestHolds(t *testing.T) {
 	_, _ = r.Open(ctx, "drive", "dir")
 	expect("not found", nil, 1, 0)
 }
+
+// An Open given the info of the file's earlier opening does not stat it
+// again: on 115 a stat lists the file's folder.
+func TestOpenWithFileInfo(t *testing.T) {
+	var stats atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/operations/stat" {
+			stats.Add(1)
+		}
+		_, _ = io.WriteString(w, `{"item":{"Name":"a.mkv","Size":10}}`)
+	}))
+	defer srv.Close()
+	c, err := NewClient(Endpoint{URL: srv.URL}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := &Storage{r: &Remotes{Client: c}, remote: "drive"}
+	ctx := t.Context()
+	f, err := s.Open(ctx, "dir/a.mkv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	info, _ := f.Stat()
+	_ = f.Close()
+	for _, tc := range []struct {
+		name      string
+		ctx       context.Context
+		wantStats int32
+	}{
+		{"same file", core.WithFileInfo(ctx, "dir/a.mkv", info), 0},
+		{"other file", core.WithFileInfo(ctx, "dir/b.mkv", info), 1},
+		{"info of another storage", core.WithFileInfo(ctx, "dir/a.mkv", fakeInfo{}), 1},
+	} {
+		stats.Store(0)
+		f, err := s.Open(tc.ctx, "dir/a.mkv")
+		if err != nil {
+			t.Fatalf("%s: Open() error = %v", tc.name, err)
+		}
+		if got, _ := f.Stat(); got.Size() != 10 {
+			t.Errorf("%s: size = %d, want = 10", tc.name, got.Size())
+		}
+		_ = f.Close()
+		if got := stats.Load(); got != tc.wantStats {
+			t.Errorf("%s: stats = %d, want = %d", tc.name, got, tc.wantStats)
+		}
+	}
+}
+
+type fakeInfo struct{ fs.FileInfo }

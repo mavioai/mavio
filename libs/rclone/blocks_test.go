@@ -171,6 +171,41 @@ func TestBlockCacheSmallReads(t *testing.T) {
 	}
 }
 
+// A reader reading on slower than the cache fetches, as a player does,
+// has what it reads ahead fetched again once half of it is left: in
+// requests of half the read-ahead, not of the little each read moves on.
+func TestBlockCacheReadAheadRefills(t *testing.T) {
+	const size, ahead = 40 << 20, 8 << 20
+	o, bc, u := newOrigin(t, size, t.TempDir(), 1<<30)
+	it, err := bc.open("k", u, size, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer it.release()
+	caughtUp := func() {
+		for range 5000 {
+			it.mu.Lock()
+			busy := slices.ContainsFunc(it.dls, func(d *downloader) bool { return d.pos < min(d.target, it.size) })
+			it.mu.Unlock()
+			if !busy {
+				return
+			}
+			time.Sleep(time.Millisecond)
+		}
+		t.Fatal("downloaders did not reach their targets")
+	}
+	p := make([]byte, 64<<10)
+	for off := int64(0); off < size; off += int64(len(p)) {
+		if n, err := it.ReadAt(t.Context(), nil, p, off, ahead); n != len(p) || err != nil || !bytes.Equal(p, o.data[off:off+int64(n)]) {
+			t.Fatalf("ReadAt(%d) = %d, %v; want = %d, nil", off, n, err, len(p))
+		}
+		caughtUp()
+	}
+	if reqs, served := o.stats(); served != size || reqs > size/(ahead/2)+2 {
+		t.Errorf("served = %d bytes in %d requests, want = %d in at most %d", served, reqs, size, size/(ahead/2)+2)
+	}
+}
+
 func TestBlockCacheChanged(t *testing.T) {
 	const size = 8 << 20
 	o, bc, u := newOrigin(t, size, t.TempDir(), 1<<30)
@@ -195,33 +230,43 @@ func TestBlockCacheChanged(t *testing.T) {
 }
 
 func TestBlockCacheFailures(t *testing.T) {
-	const size = 1 << 20
-	o, bc, u := newOrigin(t, size, t.TempDir(), 1<<30)
-	o.fail = http.StatusServiceUnavailable
-	it, err := bc.open("k", u, size, false)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer it.release()
-	var waits []time.Duration
-	var mu sync.Mutex
-	bc.backoff = func(err error, n int) time.Duration {
+	// A file not found fails the reads at once, a refusal after a second
+	// try, other failures after maxErrors.
+	for _, tc := range []struct {
+		status, wantReqs int
+	}{
+		{http.StatusServiceUnavailable, maxErrors},
+		{http.StatusNotFound, 1},
+		{http.StatusForbidden, 2},
+	} {
+		const size = 1 << 20
+		o, bc, u := newOrigin(t, size, t.TempDir(), 1<<30)
+		o.fail = tc.status
+		it, err := bc.open("k", u, size, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var waits []time.Duration
+		var mu sync.Mutex
+		bc.backoff = func(err error, n int) time.Duration {
+			mu.Lock()
+			waits = append(waits, backoff(err, n))
+			mu.Unlock()
+			return time.Millisecond
+		}
+		var e *Error
+		if _, err := it.ReadAt(t.Context(), nil, make([]byte, 10), 0, 0); !errors.As(err, &e) || e.Status != tc.status {
+			t.Fatalf("%d: ReadAt() error = %v, want = the %d", tc.status, err, tc.status)
+		}
+		if reqs, _ := o.stats(); reqs != tc.wantReqs {
+			t.Errorf("%d: requests = %d, want = %d", tc.status, reqs, tc.wantReqs)
+		}
 		mu.Lock()
-		waits = append(waits, backoff(err, n))
+		if tc.wantReqs > 1 && (len(waits) == 0 || waits[0] != time.Second) {
+			t.Errorf("%d: waits = %v, want = the Retry-After of 1s", tc.status, waits)
+		}
 		mu.Unlock()
-		return time.Millisecond
-	}
-	var e *Error
-	if _, err := it.ReadAt(t.Context(), nil, make([]byte, 10), 0, 0); !errors.As(err, &e) || e.Status != http.StatusServiceUnavailable {
-		t.Fatalf("ReadAt() error = %v, want = the 503", err)
-	}
-	if reqs, _ := o.stats(); reqs != maxErrors {
-		t.Errorf("requests = %d, want = %d", reqs, maxErrors)
-	}
-	mu.Lock()
-	defer mu.Unlock()
-	if len(waits) == 0 || waits[0] != time.Second {
-		t.Errorf("waits = %v, want = the Retry-After of 1s", waits)
+		it.release()
 	}
 }
 

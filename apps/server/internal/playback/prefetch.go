@@ -78,13 +78,14 @@ func (m *Manager) openPrefetch(ctx context.Context, p *Playback) (*sourcePrefetc
 	if !ok {
 		return nil, errors.New("source outside its library")
 	}
+	// The index reads are few and small, and most hit what the probe
+	// left in the cache.
+	ctx = core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadBackground})
 	st, err := m.cfg.Storages.Open(ctx, p.root)
 	if err != nil {
 		return nil, err
 	}
-	// The index reads are few and small, and most hit what the probe
-	// left in the cache.
-	f, err := st.Open(core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadBackground}), name)
+	f, err := st.Open(ctx, name)
 	if err != nil {
 		_ = st.Close()
 		return nil, err

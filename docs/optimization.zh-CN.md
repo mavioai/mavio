@@ -396,10 +396,10 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 | 过期判断 | 打开时检查指纹（大小、修改时间、哈希） | 缓存项以 `Stat` 给出的 ID、大小与修改时间为键；第一个响应的 ETag 与缓存项一起保存，并以 `If-Match` 发送（§3.2）；读取中收到 412 或大小变化则丢弃该项 |
 | 缺失范围 | 若某个下载器的位置与之相距不超过 `--buffer-size`（16 MiB），就延长该下载器；否则启动新的下载器 | 相同 |
 | 每个文件的下载器 | 不限 | 最多 2 个；超出时停止离所有等待中的读取最远的下载器 |
-| 上游请求 | 128 MiB 的块，大小无上限地翻倍 | 16 MiB 的块，翻倍至 256 MiB 为止，且不超过预读的终点（向上取整到 1 MiB），使放弃的读取浪费很少 |
+| 上游请求 | 128 MiB 的块，大小无上限地翻倍 | 16 MiB 的块，翻倍至 256 MiB 为止，且不超过预读的终点（向上取整到 1 MiB），使放弃的读取浪费很少；预读剩下不到一半时才再次获取，使每次请求至少获取另一半，而不是每次读取前进的那一点 |
 | 预读 | `--vfs-read-ahead`，默认 0，另有 16 MiB 内存缓冲 | 按意图预读（见下）；数据以 1 MiB 为单位直接写入文件，不经内存缓冲 |
 | 下载器结束 | 空闲 5 秒，或连续遇到 1 MiB 已有数据 | 相同 |
-| 错误 | 连续 10 次错误后，等待者失败 | 相同；两次请求之间按 `Retry-After` 等待，没有时从 200 毫秒起翻倍至 5 秒 |
+| 错误 | 连续 10 次错误后，等待者失败 | 相同；两次请求之间按 `Retry-After` 等待，没有时从 200 毫秒起翻倍至 5 秒；文件不存在时立即失败，因为每次请求都要在远端重新查找它，403 则在第二次尝试后失败 |
 | 磁盘读取 | 持有该项的锁 | 不持锁；只保护范围信息 |
 | 淘汰 | 先淘汰未在使用的项，最久未用者优先；超出配额时整体丢弃已打开的项 | 淘汰未在使用的项，最久未读者优先；然后以 16 MiB 为单位，淘汰已打开项中落后于其所有读取方最远的范围，保留每项的第一个 MiB 及读取方身后 16 MiB；磁盘不能释放文件中的范围时，已打开的项完整保留 |
 
@@ -407,7 +407,7 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 
 * **probe：** probe 请求文件的 URL 时，用两个请求同时取回文件头（1 MiB）和文件尾（256 KiB）；ffprobe 随后从缓存读取。
 * **容器索引：** 未命中的读取至少取回 256 KiB，使读取 Matroska 元素与 MP4 box 的大量小读取共用请求。
-* **播放：** 直接播放，以及 ffmpeg 为播放进行的读取，保持领先 30 秒的源码率，最多 256 MiB；码率未知时为 32 MiB。
+* **播放：** 直接播放，以及 ffmpeg 为播放进行的读取，保持领先 30 秒的源码率，最多 256 MiB；码率未知时为 32 MiB。为云盘上的文件写 HLS 分段的 ffmpeg 本身，领先客户端已获取的分段 2 分钟后即被暂停，客户端追上或请求尚未写出的分段时恢复：不加限制时，它会以云盘的速度读完整个文件，而播放可能很早就停止。
 * **后台任务：** 读取时不预读。
 * **其他读取：** 16 MiB。
 * **播放开始：** 播放开始时，Mavio 打开源文件，从容器索引读出各关键帧在文件中的位置（§2.4）；这些索引读取大多命中 probe 留在缓存中的数据。在 ffmpeg 或客户端请求之前，它预取从开始位置处或之前的关键帧，到 30 秒媒体之后第一个关键帧为止的字节，最多 256 MiB。没有索引时，按文件的大小与时长估算这段范围。
@@ -438,6 +438,7 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 * **扫描中的失败：** 存储未能告知其条目的文件夹——列目录、stat 或 `.ignore` 文件因文件不存在以外的原因失败——与无法读取的文件夹一样保留其条目。只有存储告知文件已不存在时，条目才被视为缺失。stat 失败的被推迟文件（§1.7）仍保持推迟。
 * **媒体读取：** 为 probe、后台任务或播放打开文件所在的存储时，不先检查其文件夹是否存在，因为扫描已找到了该文件：在 115 上，这一检查要把文件夹的上级目录列出两次。
 * **扫描中的列目录：** 经 rcd 的列目录结果包含 stat 所告知的信息（`core.StorageCapabilities.ListedInfo`），因此扫描远端时不再 stat 已列出的条目：每个文件的大小、时间和 ID 取自其文件夹的列目录结果，根目录的则取自对根目录的唯一一次 stat。解析器为向前查看而列出的文件夹，扫描走进它时不再重新列出；列目录结果中没有 `.ignore` 的文件夹，也不再去读取它。在每次 stat 都要列出上级文件夹的 115 上，扫描对每个文件夹只列一次。
+* **扫描之外的查找：** 直接播放以上一次请求的文件信息打开文件，使播放器的大量范围请求只 stat 一次；某次请求失败后，下一次请求重新 stat。远端上图片的原图在图片缓存中保留一天，与客户端缓存所获内容的时长相同，远端失败时也从缓存提供。曲目是否有歌词由对其文件夹的一次列目录判断，播放预取（§3.4）打开其存储时也不检查文件夹。
 * **后台检查：** 云盘上的文件不被推迟（§1.7）。远端上的下载导入待定或受阻时，在 2 分钟后重试，每次加倍，最长 30 分钟，而不是在每次检查队列时重试，因为每次都要列出下载并探测其文件。离线下载只向云盘询问尚未完成的下载，并从其中最早的一个起列出云盘的任务：已完成的下载在被移除之前一直留在账本中。
 
 ### 3.6 实测
@@ -467,4 +468,5 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 | 暂停与失败 | `libs/rclone/hold.go`（`holds`、`throttled`、`Client.callRemote`）、`storage.go`（`Remotes.Open`、`Remotes.features`）、`offline.go`、`config.go`；`core.RetryAfter` 与 `libs/store/jobs.go`（`jobs.Fail`）；`libs/library/scan.go`（`scan.list`、`filtered.List`）、`storage/growth_policy.go`（`GrowthPolicy.Reconcile`）、`deferred.go` | P25，已实现 |
 | 扫描中的列目录 | `core.StorageCapabilities.ListedInfo`；`libs/library/fs.go`（`newRootFS`、`listings`、`rootFS.readDir`、`rootFS.stat`）、`scan.go`（`scan.list`、`filtered.List`、`Scanner.root`）、`dotignore.go`（`IgnoreFiles.Listed`） | P25，已实现 |
 | 后台检查 | `libs/library/policy.go`（`StoragePolicy.DeferGrowing`）、`scan.go`（`scan.list`）；`apps/server/internal/acquisition/queue.go`（`Runtime.track`、`importDue`、`importTried`）；`apps/server/internal/downloads/offline.go`（`Offline.downloads`） | P25，已实现 |
+| 扫描之外的查找、播放中的读取 | `core.WithFileInfo`、`libs/rclone/storage.go`（`Storage.Open`）、`apps/server/internal/playback/http.go`（`Manager.serveFile`）；`apps/server/internal/images/images.go`（`Server.remote`）；`libs/library/lyrics.go`（`Lyrics.hasLyrics`）；`apps/server/internal/playback/prefetch.go`（`Manager.openPrefetch`）；`libs/rclone/blocks.go`（`blockItem.ReadAt`、`maxRetries`）；`libs/media/supervisor/session.go`（`Session.Request`）、`libs/streaming/stream.go`（`Stream.Segment`）、`libs/media/planner/command.go`（`Planner.HLSArgs`）、`apps/server/internal/playback/manager.go`（`cloudThrottleAhead`） | P25，已实现 |
 | 实测 | mavioai/rclone `MAVIO_PROVIDERS.md` | P25，计划中 |

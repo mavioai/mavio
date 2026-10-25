@@ -255,11 +255,11 @@ func TestThrottle(t *testing.T) {
 			if !s.Paused() {
 				t.Fatal("paused: got = false")
 			}
-			s.ReportSegment(3, 90*time.Second)
-			time.Sleep(5 * time.Second)
+			// A request for output not written yet resumes ffmpeg at once.
+			s.Request(90 * time.Second)
 			synctest.Wait()
 			if s.Paused() {
-				t.Fatal("paused after catching up: got = true")
+				t.Fatal("paused after a request ahead: got = true")
 			}
 			// A paused ffmpeg is resumed before it is asked to quit.
 			f.report(t, "out_time_us=200000000\nprogress=continue\n")

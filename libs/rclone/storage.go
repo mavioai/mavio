@@ -219,9 +219,12 @@ func (s *Storage) ReadDir(ctx context.Context, name string) ([]fs.DirEntry, erro
 
 // Open implements core.Storage.
 func (s *Storage) Open(ctx context.Context, name string) (core.File, error) {
-	info, err := s.Stat(ctx, name)
-	if err != nil {
-		return nil, err
+	info, ok := core.FileInfoOf(ctx, name)
+	if _, ours := info.(fileInfo); !ok || !ours {
+		var err error
+		if info, err = s.Stat(ctx, name); err != nil {
+			return nil, err
+		}
 	}
 	if info.IsDir() {
 		return nil, &fs.PathError{Op: "open", Path: name, Err: errors.New("is a directory")}

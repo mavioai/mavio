@@ -50,8 +50,10 @@ type Session struct {
 
 	// stop carries whether to kill ffmpeg rather than ask it to finish.
 	stop chan bool
-	done chan struct{}
-	err  error
+	// check asks for throttling to be checked at once.
+	check chan struct{}
+	done  chan struct{}
+	err   error
 }
 
 // Start starts ffmpeg and supervises it until it exits, ctx is canceled,
@@ -76,6 +78,7 @@ func Start(ctx context.Context, start Starter, cfg Config) (*Session, error) {
 		lastActivity: time.Now(),
 		segments:     map[int]time.Duration{},
 		stop:         make(chan bool, 1),
+		check:        make(chan struct{}, 1),
 		done:         make(chan struct{}),
 	}
 	// Wait follows the end of the progress, so that the last of it is
@@ -108,6 +111,8 @@ func (s *Session) supervise(ctx context.Context, exited <-chan error) {
 		case <-ctx.Done():
 			s.terminate(ctx, context.Cause(ctx), exited)
 			return
+		case <-s.check:
+			s.throttle(ctx)
 		case <-tick.C:
 			if s.idle() {
 				s.log.DebugContext(ctx, "transcode idle", "timeout", s.cfg.IdleTimeout)
@@ -261,6 +266,24 @@ func (s *Session) ReportSegment(index int, end time.Duration) {
 	}
 	s.segments[index] = end
 	s.clientPos = max(s.clientPos, end)
+}
+
+// Request records that a client waits for the output at pos, as for a
+// segment not written yet: it counts as activity, advances the client
+// position and resumes a throttled ffmpeg at once, which would otherwise
+// stay paused, since the position advances with the segments served.
+func (s *Session) Request(pos time.Duration) {
+	s.mu.Lock()
+	s.lastActivity = time.Now()
+	s.clientPos = max(s.clientPos, pos)
+	paused := s.paused
+	s.mu.Unlock()
+	if paused {
+		select {
+		case s.check <- struct{}{}:
+		default:
+		}
+	}
 }
 
 // HighestServedSegmentEndingBy returns the highest served segment that ends

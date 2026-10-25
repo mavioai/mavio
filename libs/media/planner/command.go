@@ -168,7 +168,9 @@ func (p *Planner) HLSArgs(j *Job, out HLSOutput) []string {
 	if length <= 0 {
 		length = 6 * time.Second
 	}
-	args := p.commonArgs()
+	// ffmpeg reads the keys of its supervisor from stdin, which pause,
+	// resume and end it: unlike other commands, it runs without -nostdin.
+	args := []string{"-hide_banner", "-loglevel", "error"}
 	args = append(args, p.inputArgs(j)...)
 	args = append(args, p.streamArgs(j, true, seg)...)
 	if j.Start > 0 {

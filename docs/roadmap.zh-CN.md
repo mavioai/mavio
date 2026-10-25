@@ -959,6 +959,7 @@ flowchart TD
   - [x] 对象缓存：按缓存中远端的 `ChangeNotify` 失效，以及按路径读取的后端（s3、webdav、azureblob、swift、oracleobjectstorage 与 qingstor；googlecloudstorage 与 b2 本就只读一个版本）在 `Object.Open` 中以存储的 ETag 发送 `If-Match`
   - [x] §3.2 中的各后端：`FindByListing`、链接缓存（存储未标明过期时间时按估计的有效期）、为限制下载的云盘估计的默认数据流限制，以及对单个后端的修正（filelu 的范围请求、shade 的第一个请求与"另外"一列）
   - [ ] 实测 fork 的云盘与常用个人云盘（§3.6），取代估计的链接有效期与数据流限制，并找出需要顺序读取的远端；protondrive 的 SDK 能从保存的链接读取后，为其加上链接缓存
+  - [ ] 云盘按账号的数据流预算，由同一远端的所有读取者共享，播放优先于后台读取（扫描、图片、字幕、预取）；fork 的连接数限制约束每个远端的数据流，但不排定其先后
 - [ ] 后续：远端插件（运行在其他机器上的插件进程）、云盘直链、按变更通知增量扫描
 
 ### P26 字幕获取

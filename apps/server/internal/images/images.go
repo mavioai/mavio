@@ -31,6 +31,11 @@ import (
 // maxDownload bounds a downloaded provider image.
 const maxDownload = 50 << 20
 
+// remoteOriginalAge is how long the original of an image on a remote is
+// served from the cache before it is read again: as long as clients cache
+// what they are served.
+const remoteOriginalAge = 24 * time.Hour
+
 // errUnavailable is returned for images the server cannot read.
 var errUnavailable = errors.New("image unavailable")
 
@@ -224,6 +229,46 @@ func (s *Server) local(ctx context.Context, img *core.Image) ([]byte, error) {
 	if !ok {
 		return nil, errUnavailable
 	}
+	if core.IsRemotePath(root) {
+		return s.remote(ctx, img, root, name)
+	}
+	return s.read(ctx, img, root, name)
+}
+
+// remote returns the bytes of an image on a remote, kept in the cache for
+// a day: each reading of it opens its folder and stats it, calls that
+// count against the remote's rate limits, for every image of a page of
+// posters. While the remote fails, the copy kept is served however old.
+func (s *Server) remote(ctx context.Context, img *core.Image, root, name string) ([]byte, error) {
+	file := filepath.Join(s.cfg.Dir, "originals", "library", img.ID.String())
+	kept, keptErr := os.ReadFile(file)
+	if keptErr == nil {
+		if fi, err := os.Stat(file); err == nil && time.Since(fi.ModTime()) < remoteOriginalAge {
+			return kept, nil
+		}
+	}
+	v, err, _ := s.group.Do("remote:"+img.ID.String(), func() (any, error) {
+		// Reads finish for later requests even if this one goes away.
+		data, err := s.read(context.WithoutCancel(ctx), img, root, name)
+		if err != nil {
+			return nil, err
+		}
+		if err := writeFile(file, data); err != nil {
+			s.log.WarnContext(ctx, "cache image", "path", img.Path, "err", err)
+		}
+		return data, nil
+	})
+	if err != nil {
+		if keptErr == nil {
+			return kept, nil
+		}
+		return nil, err
+	}
+	return v.([]byte), nil
+}
+
+// read reads an image within its library folder.
+func (s *Server) read(ctx context.Context, img *core.Image, root, name string) ([]byte, error) {
 	f, err := s.cfg.Storages.OpenFile(ctx, root, name)
 	if err != nil {
 		s.log.WarnContext(ctx, "open image", "path", img.Path, "err", err)

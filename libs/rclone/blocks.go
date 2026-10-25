@@ -706,7 +706,10 @@ func (it *blockItem) ReadAt(ctx context.Context, cur *cursor, p []byte, off, ahe
 		it.mu.Lock()
 		delete(it.waits, wait)
 	}
-	if gap, ok := it.have.missing(end, aheadEnd); ok {
+	// What is read ahead is fetched again once less than half of it is
+	// left, so that each request fetches at least the other half rather
+	// than the little each read moves on.
+	if gap, ok := it.have.missing(end, aheadEnd); ok && (ahead <= 0 || gap.Start-end < ahead/2) {
 		it.fetch(gap.Start, aheadEnd)
 	}
 	it.used = it.bc.now()
@@ -928,7 +931,7 @@ func (d *downloader) run() {
 		}
 		it.errs++
 		it.failErr = err
-		failed := it.errs >= maxErrors
+		failed := it.errs >= maxRetries(err)
 		if failed {
 			it.errs = 0
 			it.failGen++
@@ -943,6 +946,23 @@ func (d *downloader) run() {
 		case <-d.done:
 		}
 	}
+}
+
+// maxRetries is how many requests in a row may fail with err before the
+// reads waiting for them fail: a file not found fails them at once, since
+// each request looks it up on the remote again, and a refusal, which the
+// rcd answers once it opened the file anew, after a second try.
+func maxRetries(err error) int {
+	var e *Error
+	if errors.As(err, &e) {
+		switch e.Status {
+		case http.StatusNotFound, http.StatusGone:
+			return 1
+		case http.StatusForbidden:
+			return 2
+		}
+	}
+	return maxErrors
 }
 
 // errsSnapshot returns the failed requests in a row.

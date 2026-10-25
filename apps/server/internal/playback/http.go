@@ -196,17 +196,51 @@ func (m *Manager) serveFile(w http.ResponseWriter, r *http.Request, p *Playback)
 	}
 	// The client reads on ahead of its player.
 	ctx := core.WithReadIntent(r.Context(), core.ReadIntent{Kind: core.ReadPlayback, Bitrate: p.Source().Bitrate})
+	// Players read a file in many ranges: each request opens the file with
+	// the info of the one before rather than stat it, as long as they
+	// succeed. A failure, such as of a file that changed, has the next
+	// request stat it again.
+	p.sourceMu.Lock()
+	known := p.sourceInfo
+	p.sourceMu.Unlock()
+	if name, ok := core.StorageName(p.root, p.Source().Path); ok && known != nil {
+		ctx = core.WithFileInfo(ctx, name, known)
+	}
 	f, info, err := m.open(ctx, p, p.Source().Path)
 	if err != nil {
+		p.setSourceInfo(nil)
 		m.log.ErrorContext(r.Context(), "open media", "playback", p.ID, "err", err)
 		http.Error(w, "media unavailable", http.StatusNotFound)
 		return
 	}
 	defer func() { _ = f.Close() }()
+	p.setSourceInfo(info)
 	if t, ok := mediaTypes[strings.ToLower(filepath.Ext(info.Name()))]; ok {
 		w.Header().Set("Content-Type", t)
 	}
-	http.ServeContent(w, r, info.Name(), info.ModTime(), f)
+	http.ServeContent(w, r, info.Name(), info.ModTime(), failures{f, p})
+}
+
+// setSourceInfo records the info direct play opens the source with.
+func (p *Playback) setSourceInfo(info fs.FileInfo) {
+	p.sourceMu.Lock()
+	p.sourceInfo = info
+	p.sourceMu.Unlock()
+}
+
+// failures reads a playback's source, forgetting its info when a read
+// fails.
+type failures struct {
+	core.File
+	p *Playback
+}
+
+func (f failures) Read(b []byte) (int, error) {
+	n, err := f.File.Read(b)
+	if err != nil && !errors.Is(err, io.EOF) {
+		f.p.setSourceInfo(nil)
+	}
+	return n, err
 }
 
 // open opens a file of a playback's source within its library folder.

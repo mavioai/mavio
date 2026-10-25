@@ -93,6 +93,31 @@ func ReadIntentOf(ctx context.Context) ReadIntent {
 	return intent
 }
 
+type fileInfoKey struct{}
+
+type knownInfo struct {
+	name string
+	info fs.FileInfo
+}
+
+// WithFileInfo returns a context in which opening the file name takes
+// info, which the caller had of an earlier opening of it, for its stat
+// rather than asking the storage again: on cloud drives a stat lists the
+// file's folder. Storages that stat files cheaply, or that cannot use the
+// info, ignore it.
+func WithFileInfo(ctx context.Context, name string, info fs.FileInfo) context.Context {
+	return context.WithValue(ctx, fileInfoKey{}, knownInfo{name, info})
+}
+
+// FileInfoOf returns the info ctx carries for the file name.
+func FileInfoOf(ctx context.Context, name string) (fs.FileInfo, bool) {
+	k, ok := ctx.Value(fileInfoKey{}).(knownInfo)
+	if !ok || k.name != name || k.info == nil {
+		return nil, false
+	}
+	return k.info, true
+}
+
 // LocalPath returns the OS path of a file of a local storage, false for
 // other storages.
 func LocalPath(s Storage, name string) (string, bool) {

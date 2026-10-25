@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"maps"
 	"os"
@@ -44,6 +45,10 @@ var (
 	// policy's limit of concurrent playbacks.
 	ErrTooManyPlaybacks = errors.New("playback: too many concurrent playbacks")
 )
+
+// cloudThrottleAhead is how far ahead of the client ffmpeg writes the
+// segments of a file on a cloud drive before it is paused.
+const cloudThrottleAhead = 2 * time.Minute
 
 // Config configures a Manager.
 type Config struct {
@@ -237,6 +242,10 @@ type Playback struct {
 
 	// root is the library folder holding the source, for direct play.
 	root string
+	// sourceInfo is the source's info as direct play last opened it,
+	// which later requests open it with; nil after a request failed.
+	sourceMu   sync.Mutex
+	sourceInfo fs.FileInfo
 	// Download says the playback is a download.
 	Download bool
 	// Progressive remuxes and transcodes: the job, the planner that made
@@ -631,6 +640,14 @@ func (m *Manager) prepareHLS(ctx context.Context, p *Playback) error {
 	}
 	p.variant = streaming.VariantOf(out, int(ms.Bitrate), pixelFormat)
 	p.segExt = job.SegmentContainer
+	sup := supervisor.Config{IdleTimeout: m.cfg.IdleTimeout, PauseKey: m.cfg.PauseKey}
+	if m.cfg.Class != nil && m.cfg.Class(ctx, ms.Path) == core.StorageCloud {
+		// ffmpeg reads a cloud drive's file only as far ahead of the
+		// client as it needs: unthrottled, a copied video is read whole
+		// at the drive's speed, against its limits, for a playback that
+		// may stop early.
+		sup.ThrottleAhead = cloudThrottleAhead
+	}
 	s, err := streaming.NewStream(streaming.Config{
 		Dir: filepath.Join(dir, p.ID), Layout: p.layout, Container: job.SegmentContainer, Subtitles: p.liveSubtitles(),
 		Args: func(start time.Duration, out planner.HLSOutput) []string {
@@ -639,7 +656,7 @@ func (m *Manager) prepareHLS(ctx context.Context, p *Playback) error {
 			return pl.HLSArgs(&j, out)
 		},
 		Start:       m.cfg.FFmpeg,
-		Supervision: supervisor.Config{IdleTimeout: m.cfg.IdleTimeout, PauseKey: m.cfg.PauseKey},
+		Supervision: sup,
 		Logger:      m.log.With("playback", p.ID),
 	})
 	if err != nil {

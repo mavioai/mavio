@@ -2,6 +2,8 @@ package images
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"image"
 	"image/color"
 	"image/jpeg"
@@ -12,8 +14,10 @@ import (
 	"path/filepath"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/store"
 )
 
@@ -182,4 +186,82 @@ func TestServer(t *testing.T) {
 			t.Errorf("%s = %d, want 400", q, resp.StatusCode)
 		}
 	}
+}
+
+// TestServerRemoteImages checks images on remotes are read once a day,
+// and served from the copy kept while the remote fails.
+func TestServerRemoteImages(t *testing.T) {
+	ctx := t.Context()
+	s, err := store.Open(ctx, "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = s.Close() })
+	lib := core.Library{Name: "Films", Kind: core.LibraryMovies, Paths: []string{"remote:drive:Films"}}
+	if err := s.Libraries().Create(ctx, &lib); err != nil {
+		t.Fatal(err)
+	}
+	movie := core.Item{ID: core.NewID(), LibraryID: lib.ID, Kind: core.KindMovie, Name: "Film"}
+	if err := s.Items().Upsert(ctx, movie); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Images().Replace(ctx, movie.ID, []core.Image{{Kind: core.ImagePrimary, Path: "remote:drive:Films/Film/poster.jpg"}}); err != nil {
+		t.Fatal(err)
+	}
+	stored, err := s.Images().ListForOwner(ctx, movie.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	drive := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(drive, "Film"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	write := func(data []byte) {
+		if err := os.WriteFile(filepath.Join(drive, "Film", "poster.jpg"), data, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	first, second := jpegBytes(t, 40, 60), jpegBytes(t, 60, 90)
+	write(first)
+	var opens atomic.Int32
+	var down atomic.Bool
+	storages := &library.Storages{Remote: func(ctx context.Context, remote, dir string) (core.Storage, error) {
+		opens.Add(1)
+		if down.Load() {
+			return nil, errors.New("remote held")
+		}
+		return (&library.Storages{}).Open(ctx, filepath.ToSlash(drive))
+	}}
+	cache := t.TempDir()
+	srv := httptest.NewServer(New(Config{Store: s, Dir: cache, Storages: storages}).Handler())
+	t.Cleanup(srv.Close)
+	get := func(name string, wantOpens int32, want []byte) {
+		t.Helper()
+		opens.Store(0)
+		resp, err := http.Get(srv.URL + "/images/" + stored[0].ID.String())
+		if err != nil {
+			t.Fatal(err)
+		}
+		body, _ := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		if resp.StatusCode != http.StatusOK || !bytes.Equal(body, want) {
+			t.Errorf("%s: GET = %d, %d bytes; want = 200 and the %d bytes", name, resp.StatusCode, len(body), len(want))
+		}
+		if got := opens.Load(); got != wantOpens {
+			t.Errorf("%s: remote opened %d times, want = %d", name, got, wantOpens)
+		}
+	}
+	get("first", 1, first)
+	write(second)
+	get("again", 0, first)
+	kept := filepath.Join(cache, "originals", "library", stored[0].ID.String())
+	old := time.Now().Add(-remoteOriginalAge - time.Minute)
+	if err := os.Chtimes(kept, old, old); err != nil {
+		t.Fatal(err)
+	}
+	down.Store(true)
+	get("a day later, the remote failing", 1, first)
+	down.Store(false)
+	get("a day later", 1, second)
+	get("after reading it again", 0, second)
 }

@@ -205,15 +205,24 @@ func (l *Lyrics) hasLyrics(ctx context.Context, lib core.Library, media string) 
 	if !ok {
 		return true
 	}
-	st, err := l.Storages.Open(ctx, root)
+	// The folder is listed once rather than each lyric file stat'ed: on
+	// cloud drives each stat lists the folder.
+	st, err := l.Storages.Open(core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadBackground}), root)
 	if err != nil {
 		return true
 	}
 	defer st.Close()
-	stem := strings.TrimSuffix(rel, path.Ext(rel))
-	for _, ext := range metadata.LyricExtensions {
-		if _, err := st.Stat(ctx, stem+ext); !errors.Is(err, fs.ErrNotExist) {
-			return true
+	des, err := st.ReadDir(ctx, path.Dir(rel))
+	if err != nil {
+		return true
+	}
+	base := path.Base(rel)
+	stem := strings.TrimSuffix(base, path.Ext(base))
+	for _, de := range des {
+		for _, ext := range metadata.LyricExtensions {
+			if strings.EqualFold(de.Name(), stem+ext) {
+				return true
+			}
 		}
 	}
 	return false
