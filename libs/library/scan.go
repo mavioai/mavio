@@ -404,9 +404,13 @@ func (sc *scan) list(rfs rootFS, ignores *IgnoreFiles, st core.FolderState) (cor
 		return st, false, err
 	}
 	ignores.Listed(slashRel(rfs, st.Path), des)
+	growth := sc.GrowthPolicy
+	if growth != nil && !sc.policy(st.Path).DeferGrowing {
+		growth = nil
+	}
 	for _, de := range des {
 		e := Entry{Path: path.Join(st.Path, de.Name()), IsDir: de.IsDir()}
-		if !e.IsDir && sc.GrowthPolicy == nil && storage.HasDownloadSuffix(e.Path) {
+		if !e.IsDir && growth == nil && storage.HasDownloadSuffix(e.Path) {
 			continue
 		}
 		// An entry the storage fails to tell of fails the folder, which
@@ -435,7 +439,7 @@ func (sc *scan) list(rfs rootFS, ignores *IgnoreFiles, st core.FolderState) (cor
 		fe.ModTime = modTime(fi)
 		if !e.IsDir {
 			fe.Size = fi.Size()
-			if sc.GrowthPolicy != nil && sc.GrowthPolicy.Growing(sc.lib.ID.String(), e.Path, storage.FileStamp{Size: fe.Size, ModTime: fe.ModTime}) {
+			if growth != nil && growth.Growing(sc.lib.ID.String(), e.Path, storage.FileStamp{Size: fe.Size, ModTime: fe.ModTime}) {
 				// Files still being written are left for a later scan,
 				// which must list the folder again: its modification time
 				// does not change when they are written to.

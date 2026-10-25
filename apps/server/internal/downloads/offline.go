@@ -427,24 +427,35 @@ func (o *Offline) downloads(ctx context.Context, c OfflineClient) ([]*pluginv1.D
 		// a long history of them, every minute gets clients blocked.
 		return nil, nil
 	}
-	rc, err := o.rc()
-	if err != nil {
-		return nil, err
-	}
-	// The drive needs to list only the tasks added since the oldest
-	// download, with a margin for its clock.
-	since := slices.MinFunc(jobs, func(a, b core.StorageJob) int { return a.CreatedAt.Compare(b.CreatedAt) }).CreatedAt.Add(-sinceMargin)
-	tasks, err := rc.OfflineTasks(ctx, c.Remote, since)
-	if err != nil {
-		return nil, err
-	}
-	byID := make(map[string]rclone.OfflineTask, len(tasks))
-	for _, t := range tasks {
-		byID[t.ID] = t
+	// Completed downloads stay completed, listed by the drive or not: the
+	// drive is asked only of the others, and needs to list only the tasks
+	// added since the oldest of them, with a margin for its clock. Asking
+	// since a completed download kept in the ledger would list the
+	// drive's history since then at each check.
+	var byID map[string]rclone.OfflineTask
+	asked := slices.DeleteFunc(slices.Clone(jobs), offlineComplete)
+	if len(asked) > 0 {
+		rc, err := o.rc()
+		if err != nil {
+			return nil, err
+		}
+		since := slices.MinFunc(asked, func(a, b core.StorageJob) int { return a.CreatedAt.Compare(b.CreatedAt) }).CreatedAt.Add(-sinceMargin)
+		tasks, err := rc.OfflineTasks(ctx, c.Remote, since)
+		if err != nil {
+			return nil, err
+		}
+		byID = make(map[string]rclone.OfflineTask, len(tasks))
+		for _, t := range tasks {
+			byID[t.ID] = t
+		}
 	}
 	var out []*pluginv1.Download
 	for _, j := range jobs {
 		_, id, _ := strings.Cut(j.Key, "/")
+		if offlineComplete(j) {
+			out = append(out, offlineDownload(c, id, j, rclone.OfflineTask{}, true))
+			continue
+		}
 		t, listed := byID[j.Data["task"]]
 		if listed {
 			data := maps.Clone(j.Data)
@@ -462,6 +473,12 @@ func (o *Offline) downloads(ctx context.Context, c OfflineClient) ([]*pluginv1.D
 		out = append(out, offlineDownload(c, id, j, t, listed))
 	}
 	return out, nil
+}
+
+// offlineComplete reports whether the drive told that an offline download
+// completed.
+func offlineComplete(j core.StorageJob) bool {
+	return rclone.OfflineStatus(j.Data["status"]) == rclone.OfflineComplete
 }
 
 // offlineDownload returns a download of a client.

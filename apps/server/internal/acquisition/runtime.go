@@ -102,6 +102,9 @@ type Runtime struct {
 	// statuses are what the clients last told of the tracked downloads,
 	// by download ID.
 	statuses map[core.ID]ClientStatus
+	// importRetries put off the next import of downloads on remotes that
+	// could not be imported, by download ID.
+	importRetries map[core.ID]importRetry
 	// devices detects volumes when Devices is nil.
 	devices *storage.Detector
 	// scene caches the scene mapping providers' mappings.

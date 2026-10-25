@@ -83,7 +83,9 @@ func (r *Runtime) importEpisodeDownload(ctx context.Context, rn *run, d *core.Do
 	if len(imported) > 0 && allImported(expected, imported) {
 		return r.completeImport(ctx, d, p)
 	}
-	d.State = core.DownloadImporting
+	// The messages are cleared so that the state the import ends in is
+	// stored, even when its messages are those of the attempt before.
+	d.State, d.Messages = core.DownloadImporting, nil
 	if err := r.putDownload(ctx, d); err != nil {
 		return err
 	}

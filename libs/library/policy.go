@@ -24,6 +24,13 @@ type StoragePolicy struct {
 	// PruneFolders takes the items of folders whose modification time and
 	// file ID did not change from the previous scan, without listing them.
 	PruneFolders bool
+	// DeferGrowing leaves files modified within the write window out of a
+	// scan until they settle (GrowthPolicy), stat'ing them until then. On
+	// cloud drives files appear only once written, while their stats and
+	// the scan of the library after they settle are calls counted against
+	// rate limits: files there are scanned as found, and only those with a
+	// download suffix are left out.
+	DeferGrowing bool
 	// ScanConcurrency bounds the folders a scan lists at once; zero leaves
 	// it to the device.
 	ScanConcurrency int
@@ -38,7 +45,7 @@ func PolicyOf(class core.StorageClass) StoragePolicy {
 	if class == core.StorageCloud {
 		return StoragePolicy{ScanConcurrency: 2}
 	}
-	return StoragePolicy{WholeFiles: true, Samples: true, Speculative: true, PruneFolders: true}
+	return StoragePolicy{WholeFiles: true, Samples: true, Speculative: true, PruneFolders: true, DeferGrowing: true}
 }
 
 // policy returns the storage policy of a file of lib.

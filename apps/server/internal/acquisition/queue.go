@@ -63,6 +63,11 @@ func (r *Runtime) pruneStatuses(keep map[core.ID]bool) {
 			delete(r.statuses, id)
 		}
 	}
+	for id := range r.importRetries {
+		if !keep[id] {
+			delete(r.importRetries, id)
+		}
+	}
 	r.mu.Unlock()
 }
 
@@ -213,7 +218,62 @@ func (r *Runtime) track(ctx context.Context, rn *run, d *core.Download, p polled
 	if !r.settings().CompletedDownloadHandling {
 		return nil
 	}
-	return r.importDownload(ctx, rn, d, p, mappings)
+	remote := core.IsRemotePath(acquire.RemapDownloadPath(mappings, p.client.Ref(), item.GetOutputPath()))
+	if remote && !r.importDue(d) {
+		return nil
+	}
+	err := r.importDownload(ctx, rn, d, p, mappings)
+	if remote {
+		r.importTried(d)
+	}
+	return err
+}
+
+// Retries of imports of downloads on remotes: an import that is pending or
+// blocked is tried again after a while, twice as long each time, rather
+// than at each check of the queue, since each lists the download's folder
+// and probes its files through calls that count against the remote's rate
+// limits.
+const (
+	importRetryMin = 2 * time.Minute
+	importRetryMax = 30 * time.Minute
+)
+
+// importRetry is when a download on a remote is next imported, and how
+// long the retry after that waits.
+type importRetry struct {
+	at   time.Time
+	wait time.Duration
+}
+
+// importDue reports whether a download on a remote is to be imported now.
+func (r *Runtime) importDue(d *core.Download) bool {
+	if d.State != core.DownloadImportPending && d.State != core.DownloadImportBlocked {
+		return true
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	next, ok := r.importRetries[d.ID]
+	return !ok || !r.now().Before(next.at)
+}
+
+// importTried records an import of a download on a remote: one left
+// pending or blocked is tried again later.
+func (r *Runtime) importTried(d *core.Download) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if d.State != core.DownloadImportPending && d.State != core.DownloadImportBlocked {
+		delete(r.importRetries, d.ID)
+		return
+	}
+	if r.importRetries == nil {
+		r.importRetries = map[core.ID]importRetry{}
+	}
+	wait := importRetryMin
+	if next, ok := r.importRetries[d.ID]; ok {
+		wait = next.wait
+	}
+	r.importRetries[d.ID] = importRetry{at: r.now().Add(wait), wait: min(wait*2, importRetryMax)}
 }
 
 // failureMessage is why a download failed, as Radarr's ProcessFailed

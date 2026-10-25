@@ -82,7 +82,7 @@ Mavio 部署在家用服务器、NAS（Synology、TrueNAS、Unraid）和低功�
   * 或此前被推迟过，且其大小和修改时间尚未稳定满 30 秒。
 * **推迟**：增长中的文件被排除在扫描之外，不报错、不探测，并为其媒体库推迟（最多 4,096 个文件；永不稳定的文件，例如暂停的下载，一天后遗忘）。它所在的文件夹不会被标记为未变化，因此即使文件夹修改时间没变，之后的扫描也会重新列出它。
 * **协调**（`library.Scanner.RunDeferred`，每 10 秒）：对被推迟的文件做 stat；一旦文件消失（下载完成后被重命名；stat 因其他原因失败时文件仍保持推迟，§3.5），或在写入窗口之后保持不变满 30 秒，就为其媒体库排入一次扫描，每个媒体库一次。
-* 没有策略时，扫描器仍会跳过带下载后缀的文件。
+* 没有策略时以及在云盘上，扫描器只跳过带下载后缀的文件。云盘上的文件写完才会出现，而推迟它们要对其做 stat 并重新扫描其媒体库，这些调用都计入云盘的限制（§3.5；`StoragePolicy.DeferGrowing`）。
 
 ### 1.8 续播寻道折叠与关键帧吸附
 
@@ -438,6 +438,7 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 * **扫描中的失败：** 存储未能告知其条目的文件夹——列目录、stat 或 `.ignore` 文件因文件不存在以外的原因失败——与无法读取的文件夹一样保留其条目。只有存储告知文件已不存在时，条目才被视为缺失。stat 失败的被推迟文件（§1.7）仍保持推迟。
 * **媒体读取：** 为 probe、后台任务或播放打开文件所在的存储时，不先检查其文件夹是否存在，因为扫描已找到了该文件：在 115 上，这一检查要把文件夹的上级目录列出两次。
 * **扫描中的列目录：** 经 rcd 的列目录结果包含 stat 所告知的信息（`core.StorageCapabilities.ListedInfo`），因此扫描远端时不再 stat 已列出的条目：每个文件的大小、时间和 ID 取自其文件夹的列目录结果，根目录的则取自对根目录的唯一一次 stat。解析器为向前查看而列出的文件夹，扫描走进它时不再重新列出；列目录结果中没有 `.ignore` 的文件夹，也不再去读取它。在每次 stat 都要列出上级文件夹的 115 上，扫描对每个文件夹只列一次。
+* **后台检查：** 云盘上的文件不被推迟（§1.7）。远端上的下载导入待定或受阻时，在 2 分钟后重试，每次加倍，最长 30 分钟，而不是在每次检查队列时重试，因为每次都要列出下载并探测其文件。离线下载只向云盘询问尚未完成的下载，并从其中最早的一个起列出云盘的任务：已完成的下载在被移除之前一直留在账本中。
 
 ### 3.6 实测
 
@@ -465,4 +466,5 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 | 块缓存 | `libs/rclone`（`blocks.go`、`ranges.go`、`cached.go`）、`storage.go`（`Storage.Open`、`Storage.MediaURL`）、`proxy.go`（`Proxy.serveCached`）；`core.ReadIntent` 来自 `libs/library`（probe、后台任务）、`apps/server/internal/playback`（播放）与 `apps/server/internal/acquisition`（导入时的 probe）；`apps/server/internal/server/rclone.go` 与设置 `rclone-cache-size`；已打开项内部的淘汰在 `blocks.go`（`BlockCache.trimOpen`、`blockItem.evict`）与 `punch_{linux,darwin,windows,other}.go`；按关键帧预取经 `core.Prefetcher`（`cachedFile.Prefetch`）、`libs/media/keyframes`（`Data.Offsets`）与 `apps/server/internal/playback/prefetch.go`（`sourcePrefetch`；`Manager.prepareStart`、`serveSegment`、`Manager.Progress`） | P25，已实现 |
 | 暂停与失败 | `libs/rclone/hold.go`（`holds`、`throttled`、`Client.callRemote`）、`storage.go`（`Remotes.Open`、`Remotes.features`）、`offline.go`、`config.go`；`core.RetryAfter` 与 `libs/store/jobs.go`（`jobs.Fail`）；`libs/library/scan.go`（`scan.list`、`filtered.List`）、`storage/growth_policy.go`（`GrowthPolicy.Reconcile`）、`deferred.go` | P25，已实现 |
 | 扫描中的列目录 | `core.StorageCapabilities.ListedInfo`；`libs/library/fs.go`（`newRootFS`、`listings`、`rootFS.readDir`、`rootFS.stat`）、`scan.go`（`scan.list`、`filtered.List`、`Scanner.root`）、`dotignore.go`（`IgnoreFiles.Listed`） | P25，已实现 |
+| 后台检查 | `libs/library/policy.go`（`StoragePolicy.DeferGrowing`）、`scan.go`（`scan.list`）；`apps/server/internal/acquisition/queue.go`（`Runtime.track`、`importDue`、`importTried`）；`apps/server/internal/downloads/offline.go`（`Offline.downloads`） | P25，已实现 |
 | 实测 | mavioai/rclone `MAVIO_PROVIDERS.md` | P25，计划中 |

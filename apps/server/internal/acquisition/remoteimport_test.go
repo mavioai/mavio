@@ -1,12 +1,14 @@
 package acquisition
 
 import (
+	"context"
 	"errors"
 	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
@@ -97,4 +99,41 @@ func testImportFromRemote(t *testing.T, bin string, move bool) {
 	if jobs, err := e.db.StorageJobs().List(e.ctx, core.StorageJobTransfer); err != nil || len(jobs) != 0 {
 		t.Errorf("transfer ledger = %v, %v, want = empty", jobs, err)
 	}
+}
+
+// TestImportRetriesOnRemote checks a download on a remote that could not be
+// imported is tried again after a while, twice as long each time, rather
+// than at each check of the queue.
+func TestImportRetriesOnRemote(t *testing.T) {
+	e := newEnv(t)
+	var opens int
+	e.rt.Storages = &library.Storages{Remote: func(context.Context, string, string) (core.Storage, error) {
+		opens++
+		return nil, errors.New("remote unavailable")
+	}}
+	it := e.addMovie()
+	e.grabAndComplete(it)
+	e.client.setDownloads(pluginv1.Download_builder{
+		ClientId: new("qb"), Id: new(hash1080), Title: new(title1080), Status: new(pluginv1.DownloadStatus_DOWNLOAD_STATUS_COMPLETED),
+		OutputPath: new("remote:drive:Downloads/movies/" + title1080),
+	}.Build())
+	check := func(name string, advance time.Duration, wantOpens bool) {
+		t.Helper()
+		e.clock = e.clock.Add(advance)
+		opens = 0
+		if err := e.rt.CheckQueue(e.ctx); err != nil {
+			t.Fatal(err)
+		}
+		if got := opens > 0; got != wantOpens {
+			t.Errorf("%s: remote opened = %v, want = %v", name, got, wantOpens)
+		}
+		if got := e.download(hash1080).State; got != core.DownloadImportPending {
+			t.Errorf("%s: download = %s, want = pending", name, got)
+		}
+	}
+	check("first", 0, true)
+	check("a minute later", time.Minute, false)
+	check("after the first wait", time.Minute, true)
+	check("before the second wait", 3*time.Minute, false)
+	check("after the second wait", time.Minute, true)
 }

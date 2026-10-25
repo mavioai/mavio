@@ -78,7 +78,9 @@ func (r *Runtime) importDownload(ctx context.Context, rn *run, d *core.Download,
 	if err != nil {
 		return err
 	}
-	d.State = core.DownloadImporting
+	// The messages are cleared so that the state the import ends in is
+	// stored, even when its messages are those of the attempt before.
+	d.State, d.Messages = core.DownloadImporting, nil
 	if err := r.putDownload(ctx, d); err != nil {
 		return err
 	}

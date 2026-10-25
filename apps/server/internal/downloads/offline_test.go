@@ -156,16 +156,20 @@ func TestOffline(t *testing.T) {
 	if d := get(); d.GetStatus() != pluginv1.DownloadStatus_DOWNLOAD_STATUS_COMPLETED || d.GetOutputPath() != out || !d.GetCanMoveFiles() {
 		t.Errorf("download = %v, want completed at %s", d, out)
 	}
-	// A drive that no longer lists the completed download leaves it
-	// completed.
+	if since, _ := drive.since[len(drive.since)-1].(string); since == "" {
+		t.Errorf("listoffline since = %v, want the time of the oldest download", drive.since)
+	}
+	// A completed download stays completed, and the drive is no longer
+	// asked of it.
+	asked := len(drive.since)
 	drive.set(rclone.OfflineTask{ID: "other"})
 	list, err = o.ListDownloads(ctx, pluginv1.ListDownloadsRequest_builder{IncludeStatuses: new(true)}.Build())
 	if err != nil || len(list.GetDownloads()) != 1 || list.GetDownloads()[0].GetStatus() != pluginv1.DownloadStatus_DOWNLOAD_STATUS_COMPLETED ||
-		len(list.GetStatuses()) != 1 {
+		list.GetDownloads()[0].GetOutputPath() != out || len(list.GetStatuses()) != 1 {
 		t.Errorf("ListDownloads = %v, %v; want the completed download, not the drive's other", list, err)
 	}
-	if since, _ := drive.since[len(drive.since)-1].(string); since == "" {
-		t.Errorf("listoffline since = %v, want the time of the oldest download", drive.since)
+	if len(drive.since) != asked {
+		t.Errorf("listoffline asked %v, want = not again for a completed download", drive.since[asked:])
 	}
 
 	if _, err := o.RemoveDownload(ctx, pluginv1.RemoveDownloadRequest_builder{ClientId: new("pp"), DownloadId: new(hash), DeleteData: new(true)}.Build()); err != nil {

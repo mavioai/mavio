@@ -90,6 +90,27 @@ func TestScanner_GrowthPolicy(t *testing.T) {
 	}
 }
 
+// On a cloud drive files are scanned as found: they appear only once
+// written, and deferring them would stat them and scan the library again.
+func TestScanner_GrowthPolicyCloud(t *testing.T) {
+	f := newScan(t, core.LibraryMovies)
+	tree(t, f.root, "Film (2021)/Film (2021).mkv.part", "Growing (2022)/Growing (2022).mkv")
+	f.lib.StorageClasses = map[string]core.StorageClass{f.lib.Paths[0]: core.StorageCloud}
+	if err := f.store.Libraries().Create(t.Context(), &f.lib); err != nil {
+		t.Fatal(err)
+	}
+	policy := &storage.GrowthPolicy{}
+	f.sc.GrowthPolicy = policy
+	f.scan()
+	want := map[string]core.ItemKind{"Growing (2022)/Growing (2022).mkv": core.KindMovie}
+	if got := f.items(); !maps.Equal(got, want) {
+		t.Fatalf("items = %v, want %v", got, want)
+	}
+	if got := policy.Pending(); got != 0 {
+		t.Errorf("deferred = %d, want 0", got)
+	}
+}
+
 // rotational detects every path as on one hard disk.
 func rotational(calls *atomic.Int32) *storage.Detector {
 	return &storage.Detector{Detect: func(string) (storage.DeviceInfo, error) {
