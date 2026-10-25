@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"errors"
+	"io/fs"
 	"path"
 	"slices"
 	"strings"
@@ -41,9 +43,9 @@ type FileStamp struct {
 	ModTime time.Time
 }
 
-// FileStat returns the stamp of the file at path; ok is false when it is
-// gone.
-type FileStat func(path string) (stamp FileStamp, ok bool)
+// FileStat returns the stamp of the file at path: an error matching
+// fs.ErrNotExist when it is gone, another error when it could not be told.
+type FileStat func(path string) (FileStamp, error)
 
 // GrowthPolicy keeps files that are still being written, such as
 // downloads, out of scans and defers them: a file whose name has a
@@ -151,7 +153,9 @@ func (p *GrowthPolicy) Pending() int {
 // the owners of those that went away (renamed when their download
 // finished, or removed) or whose stamp stayed the same for StableFor
 // after the write window. A file with a download suffix settles only by
-// going away; one that never does is forgotten after a day.
+// going away; one that never does is forgotten after a day. A file stat
+// fails on is left as it was, so that a storage failing for a while does
+// not have every library scanned.
 func (p *GrowthPolicy) Reconcile(stat FileStat) []string {
 	p.mu.Lock()
 	names := make([]string, 0, len(p.deferred))
@@ -162,11 +166,15 @@ func (p *GrowthPolicy) Reconcile(stat FileStat) []string {
 	// Stat without the lock: remote volumes may be slow to answer.
 	stamps := make(map[string]FileStamp, len(names))
 	gone := map[string]bool{}
+	unknown := map[string]bool{}
 	for _, n := range names {
-		if s, ok := stat(n); ok {
+		switch s, err := stat(n); {
+		case err == nil:
 			stamps[n] = s
-		} else {
+		case errors.Is(err, fs.ErrNotExist):
 			gone[n] = true
+		default:
+			unknown[n] = true
 		}
 	}
 	now := p.now()
@@ -179,7 +187,7 @@ func (p *GrowthPolicy) Reconcile(stat FileStat) []string {
 			continue
 		}
 		settled := gone[n]
-		if !settled {
+		if !settled && !unknown[n] {
 			if s := stamps[n]; s != d.stamp {
 				d.stamp, d.since = s, now
 			} else {

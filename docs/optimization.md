@@ -81,7 +81,7 @@ Two properties are derived from a device:
   * it was modified within the write window (10 seconds);
   * or it was deferred before and its size and modification time have not been stable for 30 seconds.
 * **Deferral**: a growing file is left out of the scan without errors or probes and is deferred for its library (at most 4,096 files; one that never settles, such as a paused download, is forgotten after a day). Its folder is not marked unchanged, so a later scan lists it again although its modification time did not change.
-* **Reconciliation** (`library.Scanner.RunDeferred`, every 10 seconds): deferred files are stat'ed; once a file went away (a finished download renamed) or stayed unchanged for 30 seconds after its write window, a scan of its library is queued, once per library.
+* **Reconciliation** (`library.Scanner.RunDeferred`, every 10 seconds): deferred files are stat'ed; once a file went away (a finished download renamed; a stat failing otherwise leaves the file deferred, §3.5) or stayed unchanged for 30 seconds after its write window, a scan of its library is queued, once per library.
 * Without a policy, the scanner still skips files with download suffixes.
 
 ### 1.8 Resume Seek Folding and Keyframe Snapping
@@ -425,11 +425,20 @@ Each reader of an item marks where it reads: a client's request for direct play,
 Some remotes are read sequentially:
 
 * those whose rcd reports that they read from the start (§3.2);
-* *Planned:* those whose storage refuses a range that does not continue an open stream, as measured (§3.5) and set on the remote.
+* *Planned:* those whose storage refuses a range that does not continue an open stream, as measured (§3.6) and set on the remote.
 
 A file of a sequential remote has one downloader. A read ahead of it extends it, however far; a read behind it restarts it there. A long seek forward on such a remote waits for the bytes before it.
 
-### 3.5 Measurements
+### 3.5 Calls to Remotes
+
+Drives such as 115 limit the calls to their API more tightly than the reads of their files: they answer calls that come too often with errors, block the client for a while, or end its session after logins in a row. Mavio stops calling a remote that refuses its calls.
+
+* **Holds:** a remote is held when its backend fails to start in the rcd, as when its login fails, or when one of its calls is throttled: status 429, or a message telling of a rate limit or quota, as 115's firewall gives. While it is held, its calls fail at once without reaching the rcd. A hold lasts a minute, and each hold in a row twice as long as the one before, up to 30 minutes. A call that succeeds after the hold releases the remote, and so does a change of its configuration. Reads through `--rc-serve` are not held: the block cache waits as `Retry-After` asks (§3.4).
+* **Retries of jobs:** an error that tells how long to wait (`core.RetryAfter`), such as a held remote's, puts off the job's next attempt for at least that long.
+* **Failures in scans:** a folder whose entries the storage fails to tell of — a listing, a stat or an `.ignore` file failing for another reason than the file's absence — keeps its items, as an unreadable folder does. Items are taken for missing only when the storage tells they are gone. Deferred files (§1.7) whose stat fails stay deferred.
+* **Media reads:** opening the storage of a file for a probe, a background job or a playback does not first check that its folder is there, since a scan found the file: on 115, that check lists the folder's parent twice.
+
+### 3.6 Measurements
 
 Planned. The stream limits and the link lifetimes without a stated expiry are estimates for now (§3.2, §3.3); measurements are to replace them and to find the remotes to read sequentially. Each backend is measured through the rcd with a test account, starting with the drives of the fork and the consumer drives (drive, onedrive, dropbox, box, pcloud, mega, yandex, protondrive). The measurements:
 
@@ -441,7 +450,7 @@ They count the requests to the API and to the storage (`--dump headers`). They n
 
 The results set each backend's stream limits, link lifetimes and whether its remotes are sequential. They are recorded in the fork's `MAVIO_PROVIDERS.md`.
 
-### 3.6 Implementation Index
+### 3.7 Implementation Index
 
 | Mechanism | Implementation | Phase |
 | :--- | :--- | :--- |
@@ -453,4 +462,5 @@ The results set each backend's stream limits, link lifetimes and whether its rem
 | One `Fs` per remote, longer `Fs` cache | `libs/rclone/storage.go` (`Storage.fsName`, `Storage.abs`), `daemon.go` (`Daemon.launch`) | P25, implemented |
 | Connection limits | mavioai/rclone `lib/connlimit`, `fs/rc/rcserver/serveobject.go` (`Server.open`), `fs/rc/rc.go` (the options); the `MaxFileStreams` and `MaxStreams` features in `fs/features.go` and the backends of §3.3 | P25, implemented |
 | Block cache | `libs/rclone` (`blocks.go`, `ranges.go`, `cached.go`), `storage.go` (`Storage.Open`, `Storage.MediaURL`), `proxy.go` (`Proxy.serveCached`); `core.ReadIntent` from `libs/library` (probes, background jobs), `apps/server/internal/playback` (playback) and `apps/server/internal/acquisition` (probes of imports); `apps/server/internal/server/rclone.go` and the `rclone-cache-size` setting; eviction within open items in `blocks.go` (`BlockCache.trimOpen`, `blockItem.evict`) and `punch_{linux,darwin,windows,other}.go`; read-ahead from keyframes through `core.Prefetcher` (`cachedFile.Prefetch`), `libs/media/keyframes` (`Data.Offsets`) and `apps/server/internal/playback/prefetch.go` (`sourcePrefetch`; `Manager.prepareStart`, `serveSegment`, `Manager.Progress`) | P25, implemented |
+| Holds and failures | `libs/rclone/hold.go` (`holds`, `throttled`, `Client.callRemote`), `storage.go` (`Remotes.Open`, `Remotes.features`), `offline.go`, `config.go`; `core.RetryAfter` and `libs/store/jobs.go` (`jobs.Fail`); `libs/library/scan.go` (`scan.list`, `filtered.List`), `storage/growth_policy.go` (`GrowthPolicy.Reconcile`), `deferred.go` | P25, implemented |
 | Measurements | mavioai/rclone `MAVIO_PROVIDERS.md` | P25, planned |

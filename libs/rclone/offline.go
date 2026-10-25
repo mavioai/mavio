@@ -2,6 +2,7 @@ package rclone
 
 import (
 	"context"
+	"strings"
 	"time"
 )
 
@@ -41,7 +42,8 @@ func (c *Client) AddOffline(ctx context.Context, fsName, link, name string) (Off
 	if name != "" {
 		in["name"] = name
 	}
-	err := c.Call(ctx, "operations/addurl", in, &out)
+	remote, _, _ := strings.Cut(fsName, ":")
+	err := c.callRemote(ctx, remote, "operations/addurl", in, &out, false)
 	return out.Task, err
 }
 
@@ -55,11 +57,11 @@ func (c *Client) OfflineTasks(ctx context.Context, remote string, since time.Tim
 	if !since.IsZero() {
 		in["since"] = since.UTC().Format(time.RFC3339)
 	}
-	err := c.Call(ctx, "operations/listoffline", in, &out)
+	err := c.callRemote(ctx, remote, "operations/listoffline", in, &out, false)
 	return out.Tasks, err
 }
 
 // DeleteOffline removes an offline download of a remote.
 func (c *Client) DeleteOffline(ctx context.Context, remote, id string) error {
-	return c.Call(ctx, "operations/deleteoffline", map[string]any{"fs": remote + ":", "task_id": id}, nil)
+	return c.callRemote(ctx, remote, "operations/deleteoffline", map[string]any{"fs": remote + ":", "task_id": id}, nil, false)
 }

@@ -47,6 +47,8 @@ type Client struct {
 	// verified is set once the rcd was seen running it.
 	require  string
 	verified atomic.Bool
+	// holds are the remotes whose calls wait.
+	holds holds
 }
 
 // Require makes every request first check, until it once succeeds, that

@@ -323,8 +323,9 @@ func (sc *scan) folder(ctx context.Context, rfs rootFS, ignores *IgnoreFiles, t 
 		stats[p] = e
 	}
 	res, err := sc.resolve(ctx, t, entries, filtered{rfs, ignores})
-	if rerr := (*resolverError)(nil); errors.As(err, &rerr) {
-		// A folder a resolver failed on keeps its items.
+	if rerr, lerr := (*resolverError)(nil), (*listError)(nil); errors.As(err, &rerr) || errors.As(err, &lerr) {
+		// A folder a resolver failed on, or whose subfolders the storage
+		// failed to list for it, keeps its items.
 		sc.logger().WarnContext(ctx, "folder resolver failed", "path", t.dir, "err", err)
 		sc.count(func(s *ScanStats) { s.Unreadable++ })
 		return nil, sc.Store.Items().MarkSeen(ctx, sc.lib.ID, t.dir, sc.gen)
@@ -404,13 +405,23 @@ func (sc *scan) list(rfs rootFS, ignores *IgnoreFiles, st core.FolderState) (cor
 		if !e.IsDir && sc.GrowthPolicy == nil && storage.HasDownloadSuffix(e.Path) {
 			continue
 		}
-		if ignored, err := ignores.Ignored(slashRel(rfs, e.Path), e.IsDir); err != nil || ignored {
+		// An entry the storage fails to tell of fails the folder, which
+		// then keeps its items: dropping it would take its items for
+		// missing.
+		ignored, err := ignores.Ignored(slashRel(rfs, e.Path), e.IsDir)
+		if err != nil {
+			return st, false, err
+		}
+		if ignored {
 			continue
 		}
 		fe := core.FolderEntry{Name: path.Base(e.Path), IsDir: e.IsDir}
 		fi, err := rfs.stat(e.Path)
-		if err != nil {
+		if isNotExist(err) {
 			continue // gone since listed
+		}
+		if err != nil {
+			return st, false, err
 		}
 		fe.ModTime = modTime(fi)
 		if !e.IsDir {
@@ -443,14 +454,26 @@ type filtered struct {
 	ignores *IgnoreFiles
 }
 
+// listError is a storage failing to list a folder for a resolver; the
+// folder resolved keeps its items.
+type listError struct{ err error }
+
+func (e *listError) Error() string { return e.err.Error() }
+
+func (e *listError) Unwrap() error { return e.err }
+
 func (f filtered) List(dir string) ([]Entry, error) {
 	entries, err := f.rfs.List(dir)
 	if err != nil {
-		return nil, err
+		return nil, &listError{err}
 	}
 	out := entries[:0]
 	for _, e := range entries {
-		if ignored, err := f.ignores.Ignored(slashRel(f.rfs, e.Path), e.IsDir); err == nil && !ignored {
+		ignored, err := f.ignores.Ignored(slashRel(f.rfs, e.Path), e.IsDir)
+		if err != nil {
+			return nil, &listError{err}
+		}
+		if !ignored {
 			out = append(out, e)
 		}
 	}

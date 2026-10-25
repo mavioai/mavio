@@ -238,7 +238,7 @@ erDiagram
 * 工作者按优先级（其次按 `RunAt`）**租用**到期的任务；租约在 `LeaseExpiresAt` 到期且未续租时，任务重新变为可用，因此工作者崩溃也不会丢失任务。`Attempts` 统计的是租用次数，因此因崩溃中断的尝试也会计入。
 * `Extend`、`Complete` 与 `Fail` 要求调用者持有租约；租约已过期并被接管的工作者会得到 `ErrConflict`。
 * `Complete` 保存任务的 `Result`，即其所做之事的摘要（如插件任务下载了哪些模型），随已结束的任务显示；处理器以 `library.SetResult` 设置它，无可报告时为空。
-* 一次尝试失败后，在 `RetryDelay(attempts)` 之后重试——30 秒，此后翻倍（1 分钟、2 分钟……），最长一小时——直到达到 `MaxAttempts`，此时任务变为 `failed`。若在其执行期间已有同 key 的任务入队，则由后者代替重试，该任务立即变为 `failed`。
+* 一次尝试失败后，在 `RetryDelay(attempts)` 之后重试——30 秒，此后翻倍（1 分钟、2 分钟……），最长一小时——若其错误说明的需等待时间更长，则在其之后（`RetryAfter`，例如限制调用的存储所说明的），直到达到 `MaxAttempts`，此时任务变为 `failed`。若在其执行期间已有同 key 的任务入队，则由后者代替重试，该任务立即变为 `failed`。
 * 状态流转：`pending` → `running` → `succeeded` / 重试时回到 `pending` / `failed`。
 * `JobQuery` 按类型与状态列出任务，最近创建的在前；已结束的任务在一周后由每日运行的 `jobs.cleanup` 任务清除，该任务还会删除空闲的会话与过期的邀请，以及元数据目录中已不存在的条目的目录（在其最后一次改动一天之后）。
 

@@ -81,7 +81,7 @@ Mavio 部署在家用服务器、NAS（Synology、TrueNAS、Unraid）和低功�
   * 在写入窗口（10 秒）内被修改过；
   * 或此前被推迟过，且其大小和修改时间尚未稳定满 30 秒。
 * **推迟**：增长中的文件被排除在扫描之外，不报错、不探测，并为其媒体库推迟（最多 4,096 个文件；永不稳定的文件，例如暂停的下载，一天后遗忘）。它所在的文件夹不会被标记为未变化，因此即使文件夹修改时间没变，之后的扫描也会重新列出它。
-* **协调**（`library.Scanner.RunDeferred`，每 10 秒）：对被推迟的文件做 stat；一旦文件消失（下载完成后被重命名），或在写入窗口之后保持不变满 30 秒，就为其媒体库排入一次扫描，每个媒体库一次。
+* **协调**（`library.Scanner.RunDeferred`，每 10 秒）：对被推迟的文件做 stat；一旦文件消失（下载完成后被重命名；stat 因其他原因失败时文件仍保持推迟，§3.5），或在写入窗口之后保持不变满 30 秒，就为其媒体库排入一次扫描，每个媒体库一次。
 * 没有策略时，扫描器仍会跳过带下载后缀的文件。
 
 ### 1.8 续播寻道折叠与关键帧吸附
@@ -425,11 +425,20 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 以下远端按顺序读取：
 
 * rcd 报告需要从开头读起的远端（§3.2）；
-* *计划中：* 经实测（§3.5）其存储拒绝不能接续已打开数据流的范围请求、并在远端上设置了此项的远端。
+* *计划中：* 经实测（§3.6）其存储拒绝不能接续已打开数据流的范围请求、并在远端上设置了此项的远端。
 
 顺序读取的远端上，每个文件只有一个下载器。在它前方的读取延长它，无论多远；在它后方的读取让它从该处重新开始。在这种远端上向前远距离拖动要等待之前的字节。
 
-### 3.5 实测
+### 3.5 对远端的调用
+
+115 这类云盘对 API 调用的限制比对文件读取更严：调用过于频繁时返回错误、暂时封锁客户端，或在接连登录之后结束其会话。远端拒绝调用时，Mavio 便停止调用它。
+
+* **暂停：** 远端的后端在 rcd 中启动失败（例如登录失败），或其某次调用被限速（状态 429，或错误信息说明了速率限制或配额，如 115 的防火墙所返回的）时，该远端被暂停。暂停期间，它的调用立即失败，不到达 rcd。一次暂停持续一分钟，接连的每次暂停是上一次的两倍，最长 30 分钟。暂停之后有调用成功即解除暂停，远端的配置改变时也解除。经 `--rc-serve` 的读取不受暂停影响：块缓存按 `Retry-After` 的要求等待（§3.4）。
+* **任务的重试：** 说明了需等待多久的错误（`core.RetryAfter`），例如被暂停的远端的错误，会把任务的下一次尝试推迟至少这么久。
+* **扫描中的失败：** 存储未能告知其条目的文件夹——列目录、stat 或 `.ignore` 文件因文件不存在以外的原因失败——与无法读取的文件夹一样保留其条目。只有存储告知文件已不存在时，条目才被视为缺失。stat 失败的被推迟文件（§1.7）仍保持推迟。
+* **媒体读取：** 为 probe、后台任务或播放打开文件所在的存储时，不先检查其文件夹是否存在，因为扫描已找到了该文件：在 115 上，这一检查要把文件夹的上级目录列出两次。
+
+### 3.6 实测
 
 计划中。数据流限制与未标明过期时间的链接有效期目前是估计值（§3.2、§3.3）；实测将取代它们，并找出需要顺序读取的远端。用测试账号经 rcd 逐个后端实测，先测 fork 的云盘与常用的个人云盘（drive、onedrive、dropbox、box、pcloud、mega、yandex、protondrive）。实测内容：
 
@@ -441,7 +450,7 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 
 实测结果决定各后端的数据流限制、链接有效期以及其远端是否需要顺序读取，并记录在 fork 的 `MAVIO_PROVIDERS.md` 中。
 
-### 3.6 实现索引
+### 3.7 实现索引
 
 | 机制 | 实现 | 阶段 |
 | :--- | :--- | :--- |
@@ -453,4 +462,5 @@ Mavio 把从 rclone 远端读取的字节保存在本地磁盘上，位于 `libs
 | 每个远端一个 `Fs`、更长的 `Fs` 缓存 | `libs/rclone/storage.go`（`Storage.fsName`、`Storage.abs`）、`daemon.go`（`Daemon.launch`） | P25，已实现 |
 | 连接数限制 | mavioai/rclone `lib/connlimit`、`fs/rc/rcserver/serveobject.go`（`Server.open`）、`fs/rc/rc.go`（选项）；`fs/features.go` 与 §3.3 中各后端的 `MaxFileStreams` 与 `MaxStreams` 特性 | P25，已实现 |
 | 块缓存 | `libs/rclone`（`blocks.go`、`ranges.go`、`cached.go`）、`storage.go`（`Storage.Open`、`Storage.MediaURL`）、`proxy.go`（`Proxy.serveCached`）；`core.ReadIntent` 来自 `libs/library`（probe、后台任务）、`apps/server/internal/playback`（播放）与 `apps/server/internal/acquisition`（导入时的 probe）；`apps/server/internal/server/rclone.go` 与设置 `rclone-cache-size`；已打开项内部的淘汰在 `blocks.go`（`BlockCache.trimOpen`、`blockItem.evict`）与 `punch_{linux,darwin,windows,other}.go`；按关键帧预取经 `core.Prefetcher`（`cachedFile.Prefetch`）、`libs/media/keyframes`（`Data.Offsets`）与 `apps/server/internal/playback/prefetch.go`（`sourcePrefetch`；`Manager.prepareStart`、`serveSegment`、`Manager.Progress`） | P25，已实现 |
+| 暂停与失败 | `libs/rclone/hold.go`（`holds`、`throttled`、`Client.callRemote`）、`storage.go`（`Remotes.Open`、`Remotes.features`）、`offline.go`、`config.go`；`core.RetryAfter` 与 `libs/store/jobs.go`（`jobs.Fail`）；`libs/library/scan.go`（`scan.list`、`filtered.List`）、`storage/growth_policy.go`（`GrowthPolicy.Reconcile`）、`deferred.go` | P25，已实现 |
 | 实测 | mavioai/rclone `MAVIO_PROVIDERS.md` | P25，计划中 |

@@ -69,9 +69,12 @@ func (r *Remotes) Open(ctx context.Context, remote, dir string) (core.Storage, e
 	if r.Blocks != nil && (r.Class == nil || r.Class(ctx, "remote:"+remote+":"+dir) == core.StorageCloud) {
 		s.blocks, s.seq = r.Blocks, f["SeekReadsFromStart"]
 	}
-	if core.ReadIntentOf(ctx).Kind == core.ReadPlayback {
-		// Playbacks read files scans found, in folders known to be there:
-		// asking the remote again only delays them.
+	if core.ReadIntentOf(ctx).Kind != core.ReadAny {
+		// Reads of media, by playbacks, probes and background jobs, are of
+		// files scans found, in folders known to be there: asking the
+		// remote again only delays them, and costs a listing of the
+		// folder's parent on remotes that find a file by listing its
+		// folder.
 		return s, nil
 	}
 	info, err := s.Stat(ctx, ".")
@@ -86,6 +89,7 @@ func (r *Remotes) Open(ctx context.Context, remote, dir string) (core.Storage, e
 
 // Forget drops what is known of a remote, after its configuration changed.
 func (r *Remotes) Forget(remote string) {
+	r.Client.holds.release(remote)
 	r.mu.Lock()
 	delete(r.cache, remote)
 	r.mu.Unlock()
@@ -114,7 +118,7 @@ func (r *Remotes) features(ctx context.Context, remote string) (map[string]bool,
 	var info struct {
 		Features map[string]bool `json:"Features"`
 	}
-	if err := r.Client.Call(ctx, "operations/fsinfo", map[string]any{"fs": remote + ":"}, &info); err != nil {
+	if err := r.Client.callRemote(ctx, remote, "operations/fsinfo", map[string]any{"fs": remote + ":"}, &info, true); err != nil {
 		return nil, err
 	}
 	r.mu.Lock()
@@ -181,7 +185,7 @@ func (s *Storage) Stat(ctx context.Context, name string) (fs.FileInfo, error) {
 	var out struct {
 		Item *item `json:"item"`
 	}
-	if err := s.r.Client.Call(ctx, "operations/stat", map[string]any{"fs": s.fsName(), "remote": s.abs(remote), "opt": listOpt}, &out); err != nil {
+	if err := s.r.Client.callRemote(ctx, s.remote, "operations/stat", map[string]any{"fs": s.fsName(), "remote": s.abs(remote), "opt": listOpt}, &out, false); err != nil {
 		return nil, &fs.PathError{Op: "stat", Path: name, Err: err}
 	}
 	if out.Item == nil {
@@ -202,7 +206,7 @@ func (s *Storage) ReadDir(ctx context.Context, name string) ([]fs.DirEntry, erro
 	var out struct {
 		List []item `json:"list"`
 	}
-	if err := s.r.Client.Call(ctx, "operations/list", map[string]any{"fs": s.fsName(), "remote": s.abs(remote), "opt": listOpt}, &out); err != nil {
+	if err := s.r.Client.callRemote(ctx, s.remote, "operations/list", map[string]any{"fs": s.fsName(), "remote": s.abs(remote), "opt": listOpt}, &out, false); err != nil {
 		return nil, &fs.PathError{Op: "readdir", Path: name, Err: err}
 	}
 	entries := make([]fs.DirEntry, 0, len(out.List))
@@ -314,7 +318,7 @@ func (s *Storage) MkdirAll(ctx context.Context, name string) error {
 }
 
 func (s *Storage) call(ctx context.Context, method, op, name string, in map[string]any) error {
-	if err := s.r.Client.Call(ctx, method, in, nil); err != nil {
+	if err := s.r.Client.callRemote(ctx, s.remote, method, in, nil, false); err != nil {
 		return &fs.PathError{Op: op, Path: name, Err: err}
 	}
 	return nil
@@ -409,7 +413,7 @@ func (s *Storage) link(ctx context.Context, from, to string) error {
 		return &fs.PathError{Op: "link", Path: to, Err: fs.ErrInvalid}
 	}
 	in := map[string]any{"srcFs": s.fsName(), "srcRemote": from, "dstFs": s.fsName(), "dstRemote": s.abs(to)}
-	if err := s.r.Client.Call(ctx, "operations/hardlink", in, nil); err != nil {
+	if err := s.r.Client.callRemote(ctx, s.remote, "operations/hardlink", in, nil, false); err != nil {
 		if strings.Contains(err.Error(), "can't hard link") {
 			return fmt.Errorf("%w: %w", core.ErrUnsupported, err)
 		}

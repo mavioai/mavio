@@ -259,8 +259,9 @@ type JobQueue interface {
 	// Complete marks a leased job succeeded, with the summary of what it
 	// did (Job.Result), which may be empty.
 	Complete(ctx context.Context, id ID, owner, result string) error
-	// Fail records a failed attempt; the job is retried after RetryDelay
-	// until MaxAttempts is reached, then marked failed. A job queued with
+	// Fail records a failed attempt; the job is retried after RetryDelay,
+	// or what RetryAfter of cause tells when that is longer, until
+	// MaxAttempts is reached, then marked failed. A job queued with
 	// the same UniqueKey while it ran stands for its retry: it is marked
 	// failed at once.
 	Fail(ctx context.Context, id ID, owner string, cause error) error

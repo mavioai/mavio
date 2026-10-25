@@ -1,11 +1,15 @@
 package library
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
+	"io/fs"
 	"maps"
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -308,5 +312,47 @@ func TestVersionName(t *testing.T) {
 		if got := versionName(tt.primary, tt.file); got != tt.want {
 			t.Errorf("versionName(%q, %q) = %q, want = %q", tt.primary, tt.file, got, tt.want)
 		}
+	}
+}
+
+// flakyStorage fails the calls of names fail picks as a storage limiting
+// its rate would.
+type flakyStorage struct {
+	core.Storage
+	fail func(name string) bool
+}
+
+var errThrottled = errors.New("rate limit exceeded")
+
+func (s flakyStorage) Stat(ctx context.Context, name string) (fs.FileInfo, error) {
+	if s.fail(name) {
+		return nil, errThrottled
+	}
+	return s.Storage.Stat(ctx, name)
+}
+
+func (s flakyStorage) ReadDir(ctx context.Context, name string) ([]fs.DirEntry, error) {
+	if s.fail(name) {
+		return nil, errThrottled
+	}
+	return s.Storage.ReadDir(ctx, name)
+}
+
+func TestScanStorageFailures(t *testing.T) {
+	f := newScan(t, core.LibraryMovies)
+	tree(t, f.root, "A (2000)/A (2000).mkv", "B (2001)/B (2001).mkv")
+	failing := false
+	f.lib.Paths = []string{"remote:test:Movies"}
+	f.sc.Storages = &Storages{Remote: func(context.Context, string, string) (core.Storage, error) {
+		st, err := OpenLocalStorage(f.root)
+		return flakyStorage{st, func(name string) bool { return failing && strings.HasPrefix(name, "B (2001)/") }}, err
+	}}
+	if st := f.scan(); len(f.store.present()) != 2 {
+		t.Fatalf("first scan: stats %+v, items %v", st, f.store.present())
+	}
+	// Whatever of B's folder the storage fails on, B is not missing.
+	failing = true
+	if st := f.scan(); st.Missing != 0 || st.Unreadable == 0 || len(f.store.present()) != 2 {
+		t.Errorf("failing storage: stats %+v, items %v, want B kept", st, f.store.present())
 	}
 }

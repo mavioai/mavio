@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"errors"
+	"io/fs"
 	"slices"
 	"testing"
 	"time"
@@ -36,7 +38,16 @@ func TestGrowthPolicy(t *testing.T) {
 	p := &GrowthPolicy{Now: func() time.Time { return clock }}
 	old := clock.Add(-time.Hour)
 	files := map[string]FileStamp{}
-	stat := func(name string) (FileStamp, bool) { s, ok := files[name]; return s, ok }
+	failing := map[string]bool{}
+	stat := func(name string) (FileStamp, error) {
+		if failing[name] {
+			return FileStamp{}, errors.New("storage unavailable")
+		}
+		if s, ok := files[name]; ok {
+			return s, nil
+		}
+		return FileStamp{}, fs.ErrNotExist
+	}
 	advance := func(d time.Duration) { clock = clock.Add(d) }
 
 	// A file at rest is not growing and is not deferred.
@@ -83,6 +94,12 @@ func TestGrowthPolicy(t *testing.T) {
 
 	// A download settles only by going away, renamed when it finishes.
 	advance(time.Hour)
+	// A storage that fails to tell keeps it deferred.
+	failing["/m/Film.mkv.part"] = true
+	if got := p.Reconcile(stat); len(got) != 0 || p.Pending() != 1 {
+		t.Errorf("Reconcile of a failing storage = %v with %d pending, want none with 1", got, p.Pending())
+	}
+	delete(failing, "/m/Film.mkv.part")
 	if got := p.Reconcile(stat); len(got) != 0 {
 		t.Errorf("Reconcile of a resting download = %v, want none", got)
 	}

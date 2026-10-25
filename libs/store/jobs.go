@@ -158,7 +158,7 @@ func (r jobs) Fail(ctx context.Context, id core.ID, owner string, cause error) e
 		now := time.Now()
 		params := sqlcsqlite.FinishJobParams{
 			State:     string(core.JobPending),
-			RunAt:     now.Add(core.RetryDelay(int(j.Attempts))),
+			RunAt:     now.Add(max(core.RetryDelay(int(j.Attempts)), core.RetryAfter(cause))),
 			LastError: msg,
 			ID:        id,
 			Owner:     owner,

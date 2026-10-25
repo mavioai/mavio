@@ -45,12 +45,12 @@ func (s *Scanner) ReconcileDeferred(ctx context.Context) {
 	if s.GrowthPolicy == nil || s.GrowthPolicy.Pending() == 0 {
 		return
 	}
-	owners := s.GrowthPolicy.Reconcile(func(name string) (storage.FileStamp, bool) {
+	owners := s.GrowthPolicy.Reconcile(func(name string) (storage.FileStamp, error) {
 		fi, err := s.statFile(ctx, name)
 		if err != nil {
-			return storage.FileStamp{}, false
+			return storage.FileStamp{}, err
 		}
-		return storage.FileStamp{Size: fi.Size(), ModTime: modTime(fi)}, true
+		return storage.FileStamp{Size: fi.Size(), ModTime: modTime(fi)}, nil
 	})
 	for _, owner := range owners {
 		id, err := core.ParseID(owner)
@@ -79,7 +79,9 @@ func (s *Scanner) statFile(ctx context.Context, name string) (fs.FileInfo, error
 	if !core.IsRemotePath(name) {
 		return os.Stat(filepath.FromSlash(name))
 	}
-	st, err := s.Storages.Open(ctx, path.Dir(name))
+	// A file a scan found is in a folder known to be there: as for its
+	// reads, the folder is not looked up first.
+	st, err := s.Storages.Open(core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadBackground}), path.Dir(name))
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"time"
 )
@@ -54,6 +55,17 @@ func (j *Job) Validate() error {
 		return fmt.Errorf("%w: job %s must allow at least one attempt", ErrInvalid, j.ID)
 	}
 	return nil
+}
+
+// RetryAfter returns how long err asks to wait before what failed with it
+// is tried again, such as a storage's rate limit tells: what its chain
+// carries with a RetryIn method; zero when it tells nothing.
+func RetryAfter(err error) time.Duration {
+	var r interface{ RetryIn() time.Duration }
+	if errors.As(err, &r) {
+		return max(r.RetryIn(), 0)
+	}
+	return 0
 }
 
 // RetryDelay returns the backoff before attempt n+1 after n failed attempts:

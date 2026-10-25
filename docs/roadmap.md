@@ -958,7 +958,7 @@ flowchart TD
   - [x] The block cache: read-ahead from the source's keyframes when a playback starts or seeks, and through the next segments' byte ranges for HLS; eviction of the ranges of open items furthest behind their readers
   - [x] The object cache: invalidation by the `ChangeNotify` of the remotes in it, and `If-Match` with the storage's ETag in `Object.Open` of the backends that read by path (s3, webdav, azureblob, swift, oracleobjectstorage and qingstor; googlecloudstorage and b2 already read one version)
   - [x] The backends of §3.2: `FindByListing`, link caches with lifetimes estimated where the storage states none, default stream limits estimated for the drives that throttle downloads, and the fixes of single backends (filelu's ranges, shade's first request and the "Also" column)
-  - [ ] Measurements of the fork's drives and the common consumer drives (§3.5), replacing the estimated link lifetimes and stream limits and finding the remotes to read sequentially; a link cache for protondrive once its SDK can read from a kept link
+  - [ ] Measurements of the fork's drives and the common consumer drives (§3.6), replacing the estimated link lifetimes and stream limits and finding the remotes to read sequentially; a link cache for protondrive once its SDK can read from a kept link
 - [ ] Later: remote plugins (plugin processes on other machines), direct links of cloud drives, incremental scans by change notification
 
 ### P26 Subtitle Acquisition

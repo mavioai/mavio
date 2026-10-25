@@ -102,6 +102,7 @@ func (c *Client) CreateRemote(ctx context.Context, name, provider string, parame
 		"parameters": parameters,
 		"opt":        map[string]any{"nonInteractive": true, "obscure": true},
 	}, &step)
+	c.holds.release(name)
 	return step, err
 }
 
@@ -113,6 +114,7 @@ func (c *Client) UpdateRemote(ctx context.Context, name string, parameters map[s
 		"parameters": parameters,
 		"opt":        map[string]any{"nonInteractive": true, "obscure": true},
 	}, &step)
+	c.holds.release(name)
 	return step, err
 }
 
@@ -125,11 +127,13 @@ func (c *Client) Continue(ctx context.Context, name, state, answer string) (Conf
 		"parameters": map[string]string{},
 		"opt":        map[string]any{"nonInteractive": true, "obscure": true, "continue": true, "state": state, "result": answer},
 	}, &step)
+	c.holds.release(name)
 	return step, err
 }
 
 // DeleteRemote removes a remote's configuration.
 func (c *Client) DeleteRemote(ctx context.Context, name string) error {
+	c.holds.release(name)
 	return c.Call(ctx, "config/delete", map[string]any{"name": name}, nil)
 }
 
