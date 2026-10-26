@@ -2,10 +2,12 @@ import MavioUI
 import SwiftUI
 
 /// What the scrubber is over while it is dragged: the picture there, when
-/// the player has one, over the time, in glass above the thumb.
+/// the player has one, over the chapter's name and the time, in glass above
+/// the thumb.
 struct ScrubPreview: View {
     let image: CGImage?
     let time: String
+    var chapter: String?
 
     /// How wide the picture is.
     static let width: CGFloat = 160
@@ -19,7 +21,9 @@ struct ScrubPreview: View {
                     .frame(width: Self.width, height: Self.width * 9 / 16)
                     .clipShape(.rect(cornerRadius: 8))
             }
-            Text(time)
+            Text(chapter.flatMap { $0.isEmpty ? nil : "\($0) · \(time)" } ?? time)
+                .lineLimit(1)
+                .frame(maxWidth: Self.width)
                 .type(MavioTypography.standard.footnote).fontWeight(.semibold)
                 .monospacedDigit()
                 .padding(.horizontal, MavioSpacing.s8)

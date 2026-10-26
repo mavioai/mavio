@@ -42,6 +42,10 @@ struct PlayerScreen: View {
     @State private var scrubbing: TimeInterval?
     /// The picture where the scrubber is, while it is dragged.
     @State private var scrubImage: CGImage?
+    /// How wide the scrubber is, and where the bottom bar's top is on the
+    /// screen while the controls show, which the subtitles keep above.
+    @State private var scrubberWidth: CGFloat = 0
+    @State private var bottomBarTop: CGFloat?
     @State private var closing = false
     /// The press held for double speed, and the speed it plays at after.
     @GestureState private var holding = false
@@ -64,7 +68,7 @@ struct PlayerScreen: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                PlayerSurface(player: player)
+                PlayerSurface(player: player, subtitleLift: subtitleLift(in: geo))
                 Color.clear
                     .contentShape(.rect)
                     .gesture(
@@ -445,6 +449,12 @@ struct PlayerScreen: View {
                 }
                 Spacer()
                 bottomBar
+                    .onGeometryChange(for: CGFloat.self) {
+                        $0.frame(in: .global).minY
+                    } action: {
+                        bottomBarTop = $0
+                    }
+                    .onDisappear { bottomBarTop = nil }
             }
             .padding(.horizontal, MavioSpacing.s16)
             .padding(.vertical, MavioSpacing.s8)
@@ -519,40 +529,33 @@ struct PlayerScreen: View {
         let duration = max(player.duration, 1)
         let position = scrubbing ?? player.currentTime
         return VStack(spacing: MavioSpacing.s4) {
-            Slider(
-                value: Binding(get: { min(position, duration) }, set: { scrubbing = $0 }), in: 0...duration
-            ) { editing in
-                if !editing, let target = scrubbing {
-                    Task {
-                        await player.seek(to: target)
-                        scrubbing = nil
-                    }
-                }
-            }
-            .tint(MavioColors.dark.progress)
-            .overlay {
-                if let scrubbing {
-                    GeometryReader { geo in
-                        let x = geo.size.width * min(scrubbing / duration, 1)
-                        let half = ScrubPreview.width / 2 + 4
-                        ScrubPreview(image: scrubImage, time: clock(scrubbing))
+            scrubber(position: position, duration: duration)
+                .overlay {
+                    if let scrubbing {
+                        GeometryReader { geo in
+                            let x = Self.knob / 2 + (geo.size.width - Self.knob) * min(scrubbing / duration, 1)
+                            let half = ScrubPreview.width / 2 + 4
+                            ScrubPreview(
+                                image: scrubImage, time: clock(scrubbing),
+                                chapter: source?.chapters.last { $0.start <= scrubbing }?.name
+                            )
                             .fixedSize()
                             .position(x: min(max(x, half), geo.size.width - half), y: 0)
                             .alignmentGuide(VerticalAlignment.center) { $0[.bottom] }
                             .offset(y: scrubImage == nil ? -28 : -76)
+                        }
                     }
                 }
-            }
-            // A picture for every two seconds the thumb crosses.
-            .task(id: scrubbing.map { Int($0 / 2) }) {
-                guard let scrubbing else {
-                    scrubImage = nil
-                    return
+                // A picture for every two seconds the thumb crosses.
+                .task(id: scrubbing.map { Int($0 / 2) }) {
+                    guard let scrubbing else {
+                        scrubImage = nil
+                        return
+                    }
+                    try? await Task.sleep(for: .milliseconds(60))
+                    guard !Task.isCancelled, let image = await player.thumbnail(at: scrubbing) else { return }
+                    if !Task.isCancelled { scrubImage = image }
                 }
-                try? await Task.sleep(for: .milliseconds(60))
-                guard !Task.isCancelled, let image = await player.thumbnail(at: scrubbing) else { return }
-                if !Task.isCancelled { scrubImage = image }
-            }
             HStack {
                 Text(clock(position))
                 Spacer()
@@ -596,6 +599,53 @@ struct PlayerScreen: View {
                 }
             }
         }
+    }
+
+    private static let knob: CGFloat = 14
+
+    /// The seek track with its chapters' gaps, dragged anywhere across it.
+    private func scrubber(position: TimeInterval, duration: TimeInterval) -> some View {
+        SeekTrack(
+            fraction: position / duration,
+            chapters: source?.chapters.map { $0.start / duration } ?? [],
+            height: scrubbing == nil ? 4 : 6, knob: Self.knob
+        )
+        .frame(height: 32)
+        .contentShape(.rect)
+        .onGeometryChange(for: CGFloat.self) {
+            $0.size.width
+        } action: {
+            scrubberWidth = $0
+        }
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged {
+                    scrubbing = duration * SeekTrack.fraction(at: $0.location.x, width: scrubberWidth, knob: Self.knob)
+                }
+                .onEnded { _ in
+                    guard let target = scrubbing else { return }
+                    Task {
+                        await player.seek(to: target)
+                        scrubbing = nil
+                    }
+                    poke()
+                }
+        )
+        .accessibilityElement()
+        .accessibilityLabel(MavioStrings.playerPosition)
+        .accessibilityValue(clock(position))
+        .accessibilityAdjustableAction { direction in
+            Task { await player.skip(by: direction == .increment ? 10 : -10) }
+            poke()
+        }
+    }
+
+    /// How far above the screen's bottom the subtitles keep, over the bottom
+    /// bar while the controls show.
+    private func subtitleLift(in geo: GeometryProxy) -> CGFloat {
+        guard controls, failure == nil, let bottomBarTop else { return 0 }
+        let bottom = geo.frame(in: .global).maxY + geo.safeAreaInsets.bottom
+        return max(bottom - bottomBarTop + MavioSpacing.s8, 0)
     }
 
     /// Opens the panel on tab, or closes it when it shows a tab of that button.
