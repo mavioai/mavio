@@ -4,7 +4,7 @@
 // on the television with larger items, opening on the item chosen.
 import { Menu as Base } from "@base-ui/react/menu";
 import { Link, type LinkProps } from "@tanstack/react-router";
-import { type KeyboardEvent, type ReactElement, type ReactNode, type RefObject, useRef } from "react";
+import { createContext, type KeyboardEvent, type ReactElement, type ReactNode, type RefObject, use, useRef } from "react";
 
 import { Icon, type IconName } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
@@ -15,6 +15,8 @@ import { glassPopup, popup } from "./styles.ts";
  * with its start, center or end; width is the popup's width class. It opens in
  * container where given, as an element in full screen, else the page.
  * A glass menu, as over a video, lets more of what is under it through.
+ * A menu with a gutter, as the Mac's of checked choices, lines up the text
+ * of its headings and items after the column of the checks.
  */
 export function Menu({
   trigger,
@@ -27,6 +29,7 @@ export function Menu({
   start = "[aria-checked=true]",
   container,
   glass = false,
+  gutter = false,
   children,
 }: {
   trigger: ReactElement;
@@ -40,6 +43,7 @@ export function Menu({
   start?: string;
   container?: RefObject<HTMLElement | null>;
   glass?: boolean;
+  gutter?: boolean;
   children: ReactNode;
 }) {
   const { tv } = usePrefs();
@@ -77,12 +81,23 @@ export function Menu({
             data-tv-menu={tv || undefined}
             className={`${tv || glass ? glassPopup : popup} ${width} max-h-[var(--available-height)] overflow-y-auto`}
           >
-            {children}
+            <Gutter value={gutter}>{children}</Gutter>
           </Base.Popup>
         </Base.Positioner>
       </Base.Portal>
     </Base.Root>
   );
+}
+
+/** Whether a menu lines up its text after the column of the checks. */
+const Gutter = createContext(false);
+
+/** The column of the checks, as wide as MenuOption's. */
+const checkColumn = <span className="w-4 shrink-0" />;
+
+/** The start of a line of text that is not an item, lined up with the items' text in a menu with a gutter. */
+function useLineStart() {
+  return use(Gutter) ? "ps-9 desk:ps-8" : "ps-2.5";
 }
 
 const item =
@@ -96,9 +111,10 @@ function useItem() {
 
 /** The parts of an item: its icon, its text, and the keys of its shortcut. */
 function Parts({ icon, shortcut, end, children }: { icon?: IconName; shortcut?: string; end?: ReactNode; children: ReactNode }) {
+  const gutter = use(Gutter);
   return (
     <>
-      {icon && <Icon name={icon} size={18} className="shrink-0 text-text-secondary" />}
+      {icon ? <Icon name={icon} size={18} className="shrink-0 text-text-secondary" /> : gutter && checkColumn}
       <span className="min-w-0 flex-1">{children}</span>
       {shortcut && <kbd className="font-sans type-footnote text-text-tertiary">{shortcut}</kbd>}
       {end}
@@ -244,7 +260,12 @@ export function MenuIconOption({ value, icon, label }: { value: string; icon: Ic
 
 /** A heading over the items after it. */
 export function MenuLabel({ children }: { children: ReactNode }) {
-  return <div className="px-2.5 pt-1.5 pb-1 type-caption text-text-secondary">{children}</div>;
+  return <div className={`${useLineStart()} pe-2.5 pt-1.5 pb-1 type-caption text-text-secondary`}>{children}</div>;
+}
+
+/** A line that tells, not does, as the Mac's disabled items. */
+export function MenuFact({ children }: { children: ReactNode }) {
+  return <div className={`${useLineStart()} pe-2.5 pb-1.5 type-body text-text-secondary desk:type-callout`}>{children}</div>;
 }
 
 /** A line between groups of items. */

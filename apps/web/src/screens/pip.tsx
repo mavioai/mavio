@@ -15,7 +15,15 @@ interface DocumentPictureInPicture {
   requestWindow(options?: { width?: number; height?: number }): Promise<Window>;
 }
 
+/**
+ * The browser's Picture in Picture of documents, where it opens their
+ * window: a browser of its own brand, as Chrome or Edge. One embedded in
+ * an app, Chromium's brand alone, has the API but no window, and asking
+ * for it uses up the click the video's own Picture in Picture needs.
+ */
 function documentPip(): DocumentPictureInPicture | undefined {
+  const brands = (navigator as Navigator & { userAgentData?: { brands: { brand: string }[] } }).userAgentData?.brands ?? [];
+  if (!brands.some((b) => b.brand !== "Chromium" && !/not.?a.?brand/i.test(b.brand))) return undefined;
   return (window as Window & { documentPictureInPicture?: DocumentPictureInPicture }).documentPictureInPicture;
 }
 
@@ -54,6 +62,8 @@ export function usePictureInPicture(video: RefObject<HTMLVideoElement | null>) {
   // The browser's own Picture in Picture of the video.
   const [native, setNative] = useState(false);
   const win = useRef<Window>(undefined);
+  // Set once the browser fails to open a window, which leaves the video's own.
+  const noWindow = useRef(false);
   const supported = !!documentPip() || (typeof document !== "undefined" && document.pictureInPictureEnabled);
 
   useEffect(() => {
@@ -74,13 +84,15 @@ export function usePictureInPicture(video: RefObject<HTMLVideoElement | null>) {
     const v = video.current;
     if (!v || win.current) return;
     const aspect = v.videoWidth > 0 && v.videoHeight > 0 ? v.videoWidth / v.videoHeight : 16 / 9;
-    // A browser that has the API but cannot open its window, as one
-    // embedded in an app, has the video's own.
-    const w = await documentPip()
-      ?.requestWindow({ width: openWidth, height: Math.round(openWidth / aspect) })
-      .catch(() => undefined);
-    if (!w) {
+    const pip = noWindow.current ? undefined : documentPip();
+    if (!pip) {
       await v.requestPictureInPicture().catch(() => undefined);
+      return;
+    }
+    const w = await pip.requestWindow({ width: openWidth, height: Math.round(openWidth / aspect) }).catch(() => undefined);
+    // The click is used up: the next one opens the video's own.
+    if (!w) {
+      noWindow.current = true;
       return;
     }
     win.current = w;

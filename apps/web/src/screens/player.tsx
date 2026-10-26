@@ -34,7 +34,7 @@ import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
 import { AssistantButton } from "../assistant/panel.tsx";
 import { registerPlayer } from "../assistant/player.ts";
 import { Slider, Tabs } from "../controls/inputs.tsx";
-import { Menu, MenuChoice, MenuItem, MenuLabel, MenuOption, MenuSeparator } from "../controls/menu.tsx";
+import { Menu, MenuChoice, MenuFact, MenuItem, MenuLabel, MenuOption, MenuSeparator } from "../controls/menu.tsx";
 import { Tip } from "../controls/tooltip.tsx";
 import { useServerEvents } from "../events.tsx";
 import { locale, t } from "../i18n.ts";
@@ -750,6 +750,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
       label={label}
       container={shell}
       glass
+      gutter
       onOpenChange={(o) => {
         setMenu((m) => (o ? which : m === which ? undefined : m));
         if (!o) poke();
@@ -1137,10 +1138,10 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
                       </>
                     )}
                     <MenuSeparator />
-                    <MenuItem icon="external" onClick={() => window.open(info.url, "_blank")}>
+                    <MenuItem onClick={() => window.open(info.url, "_blank")}>
                       {t("player.openExternal")}
                     </MenuItem>
-                    <MenuItem icon="copy" onClick={() => void navigator.clipboard?.writeText(info.url)}>
+                    <MenuItem onClick={() => void navigator.clipboard?.writeText(info.url)}>
                       {t("player.copyLink")}
                     </MenuItem>
                   </>
@@ -1308,11 +1309,6 @@ function TrackName({ label: [name, details] }: { label: [string, string] }) {
       {details && <span className="truncate type-caption text-text-secondary">{details}</span>}
     </span>
   );
-}
-
-/** A line of a menu that tells, not does. */
-function MenuFact({ children }: { children: ReactNode }) {
-  return <div className="px-2.5 pb-1.5 type-body desk:type-callout">{children}</div>;
 }
 
 function PlayerButton({
