@@ -870,6 +870,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
           <PictureInPictureControls
             host={pip.host}
             paused={paused}
+            loading={((loading && seek !== "pending") || seek === "shown") && !error}
             time={time}
             total={total}
             onToggle={toggle}
@@ -909,7 +910,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         </div>
       )}
 
-      {((loading && seek !== "pending") || seek === "shown") && !error && (
+      {((loading && seek !== "pending") || seek === "shown") && !error && !pip.host && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <Spinner size={48} className="text-white/70!" />
         </div>

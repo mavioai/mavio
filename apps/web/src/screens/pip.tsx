@@ -9,6 +9,7 @@ import { createPortal } from "react-dom";
 
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
+import { Spinner } from "../ui.tsx";
 import { clock, SeekBar } from "./seekbar.tsx";
 
 interface DocumentPictureInPicture {
@@ -129,11 +130,13 @@ export function usePictureInPicture(video: RefObject<HTMLVideoElement | null>) {
 
 /**
  * The controls of the Picture in Picture window, in host: shown while the
- * pointer moves over it or the video is paused.
+ * pointer moves over it or the video is paused; while the video loads,
+ * its spinner in place of play and pause, shown either way.
  */
 export function PictureInPictureControls({
   host,
   paused,
+  loading,
   time,
   total,
   onToggle,
@@ -144,6 +147,7 @@ export function PictureInPictureControls({
 }: {
   host: HTMLElement;
   paused: boolean;
+  loading: boolean;
   time: number;
   total: number;
   onToggle: () => void;
@@ -180,41 +184,50 @@ export function PictureInPictureControls({
   const shown = moved || paused;
   const button = "flex items-center justify-center rounded-full hover:bg-white/15";
   return createPortal(
-    <div
-      className={`absolute inset-0 transition-opacity duration-200 ${shown ? "opacity-100" : "cursor-none opacity-0"}`}
-      onPointerMove={poke}
-      onPointerDown={poke}
-      onPointerLeave={() => (clearTimeout(timer.current), setMoved(false))}
-    >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/50 via-transparent via-40% to-black/70" />
-      <button type="button" aria-label={t("action.close")} title={t("action.close")} onClick={onClose} className={`absolute top-2 left-2 size-8 ${button}`}>
-        <Icon name="close" size={18} />
-      </button>
-      <button
-        type="button"
-        aria-label={t("player.pictureInPicture")}
-        title={t("player.pictureInPicture")}
-        onClick={onRestore}
-        className={`absolute top-2 right-2 size-8 ${button}`}
-      >
-        <Icon name="pictureInPicture" size={18} />
-      </button>
-      <button
-        type="button"
-        aria-label={paused ? t("player.play") : t("player.pause")}
-        onClick={onToggle}
-        className={`absolute top-1/2 left-1/2 size-14 -translate-x-1/2 -translate-y-1/2 ${button}`}
-      >
-        <Icon name={paused ? "play" : "pause"} fill size={36} />
-      </button>
-      <div className="absolute inset-x-3 bottom-2 flex items-center gap-2 type-caption text-white/85 tabular-nums">
-        <span>{clock(time)}</span>
-        <div className="min-w-0 flex-1">
-          <SeekBar time={time} total={total} chapters={[]} trickplay={[]} sheetUrl={(p) => p} onScrubStart={onScrubStart} onScrubEnd={onScrubEnd} />
+    <>
+      {loading && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <Spinner size={40} className="text-white/70!" />
         </div>
-        <span>-{clock(Math.max(total - time, 0))}</span>
+      )}
+      <div
+        className={`absolute inset-0 transition-opacity duration-200 ${shown ? "opacity-100" : "cursor-none opacity-0"}`}
+        onPointerMove={poke}
+        onPointerDown={poke}
+        onPointerLeave={() => (clearTimeout(timer.current), setMoved(false))}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/50 via-transparent via-40% to-black/70" />
+        <button type="button" aria-label={t("action.close")} title={t("action.close")} onClick={onClose} className={`absolute top-2 left-2 size-8 ${button}`}>
+          <Icon name="close" size={18} />
+        </button>
+        <button
+          type="button"
+          aria-label={t("player.pictureInPicture")}
+          title={t("player.pictureInPicture")}
+          onClick={onRestore}
+          className={`absolute top-2 right-2 size-8 ${button}`}
+        >
+          <Icon name="pictureInPicture" size={18} />
+        </button>
+        {!loading && (
+          <button
+            type="button"
+            aria-label={paused ? t("player.play") : t("player.pause")}
+            onClick={onToggle}
+            className={`absolute top-1/2 left-1/2 size-14 -translate-x-1/2 -translate-y-1/2 ${button}`}
+          >
+            <Icon name={paused ? "play" : "pause"} fill size={36} />
+          </button>
+        )}
+        <div className="absolute inset-x-3 bottom-2 flex items-center gap-2 type-caption text-white/85 tabular-nums">
+          <span>{clock(time)}</span>
+          <div className="min-w-0 flex-1">
+            <SeekBar time={time} total={total} chapters={[]} trickplay={[]} sheetUrl={(p) => p} onScrubStart={onScrubStart} onScrubEnd={onScrubEnd} />
+          </div>
+          <span>-{clock(Math.max(total - time, 0))}</span>
+        </div>
       </div>
-    </div>,
+    </>,
     host,
   );
 }
