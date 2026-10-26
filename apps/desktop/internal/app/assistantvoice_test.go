@@ -121,6 +121,15 @@ func TestAssistantVoicePlayer(t *testing.T) {
 	h.until("the microphone opened", func() bool { return audio.device() != nil })
 	audio.device().say(1, true)
 	h.until("connected", func() bool { return len(h.core.assistant.voiceRequests()) == 1 })
+	// Tapped again, it ends the conversation rather than starting another.
+	if err := h.tt.Click("Assistant"); err != nil {
+		t.Fatal(err)
+	}
+	h.until("ended", func() bool { return h.app.assistant.voice == nil && !h.app.assistant.listening })
+	h.settle()
+	if got := len(h.core.assistant.voiceRequests()); got != 1 {
+		t.Errorf("sessions = %d, want = 1", got)
+	}
 }
 
 func TestAssistantVoiceHold(t *testing.T) {

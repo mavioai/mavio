@@ -1295,8 +1295,14 @@ func (a *App) playerBottomBar(c *ui.Context, p *player) float32 {
 					a.playNext(p)
 				}
 				ui.Spacer(c)
-				if a.assistantOn(c) && playerButton(c, "microphone", style.T(c, "assistant.title"), a.assistant.open, false, 44).Clicked() {
-					a.startAssistant(p.win, c.Locale())
+				if a.assistantOn(c) {
+					b := playerButton(c, "microphone", style.T(c, "assistant.title"), a.assistant.open, false, 44)
+					switch {
+					case a.voiceOn():
+						a.voicePress(c, b, "player-button", p.win)
+					case b.Clicked():
+						a.openAssistant(p.win)
+					}
 				}
 				a.rowMenu(c, p, menuSpeed, "speed", false, style.T(c, "player.speed"), func(close func()) { a.speedMenu(c, p, close) })
 				if len(p.playback.GetSubtitles()) > 0 {
