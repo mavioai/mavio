@@ -88,7 +88,7 @@ var qualities = []quality{
 	{"480p", 1_500_000},
 }
 
-var speeds = []float64{0.5, 0.75, 1, 1.25, 1.5, 2}
+var speeds = []float64{0.5, 0.75, 1, 1.25, 1.5, 1.75, 2}
 
 // controlsTimeout is how long the controls show without input during
 // playback.
@@ -151,7 +151,45 @@ type player struct {
 	notice playerNotice
 	// fitted is the size of the picture the window was fitted to.
 	fitted [2]int64
+	// menu is the menu of the controller's row that is open.
+	menu rowMenu
+	// seek is the seek the picture waits for.
+	seek playerSeek
+	// subPos is where mpv places the subtitles, in percent of the height.
+	subPos int
+	// recovered tells that the video was loaded again after it failed.
+	recovered bool
+	// swallow tells that a press outside a menu closed it, which the
+	// picture then ignores.
+	swallow bool
 }
+
+// rowMenu is a menu of the controller's row, as the Mac app's.
+type rowMenu int
+
+const (
+	menuNone rowMenu = iota
+	menuSpeed
+	menuSubtitles
+	menuAudio
+	menuQuality
+	menuInfo
+)
+
+// playerSeek is a seek the picture waits for, as the web UI's: for a beat
+// nothing changes, so that one within what is buffered does not flash, and
+// after it the old frame hides behind the activity indicator until mpv
+// starts again at the new time. The timeline shows target meanwhile.
+type playerSeek struct {
+	pending bool
+	// at is when the seek began, restarts mpv's count of restarts then.
+	at       time.Time
+	target   time.Duration
+	restarts int
+}
+
+// seekBeat is how long a seek shows the old frame.
+const seekBeat = 200 * time.Millisecond
 
 // playerNotice is what the player tells a moment over the picture, as the
 // volume, the speed or where the wheel seeks to: an icon, a text and a
@@ -162,8 +200,9 @@ type playerNotice struct {
 	at         time.Time
 }
 
-// noticeTime is how long a notice shows.
-const noticeTime = time.Second
+// noticeTime is how long a notice shows, and noticeFade how long of that
+// it fades out.
+const noticeTime, noticeFade = 1500 * time.Millisecond, 500 * time.Millisecond
 
 // thumbWidth is the width of the timeline's thumbnails, in DIPs.
 const thumbWidth = 200
@@ -355,6 +394,13 @@ func (a *App) videoChanged(p *player, s mpv.State) {
 		}
 		prev := p.state
 		p.state = s
+		if p.seek.pending {
+			if s.Restarts > p.seek.restarts || !s.Loaded || s.Err != nil {
+				p.seek = playerSeek{}
+			} else {
+				p.state.Position = p.seek.target
+			}
+		}
 		a.playerStateChanged(p, prev)
 	})
 }
@@ -363,6 +409,17 @@ func (a *App) videoChanged(p *player, s mpv.State) {
 func (a *App) playerStateChanged(p *player, prev mpv.State) {
 	s := p.state
 	if s.Err != nil && prev.Err == nil {
+		// As the web UI rebuilds its pipeline after a media error, the
+		// video loads once more where it was, decoded in software, as when
+		// a hardware decoder fails on HEVC.
+		if !p.recovered && p.playback != nil && p.video != nil && prev.Loaded {
+			p.recovered, p.selected = true, false
+			slog.WarnContext(a.ctx, "the video failed; load it again", "error", s.Err)
+			a.setVideo(p, "hwdec", "no")
+			if err := p.video.Load(p.playback.GetUrl(), prev.Position); err == nil {
+				return
+			}
+		}
 		p.err = s.Err
 	}
 	if p.playback == nil {
@@ -561,7 +618,7 @@ func cmpOr(s ...string) string {
 // play and pause, left and right and j and l seek, up and down set the
 // volume and m mutes, [ and ] change the speed and \ resets it, s saves a
 // screenshot in the Pictures folder, f enters full screen; Escape closes
-// the panel, then leaves full screen, then the player.
+// the menu or the panel, then leaves full screen, then the player.
 func (a *App) playerKeys(c *ui.Context, p *player) {
 	// The assistant's panel over the player takes the keys.
 	if a.assistant.open && a.assistant.win == p.win {
@@ -583,6 +640,8 @@ func (a *App) playerKeys(c *ui.Context, p *player) {
 	switch {
 	case pressed(ui.KeyEscape):
 		switch {
+		case p.menu != menuNone:
+			p.menu = menuNone
 		case p.panel != tabNone:
 			p.panel = tabNone
 		case a.isFullScreen(p):
@@ -818,10 +877,10 @@ func (a *App) tvPlayerKeys(c *ui.Context, p *player, pressed func(...ui.Key) boo
 }
 
 // controlsShown reports whether the controller shows at now: while the
-// panel is open or the item cannot play, and, unless hidden, while it is
-// paused or loading and for a while after the last input.
+// panel or a menu is open or the item cannot play, and, unless hidden,
+// while it is paused or loading and for a while after the last input.
 func (p *player) controlsShown(now time.Time) bool {
-	return p.panel != tabNone || p.err != nil ||
+	return p.panel != tabNone || p.menu != menuNone || p.err != nil ||
 		!p.hidden && (p.state.Paused || !p.state.Loaded || now.Sub(p.input) < controlsTimeout)
 }
 
@@ -876,6 +935,12 @@ func (a *App) seekTo(p *player, at time.Duration, exact bool) {
 	mode := "absolute+exact"
 	if !exact {
 		mode = "absolute+keyframes"
+	} else if p.state.Loaded {
+		// A seek while the old frame hides keeps it hidden.
+		if !p.seek.pending {
+			p.seek = playerSeek{pending: true, restarts: p.state.Restarts}
+		}
+		p.seek.target = at
 	}
 	p.state.Position = at
 	if err := p.video.Command("seek", strconv.FormatFloat(at.Seconds(), 'f', 3, 64), mode); err != nil {
@@ -978,32 +1043,63 @@ func (a *App) playerView(c *ui.Context, p *player) {
 				p.want = 0
 			}
 		}
+		clicked := surface.Clicked()
+		if p.swallow && (clicked || !surface.Pressed()) {
+			p.swallow, clicked = false, false
+		}
 		if surface.DoubleClicked() {
 			a.toggleFullScreen(p)
-		} else if surface.Clicked() {
+		} else if clicked {
 			if p.panel != tabNone {
 				p.panel = tabNone
 			} else {
 				a.togglePause(p)
 			}
 		}
-		if p.playback == nil && p.err == nil || p.state.Buffering {
-			ui.Spinner(c).Absolute().Top(0).Left(0).Right(0).Bottom(0)
+		// After a seek's beat the old frame hides, the subtitles drawn on
+		// it too, behind the activity indicator.
+		hiding := false
+		if p.seek.pending {
+			if p.seek.at.IsZero() {
+				p.seek.at = now
+			}
+			if since := now.Sub(p.seek.at); since >= seekBeat {
+				hiding = true
+			} else {
+				c.After(seekBeat - since)
+			}
+		}
+		if hiding {
+			ui.Box(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).Background(black).PassThrough()
+		}
+		if p.playback == nil && p.err == nil || p.state.Buffering && !p.seek.pending || hiding {
+			ui.Box(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).Center().PassThrough().Children(func() {
+				ui.Spinner(c).Size(48, 48).TextColor(ui.RGBA(255, 255, 255, 0.7))
+			})
 		}
 		controls := ui.Box(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).PassThrough()
 		controls.Opacity(controls.Animate("shown", boolf(shown), 300*time.Millisecond))
+		lift := float32(0)
 		if shown {
 			controls.Children(func() {
 				a.playerTopBar(c, p)
-				a.playerBottomBar(c, p)
+				// The subtitles 8 DIPs above the controls.
+				lift = a.playerBottomBar(c, p) + 8
 			})
 		}
+		a.liftSubtitles(c, p, lift)
 		if p.panel != tabNone {
 			a.playerPanel(c, p)
 		}
 		if since := now.Sub(p.notice.at); !p.notice.at.IsZero() && since < noticeTime {
-			c.After(noticeTime - since)
-			playerNoticeView(c, p.notice)
+			opacity := float32(1)
+			if fade := since - (noticeTime - noticeFade); fade > 0 {
+				opacity = 1 - float32(fade)/float32(noticeFade)
+				c.After(16 * time.Millisecond)
+			} else {
+				c.After(-fade)
+			}
+			playerNoticeView(c, p.notice).Opacity(opacity)
 		}
 		if p.err != nil {
 			a.playerError(c, p)
@@ -1011,24 +1107,38 @@ func (a *App) playerView(c *ui.Context, p *player) {
 	})
 }
 
-// playerNoticeView builds a notice over the picture: a pill of its icon
-// and text, with its level as a bar.
-func playerNoticeView(c *ui.Context, n playerNotice) {
+// playerNoticeView builds a notice at the picture's top leading corner, as
+// the web UI's and the Mac app's: its icon and text, and its level as a
+// bar after them.
+func playerNoticeView(c *ui.Context, n playerNotice) ui.Element {
 	white := ui.RGB(255, 255, 255)
-	ui.Row(c).Absolute().Top(72).Left(0).Right(0).Justify(ui.Center).PassThrough().Children(func() {
-		ui.Row(c).Height(40).Padding(0, 16).Gap(10).Radius(20).AlignItems(ui.Center).Background(ui.RGBA(0, 0, 0, 0.6)).
-			Children(func() {
-				ui.Icon(c, style.Icon(n.icon, true)).Size(18, 18).TextColor(white)
-				if n.level >= 0 {
-					level := float32(min(n.level, 1))
-					ui.Box(c).Size(120, 4).Draw(func(pt *ui.Painter, r ui.Rect) {
-						pt.Fill(r, white.Alpha(0.3), 2)
-						pt.Fill(ui.Rect{X: r.X, Y: r.Y, W: r.W * level, H: r.H}, white, 2)
-					})
-				}
-				style.Text(ui.Text(c, n.text), style.Type(c).Callout).FontWeight(600).FontFeatures("tnum").TextColor(white).SingleLine()
+	return ui.Row(c).Absolute().Top(80).Left(20).Padding(8, 16, 8, 14).Gap(12).Radius(10).AlignItems(ui.Center).
+		Background(ui.RGBA(0, 0, 0, 0.6)).PassThrough().Children(func() {
+		ui.Icon(c, style.Icon(n.icon, true)).Size(18, 18).TextColor(white)
+		style.Text(ui.Text(c, n.text), style.Type(c).Headline).FontWeight(600).FontFeatures("tnum").TextColor(white).SingleLine()
+		if n.level >= 0 {
+			level := float32(min(n.level, 1))
+			ui.Box(c).Size(100, 6).Draw(func(pt *ui.Painter, r ui.Rect) {
+				pt.Fill(r, white.Alpha(0.3), 3)
+				pt.Fill(ui.Rect{X: r.X, Y: r.Y, W: r.W * level, H: r.H}, white, 3)
 			})
+		}
 	})
+}
+
+// liftSubtitles places the subtitles above the controller while it shows,
+// lift DIPs from the bottom, and back where they were as it hides, as the
+// web UI's. mpv's place of 100 % keeps a margin of 22 of 720 under them.
+func (a *App) liftSubtitles(c *ui.Context, p *player, lift float32) {
+	_, h := c.Size()
+	pos := 100
+	if lift > 0 && h > 0 {
+		pos = int(math.Round(100 * (1 - float64(max(lift-h*22/720, 0)/h))))
+	}
+	if pos != cmp.Or(p.subPos, 100) {
+		p.subPos = pos
+		a.setVideo(p, "sub-pos", strconv.Itoa(pos))
+	}
 }
 
 // followingEpisode looks up the episode after p's beyond its season when
@@ -1121,14 +1231,18 @@ func (a *App) playerTopBar(c *ui.Context, p *player) {
 	})
 }
 
-// playerBottomBar builds the scrubber and the controls under it.
-func (a *App) playerBottomBar(c *ui.Context, p *player) {
+// playerBottomBar builds the scrubber and the controls under it, and
+// returns how high above the bottom they reach, the subtitles' place over
+// them.
+func (a *App) playerBottomBar(c *ui.Context, p *player) float32 {
 	white := ui.RGB(255, 255, 255)
 	total := p.state.Duration
 	if total == 0 {
 		total = time.Duration(p.details.value.GetCard().GetRuntimeMs()) * time.Millisecond
 	}
-	bar := ui.Column(c).Absolute().Left(0).Right(0).Bottom(0).Padding(64, 20, 16).Gap(8)
+	// The gradient reaches over the picture, high above the controls.
+	const fade = 64
+	bar := ui.Column(c).Absolute().Left(0).Right(0).Bottom(0).Padding(fade, 20, 16).Gap(8)
 	if !style.TV(c) {
 		bar.HandleInput(func(ev ui.InputEvent) bool {
 			if ev.Kind != ui.InputScroll {
@@ -1146,7 +1260,19 @@ func (a *App) playerBottomBar(c *ui.Context, p *player) {
 				a.tvPlayerRow(c, p, total)
 				return
 			}
-			a.scrubber(c, p, total)
+			// The time played and the time left on either side of the
+			// scrubber, as the Mac app's.
+			ui.Row(c).Gap(12).AlignItems(ui.Center).Children(func() {
+				times := func(s string) {
+					style.Text(ui.Text(c, s), style.Type(c).Footnote).TextColor(white.Alpha(0.85)).FontFeatures("tnum").SingleLine()
+				}
+				times(clock(p.state.Position))
+				ui.Box(c).Grow(1).MinWidth(0).Children(func() { a.scrubber(c, p, total) })
+				times("-" + clock(max(total-p.state.Position, 0)))
+			})
+			// As the Mac app's: playing and the sound on the leading side,
+			// the menus and the window on the trailing one, with no buttons
+			// seeking back and forward.
 			ui.Row(c).Gap(4).AlignItems(ui.Center).Children(func() {
 				label, icon := style.T(c, "player.pause"), "pause"
 				if p.state.Paused {
@@ -1154,12 +1280,6 @@ func (a *App) playerBottomBar(c *ui.Context, p *player) {
 				}
 				if playerButton(c, icon, label, true, false, 48).Clicked() {
 					a.togglePause(p)
-				}
-				if playerButton(c, "seekBack", style.T(c, "player.seekBack", "count", 10), false, false, 44).Clicked() {
-					a.seekBy(p, -10*time.Second)
-				}
-				if playerButton(c, "seekForward", style.T(c, "player.seekForward", "count", 10), false, false, 44).Clicked() {
-					a.seekBy(p, 10*time.Second)
 				}
 				label, icon = style.T(c, "player.mute"), "volume"
 				if p.state.Muted {
@@ -1169,24 +1289,22 @@ func (a *App) playerBottomBar(c *ui.Context, p *player) {
 					a.toggleMute(c.Now(), p)
 				}
 				a.volumeSlider(c, p)
-				style.Text(ui.Text(c, clock(p.state.Position)+" / "+clock(total)), style.Type(c).Footnote).
-					TextColor(white.Alpha(0.85)).FontFeatures("tnum").Margin(0, 0, 0, 8).SingleLine()
+				if len(p.next) > 0 && playerButton(c, "next", style.T(c, "player.nextEpisode"), true, false, 44).Clicked() {
+					a.playNext(p)
+				}
 				ui.Spacer(c)
-				if len(p.next) > 0 {
-					a.nextEpisodeButton(c, p)
-				}
-				if len(p.playback.GetSubtitles()) > 0 {
-					on := p.playback.GetSubtitleStreamIndex() >= 0
-					if playerButton(c, "subtitles", style.T(c, "player.subtitles"), on, p.panel == tabSubtitles, 44).Clicked() {
-						p.panel = togglePanel(p.panel, tabSubtitles)
-					}
-				}
 				if a.assistantOn(c) && playerButton(c, "microphone", style.T(c, "assistant.title"), a.assistant.open, false, 44).Clicked() {
 					a.openAssistant(p.win)
 				}
-				options := p.panel != tabNone && p.panel != tabSubtitles
-				if playerButton(c, "settings", style.T(c, "player.options"), false, options, 44).Clicked() {
-					p.panel = togglePanel(p.panel, tabAudio)
+				a.rowMenu(c, p, menuSpeed, "speed", false, style.T(c, "player.speed"), func(close func()) { a.speedMenu(c, p, close) })
+				if len(p.playback.GetSubtitles()) > 0 {
+					on := p.playback.GetSubtitleStreamIndex() >= 0
+					a.rowMenu(c, p, menuSubtitles, "subtitles", on, style.T(c, "player.subtitles"), func(close func()) { a.subtitlesMenu(c, p, close) })
+				}
+				a.rowMenu(c, p, menuAudio, "audio", false, style.T(c, "player.audio"), func(close func()) { a.audioMenu(c, p, close) })
+				a.rowMenu(c, p, menuQuality, "quality", false, style.T(c, "player.quality"), func(close func()) { a.qualityMenu(c, p, close) })
+				if p.playback != nil {
+					a.rowMenu(c, p, menuInfo, "info", false, style.T(c, "player.info"), func(func()) { a.infoMenu(c, p) })
 				}
 				icon = "fullScreen"
 				if a.isFullScreen(p) {
@@ -1197,6 +1315,7 @@ func (a *App) playerBottomBar(c *ui.Context, p *player) {
 				}
 			})
 		})
+	return bar.LayoutBounds().H - fade
 }
 
 // tvPlayerRow builds the TV mode's timeline and, under it, the time and
@@ -1288,24 +1407,6 @@ func togglePanel(open, tab panelTab) panelTab {
 	return tab
 }
 
-// nextEpisodeButton builds the pill playing the next episode.
-func (a *App) nextEpisodeButton(c *ui.Context, p *player) {
-	white := ui.RGB(255, 255, 255)
-	label := style.T(c, "player.nextEpisode")
-	b := ui.ButtonBase(c).Height(36).Padding(0, 14).Gap(6).Radius(18).AlignItems(ui.Center).Margin(0, 4, 0, 0).
-		Background(white.Alpha(0.15)).Label(label)
-	if b.Hovered() {
-		b.Background(white.Alpha(0.25))
-	}
-	b.Children(func() {
-		ui.Icon(c, style.Icon("next", true)).Size(16, 16).TextColor(white)
-		style.Text(ui.Text(c, label), style.Type(c).Footnote).FontWeight(600).TextColor(white).SingleLine()
-	})
-	if b.Clicked() {
-		a.playNext(p)
-	}
-}
-
 // volumeSlider builds the slider of the volume beside the mute button.
 func (a *App) volumeSlider(c *ui.Context, p *player) {
 	white := ui.RGB(255, 255, 255)
@@ -1358,18 +1459,30 @@ func (a *App) scrubber(c *ui.Context, p *player, total time.Duration) {
 			if active {
 				h = 6
 			}
+			// The track is inset by half the knob, so that the knob stays
+			// within the bar at either end.
 			x0, w := r.X+8, r.W-16
 			y := r.Y + (r.H-h)/2
 			at := w * float32(p.scrub/hi)
-			pt.Fill(ui.Rect{X: x0, Y: y, W: w, H: h}, white.Alpha(0.3), h/2)
-			pt.Fill(ui.Rect{X: x0, Y: y, W: at, H: h}, white, h/2)
+			// A gap of 2 DIPs where each chapter after the first starts,
+			// cut out of one rounded track and its fill alike.
+			cuts := []float32{x0}
 			for _, ch := range chapters {
-				if ch.GetStartMs() <= 0 {
-					continue
+				if s := float64(ch.GetStartMs()) / 1000; s > 0 && s < hi {
+					x := x0 + w*float32(s/hi)
+					cuts = append(cuts, x-1, x+1)
 				}
-				x := x0 + w*float32(float64(ch.GetStartMs())/1000/hi)
-				pt.Fill(ui.Rect{X: x - 1, Y: y, W: 2, H: h}, ui.RGBA(0, 0, 0, 0.6), 0)
 			}
+			cuts = append(cuts, x0+w)
+			pt.Clip(ui.Rect{X: x0, Y: y, W: w, H: h}, h/2, func() {
+				for i := 0; i+1 < len(cuts); i += 2 {
+					from, to := cuts[i], cuts[i+1]
+					pt.Fill(ui.Rect{X: from, Y: y, W: to - from, H: h}, white.Alpha(0.3), 0)
+					if fill := min(to, x0+at); fill > from {
+						pt.Fill(ui.Rect{X: from, Y: y, W: fill - from, H: h}, white, 0)
+					}
+				}
+			})
 			if active {
 				pt.Fill(ui.Rect{X: x0 + at - 7, Y: r.Y + r.H/2 - 7, W: 14, H: 14}, white, 7)
 			}
@@ -1483,9 +1596,7 @@ func (a *App) playerPanel(c *ui.Context, p *player) {
 						case tabQuality:
 							for _, q := range qualities {
 								if p.focusOpening(choice(c.Key(q.key), qualityName(c, q), "", q.key == a.quality().key), q.key == a.quality().key).Clicked() && q.key != a.quality().key {
-									a.prefs.Quality = q.key
-									a.savePreferences()
-									a.restart(p, func(*capiv1.PlaybackOptions) {})
+									a.chooseQuality(p, q)
 								}
 							}
 						case tabInfo:
@@ -1511,19 +1622,8 @@ func (a *App) audioTab(c *ui.Context, p *player) {
 	white := ui.RGB(255, 255, 255)
 	for _, s := range p.source().GetAudio() {
 		name := cmpOr(s.GetTitle(), languageName(c, s.GetLanguage()), fmt.Sprintf("#%d", s.GetIndex()))
-		var details []string
-		details = append(details, strings.ToUpper(s.GetCodec()))
-		switch ch := s.GetChannels(); ch {
-		case 0:
-		case 6:
-			details = append(details, "5.1")
-		case 8:
-			details = append(details, "7.1")
-		default:
-			details = append(details, fmt.Sprintf("%d ch", ch))
-		}
 		checked := p.playback.HasAudioStreamIndex() && s.GetIndex() == p.playback.GetAudioStreamIndex()
-		if p.focusOpening(choice(c.Key(key("audio", s.GetIndex())), name, strings.Join(details, " · "), checked), checked).Clicked() && !checked {
+		if p.focusOpening(choice(c.Key(key("audio", s.GetIndex())), name, audioDetails(s), checked), checked).Clicked() && !checked {
 			index := s.GetIndex()
 			a.restart(p, func(o *capiv1.PlaybackOptions) { o.SetAudioStreamIndex(index) })
 		}
@@ -1580,12 +1680,7 @@ func (a *App) audioOutputs(c *ui.Context, p *player) {
 		}
 		checked := d.Name == current
 		if p.focusOpening(choice(c.Key(key("output", d.Name)), cmpOr(name, d.Name), "", checked), checked).Clicked() && !checked {
-			a.prefs.AudioDevice = d.Name
-			if d.Name == "auto" {
-				a.prefs.AudioDevice = ""
-			}
-			a.savePreferences()
-			a.setVideo(p, "audio-device", d.Name)
+			a.chooseOutput(p, d.Name)
 		}
 	}
 }
@@ -1657,24 +1752,67 @@ func (a *App) infoTab(c *ui.Context, p *player) {
 	if p.playback == nil {
 		return
 	}
-	method := style.T(c, "player.directPlay")
-	switch p.playback.GetKind() {
-	case capiv1.PlayKind_PLAY_KIND_DIRECT_STREAM:
-		method = style.T(c, "player.directStream")
-	case capiv1.PlayKind_PLAY_KIND_TRANSCODE:
-		method = style.T(c, "player.transcode")
-	}
-	fact(style.T(c, "player.method"), method)
+	fact(style.T(c, "player.method"), playMethod(c, p.playback))
 	if s := p.source(); s != nil {
-		var parts []string
-		if s.GetName() != "" {
-			parts = append(parts, s.GetName())
-		}
-		if s.GetContainer() != "" {
-			parts = append(parts, strings.ToUpper(s.GetContainer()))
-		}
-		fact(style.T(c, "player.source"), strings.Join(parts, " · "))
+		fact(style.T(c, "player.source"), sourceFacts(s))
 	}
+}
+
+// playMethod names how pb plays.
+func playMethod(c *ui.Context, pb *capiv1.Playback) string {
+	switch pb.GetKind() {
+	case capiv1.PlayKind_PLAY_KIND_DIRECT_STREAM:
+		return style.T(c, "player.directStream")
+	case capiv1.PlayKind_PLAY_KIND_TRANSCODE:
+		return style.T(c, "player.transcode")
+	}
+	return style.T(c, "player.directPlay")
+}
+
+// sourceFacts tells a source's name and container.
+func sourceFacts(s *capiv1.Source) string {
+	var parts []string
+	if s.GetName() != "" {
+		parts = append(parts, s.GetName())
+	}
+	if s.GetContainer() != "" {
+		parts = append(parts, strings.ToUpper(s.GetContainer()))
+	}
+	return strings.Join(parts, " · ")
+}
+
+// audioDetails tells an audio stream's codec and channels.
+func audioDetails(s *capiv1.AudioStream) string {
+	details := []string{strings.ToUpper(s.GetCodec())}
+	switch ch := s.GetChannels(); ch {
+	case 0:
+	case 6:
+		details = append(details, "5.1")
+	case 8:
+		details = append(details, "7.1")
+	default:
+		details = append(details, fmt.Sprintf("%d ch", ch))
+	}
+	return strings.Join(details, " · ")
+}
+
+// chooseOutput plays p's sound to the device named, which the next videos
+// keep.
+func (a *App) chooseOutput(p *player, name string) {
+	a.prefs.AudioDevice = name
+	if name == "auto" {
+		a.prefs.AudioDevice = ""
+	}
+	a.savePreferences()
+	a.setVideo(p, "audio-device", name)
+}
+
+// chooseQuality plays p again where it is in quality q, which the next
+// videos keep.
+func (a *App) chooseQuality(p *player, q quality) {
+	a.prefs.Quality = q.key
+	a.savePreferences()
+	a.restart(p, func(*capiv1.PlaybackOptions) {})
 }
 
 func panelHeading(c *ui.Context, title string) {
@@ -1753,4 +1891,206 @@ func (a *App) playerError(c *ui.Context, p *player) {
 			a.closePlayer(p, true)
 		}
 	})
+}
+
+// rowMenu builds a button of the controller's row opening a menu of
+// frosted glass above it, centered on it, as the Mac app's; fill builds its
+// items, and close closes it. The press outside that closes it does not go
+// on to the picture.
+func (a *App) rowMenu(c *ui.Context, p *player, which rowMenu, icon string, fill bool, label string, items func(close func())) {
+	b := playerButton(c.Key(key("menu", int(which))), icon, label, fill, p.menu == which, 44)
+	if b.Clicked() {
+		if p.menu == which {
+			p.menu = menuNone
+		} else {
+			p.menu = which
+		}
+	}
+	open := p.menu == which
+	ui.PopoverBase(c, b, &open, func(panel ui.Element) {
+		colors := style.Colors(c)
+		shadow := design.ElevationLevel3
+		panel.AttachTo(b, ui.AnchorTop, ui.AnchorBottom).Margin(0, 0, 8).Width(288).Radius(12).
+			Material(glass.Blur{Radius: 64}).AlignItems(ui.Stretch).
+			Shadow(shadow.X, shadow.Y, shadow.Blur, shadow.Spread, style.Color(shadow.Color))
+		// The tint goes on a column of its own over the blur, as an
+		// element's background takes the place of its material.
+		ui.Column(c).Radius(12).Background(style.Color(colors.SurfaceOverlay).Alpha(0.45)).Border(1, style.Color(colors.Border)).
+			Padding(6).AlignItems(ui.Stretch).Children(func() {
+			items(func() { p.menu = menuNone })
+		})
+	})
+	if !open && p.menu == which {
+		p.menu, p.swallow = menuNone, true
+		p.input = c.Now()
+	}
+}
+
+// menuHeading builds a heading of a row's menu, lined up after the column
+// of the checks.
+func menuHeading(c *ui.Context, text string) {
+	style.Text(ui.Text(c, text), style.Type(c).Caption).TextColor(style.Color(style.Colors(c).TextSecondary)).
+		Padding(6, 10, 4, 32).SingleLine()
+}
+
+// menuFact builds a line of a row's menu that tells, not does, as the
+// Mac's disabled items.
+func menuFact(c *ui.Context, text string) {
+	style.Text(ui.Text(c, text), style.Type(c).Callout).TextColor(style.Color(style.Colors(c).TextSecondary)).
+		Padding(0, 10, 6, 32)
+}
+
+// menuChoice builds an item of a row's menu, checked or not, its details
+// after its name, and reports whether it was chosen; no item has an icon.
+func menuChoice(c *ui.Context, id, name, details string, checked, disabled bool) bool {
+	colors := style.Colors(c)
+	b := ui.ButtonBase(c.Key(id)).MinHeight(28).Padding(4, 8).Gap(8).Radius(6).AlignItems(ui.Center).Label(name).Disabled(disabled)
+	if b.Hovered() && !disabled {
+		b.Background(style.Color(colors.Fill))
+	}
+	if disabled {
+		b.Opacity(0.5)
+	}
+	b.Children(func() {
+		ui.Box(c).Size(16, 16).Shrink(0).Children(func() {
+			if checked {
+				ui.Icon(c, style.Icon("check", false)).Size(16, 16).TextColor(style.Color(colors.AccentText))
+			}
+		})
+		ui.Row(c).Grow(1).MinWidth(0).Gap(6).AlignItems(ui.Center).Children(func() {
+			style.Text(ui.Text(c, name), style.Type(c).Body).TextColor(style.Color(colors.TextPrimary)).SingleLine().Shrink(1)
+			if details != "" {
+				style.Text(ui.Text(c, details), style.Type(c).Footnote).TextColor(style.Color(colors.TextTertiary)).SingleLine().Shrink(1)
+			}
+		})
+	})
+	return b.Clicked()
+}
+
+func (a *App) speedMenu(c *ui.Context, p *player, close func()) {
+	menuHeading(c, style.T(c, "player.speed"))
+	for _, r := range speeds {
+		label := strconv.FormatFloat(r, 'f', -1, 64)
+		if menuChoice(c, key("speed", r), label+"×", "", r == p.state.Speed, false) {
+			p.state.Speed = r
+			a.setVideo(p, "speed", label)
+			close()
+		}
+	}
+}
+
+func (a *App) subtitlesMenu(c *ui.Context, p *player, close func()) {
+	current := p.playback.GetSubtitleStreamIndex()
+	if !p.playback.HasSubtitleStreamIndex() {
+		current = -1
+	}
+	menuHeading(c, style.T(c, "player.subtitles"))
+	if menuChoice(c, key("sub", -1), style.T(c, "player.subtitlesOff"), "", current < 0, false) {
+		close()
+		if current >= 0 {
+			a.restart(p, func(o *capiv1.PlaybackOptions) { o.SetSubtitleStreamIndex(-1) })
+		}
+	}
+	for _, s := range p.playback.GetSubtitles() {
+		name := cmpOr(s.GetTitle(), languageName(c, s.GetLanguage()), fmt.Sprintf("#%d", s.GetStreamIndex()))
+		details := []string{strings.ToUpper(s.GetFormat())}
+		if s.GetForced() {
+			details = append(details, "Forced")
+		}
+		checked := s.GetStreamIndex() == current
+		if menuChoice(c, key("sub", s.GetStreamIndex()), name, strings.Join(details, " · "), checked, false) {
+			close()
+			if !checked {
+				index := s.GetStreamIndex()
+				a.restart(p, func(o *capiv1.PlaybackOptions) { o.SetSubtitleStreamIndex(index) })
+			}
+		}
+	}
+	if current < 0 {
+		return
+	}
+	menuSeparator(c)
+	offsetItems(c, "sub", style.T(c, "player.subtitleOffset"), p.state.SubtitleDelay, func(d time.Duration) {
+		p.state.SubtitleDelay = d
+		a.setVideo(p, "sub-delay", strconv.FormatFloat(d.Seconds(), 'f', 3, 64))
+	})
+}
+
+// offsetItems builds an offset's heading, telling it, and the items moving
+// it a tenth of a second earlier or later and back, which keep the menu
+// open, as the web UI's.
+func offsetItems(c *ui.Context, id, title string, offset time.Duration, set func(time.Duration)) {
+	menuHeading(c, fmt.Sprintf("%s: %+.1f s", title, offset.Seconds()))
+	if menuChoice(c, key("offset", id, -1), style.T(c, "player.offsetEarlier"), "", false, false) {
+		set((offset - 100*time.Millisecond).Round(time.Millisecond))
+	}
+	if menuChoice(c, key("offset", id, 1), style.T(c, "player.offsetLater"), "", false, false) {
+		set((offset + 100*time.Millisecond).Round(time.Millisecond))
+	}
+	if menuChoice(c, key("offset", id, 0), style.T(c, "player.offsetReset"), "", false, offset == 0) {
+		set(0)
+	}
+}
+
+func (a *App) audioMenu(c *ui.Context, p *player, close func()) {
+	menuHeading(c, style.T(c, "player.audio"))
+	for _, s := range p.source().GetAudio() {
+		name := cmpOr(s.GetTitle(), languageName(c, s.GetLanguage()), fmt.Sprintf("#%d", s.GetIndex()))
+		checked := p.playback.HasAudioStreamIndex() && s.GetIndex() == p.playback.GetAudioStreamIndex()
+		if menuChoice(c, key("audio", s.GetIndex()), name, audioDetails(s), checked, false) {
+			close()
+			if !checked {
+				index := s.GetIndex()
+				a.restart(p, func(o *capiv1.PlaybackOptions) { o.SetAudioStreamIndex(index) })
+			}
+		}
+	}
+	menuSeparator(c)
+	offsetItems(c, "audio", style.T(c, "player.audioOffset"), p.state.AudioDelay, func(d time.Duration) {
+		p.state.AudioDelay = d
+		a.prefs.AudioDelay = d.Seconds()
+		a.setVideo(p, "audio-delay", strconv.FormatFloat(d.Seconds(), 'f', 3, 64))
+	})
+	devices := p.state.AudioDevices
+	if len(devices) < 2 {
+		return
+	}
+	menuSeparator(c)
+	menuHeading(c, style.T(c, "player.audioDevice"))
+	current := cmpOr(p.state.AudioDevice, "auto")
+	for _, d := range devices {
+		name := d.Description
+		if d.Name == "auto" {
+			name = style.T(c, "player.audioDeviceSystem")
+		}
+		checked := d.Name == current
+		if menuChoice(c, key("output", d.Name), cmpOr(name, d.Name), "", checked, false) {
+			close()
+			if !checked {
+				a.chooseOutput(p, d.Name)
+			}
+		}
+	}
+}
+
+func (a *App) qualityMenu(c *ui.Context, p *player, close func()) {
+	menuHeading(c, style.T(c, "player.quality"))
+	for _, q := range qualities {
+		checked := q.key == a.quality().key
+		if menuChoice(c, key("quality", q.key), qualityName(c, q), "", checked, false) {
+			close()
+			if !checked {
+				a.chooseQuality(p, q)
+			}
+		}
+	}
+}
+
+func (a *App) infoMenu(c *ui.Context, p *player) {
+	menuHeading(c, style.T(c, "player.method"))
+	menuFact(c, playMethod(c, p.playback))
+	if s := p.source(); s != nil {
+		menuHeading(c, style.T(c, "player.source"))
+		menuFact(c, sourceFacts(s))
+	}
 }

@@ -1,6 +1,8 @@
 package app
 
 import (
+	"errors"
+	"fmt"
 	"slices"
 	"strings"
 	"sync"
@@ -123,30 +125,36 @@ func TestPlayer(t *testing.T) {
 		t.Errorf("commands = %q, want a seek 10 s later", v.commands)
 	}
 
-	for _, tab := range []struct {
-		tab  panelTab
-		name string
-		text string
-	}{
-		{tabAudio, "player-audio", "English Stereo"},
-		{tabSubtitles, "player-subtitles", "Off"},
-		{tabQuality, "player-quality", "720p"},
-	} {
-		h.app.playerOf(nil).panel = tab.tab
-		h.settle()
-		if !h.tt.HasText(tab.text) {
-			t.Errorf("%s texts = %q, want %q", tab.name, h.tt.Texts(), tab.text)
+	// The row's buttons open their menus above them, as the Mac app's,
+	// with no buttons seeking back and forward.
+	for _, label := range []string{"Back 10 seconds", "Forward 10 seconds"} {
+		if _, ok := h.tt.Find(label); ok {
+			t.Errorf("the controller shows %q", label)
 		}
-		h.save(shots, tab.name)
 	}
-	// The panel's segments show the pointing hand, as the web UI's.
-	if r, ok := h.tt.Find("Info"); !ok {
-		t.Errorf("no Info segment; texts = %q", h.tt.Texts())
-	} else {
-		h.tt.Move(r.X+r.W/2, r.Y+r.H/2)
-		h.tt.Frame()
-		if got := h.tt.Cursor(); got != ui.CursorPointer {
-			t.Errorf("cursor over a segment = %v, want = the pointing hand", got)
+	for _, menu := range []struct {
+		button, name, text string
+	}{
+		{"Speed", "player-speed", "1.75×"},
+		{"Audio", "player-audio", "English Stereo"},
+		{"Subtitles", "player-subtitles", "Off"},
+		{"Info", "player-info", "Playback"},
+		{"Quality", "player-quality", "720p"},
+	} {
+		if err := h.tt.Click(menu.button); err != nil {
+			t.Fatal(err)
+		}
+		h.settle()
+		if !h.tt.HasText(menu.text) {
+			t.Errorf("%s texts = %q, want %q", menu.name, h.tt.Texts(), menu.text)
+		}
+		h.save(shots, menu.name)
+		if menu.button != "Quality" {
+			h.tt.Key(0, ui.KeyEscape)
+			h.settle()
+			if p := h.app.playerOf(nil); p == nil || p.menu != menuNone {
+				t.Fatalf("Escape did not close the %s menu alone", menu.button)
+			}
 		}
 	}
 	// A quality restarts the playback where it is.
@@ -181,7 +189,6 @@ func TestPlayer(t *testing.T) {
 	}
 
 	// Escape leaves the player.
-	h.app.playerOf(nil).panel = tabNone
 	h.tt.Key(0, ui.KeyEscape)
 	h.settle()
 	if h.app.playerOf(nil) != nil {
@@ -319,8 +326,8 @@ func TestPlayerControls(t *testing.T) {
 	if len(p.next) != 1 || p.next[0].GetItemId() != "atlas-s3e1" {
 		t.Errorf("next = %v, want = atlas-s3e1", p.next)
 	}
-	if !h.tt.HasText("Next Episode") {
-		t.Errorf("texts = %q, want Next Episode", h.tt.Texts())
+	if _, ok := h.tt.Find("Next Episode"); !ok {
+		t.Errorf("no Next Episode button; texts = %q", h.tt.Texts())
 	}
 
 	// Over the timeline: the chapter and the time under the pointer.
@@ -374,31 +381,95 @@ func TestPlayerControls(t *testing.T) {
 		t.Errorf("cursor = %v, want none with the controller hidden", got)
 	}
 
-	// The audio's tab offers the offset and the outputs.
+	// The audio's menu offers the offset, which keeps it open, and the
+	// outputs.
 	p.state.AudioDevices = []mpv.AudioDevice{{Name: "auto", Description: "Autoselect device"}, {Name: "coreaudio/speakers", Description: "MacBook Speakers"}}
-	p.panel = tabAudio
+	h.tt.Move(600, 320)
 	h.settle()
-	for _, want := range []string{"Audio Offset", "System Default", "MacBook Speakers"} {
+	if err := h.tt.Click("Audio"); err != nil {
+		t.Fatal(err)
+	}
+	h.settle()
+	for _, want := range []string{"Audio Offset: +0.0 s", "System Default", "MacBook Speakers"} {
 		if !h.tt.HasText(want) {
 			t.Errorf("texts = %q, want %q", h.tt.Texts(), want)
 		}
+	}
+	if err := h.tt.Click("Later"); err != nil {
+		t.Fatal(err)
+	}
+	h.settle()
+	if !v.has("set audio-delay 0.100") || p.menu != menuAudio {
+		t.Errorf("commands = %q, menu = %v, want the sound 0.1 s later and the menu open", v.commands, p.menu)
 	}
 	if err := h.tt.Click("MacBook Speakers"); err != nil {
 		t.Fatal(err)
 	}
 	h.settle()
-	if !v.has("set audio-device coreaudio/speakers") || h.app.prefs.AudioDevice != "coreaudio/speakers" {
-		t.Errorf("commands = %q, want the speakers chosen", v.commands)
+	if !v.has("set audio-device coreaudio/speakers") || h.app.prefs.AudioDevice != "coreaudio/speakers" || p.menu != menuNone {
+		t.Errorf("commands = %q, want the speakers chosen and the menu closed", v.commands)
+	}
+
+	// The subtitles stand above the controller while it shows.
+	if p.subPos >= 100 || !v.has(fmt.Sprintf("set sub-pos %d", p.subPos)) {
+		t.Errorf("sub-pos = %d, commands = %q, want the subtitles lifted", p.subPos, v.commands)
 	}
 
 	// S saves a screenshot.
-	p.panel = tabNone
 	h.tt.Key(0, ui.KeyS)
 	h.settle()
 	if !slices.ContainsFunc(v.commands, func(c string) bool {
 		return strings.HasPrefix(c, "screenshot-to-file ") && strings.Contains(c, "Pictures") && strings.HasSuffix(c, ".png video")
 	}) {
 		t.Errorf("commands = %q, want a screenshot", v.commands)
+	}
+}
+
+func TestPlayerSeek(t *testing.T) {
+	h := newHarness(t, true, 1280, 800)
+	h.app.play(h.core.s.Server.ID, "atlas-s2e3", nil)
+	h.settle()
+	v := h.video
+	playing := mpv.State{Loaded: true, Position: 12 * time.Minute, Duration: 42 * time.Minute, Speed: 1, Volume: 100, Tracks: tracks, Restarts: 1}
+	v.emit(playing)
+	h.settle()
+	p := h.app.playerOf(nil)
+
+	// A seek shows its time at once, keeps it while mpv still reports the
+	// old one, and hides the old frame after a beat until mpv starts again.
+	h.tt.Key(0, ui.KeyRight)
+	h.tt.Frame()
+	if !p.seek.pending || p.state.Position != 12*time.Minute+10*time.Second {
+		t.Fatalf("seek = %+v, position = %v, want a pending seek to 12:10", p.seek, p.state.Position)
+	}
+	v.emit(playing)
+	h.settle()
+	if p.state.Position != 12*time.Minute+10*time.Second {
+		t.Errorf("position = %v, want = 12:10 while seeking", p.state.Position)
+	}
+	landed := playing
+	landed.Position, landed.Restarts = 12*time.Minute+10*time.Second, 2
+	v.emit(landed)
+	h.settle()
+	if p.seek.pending || p.state.Position != landed.Position {
+		t.Errorf("seek = %+v, want it over once mpv started again", p.seek)
+	}
+
+	// A failed video loads once more where it was, decoded in software;
+	// failing again, it tells why.
+	failed := landed
+	failed.Loaded, failed.Err = false, errors.New("decoding failed")
+	v.emit(failed)
+	h.settle()
+	if !v.has("set hwdec no") || len(v.loads) != 2 || !strings.HasSuffix(v.loads[1], "@12m10s") || p.err != nil {
+		t.Errorf("loads = %q, commands = %q, err = %v, want the video loaded again at 12:10", v.loads, v.commands, p.err)
+	}
+	v.emit(landed)
+	h.settle()
+	v.emit(failed)
+	h.settle()
+	if p.err == nil || len(v.loads) != 2 {
+		t.Errorf("loads = %q, err = %v, want the error told", v.loads, p.err)
 	}
 }
 

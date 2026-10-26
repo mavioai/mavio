@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"math"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -81,6 +82,7 @@ const (
 	eventCommandReply   = 5
 	eventEndFile        = 7
 	eventFileLoaded     = 8
+	eventRestart        = 21
 	eventPropertyChange = 22
 
 	endFileEOF   = 0
@@ -115,10 +117,13 @@ type State struct {
 	Position time.Duration
 	Duration time.Duration
 	Paused   bool
-	// Buffering tells that playback waits for the network or a seek.
+	// Buffering tells that playback waits for the network.
 	Buffering bool
-	Speed     float64
-	Muted     bool
+	// Restarts counts the times playback started again with a frame shown,
+	// as it does after each seek.
+	Restarts int
+	Speed    float64
+	Muted    bool
 	// SubtitleDelay shifts the subtitles later, or earlier when negative.
 	SubtitleDelay time.Duration
 	// Ended tells that the file played to its end.
@@ -172,7 +177,6 @@ var observed = []struct {
 	{"duration", formatDouble},
 	{"pause", formatFlag},
 	{"paused-for-cache", formatFlag},
-	{"seeking", formatFlag},
 	{"speed", formatDouble},
 	{"mute", formatFlag},
 	{"sub-delay", formatDouble},
@@ -263,6 +267,8 @@ func (p *Player) apply(e *event) bool {
 			slog.Warn("mpv request failed", "request", what, "err", p.l.errorString(e.err))
 		}
 		return false
+	case eventRestart:
+		s.Restarts++
 	case eventFileLoaded:
 		s.Loaded, s.Ended, s.Err = true, false, nil
 	case eventEndFile:
@@ -300,7 +306,7 @@ func (p *Player) apply(e *event) bool {
 			s.Duration = seconds(f)
 		case "pause":
 			s.Paused = flag
-		case "paused-for-cache", "seeking":
+		case "paused-for-cache":
 			s.Buffering = flag
 		case "speed":
 			s.Speed = f
@@ -470,7 +476,22 @@ func (p *Player) audioDevices() []AudioDevice {
 		d.Description, _ = p.String(fmt.Sprintf("audio-device-list/%d/description", i))
 		devices = append(devices, d)
 	}
-	return devices
+	return uniqueDevices(devices)
+}
+
+// uniqueDevices keeps the first of devices of the same description: mpv
+// lists a device once for each of its audio outputs that reaches it, as
+// coreaudio and avfoundation on the Mac.
+func uniqueDevices(devices []AudioDevice) []AudioDevice {
+	seen := map[string]bool{}
+	return slices.DeleteFunc(devices, func(d AudioDevice) bool {
+		if d.Description == "" {
+			return false
+		}
+		dup := seen[d.Description]
+		seen[d.Description] = true
+		return dup
+	})
 }
 
 // Close stops the player and frees it, waiting for its renderer to stop

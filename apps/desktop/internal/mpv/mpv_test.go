@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"testing"
 	"time"
 )
@@ -104,4 +105,19 @@ func TestPlay(t *testing.T) {
 		t.Fatal(err)
 	}
 	wait("the end", func(s State) bool { return s.Ended })
+}
+
+func TestUniqueDevices(t *testing.T) {
+	devices := []AudioDevice{
+		{Name: "auto", Description: "Autoselect device"},
+		{Name: "coreaudio/BuiltInSpeakerDevice", Description: "MacBook Pro Speakers"},
+		{Name: "coreaudio/BlackHole2ch_UID", Description: "BlackHole 2ch"},
+		{Name: "avfoundation/BlackHole2ch_UID", Description: "BlackHole 2ch"},
+		{Name: "avfoundation/BuiltInSpeakerDevice", Description: "MacBook Pro Speakers"},
+	}
+	got := uniqueDevices(devices)
+	want := []AudioDevice{devices[0], devices[1], devices[2]}
+	if !slices.Equal(got, want) {
+		t.Errorf("uniqueDevices = %v, want = %v", got, want)
+	}
 }
