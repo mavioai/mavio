@@ -4,12 +4,17 @@ import AetherEngine
 import SwiftUI
 
 /// The picture of a player, with the subtitles AetherEngine hands over.
+/// While a seek has not landed the subtitles hide, and after a beat the
+/// picture too, behind the activity indicator the app shows.
 public struct PlayerSurface: View {
     private let player: Player
+    private let subtitleLift: CGFloat
 
-    /// The picture of player.
-    public init(player: Player) {
+    /// The picture of player, its text subtitles kept subtitleLift above
+    /// the bottom, out of the way of the controls while they show.
+    public init(player: Player, subtitleLift: CGFloat = 0) {
         self.player = player
+        self.subtitleLift = subtitleLift
     }
 
     /// The engine's surface.
@@ -18,9 +23,11 @@ public struct PlayerSurface: View {
             Color.black
             if let avPlayer = player.avPlayer {
                 AVPlayerSurface(player: avPlayer) { player.pictureInPicture = $0 }
+                    .opacity(player.seekHidesPicture ? 0 : 1)
             } else if let engine = player.aether {
                 AetherPlayerSurface(engine: engine)
-                if let still = player.still {
+                    .opacity(player.seekHidesPicture ? 0 : 1)
+                if let still = player.still, !player.seekHidesPicture {
                     GeometryReader { geo in
                         let picture = SubtitleOverlay.fit(player.videoSize, in: geo.size)
                         Image(decorative: still, scale: 1)
@@ -30,10 +37,13 @@ public struct PlayerSurface: View {
                     }
                     .allowsHitTesting(false)
                 }
-                if let renderer = player.styledSubtitles {
-                    StyledSubtitleOverlay(renderer: renderer, engine: engine, videoSize: player.videoSize)
-                } else {
-                    SubtitleOverlay(cues: player.cues, time: player.cueTime, videoSize: player.videoSize)
+                if !player.isSeekPending {
+                    if let renderer = player.styledSubtitles {
+                        StyledSubtitleOverlay(renderer: renderer, engine: engine, videoSize: player.videoSize)
+                    } else {
+                        SubtitleOverlay(
+                            cues: player.cues, time: player.cueTime, videoSize: player.videoSize, lift: subtitleLift)
+                    }
                 }
             }
         }
@@ -109,6 +119,8 @@ struct SubtitleOverlay: View {
     let cues: [SubtitleCue]
     let time: TimeInterval
     let videoSize: CGSize
+    /// How far above the bottom of the view text keeps at least.
+    var lift: CGFloat = 0
 
     var body: some View {
         let showing = cues.filter { $0.startTime <= time && time < $0.endTime }
@@ -128,7 +140,9 @@ struct SubtitleOverlay: View {
                                 .shadow(color: .black, radius: 2)
                                 .shadow(color: .black, radius: 4)
                                 .padding(.horizontal, 24)
-                                .padding(.bottom, picture.height * 0.06)
+                                .padding(
+                                    .bottom, max(picture.height * 0.06, lift - (geo.size.height - picture.maxY))
+                                )
                                 .frame(width: picture.width, height: picture.height, alignment: .bottom)
                                 .position(x: picture.midX, y: picture.midY)
                         }

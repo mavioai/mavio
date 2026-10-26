@@ -692,7 +692,8 @@ flowchart TD
   - [x] External subtitle files while the server sends HLS: such a playback goes to AetherEngine, which plays the HLS and draws the file, ASS in its styles
   - [x] A redrawn frame when AetherEngine seeks while paused, and scrub thumbnails: the software path's still of the new position is drawn over the picture until it plays, and the scrubber shows a picture over its time, AetherEngine's from what it has read and AVAssetImageGenerator's for a file AVPlayer plays directly
   - [x] Scrub thumbnails from the server's trickplay sheets, for HLS on AVPlayer, HLS on AetherEngine's native path and positions not yet read: the core hands the sheets over, the iPhone's and the Mac's players set `Player.trickplay`, and `Player.thumbnail(at:)` takes them first
-  - [ ] Chapter marks on the scrubber, with the chapter's name over its time; the subtitle offset ([Clients §6.5](clients.md))
+  - [x] Chapter gaps on the scrubber, a seek track of its own (`SeekTrack` in MavioUI) as the web UI's and the Mac's, with the chapter's name over its time; the subtitles above the controls while they show; seeks that hide the old frame and the subtitles until the new frame shows, and a pipeline rebuilt after a decoding failure, in the shared `Player` ([Clients §6.5](clients.md))
+  - [ ] The subtitle offset ([Clients §6.5](clients.md))
   - [ ] Live Text on a paused picture (VisionKit's `ImageAnalysisInteraction`), out of the controls' way and cleared as the picture changes size; on the iPad a trackpad's scroll seeking
   - [ ] The multicast entitlement, so that servers on the network are found on a device and not only in the simulator
   - [ ] Snapshot tests of the screens beyond Home
@@ -859,7 +860,8 @@ flowchart TD
   - [ ] Android TV: the timeline's thumbnail and the subtitle offset checked on the television
   - [x] Android phone and TV, after the web player: chapter gaps cut out of one rounded track, inset by half the knob on the phone; a seek showing where it goes at once, its subtitles hidden and, after 200 ms, the frame from before it behind the activity indicator until the first frame at the new time; a decoder error rebuilding the pipeline once, and Media3 falling back to another decoder; the player dark in either theme; the subtitles above the controls by their height while they show; in picture in picture the activity indicator, and restoring it playing on; checked on the phone
   - [ ] Android: a seek long enough to hide the frame, a decoder error's rebuild and closing picture in picture checked on the phone; all of these on the television
-  - [ ] Apple TV: trickplay thumbnails and chapter marks on the timeline as the remote scrubs, and the subtitle offset
+  - [x] Apple TV: chapter gaps on the timeline, and the subtitles above the controls while they show
+  - [ ] Apple TV: trickplay thumbnails on the timeline as the remote scrubs, and the subtitle offset
 - [ ] Mac app
   - [x] Mac app (`apps/macos`): an AppKit app without SwiftUI, its pages view controllers in the `MavioMac*` targets over `MavioAppKit`; sign-in as the web UI's desktop layout, a card centered on the wall of posters; the sidebar with Search, Home, Discover, Downloads and the libraries by server, the user's menu at its foot, each place keeping the pages opened from it; the menu bar, with the settings on ⌘, and Search on ⌘F; videos playing in the player's window in place of what played, or with Play Each Video in a Window of Its Own in a window each, as the desktop app's, with space, the arrows, J, L, F and Escape
   - [x] Mac app: the settings beside their own sidebar as the web UI's desktop layout, flat, with the Advanced group; the features iOS leaves out for the App Store, which the Mac, distributed outside it, keeps: acquisition, Wanted, downloads, subtitles, AI and the AI conversations, plugins, proxies and the indexer search, and Discover's requests

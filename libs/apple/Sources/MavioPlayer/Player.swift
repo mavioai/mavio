@@ -40,6 +40,14 @@ public final class Player {
     public private(set) var ended = false
     /// Why it failed.
     public private(set) var failure: String?
+    /// Whether a seek is under way, from its start until the frame of its
+    /// time is there: the subtitles hide, so that they never run ahead of
+    /// the picture.
+    public private(set) var isSeekPending = false
+    /// Whether the picture hides behind the activity indicator: a seek that
+    /// has not landed within a beat, so that one within what is buffered
+    /// does not flash, hides the old frame until the new one is there.
+    public private(set) var seekHidesPicture = false
     /// The speed.
     public private(set) var rate: Float = 1
     /// The volume, from 0 to 1, kept from one item to the next.
@@ -96,13 +104,35 @@ public final class Player {
     @ObservationIgnored private var styledHeader: String?
     /// The cues the styled renderer has, by their ID and start.
     @ObservationIgnored private var styledCues: Set<StyledCue> = []
+    /// What plays, which a recovery loads again.
+    @ObservationIgnored private var media: Media?
+    /// Whether what plays has played, after which a failure is recovered
+    /// from rather than taken for media the engine refuses.
+    @ObservationIgnored private var played = false
+    /// The recoveries in a row, and the position of the last.
+    @ObservationIgnored private var recoveries = 0
+    @ObservationIgnored private var recoveredAt = -TimeInterval.infinity
+    /// Whether it is to play rather than stay paused, which a recovery
+    /// keeps.
+    @ObservationIgnored private var wantsPlay = true
+    /// The seek under way, which a newer one replaces.
+    @ObservationIgnored private var seekID = 0
 
     /// A player with nothing loaded.
     public init() {}
 
     /// Plays media, replacing what played.
     public func load(_ media: Media) async {
+        recoveries = 0
+        recoveredAt = -.infinity
+        await start(media)
+    }
+
+    private func start(_ media: Media) async {
         teardown()
+        self.media = media
+        played = false
+        wantsPlay = true
         ended = false
         failure = nil
         currentTime = media.start
@@ -219,11 +249,14 @@ public final class Player {
             let d = item.duration.seconds
             if d.isFinite, d > 0 { duration = d }
             isPlaying = player.timeControlStatus != .paused
-            isBuffering = player.timeControlStatus == .waitingToPlayAtSpecifiedRate || item.status == .unknown
+            isBuffering =
+                player.timeControlStatus == .waitingToPlayAtSpecifiedRate || item.status == .unknown || seekHidesPicture
             let size = item.presentationSize
             if size.width > 0, size.height > 0, size != videoSize { videoSize = size }
+            if item.status == .readyToPlay, isPlaying { played = true }
             if item.status == .failed, failure == nil {
-                failure = item.error?.localizedDescription ?? "AVPlayer failed"
+                failed(item.error?.localizedDescription ?? "AVPlayer failed")
+                return
             }
         } else if let engine = aether {
             if !isSeeking { currentTime = engine.clock.currentTime }
@@ -236,16 +269,21 @@ public final class Player {
                 height: Double(engine.sourceVideoHeight))
             if size != videoSize { videoSize = size }
             switch engine.state {
-            case .playing: isPlaying = true
+            case .playing:
+                isPlaying = true
+                played = true
             case .ended:
                 isPlaying = false
                 ended = true
             case let .error(message):
                 isPlaying = false
-                if failure == nil { failure = message }
+                if failure == nil {
+                    failed(message)
+                    return
+                }
             default: isPlaying = false
             }
-            isBuffering = engine.isBuffering || engine.state == .loading
+            isBuffering = engine.isBuffering || engine.state == .loading || seekHidesPicture
             #if os(iOS) || os(macOS)
                 // A session's layer, once it has one, takes Picture in Picture.
                 let layer = AetherPictureInPicture.layer(of: engine)
@@ -259,6 +297,32 @@ public final class Player {
 
     @ObservationIgnored private var isSeeking = false
 
+    /// Takes a failure: one after the media played, as a decoder failing on
+    /// a frame or the network dropping, loads it again where it was and
+    /// plays on; three within ten seconds of the media fail the playback.
+    private func failed(_ message: String) {
+        if currentTime - recoveredAt > 10 { recoveries = 0 }
+        guard played, let media, recoveries < 3 else {
+            failure = message
+            return
+        }
+        recoveries += 1
+        recoveredAt = currentTime
+        var again = media
+        again.start = currentTime
+        let paused = !wantsPlay
+        poll?.cancel()
+        poll = nil
+        isBuffering = true
+        Task { [weak self] in
+            // A beat apart, so that a network coming back has a moment.
+            try? await Task.sleep(for: .seconds(1))
+            guard let self, self.media?.url == media.url, self.failure == nil else { return }
+            await self.start(again)
+            if paused { self.groupPause() }
+        }
+    }
+
     /// Plays, or asks the group to.
     public func play() {
         if let group { group.unpause() } else { groupPlay() }
@@ -267,6 +331,7 @@ public final class Player {
     /// Plays, as the group says.
     public func groupPlay() {
         clearStill()
+        wantsPlay = true
         avPlayer?.play()
         aether?.play()
         isPlaying = true
@@ -283,6 +348,7 @@ public final class Player {
 
     /// Pauses, as the group says.
     public func groupPause() {
+        wantsPlay = false
         avPlayer?.pause()
         aether?.pause()
         isPlaying = false
@@ -312,15 +378,44 @@ public final class Player {
         currentTime = target
         isSeeking = true
         defer { isSeeking = false }
+        seekID += 1
+        let id = seekID
+        isSeekPending = true
+        // A seek that has not landed within a beat hides the old frame; one
+        // while it is hidden keeps it hidden.
+        Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(200))
+            guard let self, self.seekID == id, self.isSeekPending else { return }
+            self.seekHidesPicture = true
+            self.isBuffering = true
+        }
         if let player = avPlayer {
             await player.seek(to: CMTime(seconds: target, preferredTimescale: 600))
+            await frameShown(of: player)
         }
         if let engine = aether {
             clearStill()
             await engine.seek(to: target)
-            if !isPlaying { showStill(of: engine, at: target) }
+            if !isPlaying {
+                showStill(of: engine, at: target)
+                await stillTask?.value
+            }
         }
+        if seekID == id { (isSeekPending, seekHidesPicture) = (false, false) }
         nowPlaying.sync(force: true)
+    }
+
+    /// Waits until AVPlayer has the frame of where it is, or for a while:
+    /// a seek lands once its frame is there, not when it is done.
+    private func frameShown(of player: AVPlayer) async {
+        // Sound alone has no frame to wait for.
+        guard let output = videoOutput, let size = player.currentItem?.presentationSize, size != .zero
+        else { return }
+        for _ in 0..<50 {
+            guard player === avPlayer, let item = player.currentItem, item.status != .failed else { return }
+            if output.hasNewPixelBuffer(forItemTime: item.currentTime()) { return }
+            try? await Task.sleep(for: .milliseconds(30))
+        }
     }
 
     /// A small picture of a position, for the scrubber: from the server's
@@ -450,6 +545,7 @@ public final class Player {
     /// Stops playing and lets the engine go.
     public func stop() {
         teardown()
+        media = nil
         nowPlaying.end()
     }
 
@@ -500,6 +596,7 @@ public final class Player {
         (styledSubtitles, styledHeader, styledCues) = (nil, nil, [])
         videoSize = .zero
         isPlaying = false
+        (isSeekPending, seekHidesPicture) = (false, false)
     }
 }
 

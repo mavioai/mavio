@@ -692,7 +692,8 @@ flowchart TD
   - [x] 服务端发送 HLS 时的外挂字幕文件：这样的播放交给 AetherEngine，由它播放 HLS 并绘制该文件，ASS 保留样式
   - [x] AetherEngine 暂停时跳转后重绘画面，以及拖动缩略图：软件路径在新位置的静帧盖在画面上直到播放，拖动条在时间上方显示画面，AetherEngine 的取自已读到的数据，AVPlayer 直接播放的文件由 AVAssetImageGenerator 生成
   - [x] 用服务器的 trickplay 拼图作拖动缩略图，用于 AVPlayer 播放的 HLS、AetherEngine 原生路径上的 HLS 以及尚未读到的位置：核心交出拼图，iPhone 与 Mac 的播放器设置 `Player.trickplay`，`Player.thumbnail(at:)` 优先使用
-  - [ ] 拖动条上的章节标记，在其时间上方显示章节名；字幕偏移（[客户端 §6.5](clients.zh-CN.md)）
+  - [x] 拖动条上的章节间隙，用自己的进度轨道（MavioUI 的 `SeekTrack`），与 Web UI 和 Mac 的一样，在其时间上方显示章节名；控件显示时字幕位于其上方；在共享的 `Player` 中，跳转时隐藏旧画面与字幕直到新画面显示，解码失败后重建播放管线（[客户端 §6.5](clients.zh-CN.md)）
+  - [ ] 字幕偏移（[客户端 §6.5](clients.zh-CN.md)）
   - [ ] 暂停画面上的实况文本（VisionKit 的 `ImageAnalysisInteraction`），避开控制器，画面尺寸变化时清除；iPad 上用触控板滚动跳转
   - [ ] 多播权限（entitlement），使真机而不只是模拟器能发现网络中的服务器
   - [ ] 首页以外页面的快照测试
@@ -859,7 +860,8 @@ flowchart TD
   - [ ] Android TV：在电视上检查时间轴缩略图与字幕偏移
   - [x] Android 手机与电视跟进 web 播放器：章节间隙从一条圆角轨道中切出，手机上内缩滑块的一半；跳转时立即显示目标位置，字幕随即隐藏，200 ms 后旧画面隐藏在加载指示器后，直到新位置的第一帧出现；解码错误时重建一次管线，Media3 回退到其他解码器；播放器在任一主题下均为深色；控件显示时字幕按其高度抬到控件上方；画中画中显示加载指示器，恢复后继续播放；已在手机上检查
   - [ ] Android：在手机上检查足以隐藏画面的慢速跳转、解码错误后的重建与关闭画中画；以上全部在电视上检查
-  - [ ] Apple TV：遥控器拖动时间轴时显示 trickplay 缩略图与章节标记，以及字幕偏移
+  - [x] Apple TV：时间轴上的章节间隙，控件显示时字幕位于其上方
+  - [ ] Apple TV：遥控器拖动时间轴时显示 trickplay 缩略图，以及字幕偏移
 - [ ] Mac 应用
   - [x] Mac 应用（`apps/macos`）：不用 SwiftUI 的 AppKit 应用，其页面是 `MavioMac*` 各 target 中基于 `MavioAppKit` 的视图控制器；与 Web UI 桌面布局一致的登录：海报墙上居中的卡片；边栏含搜索、首页、发现、下载与按服务器分组的媒体库，底部为用户菜单，每个位置保留从它打开的页面；菜单栏，⌘, 打开设置、⌘F 打开搜索；视频在播放器窗口中替换正在播放的内容，开启“每个视频在单独的窗口中播放”后各占一个窗口，与桌面应用一致，并支持空格、方向键、J、L、F 与 Esc
   - [x] Mac 应用：与 Web UI 桌面布局一致、在自己边栏旁的设置，平铺并含“高级功能”分组；iOS 为 App Store 省去、Mac 不经 App Store 分发而保留的功能：获取、想要、下载、字幕、AI 与 AI 对话、插件、代理与索引搜索，以及发现的请求

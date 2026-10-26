@@ -71,9 +71,14 @@
 
         private func update() {
             updateEngines()
+            // A seek hides the subtitles until it lands, and after a beat the
+            // picture, behind the activity indicator.
+            let hidden = player.seekHidesPicture
+            avView?.isHidden = hidden
+            aetherView?.isHidden = hidden
             stillView.layer?.contents = player.still
-            stillView.isHidden = player.still == nil
-            subtitleView.isHidden = player.aether == nil || player.styledSubtitles != nil
+            stillView.isHidden = player.still == nil || hidden
+            subtitleView.isHidden = player.aether == nil || player.styledSubtitles != nil || player.isSeekPending
             subtitleView.set(cues: player.cues, time: player.cueTime, videoSize: player.videoSize)
             updateStyled()
             needsLayout = true
@@ -118,7 +123,7 @@
         /// times a second, while there is one.
         private func updateStyled() {
             let styled = player.styledSubtitles != nil && player.aether != nil
-            styledView.isHidden = !styled
+            styledView.isHidden = !styled || player.isSeekPending
             if styled, styledTask == nil {
                 styledTask = Task { [weak self] in
                     while !Task.isCancelled {
