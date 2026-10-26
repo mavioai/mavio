@@ -162,6 +162,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     if (!v) return;
     setLoading(true);
     let hls: Hls | undefined;
+    let onMediaError: (() => void) | undefined;
     let cancelled = false;
     const state = () => ({ positionMs: v.currentTime * 1000, paused: v.paused });
     // Started a tick later, so that an effect undone at once, as React's
@@ -198,12 +199,32 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
           // twice as long apart each time, before it is shown.
           const delays = [1000, 2000, 4000, 8000, 8000];
           let retries = 0;
+          // A media error, as when the browser's hardware decoder fails on a
+          // frame, rebuilds the media pipeline where the video is and plays
+          // on; three times within ten seconds of the video are shown.
+          let recoveries = 0;
+          let recoveredAt = -Infinity;
+          const recover = () => {
+            if (v.currentTime - recoveredAt > 10) recoveries = 0;
+            if (recoveries >= 3) return false;
+            recoveries++;
+            recoveredAt = v.currentTime;
+            hls?.recoverMediaError();
+            v.play().catch(() => setPaused(true));
+            return true;
+          };
+          onMediaError = () => {
+            if (cancelled || !v.error || v.error.code === MediaError.MEDIA_ERR_ABORTED) return;
+            if (!recover()) setError(v.error.message || `media error ${v.error.code}`);
+          };
+          v.addEventListener("error", onMediaError);
           hls.on(HlsJs.Events.ERROR, (_, data) => {
             if (!data.fatal) return;
             if (data.type === HlsJs.ErrorTypes.NETWORK_ERROR && retries < delays.length) {
               setTimeout(() => !cancelled && hls?.startLoad(), delays[retries++]);
               return;
             }
+            if (data.type === HlsJs.ErrorTypes.MEDIA_ERROR && recover()) return;
             setError(`${data.type}: ${data.details}`);
           });
           hls.on(HlsJs.Events.FRAG_LOADED, () => {
@@ -235,6 +256,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
       const p = playback.current;
       playback.current = undefined;
       if (p) void p.stop().then(() => qc.invalidateQueries({ queryKey: ["mavio", server.id] }));
+      if (onMediaError) v.removeEventListener("error", onMediaError);
       hls?.destroy();
       v.pause();
       v.removeAttribute("src");
