@@ -178,6 +178,17 @@
   }
 }
 
+/* The player's notice of the volume, the speed or a seek: shown at once, gone after a second. */
+@keyframes notice {
+  0%,
+  66% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 /* The activity indicator's turn (ui.tsx), a spoke a step. */
 @keyframes spinner {
   to {

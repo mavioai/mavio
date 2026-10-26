@@ -44,12 +44,16 @@ export interface Prefs {
   sidebarWidth?: number;
   quality: Quality;
   autoplayNext: boolean;
+  /** The player's volume, from 0 to 1, kept for the next videos. */
+  volume: number;
+  /** The device the player's sound plays to, where the browser lets it choose; undefined for the system's. */
+  audioOutput?: string;
   /** The advanced tools pinned to the sidebar's Features group, in the order pinned. */
   pinned: string[];
 }
 
 const key = prefsKey;
-const defaults: Prefs = { appearance: "system", language: "system", tv: false, sidebar: true, quality: "auto", autoplayNext: true, pinned: [] };
+const defaults: Prefs = { appearance: "system", language: "system", tv: false, sidebar: true, quality: "auto", autoplayNext: true, volume: 1, pinned: [] };
 
 function read(): Prefs {
   try {

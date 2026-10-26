@@ -36,24 +36,26 @@ import { Tip } from "../controls/tooltip.tsx";
 import { useServerEvents } from "../events.tsx";
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
-import { prefs, type Quality, qualities, qualityBitrates, usePrefs } from "../prefs.ts";
+import { prefs, type Quality, qualities, qualityBitrates, setPrefs, usePrefs } from "../prefs.ts";
 import { useGroupPlayer } from "../syncplay.tsx";
 import { Spinner, StatusView } from "../ui.tsx";
 import { LyricsView } from "./lyrics.tsx";
+import { type ChapterMark, clock, SeekBar } from "./seekbar.tsx";
 import { GroupChip } from "./syncplay.tsx";
 
 const route = getRouteApi("/s/$serverId/play/$itemId");
 
 const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
-/** Seconds as "1:02:03" or "2:03". */
-function clock(s: number): string {
-  if (!Number.isFinite(s) || s < 0) s = 0;
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = Math.floor(s % 60);
-  const mm = h > 0 ? String(m).padStart(2, "0") : String(m);
-  return `${h > 0 ? `${h}:` : ""}${mm}:${String(sec).padStart(2, "0")}`;
+/** Whether the browser lets a video's sound go to a device it picks. */
+const sinkable = typeof HTMLMediaElement !== "undefined" && "setSinkId" in HTMLMediaElement.prototype;
+
+/** How long after a click a second one makes it a double click, in milliseconds. */
+const doubleClickMs = 300;
+
+/** An offset in seconds, as "+0.3 s". */
+function offsetText(s: number): string {
+  return s === 0 ? "0 s" : `${s > 0 ? "+" : "−"}${Math.abs(s).toFixed(1)} s`;
 }
 
 const languageNames = new Intl.DisplayNames([locale], { type: "language" });
@@ -116,6 +118,13 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [muted, setMuted] = useState(false);
+  const [volume, setVolume] = useState(() => prefs().volume);
+  // Seconds the subtitles show later, or earlier.
+  const [subtitleOffset, setSubtitleOffset] = useState(0);
+  const [sink, setSink] = useState(() => prefs().audioOutput ?? "");
+  const [outputs, setOutputs] = useState<MediaDeviceInfo[]>([]);
+  // The brief notice of the volume, the speed or a seek; its key starts it again.
+  const [notice, setNotice] = useState<{ icon: IconName; text: string; level?: number; key: number }>();
   const [speed, setSpeed] = useState(1);
   const [full, setFull] = useState(false);
   const [controls, setControls] = useState(true);
@@ -246,6 +255,86 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     return () => document.removeEventListener("fullscreenchange", onChange);
   }, []);
 
+  const tell = useCallback((icon: IconName, text: string, level?: number) => setNotice({ icon, text, level, key: performance.now() }), []);
+  const tellVolume = useCallback(() => {
+    const v = video.current;
+    if (!v) return;
+    const level = v.muted ? 0 : v.volume;
+    tell(level === 0 ? "mute" : "volume", `${Math.round(level * 100)}%`, level);
+  }, [tell]);
+  const changeVolume = useCallback(
+    (by: number) => {
+      const v = video.current;
+      if (!v) return;
+      v.volume = Math.min(Math.max((v.muted ? 0 : v.volume) + by, 0), 1);
+      v.muted = false;
+      tellVolume();
+    },
+    [tellVolume],
+  );
+
+  // The volume of the last video, and the sound's device as chosen.
+  useEffect(() => {
+    const v = video.current;
+    if (!v) return;
+    v.volume = prefs().volume;
+    const id = prefs().audioOutput;
+    if (sinkable && id) v.setSinkId(id).catch(() => (setPrefs({ audioOutput: undefined }), setSink("")));
+  }, []);
+
+  // The devices the sound can play to, as the audio's panel opens; the
+  // browser names them only once the page may use a microphone.
+  useEffect(() => {
+    if (!sinkable || panel !== "audio") return;
+    void navigator.mediaDevices
+      ?.enumerateDevices()
+      .then((ds) => setOutputs(ds.filter((d) => d.kind === "audiooutput" && d.deviceId !== "default" && d.label)))
+      .catch(() => setOutputs([]));
+  }, [panel]);
+  const pickOutput = (id: string) => {
+    void video.current
+      ?.setSinkId(id)
+      .then(() => {
+        setSink(id);
+        setPrefs({ audioOutput: id || undefined });
+      })
+      .catch(() => undefined);
+  };
+
+  // The subtitles' cues shifted by the offset from the times they came
+  // with, which cues arriving later take as they come.
+  const cueTimes = useRef(new WeakMap<TextTrackCue, [number, number]>());
+  const shifted = useRef(false);
+  useEffect(() => {
+    const v = video.current;
+    if (!v) return;
+    const apply = () => {
+      if (subtitleOffset === 0 && !shifted.current) return;
+      for (const track of v.textTracks) {
+        for (const cue of track.cues ?? []) {
+          let times = cueTimes.current.get(cue);
+          if (!times) {
+            times = [cue.startTime, cue.endTime];
+            cueTimes.current.set(cue, times);
+          }
+          if (cue.startTime !== times[0] + subtitleOffset) {
+            cue.startTime = Math.max(times[0] + subtitleOffset, 0);
+            cue.endTime = Math.max(times[1] + subtitleOffset, 0);
+          }
+        }
+      }
+      shifted.current = subtitleOffset !== 0;
+    };
+    apply();
+    v.addEventListener("timeupdate", apply);
+    return () => v.removeEventListener("timeupdate", apply);
+  }, [subtitleOffset]);
+  const offsetSubtitles = (s: number) => {
+    const o = Math.round(s * 10) / 10;
+    setSubtitleOffset(o);
+    tell("subtitles", `${t("player.subtitleOffset")} ${offsetText(o)}`);
+  };
+
   // The controls hide after 3 seconds without input while playing.
   const hideTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const poke = useCallback(() => {
@@ -319,11 +408,94 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     },
     [group],
   );
-  const seekBy = useCallback((s: number) => seekTo((video.current?.currentTime ?? 0) + s), [seekTo]);
+  const seekBy = useCallback(
+    (s: number) => {
+      const v = video.current;
+      if (!v) return;
+      const to = Math.max(0, Math.min(v.duration || Infinity, v.currentTime + s));
+      seekTo(to);
+      tell(s < 0 ? "seekBack" : "seekForward", `${clock(to)} / ${clock(v.duration)}`, v.duration ? to / v.duration : undefined);
+    },
+    [seekTo, tell],
+  );
   const fullScreen = useCallback(() => {
     if (document.fullscreenElement) void document.exitFullscreen();
     else void shell.current?.requestFullscreen();
   }, []);
+
+  // Dragging the seek bar pauses, and releasing it plays on.
+  const resumeAfterScrub = useRef(false);
+  const scrubStart = () => {
+    const v = video.current;
+    resumeAfterScrub.current = !group && !!v && !v.paused;
+    if (resumeAfterScrub.current) v?.pause();
+  };
+  const scrubEnd = (s: number) => {
+    seekTo(s);
+    if (resumeAfterScrub.current) play();
+    resumeAfterScrub.current = false;
+  };
+
+  // The wheel and trackpad: sideways seeks and up and down sets the
+  // volume, which of them taken at a gesture's start, and over the seek bar
+  // always seeking. A seek pauses until the gesture ends, then goes to
+  // where it points and plays on.
+  const scroll = useRef<{ axis?: "seek" | "volume"; last: number; target?: number; resume: boolean; timer?: ReturnType<typeof setTimeout> }>({ last: 0, resume: false });
+  const wheelDeps = useRef({ seekTo, play, changeVolume, tell, group });
+  wheelDeps.current = { seekTo, play, changeVolume, tell, group };
+  useEffect(() => {
+    const el = shell.current;
+    if (!el || tv) return;
+    const onWheel = (e: WheelEvent) => {
+      const v = video.current;
+      if (!v || (e.target instanceof Element && e.target.closest("aside"))) return;
+      e.preventDefault();
+      const d = wheelDeps.current;
+      const w = scroll.current;
+      // Pixels, from lines or pages where the wheel gives those.
+      const unit = e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? 800 : 1;
+      const right = e.deltaX * unit;
+      const up = -e.deltaY * unit;
+      if (right === 0 && up === 0) return;
+      const overBar = e.target instanceof Element && !!e.target.closest("[data-seekbar]");
+      const now = performance.now();
+      // A gesture is the scrolls less than a fifth of a second apart.
+      if (!w.axis || now - w.last > 200) w.axis = overBar || Math.abs(right) > Math.abs(up) ? "seek" : "volume";
+      w.last = now;
+      if (w.axis === "volume") {
+        d.changeVolume(up * 0.001);
+        return;
+      }
+      const delta = overBar && Math.abs(up) > Math.abs(right) ? up : right;
+      if (w.target === undefined) {
+        w.resume = !d.group && !v.paused;
+        if (w.resume) v.pause();
+      }
+      const total = v.duration || Infinity;
+      const target = Math.min(Math.max((w.target ?? v.currentTime) + delta * 0.1, 0), total);
+      w.target = target;
+      d.tell(delta >= 0 ? "seekForward" : "seekBack", `${clock(target)} / ${clock(v.duration)}`, Number.isFinite(total) ? target / total : undefined);
+      clearTimeout(w.timer);
+      w.timer = setTimeout(() => {
+        const to = w.target;
+        w.target = undefined;
+        w.axis = undefined;
+        if (to !== undefined) wheelDeps.current.seekTo(to);
+        if (w.resume) wheelDeps.current.play();
+        w.resume = false;
+      }, 300);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      clearTimeout(scroll.current.timer);
+    };
+  }, [tv]);
+
+  // A click plays or pauses once it is not a double click, which goes to
+  // full screen alone.
+  const clickTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(clickTimer.current), []);
 
   // The assistant's controls, which read the latest of what they call.
   const live = useRef({ play, pause, back, seekTo, fullScreen, playNext, hasNext: false, info, selection, group });
@@ -467,8 +639,10 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         j: () => seekBy(-10),
         ArrowRight: () => seekBy(10),
         l: () => seekBy(10),
+        ArrowUp: () => changeVolume(0.05),
+        ArrowDown: () => changeVolume(-0.05),
         f: fullScreen,
-        m: () => (v.muted = !v.muted),
+        m: () => ((v.muted = !v.muted), tellVolume()),
       };
       const f = keys[e.key];
       if (!f) return;
@@ -478,7 +652,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
-  }, [toggle, seekBy, fullScreen, back, poke, hide, play, pause, panel, tv, shown]);
+  }, [toggle, seekBy, fullScreen, back, poke, hide, play, pause, panel, tv, shown, changeVolume, tellVolume]);
 
   const current = item.data?.item;
   const source = item.data?.mediaSources.find((m) => m.id === info?.info.mediaSourceId);
@@ -491,6 +665,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
       ? t("item.episodeNumber", { season: current.parentIndexNumber, episode: current.indexNumber })
       : undefined;
   const subtitlesOn = (info?.info.subtitleStreamIndex ?? -1) >= 0;
+  const chapters: ChapterMark[] = (source?.chapters ?? []).map((c) => ({ start: c.start ? durationMs(c.start) / 1000 : 0, title: c.title }));
   const pick = (s: Partial<Selection>) => setSelection({ ...selection, ...s });
   const openPanel = (tab: Tab) => {
     if (document.activeElement instanceof HTMLElement) opener.current = document.activeElement;
@@ -510,8 +685,15 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         className="h-full w-full"
         playsInline
         crossOrigin="anonymous"
-        onClick={() => (panel !== undefined ? setPanel(undefined) : toggle())}
-        onDoubleClick={fullScreen}
+        onClick={(e) => {
+          clearTimeout(clickTimer.current);
+          if (panel !== undefined) setPanel(undefined);
+          else if (e.detail <= 1) clickTimer.current = setTimeout(toggle, doubleClickMs);
+        }}
+        onDoubleClick={() => {
+          clearTimeout(clickTimer.current);
+          fullScreen();
+        }}
         // On the television playing hides the controls.
         onPlay={() => (setPaused(false), tv ? hide() : poke())}
         onPause={() => {
@@ -526,7 +708,12 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         onCanPlay={(e) => e.currentTarget.paused && setLoading(false)}
         onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
         onDurationChange={(e) => Number.isFinite(e.currentTarget.duration) && setDuration(e.currentTarget.duration)}
-        onVolumeChange={(e) => setMuted(e.currentTarget.muted)}
+        onVolumeChange={(e) => {
+          const v = e.currentTarget;
+          setMuted(v.muted);
+          setVolume(v.volume);
+          if (v.volume !== prefs().volume) setPrefs({ volume: v.volume });
+        }}
         onRateChange={(e) => !group && setSpeed(e.currentTarget.playbackRate)}
         onEnded={() => (group ? group.ended() : prefs().autoplayNext && next.data ? playNext() : back())}
       >
@@ -544,6 +731,22 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
 
       {lyrics.data && showLyrics && (
         <LyricsView lyrics={lyrics.data} time={time} onSeek={seekTo} onBackground={() => (panel !== undefined ? setPanel(undefined) : toggle())} />
+      )}
+
+      {notice && (
+        <div
+          key={notice.key}
+          role="status"
+          className="pointer-events-none absolute top-20 left-5 flex animate-[notice_1.5s_ease-out_forwards] items-center gap-3 rounded-[10px] bg-black/60 py-2 pr-4 pl-3.5"
+        >
+          <Icon name={notice.icon} fill size={18} />
+          <span className="type-headline font-semibold tabular-nums">{notice.text}</span>
+          {notice.level !== undefined && (
+            <span className="h-1.5 w-[100px] overflow-hidden rounded-full bg-white/30">
+              <span className="block h-full bg-white" style={{ width: `${Math.min(Math.max(notice.level, 0), 1) * 100}%` }} />
+            </span>
+          )}
+        </div>
       )}
 
       {loading && !error && (
@@ -583,7 +786,19 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         </div>
 
         <div className="pointer-events-auto absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-5 pt-16 pb-4">
-          {tv ? <Timeline time={time} total={total} /> : <Scrubber time={time} total={total} onSeek={seekTo} />}
+          {tv ? (
+            <Timeline time={time} total={total} />
+          ) : (
+            <SeekBar
+              time={time}
+              total={total}
+              chapters={chapters}
+              trickplay={item.data?.trickplay ?? []}
+              sheetUrl={(path) => urlOf(server, path)}
+              onScrubStart={scrubStart}
+              onScrubEnd={scrubEnd}
+            />
+          )}
           {tv ? (
             // The television's row: the remote's keys play, pause and seek.
             <div className="mt-3 flex items-center gap-3">
@@ -624,11 +839,37 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
               <Icon name="seekForward" />
             </PlayerButton>
             <PlayerButton
-              label={muted ? t("player.unmute") : t("player.mute")}
-              onClick={() => video.current && (video.current.muted = !video.current.muted)}
+              label={muted || volume === 0 ? t("player.unmute") : t("player.mute")}
+              onClick={() => {
+                const v = video.current;
+                if (!v) return;
+                // Unmuting a silent video brings its sound back.
+                if (v.muted || v.volume === 0) {
+                  v.muted = false;
+                  if (v.volume === 0) v.volume = 0.5;
+                } else v.muted = true;
+                tellVolume();
+              }}
             >
-              <Icon name={muted ? "mute" : "volume"} />
+              <Icon name={muted || volume === 0 ? "mute" : "volume"} />
             </PlayerButton>
+            <Slider
+              light
+              min={0}
+              max={1}
+              step={0.01}
+              value={muted ? 0 : volume}
+              label={t("player.volume")}
+              valueText={(x) => `${Math.round(x * 100)}%`}
+              onChange={(x) => {
+                const v = video.current;
+                if (!v) return;
+                v.volume = x;
+                v.muted = false;
+                tellVolume();
+              }}
+              className="w-20"
+            />
             <span className="ml-2 type-footnote text-white/85 tabular-nums">
               {clock(time)} / {clock(total)}
             </span>
@@ -717,13 +958,26 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
                       type="button"
                       aria-pressed={r === speed}
                       disabled={!!group}
-                      onClick={() => video.current && (video.current.playbackRate = r)}
+                      onClick={() => {
+                        if (!video.current) return;
+                        video.current.playbackRate = r;
+                        tell("speed", `${r}×`);
+                      }}
                       className={`h-8 rounded-full px-3 type-footnote font-semibold tabular-nums disabled:opacity-40 ${r === speed ? "bg-white/30 text-white" : "bg-white/10 hover:bg-white/20"}`}
                     >
                       {r}×
                     </button>
                   ))}
                 </div>
+                {sinkable && outputs.length > 0 && (
+                  <>
+                    <Heading>{t("player.audioDevice")}</Heading>
+                    <Choice checked={sink === ""} onClick={() => pickOutput("")} label={[t("player.audioDeviceSystem"), ""]} />
+                    {outputs.map((d) => (
+                      <Choice key={d.deviceId} checked={sink === d.deviceId} onClick={() => pickOutput(d.deviceId)} label={[d.label, ""]} />
+                    ))}
+                  </>
+                )}
               </>
             )}
             {panel === "subtitles" && (
@@ -740,6 +994,19 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
                     />
                   );
                 })}
+                {subtitlesOn && (
+                  <>
+                    <Heading>{t("player.subtitleOffset")}</Heading>
+                    <div className="flex items-center gap-1.5 px-2.5">
+                      <OffsetButton onClick={() => offsetSubtitles(subtitleOffset - 0.1)}>{t("player.offsetEarlier")}</OffsetButton>
+                      <span className="min-w-16 text-center type-callout tabular-nums">{offsetText(subtitleOffset)}</span>
+                      <OffsetButton onClick={() => offsetSubtitles(subtitleOffset + 0.1)}>{t("player.offsetLater")}</OffsetButton>
+                      <OffsetButton disabled={subtitleOffset === 0} onClick={() => offsetSubtitles(0)}>
+                        {t("player.offsetReset")}
+                      </OffsetButton>
+                    </div>
+                  </>
+                )}
               </>
             )}
             {panel === "quality" &&
@@ -782,11 +1049,6 @@ function methodText(m: PlayMethod): string {
   }
 }
 
-/** The timeline: a slim bar that thickens under the pointer. */
-function Scrubber({ time, total, onSeek }: { time: number; total: number; onSeek: (s: number) => void }) {
-  return <Slider light min={0} max={total || 1} value={Math.min(time, total || 1)} label={t("player.position")} valueText={clock} onChange={onSeek} />;
-}
-
 /** The television's timeline, which the remote's left and right seek along. */
 function Timeline({ time, total }: { time: number; total: number }) {
   return (
@@ -821,6 +1083,19 @@ function PlayerButton({
         {children}
       </button>
     </Tip>
+  );
+}
+
+function OffsetButton({ onClick, disabled, children }: { onClick: () => void; disabled?: boolean; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="h-8 rounded-full bg-white/10 px-3 type-footnote font-semibold hover:bg-white/20 disabled:opacity-40"
+    >
+      {children}
+    </button>
   );
 }
 
