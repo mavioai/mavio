@@ -35,19 +35,23 @@ func (s *Stream) subtitleFile(stream, run int) string {
 // It waits for the run to have read past the segment, starting or
 // restarting ffmpeg as [Stream.Segment] does. The WebVTT holds the cues
 // the run read, from where it started, and complete ones only.
-func (s *Stream) Subtitle(ctx context.Context, stream, index int) ([]byte, error) {
+func (s *Stream) Subtitle(ctx context.Context, stream, index int) (_ []byte, err error) {
 	l := s.cfg.Layout
 	if index < 0 || index >= len(l.Segments) ||
 		!slices.ContainsFunc(s.cfg.Subtitles, func(st *core.MediaStream) bool { return st.Index == stream }) {
 		return nil, ErrSegmentRange
 	}
+	t := s.trace("subtitles", index)
+	defer func() { s.done(ctx, t, err) }()
 	if err := s.lock(ctx); err != nil {
 		return nil, err
 	}
 	defer s.unlock()
+	t.locked()
 	if s.closed {
 		return nil, errors.New("streaming: stream closed")
 	}
+	t.decision = "written"
 	// The newest run that read the segment.
 	if s.job != nil && s.covers(s.job, stream, index) {
 		return s.readSubtitle(s.job, stream)
@@ -57,7 +61,7 @@ func (s *Stream) Subtitle(ctx context.Context, stream, index int) ([]byte, error
 			return s.readSubtitle(j, stream)
 		}
 	}
-	if s.restart(index) {
+	if t.decide(s, index) {
 		if err := s.startAt(ctx, index); err != nil {
 			return nil, err
 		}

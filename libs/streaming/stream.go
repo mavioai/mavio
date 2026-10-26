@@ -140,15 +140,18 @@ func exists(p string) bool {
 // [InitSegment], waiting for ffmpeg to write it and starting or
 // restarting ffmpeg as needed. The reader holds the segment's files open,
 // so later restarts do not change what it reads.
-func (s *Stream) Segment(ctx context.Context, index int) (io.ReadCloser, int64, error) {
+func (s *Stream) Segment(ctx context.Context, index int) (_ io.ReadCloser, _ int64, err error) {
 	l := s.cfg.Layout
 	if index < InitSegment || index >= len(l.Segments) || (index == InitSegment && s.cfg.Container == "ts") {
 		return nil, 0, ErrSegmentRange
 	}
+	t := s.trace("segment", index)
+	defer func() { s.done(ctx, t, err) }()
 	if err := s.lock(ctx); err != nil {
 		return nil, 0, err
 	}
 	defer s.unlock()
+	t.locked()
 	if s.closed {
 		return nil, 0, errors.New("streaming: stream closed")
 	}
@@ -156,8 +159,9 @@ func (s *Stream) Segment(ctx context.Context, index int) (io.ReadCloser, int64, 
 		return s.init(ctx)
 	}
 	first, last := l.files(index)
+	t.decision = "written"
 	if !s.written(first, last) {
-		if s.restart(index) {
+		if t.decide(s, index) {
 			if err := s.startAt(ctx, index); err != nil {
 				return nil, 0, err
 			}
@@ -245,22 +249,24 @@ func (s *Stream) restart(index int) bool {
 	if s.job == nil || s.ended() {
 		return true
 	}
-	l := s.cfg.Layout
-	first, _ := l.files(index)
+	first, _ := s.cfg.Layout.files(index)
 	if first < s.job.first {
 		return true
 	}
-	// The run is at the end of the files it wrote in a row, or at its
-	// start.
+	return s.cfg.Layout.Start(index)-s.reached() > s.cfg.MaxGap
+}
+
+// reached is where the run is: at the end of the files it wrote in a row,
+// or at its start.
+func (s *Stream) reached() time.Duration {
 	n := s.job.first
 	for exists(s.file(n)) {
 		n++
 	}
-	reached := s.runStart()
 	if n > s.job.first {
-		reached = l.fileEnd(n - 1)
+		return s.cfg.Layout.fileEnd(n - 1)
 	}
-	return l.Start(index)-reached > s.cfg.MaxGap
+	return s.runStart()
 }
 
 // runStart is the time the current run started at.
