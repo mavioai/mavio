@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.net.Uri
+import android.view.View
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
@@ -103,7 +104,11 @@ import dev.mavio.core.SubtitleStream
 import dev.mavio.design.MavioSpacing
 import dev.mavio.player.GroupControls
 import dev.mavio.player.SubtitleShift
-import dev.mavio.player.NetworkRetry
+import dev.mavio.player.MpvPlayer
+import dev.mavio.player.PlaybackRetry
+import dev.mavio.player.Seek
+import dev.mavio.player.rememberBuffering
+import dev.mavio.player.rememberSeek
 import dev.mavio.player.PlayerEngine
 import dev.mavio.player.chooseTracks
 import dev.mavio.player.createPlayer
@@ -248,7 +253,7 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
         }
     }
     DisposableEffect(player) {
-        val retry = player?.let { NetworkRetry(it) }
+        val retry = player?.let { PlaybackRetry(it) }
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED && p != null && !position.ended) {
@@ -350,21 +355,27 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
         }
     }
     AssistantPlayerEffect(assistantPlayer)
+    val seek = rememberSeek(player)
+    // How far up the subtitles go, a fraction of the height, above the controller while it shows.
+    var lift by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(player, lift) { (player as? MpvPlayer)?.subtitleLift = lift }
 
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         when {
             player != null && engine == PlayerEngine.MPV -> PlayerSurface(player, Modifier.fillMaxSize())
             player != null -> {
                 ContentFrame(player, Modifier.fillMaxSize())
-                Subtitles(player)
+                Subtitles(player, hidden = seek != null, lift)
             }
         }
+        // A seek that has not landed hides the frame from before it.
+        if (seek?.hidden == true) Box(Modifier.fillMaxSize().background(Color.Black))
         val error = failure
         if (error != null) {
             Failure(error)
         } else if (player != null && p != null) {
             val chip: (@Composable (onOpen: (Boolean) -> Unit) -> Unit)? = group?.let { g -> { onOpen -> GroupChip(model, page.serverId, g.group, onOpen) } }
-            Controller(controls ?: player, page.title, p, selection.quality, shift, options, playNext, chip) { picked ->
+            Controller(controls ?: player, page.title, p, selection.quality, shift, seek, options, playNext, chip, { lift = it }) { picked ->
                 resume = Duration.ofMillis(player.currentPosition)
                 // The quality stays this device's, as the web UI's.
                 prefs.quality = picked.quality
@@ -386,10 +397,14 @@ private fun KeepScreenOn() {
     }
 }
 
-/** The subtitles Media3 decodes, drawn by its own view over the video; libmpv draws its own. */
+/**
+ * The subtitles Media3 decodes, drawn by its own view over the video;
+ * libmpv draws its own. They hide while [hidden], and stand [lift] of the
+ * height up from the foot when that is above where they stand.
+ */
 @OptIn(UnstableApi::class)
 @Composable
-private fun Subtitles(player: Player) {
+private fun Subtitles(player: Player, hidden: Boolean, lift: Float) {
     var view by remember { mutableStateOf<SubtitleView?>(null) }
     DisposableEffect(player, view) {
         val v = view ?: return@DisposableEffect onDispose {}
@@ -402,6 +417,10 @@ private fun Subtitles(player: Player) {
     AndroidView(
         { context -> SubtitleView(context).apply { setUserDefaultStyle(); setUserDefaultTextSize() }.also { view = it } },
         Modifier.fillMaxSize(),
+        update = {
+            it.visibility = if (hidden) View.INVISIBLE else View.VISIBLE
+            it.setBottomPaddingFraction(maxOf(SubtitleView.DEFAULT_BOTTOM_PADDING_FRACTION, lift))
+        },
     )
 }
 
@@ -438,9 +457,11 @@ private fun Controller(
     playback: Playback,
     quality: Quality,
     shift: SubtitleShift,
+    seek: Seek?,
     options: Options,
     playNext: (() -> Unit)?,
     chip: (@Composable (onOpen: (Boolean) -> Unit) -> Unit)?,
+    onLift: (Float) -> Unit,
     onPick: (Selection) -> Unit,
 ) {
     val pages = LocalPages.current
@@ -481,7 +502,7 @@ private fun Controller(
         delay(SEEK_PREVIEW_MS)
         target = null
     }
-    val seek = { by: Long ->
+    val seekBy = { by: Long ->
         val duration = player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
         val to = ((target ?: player.currentPosition) + by).coerceIn(0, duration)
         player.seekTo(to)
@@ -505,7 +526,13 @@ private fun Controller(
             else -> pages.back()
         }
     }
-    val buffering = rememberBuffering(player)
+    // The activity indicator shows with the frame a seek hides.
+    val buffering = rememberBuffering(player) || seek?.hidden == true
+    // The subtitles stand above the controller while it shows, as the web UI's.
+    var controllerTop by remember { mutableFloatStateOf(0f) }
+    val lift = if (visible && bottom > 0f && controllerTop > 0f) (bottom - controllerTop + with(density) { SUBTITLE_GAP.toPx() }) / bottom else 0f
+    LaunchedEffect(lift) { onLift(lift) }
+    DisposableEffect(Unit) { onDispose { onLift(0f) } }
     Box(
         Modifier
             .fillMaxSize()
@@ -519,7 +546,7 @@ private fun Controller(
                         true
                     }
                     e.key == Key.MediaRewind || e.key == Key.MediaFastForward -> {
-                        if (down) seek(if (e.key == Key.MediaRewind) -SEEK_MS else SEEK_MS)
+                        if (down) seekBy(if (e.key == Key.MediaRewind) -SEEK_MS else SEEK_MS)
                         true
                     }
                     // The side panel and the row move focus as usual, and up leaves the row.
@@ -533,7 +560,7 @@ private fun Controller(
                         }
                     }
                     e.key == Key.DirectionLeft || e.key == Key.DirectionRight -> {
-                        if (down) seek(if (e.key == Key.DirectionLeft) -SEEK_MS else SEEK_MS)
+                        if (down) seekBy(if (e.key == Key.DirectionLeft) -SEEK_MS else SEEK_MS)
                         true
                     }
                     e.key == Key.DirectionDown -> {
@@ -564,13 +591,15 @@ private fun Controller(
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
                         .background(Brush.verticalGradient(0f to Color.Transparent, 0.4f to Color.Black.copy(alpha = 0.45f), 1f to Color.Black.copy(alpha = 0.9f)))
-                        .padding(start = theme.layout.margin, end = theme.layout.margin, top = 160.dp, bottom = 64.dp),
+                        .onGloballyPositioned { controllerTop = it.boundsInRoot().top + with(density) { CONTROLLER_FADE.toPx() } }
+                        .padding(start = theme.layout.margin, end = theme.layout.margin, top = CONTROLLER_FADE, bottom = 64.dp),
                     verticalArrangement = Arrangement.spacedBy(MavioSpacing.s16),
                 ) {
                     playback.heading?.let { Text(it, style = theme.type.headline.text, color = Color.White.copy(alpha = 0.75f), maxLines = 1) }
                     Text(title, style = theme.type.title1.text, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     val duration = progress.durationMs.coerceAtLeast(0)
-                    val now = target ?: progress.currentPositionMs.coerceAtLeast(0)
+                    // A seek's time shows at once.
+                    val now = target ?: seek?.targetMs ?: progress.currentPositionMs.coerceAtLeast(0)
                     Timeline(now, duration, target, playback, Modifier.onGloballyPositioned { timeline = it.boundsInRoot().top })
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16)) {
                         // Whether it plays, which select changes.
@@ -622,23 +651,11 @@ private fun Controller(
     }
 }
 
-/** Whether [player] waits for media, following its state as it changes. */
-@Composable
-private fun rememberBuffering(player: Player): Boolean {
-    fun waiting() = player.playbackState == Player.STATE_BUFFERING || player.playbackState == Player.STATE_IDLE
-    var buffering by remember(player) { mutableStateOf(waiting()) }
-    DisposableEffect(player) {
-        val listener = object : Player.Listener {
-            override fun onPlaybackStateChanged(state: Int) {
-                buffering = waiting()
-            }
-        }
-        player.addListener(listener)
-        buffering = waiting()
-        onDispose { player.removeListener(listener) }
-    }
-    return buffering
-}
+/** How far the controller's gradient reaches above its text. */
+private val CONTROLLER_FADE = 160.dp
+
+/** How far above the controller the subtitles stand while it shows. */
+private val SUBTITLE_GAP = 16.dp
 
 /** How long a seek's thumbnail stays over the timeline. */
 private const val SEEK_PREVIEW_MS = 1500L
