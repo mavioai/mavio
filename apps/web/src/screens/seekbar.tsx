@@ -59,17 +59,26 @@ export function SeekBar({
   const [scrub, setScrub] = useState<number>();
   const dragging = useRef(false);
 
+  const track = useRef<HTMLDivElement>(null);
+
+  // The time at a point, from the track, and where the point is across the bar.
   const at = (clientX: number) => {
-    const r = bar.current!.getBoundingClientRect();
-    const x = Math.min(Math.max(clientX - r.left, 0), r.width);
-    return { time: total > 0 ? (x / r.width) * total : 0, x };
+    const b = bar.current!.getBoundingClientRect();
+    const r = track.current!.getBoundingClientRect();
+    const x = Math.min(Math.max(clientX, r.left), r.right);
+    return { time: total > 0 ? ((x - r.left) / Math.max(r.width, 1)) * total : 0, x: x - b.left };
   };
 
   const position = scrub ?? time;
   const fraction = (s: number) => (total > 0 ? Math.min(Math.max(s / total, 0), 1) : 0);
-  // The stretches between the chapters' gaps.
-  const starts = [0, ...chapters.map((c) => c.start).filter((s) => s > 0 && s < total)];
-  const segments = starts.map((s, i) => [fraction(s), i + 1 < starts.length ? fraction(starts[i + 1]) : 1] as const);
+  // A 2 pixel gap where each chapter after the first starts, as the Mac app's.
+  const gaps = chapters
+    .map((c) => c.start)
+    .filter((s) => s > 0 && s < total)
+    .flatMap((s) => {
+      const p = `${fraction(s) * 100}%`;
+      return [`#000 calc(${p} - 1px)`, `transparent calc(${p} - 1px)`, `transparent calc(${p} + 1px)`, `#000 calc(${p} + 1px)`];
+    });
   const active = hover !== undefined || scrub !== undefined;
 
   return (
@@ -118,22 +127,19 @@ export function SeekBar({
           onScrubEnd(position);
         }}
       >
-        {segments.map(([from, to], i) => (
+        {/* The track is inset by half the knob, so the knob stays inside the bar at either end. */}
+        <div ref={track} className="pointer-events-none absolute inset-x-1.5 flex h-full items-center">
           <div
-            key={i}
-            className={`absolute overflow-hidden rounded-full bg-white/30 transition-[height] ${active ? "h-1.5" : "h-1"}`}
-            // A 2 pixel gap where each chapter after the first starts.
-            style={{ left: `calc(${from * 100}% + ${i > 0 ? 1 : 0}px)`, width: `calc(${(to - from) * 100}% - ${i > 0 ? 1 : 0}px - ${i + 1 < segments.length ? 1 : 0}px)` }}
+            className={`relative w-full overflow-hidden rounded-full bg-white/30 transition-[height] ${active ? "h-1.5" : "h-1"}`}
+            // The chapters' gaps are cut out of the track and its fill alike.
+            style={gaps.length > 0 ? { maskImage: `linear-gradient(to right, ${["#000 0", ...gaps, "#000 100%"].join(", ")})` } : undefined}
           >
-            <div
-              className="h-full bg-white"
-              style={{ width: `${Math.min(Math.max((fraction(position) - from) / Math.max(to - from, 1e-9), 0), 1) * 100}%` }}
-            />
+            <div className="h-full bg-white" style={{ width: `${fraction(position) * 100}%` }} />
           </div>
-        ))}
-        {active && total > 0 && (
-          <div className="pointer-events-none absolute size-3 -translate-x-1/2 rounded-full bg-white" style={{ left: `${fraction(position) * 100}%` }} />
-        )}
+          {active && total > 0 && (
+            <div className="absolute size-3 -translate-x-1/2 rounded-full bg-white" style={{ left: `${fraction(position) * 100}%` }} />
+          )}
+        </div>
       </div>
       {hover && total > 0 && (
         <Preview
