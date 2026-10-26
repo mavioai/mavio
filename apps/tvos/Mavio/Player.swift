@@ -39,6 +39,10 @@ struct PlayerScreen: View {
     /// Follows the Watch Together group while it plays the item.
     @State private var follower: GroupFollower?
     @State private var together = false
+    /// The screen's bottom, and the top of the controls on it while they
+    /// show, which the subtitles keep above.
+    @State private var screenBottom: CGFloat = 0
+    @State private var controlsTop: CGFloat?
     @FocusState private var focus: Focus?
     @AppStorage(PlaybackQuality.key) private var quality = PlaybackQuality.auto
     @AppStorage(DeviceSetting.autoplayNext) private var autoplayNext = true
@@ -56,7 +60,12 @@ struct PlayerScreen: View {
 
     var body: some View {
         ZStack {
-            PlayerSurface(player: player)
+            PlayerSurface(player: player, subtitleLift: subtitleLift)
+                .onGeometryChange(for: CGFloat.self) {
+                    $0.frame(in: .global).maxY
+                } action: {
+                    screenBottom = $0
+                }
             // The picture takes the remote's keys while nothing else has focus.
             Button(action: select) { Color.clear }
                 .buttonStyle(Bare())
@@ -217,7 +226,9 @@ struct PlayerScreen: View {
                     }
                     Text(title).type(MavioTypography.tv.title2).foregroundStyle(.white)
                 }
-                Timeline(position: player.currentTime, duration: player.duration)
+                Timeline(
+                    position: player.currentTime, duration: player.duration,
+                    chapters: source?.chapters.map(\.start) ?? [])
                 if hasButtons {
                     HStack(spacing: MavioSpacing.s24) {
                         if let group = follower?.group {
@@ -272,9 +283,22 @@ struct PlayerScreen: View {
                     .onMoveCommand { if $0 == .up { focus = .picture } else { poke() } }
                 }
             }
+            .onGeometryChange(for: CGFloat.self) {
+                $0.frame(in: .global).minY
+            } action: {
+                controlsTop = $0
+            }
+            .onDisappear { controlsTop = nil }
             .padding(.horizontal, 80)
             .padding(.bottom, 60)
         }
+    }
+
+    /// How far above the screen's bottom the subtitles keep, over the
+    /// controls while they show.
+    private var subtitleLift: CGFloat {
+        guard controls, failure == nil, let controlsTop else { return 0 }
+        return max(screenBottom - controlsTop + MavioSpacing.s16, 0)
     }
 
     private func open(_ which: Panel) {
@@ -526,21 +550,19 @@ struct PlayerScreen: View {
     }
 }
 
-/// The timeline: the position, the bar and the time left.
+/// The timeline: the position, the bar with its chapters' gaps and the time
+/// left.
 private struct Timeline: View {
     let position: TimeInterval
     let duration: TimeInterval
+    let chapters: [TimeInterval]
 
     var body: some View {
         VStack(spacing: MavioSpacing.s8) {
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(.white.opacity(0.3))
-                    Capsule().fill(.white)
-                        .frame(width: geo.size.width * (duration > 0 ? min(position / duration, 1) : 0))
-                }
-            }
-            .frame(height: 10)
+            SeekTrack(
+                fraction: duration > 0 ? position / duration : 0,
+                chapters: duration > 0 ? chapters.map { $0 / duration } : [], height: 10, knob: 0,
+                showsKnob: false)
             HStack {
                 Text(clock(position))
                 Spacer()
