@@ -116,9 +116,10 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   // Until the video plays, and while it waits for data.
   const [loading, setLoading] = useState(true);
   const [time, setTime] = useState(0);
-  // A seek that has not landed after a beat: the old frame is hidden and the
-  // activity indicator shown until the video is at the new time.
-  const [seeking, setSeeking] = useState(false);
+  // A seek: for a beat nothing changes, so that one within what is buffered
+  // does not flash, and after it the old frame is hidden and the activity
+  // indicator shown together until the video is at the new time.
+  const [seek, setSeek] = useState<"pending" | "shown">();
   const seekTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(seekTimer.current), []);
   const [duration, setDuration] = useState(0);
@@ -709,7 +710,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     >
       <video
         ref={video}
-        className={`h-full w-full ${seeking ? "opacity-0" : ""}`}
+        className={`h-full w-full ${seek === "shown" ? "opacity-0" : ""}`}
         playsInline
         crossOrigin="anonymous"
         onClick={(e) => {
@@ -732,29 +733,30 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
           // The seek bar shows where the video goes at once.
           setTime(e.currentTarget.currentTime);
           clearTimeout(seekTimer.current);
-          seekTimer.current = setTimeout(() => setSeeking(true), 200);
+          setSeek("pending");
+          seekTimer.current = setTimeout(() => setSeek("shown"), 200);
         }}
         onSeeked={(e) => {
           // Landed once the new time's frame is there, else when it can play.
           if (e.currentTarget.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
             clearTimeout(seekTimer.current);
-            setSeeking(false);
+            setSeek(undefined);
           }
           void playback.current?.report();
         }}
         onEmptied={() => {
           clearTimeout(seekTimer.current);
-          setSeeking(false);
+          setSeek(undefined);
         }}
         onWaiting={() => setLoading(true)}
         onPlaying={(e) => {
           setLoading(false);
-          if (!e.currentTarget.seeking) setSeeking(false);
+          if (!e.currentTarget.seeking) setSeek(undefined);
         }}
         // Paused with enough to play, as a group's member waiting for the group.
         onCanPlay={(e) => {
           if (e.currentTarget.paused) setLoading(false);
-          if (!e.currentTarget.seeking) setSeeking(false);
+          if (!e.currentTarget.seeking) setSeek(undefined);
         }}
         onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
         onDurationChange={(e) => Number.isFinite(e.currentTarget.duration) && setDuration(e.currentTarget.duration)}
@@ -799,7 +801,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         </div>
       )}
 
-      {(loading || seeking) && !error && (
+      {((loading && seek !== "pending") || seek === "shown") && !error && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <Spinner size={48} className="text-white/70!" />
         </div>
