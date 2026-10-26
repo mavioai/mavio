@@ -284,20 +284,23 @@ func (d *device) openVoice(frame func([]int16)) error {
 	d.in = u
 	d.name = deviceString(defaultInput(), propName)
 	one := uint32(1)
-	capture, speech := mono(Rate), mono(outputRate)
 	if err := set(u, propEnableIO, scopeInput, busInput, &one); err != nil {
 		return err
 	}
 	if err := set(u, propEnableIO, scopeOutput, busOutput, &one); err != nil {
 		return err
 	}
+	// The unit converts no rate of its own on recent macOS, failing to
+	// initialize at any other: capture and play at its rates.
+	capture, speech := mono(rateOf(u, scopeOutput, busInput, Rate)), mono(rateOf(u, scopeInput, busOutput, outputRate))
+	d.play.rate = int(speech.sampleRate)
 	if err := set(u, propStreamFormat, scopeOutput, busInput, &capture); err != nil {
 		return err
 	}
 	if err := set(u, propStreamFormat, scopeInput, busOutput, &speech); err != nil {
 		return err
 	}
-	d.prepare(Rate, frame)
+	d.prepare(capture.sampleRate, frame)
 	if err := set(u, propInputCallback, scopeGlobal, busInput, &renderCallback{inputProc, d.ref}); err != nil {
 		return err
 	}
@@ -305,6 +308,17 @@ func (d *device) openVoice(frame func([]int16)) error {
 		return err
 	}
 	return start(u)
+}
+
+// rateOf returns the rate of the unit's stream on scope and bus, or else
+// where it tells none.
+func rateOf(u uintptr, scope, bus uint32, or float64) float64 {
+	var f streamFormat
+	size := uint32(unsafe.Sizeof(f))
+	if st := unitGetProperty(u, propStreamFormat, scope, bus, unsafe.Pointer(&f), &size); st != 0 || f.sampleRate <= 0 {
+		return or
+	}
+	return f.sampleRate
 }
 
 // openChosen captures the input dev with a HAL unit, and plays through

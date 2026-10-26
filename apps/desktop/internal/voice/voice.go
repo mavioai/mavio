@@ -15,7 +15,7 @@ const Rate = 16000
 const FrameSamples = Rate / 50
 
 // outputRate is the rate speech is played at, converted to from the
-// session's.
+// session's, unless the device plays at its own.
 const outputRate = 48000
 
 // ErrDenied tells that the user refused the app the microphone.
@@ -120,9 +120,11 @@ func (c *capture) write(in []float32) {
 	}
 }
 
-// playback holds the speech to play at outputRate, converting it from
-// the session's rate, and counts what of the answer has played.
+// playback holds the speech to play at its rate, converting it from the
+// session's rate, and counts what of the answer has played.
 type playback struct {
+	// rate is the rate it plays at, outputRate unless set.
+	rate  int
 	mu    sync.Mutex
 	queue []float32
 	// played and total are the samples of the answer played and come.
@@ -141,7 +143,7 @@ func (p *playback) push(pcm []int16, rate int) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	n := len(p.queue)
-	if rate == outputRate {
+	if rate == p.outRate() {
 		for _, s := range pcm {
 			p.queue = append(p.queue, float32(s)/0x8000)
 		}
@@ -149,7 +151,7 @@ func (p *playback) push(pcm []int16, rate int) {
 		if p.pos == 0 {
 			p.pos = 1
 		}
-		step := float64(rate) / outputRate
+		step := float64(rate) / float64(p.outRate())
 		at := func(i int) float32 {
 			if i == 0 {
 				return p.prev
@@ -191,16 +193,25 @@ func (p *playback) run() {
 func (p *playback) progress() (played, total time.Duration) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	return samples(p.played), samples(p.total)
+	return p.samples(p.played), p.samples(p.total)
 }
 
 func (p *playback) drop() time.Duration {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	played := samples(p.played)
+	played := p.samples(p.played)
 	p.queue, p.played, p.total, p.pos, p.prev = nil, 0, 0, 0, 0
 	return played
 }
 
-// samples is how long n samples at outputRate play.
-func samples(n int) time.Duration { return time.Duration(n) * time.Second / outputRate }
+func (p *playback) outRate() int {
+	if p.rate > 0 {
+		return p.rate
+	}
+	return outputRate
+}
+
+// samples is how long n samples at the playback's rate play.
+func (p *playback) samples(n int) time.Duration {
+	return time.Duration(n) * time.Second / time.Duration(p.outRate())
+}
