@@ -85,7 +85,8 @@ function typeVars(scale) {
 function tokensCss(t) {
   return `${HEADER('/*', ' */')}
 /* The dark theme is the default; the light theme follows the system unless
-   data-theme on the root element picks one. */
+   data-theme on the root element picks one. data-theme='dark' on another
+   element keeps it and what it holds dark, as the player. */
 :root {
   --mavio-font-family: Inter, system-ui, sans-serif;
 ${themeVars(t.themes.dark)}
@@ -106,6 +107,10 @@ ${themeVars(t.themes.light).replace(/^/gm, '  ')}
 
 :root[data-theme='light'] {
 ${themeVars(t.themes.light)}
+}
+
+:root [data-theme='dark'] {
+${themeVars(t.themes.dark)}
 }
 
 @media (min-width: ${BREAKPOINTS.tablet}px) {
