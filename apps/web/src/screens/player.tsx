@@ -425,6 +425,8 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   // On the television (docs/tv.md §7), focus leaves the controls' row as
   // they hide, so that the arrows seek again.
   const row = useRef<HTMLDivElement>(null);
+  // The controls along the bottom, their padding the gradient above them.
+  const bar = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (tv && !shown && shell.current?.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
   }, [tv, shown]);
@@ -444,14 +446,24 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     }
   }, [open]);
 
-  // Subtitles rise above the controls while they show.
+  // Subtitles rise above the controls while they show: their last line
+  // ends where the controls start, as a share of the video's height.
   useEffect(() => {
     const v = video.current;
     if (!v) return;
     const tracks = v.textTracks;
     const lift = () => {
+      const b = bar.current;
+      const box = v.getBoundingClientRect();
+      const top = b ? b.getBoundingClientRect().top + parseFloat(getComputedStyle(b).paddingTop) - 8 : box.bottom;
+      const line = Math.min(Math.max(((top - box.top) / box.height) * 100, 0), 100);
       for (const track of tracks) {
-        for (const cue of track.activeCues ?? []) if (cue instanceof VTTCue) cue.line = shown ? -4 : "auto";
+        for (const cue of track.activeCues ?? []) {
+          if (!(cue instanceof VTTCue)) continue;
+          cue.snapToLines = !shown;
+          cue.lineAlign = shown ? "end" : "start";
+          cue.line = shown ? line : "auto";
+        }
       }
     };
     const watch = (e: TrackEvent) => e.track?.addEventListener("cuechange", lift);
@@ -933,7 +945,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
           {group && !tv && <GroupChip server={server} group={group.group} />}
         </div>
 
-        <div className="pointer-events-auto absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-5 pt-16 pb-4">
+        <div ref={bar} className="pointer-events-auto absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-5 pt-16 pb-4">
           {tv ? (
             <Timeline time={time} total={total} />
           ) : (
