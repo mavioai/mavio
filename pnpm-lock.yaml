@@ -162,6 +162,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  hls.js@1.7.3: 8b4aa258559e3c8b162c7f36247aba0d092d49d5de2eebfab04abfd0ae0b0563
+
 importers:
 
   .:
@@ -201,7 +204,7 @@ importers:
         version: 3.14.13(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       hls.js:
         specifier: 1.7.3
-        version: 1.7.3
+        version: 1.7.3(patch_hash=8b4aa258559e3c8b162c7f36247aba0d092d49d5de2eebfab04abfd0ae0b0563)
       react:
         specifier: 19.3.0
         version: 19.3.0
@@ -7073,7 +7076,7 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
-  hls.js@1.7.3: {}
+  hls.js@1.7.3(patch_hash=8b4aa258559e3c8b162c7f36247aba0d092d49d5de2eebfab04abfd0ae0b0563): {}
 
   http-proxy-agent@9.1.0(supports-color@7.2.0):
     dependencies:

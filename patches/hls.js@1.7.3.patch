@@ -1,0 +1,32 @@
+diff --git a/dist/hls.mjs b/dist/hls.mjs
+index fce9ba311355708eaf3846cc9f167a1fdd946c76..aad06deceef1fe74931da07f2c8b9a05dfae9be7 100644
+--- a/dist/hls.mjs
++++ b/dist/hls.mjs
+@@ -35203,10 +35203,7 @@ class SubtitleStreamController extends BaseStreamController {
+     if (!success) {
+       return;
+     }
+-    const buffered = this.tracksBuffered[this.currentTrackId];
+-    if (!buffered) {
+-      return;
+-    }
++    const buffered = this.tracksBuffered[frag.level] ||= [];
+ 
+     // Create/update a buffered array matching the interface used by BufferHelper.bufferedInfo
+     // so we can re-use the logic used to detect how much has been buffered
+diff --git a/src/controller/subtitle-stream-controller.ts b/src/controller/subtitle-stream-controller.ts
+index 0910a0837e1da1247913d996b8c0562eadd823f0..638cf4ea524caa669eedfceaa10ef6fe8f46e1e7 100644
+--- a/src/controller/subtitle-stream-controller.ts
++++ b/src/controller/subtitle-stream-controller.ts
+@@ -132,10 +132,7 @@ export class SubtitleStreamController
+       return;
+     }
+ 
+-    const buffered = this.tracksBuffered[this.currentTrackId];
+-    if (!buffered) {
+-      return;
+-    }
++    const buffered = this.tracksBuffered[frag.level] ||= [];
+ 
+     // Create/update a buffered array matching the interface used by BufferHelper.bufferedInfo
+     // so we can re-use the logic used to detect how much has been buffered

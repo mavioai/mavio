@@ -903,6 +903,7 @@ flowchart TD
   - [x] The assistant, as the web UI's ([Assistant](assistant.md)): its button in the sidebar, the player and the television's navigation bar, and its panel of typed requests with examples, what was heard, the tools run, results to choose by their number, confirmations and the answer streamed; the fast path through the grammar linked into the core (the C ABI's `RunIntent`), the AI path through the core's new `CallServerStream`, and the client actions: playing, controlling the player, its volume, streams and subtitle offset, and navigating
   - [ ] The details' rest, in every layout: Watch Together and carrying out what other devices send, which need the core's C ABI to pass on SyncPlay's updates and the devices' commands, with the player following a group; and the More menu's dialogs checked on the television
   - [ ] Tried on Windows and Linux; signed and notarized on macOS; the app's icon
+- [ ] The web UI on the first hls.js release after 1.7.3 that keeps the subtitles after attaching again, without `patches/hls.js@1.7.3.patch` ([Development §1](development.md))
 - [ ] The decision on a Jellyfin API compatibility shim
 
 ### P22 Real-Device Acceptance

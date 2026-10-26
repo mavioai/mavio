@@ -37,6 +37,12 @@ Rust 由 `libs/client-rust/rust-toolchain.toml` 固定，rustup 在该目录首�
 
 迁移由 `libs/store/internal/cmd/migrategen` 生成，它以库的形式使用 Atlas，不需要 Atlas CLI。生成 PostgreSQL 迁移和运行 PostgreSQL 一致性测试需要 Docker。`libs/store/pgtest` 依次在 `DOCKER_HOST`、Docker CLI 当前上下文（`docker context use`）的引擎、Docker Desktop / OrbStack / Colima / Rancher Desktop / Podman 的常见 socket 中找到的第一个引擎上启动容器，无需额外配置。
 
+需要某个修复而其发布版本尚未包含的 npm 包，用 `pnpm patch` / `pnpm patch-commit` 打补丁：补丁位于 `patches/`，列在 `pnpm-workspace.yaml` 的 `patchedDependencies` 下，由 `pnpm install` 应用。每个补丁只带上游已经做出的修复，一旦某个发布版本包含它就移除：升级该包，再删除补丁及其条目（`pnpm patch-remove`）。
+
+| 补丁 | 修复 | 何时移除 |
+| :--- | :--- | :--- |
+| `hls.js@1.7.3.patch` | hls.js 重新附着到视频（`recoverMediaError`，如视频移入画中画窗口或网络变化时）后字幕停止：`SubtitleStreamController.onSubtitleFragProcessed` 按需取得轨道的已缓冲范围（`tracksBuffered[frag.level] ||= []`），与 hls.js 的 `master` 相同 | 1.7.3 之后第一个含该行的 hls.js 发布版本 |
+
 ---
 
 ## 2. Monorepo 与 Nx
