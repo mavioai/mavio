@@ -9,7 +9,7 @@ import { useState } from "react";
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
-import { input, popup, popupItem } from "./styles.ts";
+import { glassPopup, input, popup, popupItem } from "./styles.ts";
 
 /** How many options a select lists without a field searching them. */
 const selectSearchFrom = 16;
@@ -62,7 +62,7 @@ export function Select<T extends string>({
         <Base.Positioner alignItemWithTrigger={!tv} sideOffset={tv ? 8 : 4} className="z-50 outline-none">
           <Base.Popup
             data-tv-menu={tv || undefined}
-            className={`${popup} ${tv ? "bg-surface-overlay/45 backdrop-blur-3xl backdrop-saturate-150" : ""} min-w-[var(--anchor-width)]`}
+            className={`${tv ? glassPopup : popup} min-w-[var(--anchor-width)]`}
           >
             <Base.List className="max-h-[min(var(--available-height),24rem)] overflow-y-auto">
               {options.map((o) => (

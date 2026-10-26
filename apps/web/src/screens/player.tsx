@@ -749,6 +749,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
       width="w-72"
       label={label}
       container={shell}
+      glass
       onOpenChange={(o) => {
         setMenu((m) => (o ? which : m === which ? undefined : m));
         if (!o) poke();
@@ -765,9 +766,11 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     </Menu>
   );
 
+  // Dark in either theme, as the Mac app's player, its menus with it.
   return (
     <div
       ref={shell}
+      data-theme="dark"
       data-tv-player={tv || undefined}
       className={`fixed inset-0 bg-black text-white select-none ${shown ? "" : "cursor-none"}`}
       onMouseMove={poke}

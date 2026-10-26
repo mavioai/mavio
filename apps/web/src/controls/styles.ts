@@ -2,9 +2,15 @@
 // glass over the page, their items highlighted as they are hovered or
 // reached with the keys, and the fields text is typed into.
 
+/** A popup's shape and motion, without its fill. */
+const popupShape =
+  "origin-[var(--transform-origin)] rounded-[14px] border border-border p-1.5 text-on-background shadow-level3 outline-none transition-[opacity,scale] duration-100 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0";
+
 /** A popup over the page: a menu, a select's options, a field's suggestions. */
-export const popup =
-  "origin-[var(--transform-origin)] rounded-[14px] border border-border bg-surface-overlay/90 p-1.5 text-on-background shadow-level3 outline-none backdrop-blur-xl transition-[opacity,scale] duration-100 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0";
+export const popup = `${popupShape} bg-surface-overlay/90 backdrop-blur-xl`;
+
+/** A popup of frosted glass, letting more of what is under it through: on the television, and over a video. */
+export const glassPopup = `${popupShape} bg-surface-overlay/45 backdrop-blur-3xl backdrop-saturate-150`;
 
 /** An item of a popup, highlighted by the pointer and the keys alike. */
 export const popupItem =

@@ -1,19 +1,20 @@
 // Menus (docs/clients.md §6.4): Base UI's menu opened by a button, its
 // items moved through with the arrow keys and typed to, closed by Escape
-// or a press outside; on the television, frosted glass with larger
-// items, opening on the item chosen.
+// or a press outside; on the television, and over a video, frosted glass,
+// on the television with larger items, opening on the item chosen.
 import { Menu as Base } from "@base-ui/react/menu";
 import { Link, type LinkProps } from "@tanstack/react-router";
 import { type KeyboardEvent, type ReactElement, type ReactNode, type RefObject, useRef } from "react";
 
 import { Icon, type IconName } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
-import { popup } from "./styles.ts";
+import { glassPopup, popup } from "./styles.ts";
 
 /**
  * A menu opened by trigger, a button, placed on side of it and aligned
  * with its start, center or end; width is the popup's width class. It opens in
  * container where given, as an element in full screen, else the page.
+ * A glass menu, as over a video, lets more of what is under it through.
  */
 export function Menu({
   trigger,
@@ -25,6 +26,7 @@ export function Menu({
   onOpenChange,
   start = "[aria-checked=true]",
   container,
+  glass = false,
   children,
 }: {
   trigger: ReactElement;
@@ -37,6 +39,7 @@ export function Menu({
   /** The item a menu opens on on the television: its chosen one, else its first. */
   start?: string;
   container?: RefObject<HTMLElement | null>;
+  glass?: boolean;
   children: ReactNode;
 }) {
   const { tv } = usePrefs();
@@ -72,7 +75,7 @@ export function Menu({
             onFocus={toStart}
             aria-label={label}
             data-tv-menu={tv || undefined}
-            className={`${popup} ${tv ? "bg-surface-overlay/45 backdrop-blur-3xl backdrop-saturate-150" : ""} ${width} max-h-[var(--available-height)] overflow-y-auto`}
+            className={`${tv || glass ? glassPopup : popup} ${width} max-h-[var(--available-height)] overflow-y-auto`}
           >
             {children}
           </Base.Popup>
