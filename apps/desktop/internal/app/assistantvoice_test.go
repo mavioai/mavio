@@ -9,6 +9,7 @@ import (
 
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 
+	"github.com/mavioai/mavio/apps/desktop/internal/mpv"
 	"github.com/mavioai/mavio/apps/desktop/internal/voice"
 )
 
@@ -104,6 +105,22 @@ func TestAssistantVoice(t *testing.T) {
 	if h.tt.HasText("Playing The Long Orbit.") {
 		t.Errorf("the cards stayed after Escape")
 	}
+}
+
+// The player's microphone starts a conversation as the assistant's button does.
+func TestAssistantVoicePlayer(t *testing.T) {
+	audio := &fakeAudio{}
+	h, _ := newVoiceHarness(t, audio)
+	h.app.play(h.core.s.Server.ID, "atlas-s2e3", nil)
+	h.settle()
+	h.video.emit(mpv.State{Loaded: true, Position: time.Minute, Duration: 42 * time.Minute, Speed: 1, Volume: 100, Restarts: 1})
+	h.settle()
+	if err := h.tt.Click("Assistant"); err != nil {
+		t.Fatal(err)
+	}
+	h.until("the microphone opened", func() bool { return audio.device() != nil })
+	audio.device().say(1, true)
+	h.until("connected", func() bool { return len(h.core.assistant.voiceRequests()) == 1 })
 }
 
 func TestAssistantVoiceHold(t *testing.T) {

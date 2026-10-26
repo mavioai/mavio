@@ -162,6 +162,17 @@ func (a *App) openAssistant(win Window) {
 	st.open, st.win, st.lingering = true, win, 0
 }
 
+// startAssistant starts a voice session in win, nil for the app's
+// window, or ends the one going, as the assistant's button tapped does;
+// it opens the panel where the app has no voice.
+func (a *App) startAssistant(win Window, lang string) {
+	if a.voiceOn() {
+		a.tapAssistant(win, lang)
+	} else {
+		a.openAssistant(win)
+	}
+}
+
 // closeAssistant closes the panel, stopping what runs; the orb and cards
 // fade out first.
 func (a *App) closeAssistant() {

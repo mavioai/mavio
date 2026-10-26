@@ -1296,7 +1296,7 @@ func (a *App) playerBottomBar(c *ui.Context, p *player) float32 {
 				}
 				ui.Spacer(c)
 				if a.assistantOn(c) && playerButton(c, "microphone", style.T(c, "assistant.title"), a.assistant.open, false, 44).Clicked() {
-					a.openAssistant(p.win)
+					a.startAssistant(p.win, c.Locale())
 				}
 				a.rowMenu(c, p, menuSpeed, "speed", false, style.T(c, "player.speed"), func(close func()) { a.speedMenu(c, p, close) })
 				if len(p.playback.GetSubtitles()) > 0 {
@@ -1375,7 +1375,7 @@ func (a *App) tvPlayerRow(c *ui.Context, p *player, total time.Duration) {
 				open(tabAudio)
 			}
 			if a.assistantOn(c) && tvPlayerButton(c, p, "microphone", style.T(c, "assistant.title"), a.assistant.open, false) {
-				a.openAssistant(p.win)
+				a.startAssistant(p.win, c.Locale())
 			}
 		})
 	})
