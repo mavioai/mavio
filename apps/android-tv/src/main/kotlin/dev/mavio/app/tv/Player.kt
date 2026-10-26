@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,6 +66,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -100,6 +102,7 @@ import dev.mavio.core.Source
 import dev.mavio.core.SubtitleStream
 import dev.mavio.design.MavioSpacing
 import dev.mavio.player.GroupControls
+import dev.mavio.player.SubtitleShift
 import dev.mavio.player.NetworkRetry
 import dev.mavio.player.PlayerEngine
 import dev.mavio.player.chooseTracks
@@ -108,6 +111,10 @@ import dev.mavio.player.engineFor
 import dev.mavio.player.playing
 import dev.mavio.player.rememberGroupPlayer
 import dev.mavio.ui.Focusable
+import dev.mavio.ui.ChapterTrack
+import dev.mavio.ui.SeekPreview
+import dev.mavio.ui.chapterAt
+import dev.mavio.ui.chooseSheets
 import dev.mavio.ui.LocalPrefs
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.Quality
@@ -123,6 +130,7 @@ import java.time.Duration
 import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import kotlin.math.abs
 import dev.mavio.ui.Assistant
 import dev.mavio.ui.AssistantPlayer
 import dev.mavio.ui.AssistantPlayerEffect
@@ -218,10 +226,12 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
     var engine by remember(p) { mutableStateOf(p?.engine) }
     var startMs by remember(p) { mutableLongStateOf(p?.info?.startPosition?.toMillis() ?: 0) }
     val position = remember(p) { Position().also { it.ms = startMs } }
+    // The subtitle offset, kept as streams change, as the web UI's.
+    val shift = remember(page) { SubtitleShift() }
     val player = remember(p, engine) {
         // A group's member waits for the group to play.
         val follows = model.syncPlay.joined.value.playing(page.serverId, page.itemId) != null
-        p?.let { createPlayer(context, engine ?: it.engine, it.info, it.source, startMs, autoplay = !follows) }
+        p?.let { createPlayer(context, engine ?: it.engine, it.info, it.source, startMs, autoplay = !follows, subtitles = shift) }
     }
     // The SyncPlay group playing the item, which the controller asks instead of the player.
     val group = rememberGroupPlayer(model, page.serverId, page.itemId, player) { pages.back() }
@@ -354,7 +364,7 @@ fun PlayerPage(model: AppModel, page: Page.Player) {
             Failure(error)
         } else if (player != null && p != null) {
             val chip: (@Composable (onOpen: (Boolean) -> Unit) -> Unit)? = group?.let { g -> { onOpen -> GroupChip(model, page.serverId, g.group, onOpen) } }
-            Controller(controls ?: player, page.title, p, selection.quality, options, playNext, chip) { picked ->
+            Controller(controls ?: player, page.title, p, selection.quality, shift, options, playNext, chip) { picked ->
                 resume = Duration.ofMillis(player.currentPosition)
                 // The quality stays this device's, as the web UI's.
                 prefs.quality = picked.quality
@@ -427,6 +437,7 @@ private fun Controller(
     title: String,
     playback: Playback,
     quality: Quality,
+    shift: SubtitleShift,
     options: Options,
     playNext: (() -> Unit)?,
     chip: (@Composable (onOpen: (Boolean) -> Unit) -> Unit)?,
@@ -462,9 +473,19 @@ private fun Controller(
         withFrameNanos {}
         runCatching { idle.requestFocus() }
     }
+    // Where left and right seek to, from where the last seek went while it
+    // shows; the timeline shows its thumbnail for a while after.
+    var target by remember { mutableStateOf<Long?>(null) }
+    LaunchedEffect(target, pressed) {
+        if (target == null) return@LaunchedEffect
+        delay(SEEK_PREVIEW_MS)
+        target = null
+    }
     val seek = { by: Long ->
         val duration = player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
-        player.seekTo((player.currentPosition + by).coerceIn(0, duration))
+        val to = ((target ?: player.currentPosition) + by).coerceIn(0, duration)
+        player.seekTo(to)
+        target = to
         shown = true
     }
     val toggle = {
@@ -549,8 +570,8 @@ private fun Controller(
                     playback.heading?.let { Text(it, style = theme.type.headline.text, color = Color.White.copy(alpha = 0.75f), maxLines = 1) }
                     Text(title, style = theme.type.title1.text, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     val duration = progress.durationMs.coerceAtLeast(0)
-                    val now = progress.currentPositionMs.coerceAtLeast(0)
-                    Timeline(if (duration > 0) now.toFloat() / duration else 0f, Modifier.onGloballyPositioned { timeline = it.boundsInRoot().top })
+                    val now = target ?: progress.currentPositionMs.coerceAtLeast(0)
+                    Timeline(now, duration, target, playback, Modifier.onGloballyPositioned { timeline = it.boundsInRoot().top })
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MavioSpacing.s16)) {
                         // Whether it plays, which select changes.
                         MavioIcon(if (playPause.showPlay) R.drawable.ic_pause_fill else R.drawable.ic_play_fill, size = 28.dp, tint = Color.White)
@@ -596,7 +617,7 @@ private fun Controller(
             }
         }
         panel?.let { open ->
-            SidePanel(open, player, playback, quality, with(density) { (bottom - timeline).coerceAtLeast(0f).toDp() } + MavioSpacing.s16, Modifier.align(Alignment.BottomEnd), onTab = { panel = it }, onPick = onPick)
+            SidePanel(open, player, playback, quality, shift, with(density) { (bottom - timeline).coerceAtLeast(0f).toDp() } + MavioSpacing.s16, Modifier.align(Alignment.BottomEnd), onTab = { panel = it }, onPick = onPick)
         }
     }
 }
@@ -619,13 +640,75 @@ private fun rememberBuffering(player: Player): Boolean {
     return buffering
 }
 
-/** How far the playback is, as a slim bar across the controller. */
+/** How long a seek's thumbnail stays over the timeline. */
+private const val SEEK_PREVIEW_MS = 1500L
+
+/** How wide the timeline's thumbnails are. */
+private val PREVIEW_WIDTH = 320.dp
+
+/**
+ * How far the playback is, [positionMs] of [durationMs], as a slim bar
+ * across the controller with gaps where chapters start; over [target],
+ * where the remote seeks to, the trickplay thumbnail there with the
+ * chapter's name and the time.
+ */
 @Composable
-private fun Timeline(fraction: Float, modifier: Modifier) {
-    Box(modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.3f))) {
-        Box(Modifier.fillMaxWidth(fraction.coerceIn(0f, 1f)).fillMaxHeight().background(Color.White))
+private fun Timeline(positionMs: Long, durationMs: Long, target: Long?, playback: Playback, modifier: Modifier) {
+    val density = LocalDensity.current
+    val chapters = playback.source?.chapters.orEmpty()
+    val marks = remember(chapters, durationMs) {
+        if (durationMs > 0) chapters.map { it.start.toMillis().toFloat() / durationMs } else emptyList()
+    }
+    val sheets = remember(playback.details) {
+        chooseSheets(playback.details?.trickplay.orEmpty(), with(density) { PREVIEW_WIDTH.roundToPx() })
+    }
+    val fraction = if (durationMs > 0) (positionMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f
+    Box(modifier.fillMaxWidth()) {
+        ChapterTrack(fraction, marks, 8.dp, Modifier.fillMaxWidth())
+        target?.let { ms ->
+            Box(
+                Modifier.layout { measurable, constraints ->
+                    val preview = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
+                    val x = (fraction * constraints.maxWidth - preview.width / 2f).toInt()
+                        .coerceIn(0, (constraints.maxWidth - preview.width).coerceAtLeast(0))
+                    layout(constraints.maxWidth, 0) { preview.place(x, -preview.height - MavioSpacing.s16.roundToPx()) }
+                },
+            ) {
+                SeekPreview(sheets, ms, chapterAt(chapters, ms), clock(ms), PREVIEW_WIDTH, theme.type.callout.text)
+            }
+        }
     }
 }
+
+/**
+ * The subtitle offset in the side panel, as the web UI's: a tenth of a
+ * second earlier or later at a time, and back to none.
+ */
+@Composable
+private fun SubtitleOffset(shift: SubtitleShift) {
+    var ms by remember { mutableLongStateOf(shift.ms) }
+    val set = { to: Long ->
+        ms = to
+        shift.ms = to
+    }
+    Heading(stringResource(R.string.player_subtitle_offset))
+    Row(Modifier.padding(horizontal = 10.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+        Speed(stringResource(R.string.player_offset_earlier), chosen = false, enabled = true) { set(ms - 100) }
+        Text(
+            offsetText(ms),
+            Modifier.widthIn(min = 64.dp),
+            style = theme.type.callout.text,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+        )
+        Speed(stringResource(R.string.player_offset_later), chosen = false, enabled = true) { set(ms + 100) }
+        Speed(stringResource(R.string.player_offset_reset), chosen = false, enabled = ms != 0L) { set(0) }
+    }
+}
+
+/** An offset in milliseconds as "+0.3 s", as the web UI's. */
+private fun offsetText(ms: Long): String =
+    if (ms == 0L) "0 s" else "${if (ms > 0) "+" else "−"}${"%.1f".format(abs(ms) / 1000.0)} s"
 
 /**
  * The side panel of the player's options, as the web UI's: dark glass over
@@ -643,6 +726,7 @@ private fun SidePanel(
     player: Player,
     playback: Playback,
     quality: Quality,
+    shift: SubtitleShift,
     above: Dp,
     modifier: Modifier,
     onTab: (Panel) -> Unit,
@@ -724,6 +808,7 @@ private fun SidePanel(
                         val checked = t.streamIndex == picked
                         Choice(checked, label, first(checked)) { onPick(current.copy(subtitle = t.streamIndex)) }
                     }
+                    if (picked >= 0) SubtitleOffset(shift)
                 }
                 Panel.QUALITY -> Quality.entries.forEach { q ->
                     Choice(q == quality, (q.label?.let { stringResource(it) } ?: q.key) to "", first(q == quality)) {
