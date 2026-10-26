@@ -189,6 +189,17 @@
   }
 }
 
+/* The player's subtitles hidden while a seek's frame is not shown yet:
+   the cue box where the browser draws one, else the cues themselves. */
+video[data-hide-cues]::-webkit-media-text-track-container {
+  visibility: hidden;
+}
+video[data-hide-cues]::cue {
+  color: transparent;
+  background: transparent;
+  text-shadow: none;
+}
+
 /* The activity indicator's turn (ui.tsx), a spoke a step. */
 @keyframes spinner {
   to {

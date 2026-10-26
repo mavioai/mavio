@@ -118,10 +118,29 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   const [time, setTime] = useState(0);
   // A seek: for a beat nothing changes, so that one within what is buffered
   // does not flash, and after it the old frame is hidden and the activity
-  // indicator shown together until the video is at the new time.
+  // indicator shown together until the video is at the new time. The
+  // subtitles hide from the seek on, so that they never run ahead of the
+  // frame shown.
   const [seek, setSeek] = useState<"pending" | "shown">();
   const seekTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(seekTimer.current), []);
+  const seekFrame = useRef<number>(undefined);
+  const landed = () => {
+    clearTimeout(seekTimer.current);
+    setSeek(undefined);
+  };
+  // The seek ends with the first frame shown at the new time, where the
+  // browser reports frames shown; else when the video has the time's data.
+  const framed = (v: HTMLVideoElement) => "requestVideoFrameCallback" in v;
+  const awaitFrame = (v: HTMLVideoElement) => {
+    if (seekFrame.current !== undefined) v.cancelVideoFrameCallback(seekFrame.current);
+    const check = (_: number, frame: VideoFrameCallbackMetadata) => {
+      seekFrame.current = undefined;
+      if (!v.seeking && Math.abs(frame.mediaTime - v.currentTime) < 1) landed();
+      else seekFrame.current = v.requestVideoFrameCallback(check);
+    };
+    seekFrame.current = v.requestVideoFrameCallback(check);
+  };
   const [duration, setDuration] = useState(0);
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(() => prefs().volume);
@@ -711,6 +730,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
       <video
         ref={video}
         className={`h-full w-full ${seek === "shown" ? "opacity-0" : ""}`}
+        data-hide-cues={seek !== undefined || undefined}
         playsInline
         crossOrigin="anonymous"
         onClick={(e) => {
@@ -732,31 +752,29 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         onSeeking={(e) => {
           // The seek bar shows where the video goes at once.
           setTime(e.currentTarget.currentTime);
-          clearTimeout(seekTimer.current);
-          setSeek("pending");
-          seekTimer.current = setTimeout(() => setSeek("shown"), 200);
+          // A seek while the old frame is hidden keeps it hidden.
+          if (seek !== "shown") {
+            clearTimeout(seekTimer.current);
+            setSeek("pending");
+            seekTimer.current = setTimeout(() => setSeek("shown"), 200);
+          }
+          if (framed(e.currentTarget)) awaitFrame(e.currentTarget);
         }}
         onSeeked={(e) => {
-          // Landed once the new time's frame is there, else when it can play.
-          if (e.currentTarget.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-            clearTimeout(seekTimer.current);
-            setSeek(undefined);
-          }
+          const v = e.currentTarget;
+          if (!framed(v) && v.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) landed();
           void playback.current?.report();
         }}
-        onEmptied={() => {
-          clearTimeout(seekTimer.current);
-          setSeek(undefined);
-        }}
+        onEmptied={landed}
         onWaiting={() => setLoading(true)}
         onPlaying={(e) => {
           setLoading(false);
-          if (!e.currentTarget.seeking) setSeek(undefined);
+          if (!framed(e.currentTarget) && !e.currentTarget.seeking) landed();
         }}
         // Paused with enough to play, as a group's member waiting for the group.
         onCanPlay={(e) => {
           if (e.currentTarget.paused) setLoading(false);
-          if (!e.currentTarget.seeking) setSeek(undefined);
+          if (!framed(e.currentTarget) && !e.currentTarget.seeking) landed();
         }}
         onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
         onDurationChange={(e) => Number.isFinite(e.currentTarget.duration) && setDuration(e.currentTarget.duration)}
