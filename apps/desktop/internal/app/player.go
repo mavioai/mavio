@@ -109,6 +109,10 @@ type player struct {
 	starting int
 	err      error
 	state    mpv.State
+	// loading tells that a file loads until its first frame shows, which
+	// mpv's count of restarts passing loaded tells.
+	loading bool
+	loaded  int
 	// selected tells that the playback's streams were selected in mpv.
 	selected bool
 	// input is when the user last moved the pointer or pressed a key.
@@ -317,11 +321,21 @@ func (a *App) startPlayback(p *player) {
 			if pb.HasStartPositionMs() {
 				start = time.Duration(pb.GetStartPositionMs()) * time.Millisecond
 			}
-			if err := p.video.Load(pb.GetUrl(), start); err != nil {
+			if err := a.loadVideo(p, pb.GetUrl(), start); err != nil {
 				p.err = err
 			}
 		})
 	}()
+}
+
+// loadVideo loads url into p's video from start, loading until its first
+// frame shows.
+func (a *App) loadVideo(p *player, url string, start time.Duration) error {
+	if err := p.video.Load(url, start); err != nil {
+		return err
+	}
+	p.loading, p.loaded = true, p.state.Restarts
+	return nil
 }
 
 // restart plays p again where it is, with other streams or another
@@ -396,6 +410,9 @@ func (a *App) videoChanged(p *player, s mpv.State) {
 		}
 		prev := p.state
 		p.state = s
+		if p.loading && (s.Restarts > p.loaded || s.Err != nil) {
+			p.loading = false
+		}
 		if p.seek.pending {
 			if s.Restarts > p.seek.restarts || !s.Loaded || s.Err != nil {
 				p.seek = playerSeek{}
@@ -418,7 +435,7 @@ func (a *App) playerStateChanged(p *player, prev mpv.State) {
 			p.recovered, p.selected = true, false
 			slog.WarnContext(a.ctx, "the video failed; load it again", "error", s.Err)
 			a.setVideo(p, "hwdec", "no")
-			if err := p.video.Load(p.playback.GetUrl(), prev.Position); err == nil {
+			if err := a.loadVideo(p, p.playback.GetUrl(), prev.Position); err == nil {
 				return
 			}
 		}
@@ -1074,7 +1091,7 @@ func (a *App) playerView(c *ui.Context, p *player) {
 		if hiding {
 			ui.Box(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).Background(black).PassThrough()
 		}
-		if p.playback == nil && p.err == nil || p.state.Buffering && !p.seek.pending || hiding {
+		if (p.playback == nil || p.loading) && p.err == nil || p.state.Buffering && !p.seek.pending || hiding {
 			ui.Box(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).Center().PassThrough().Children(func() {
 				ui.Spinner(c).Size(48, 48).TextColor(ui.RGBA(255, 255, 255, 0.7))
 			})

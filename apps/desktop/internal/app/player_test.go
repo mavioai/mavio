@@ -522,6 +522,27 @@ func TestPlayerScrub(t *testing.T) {
 	}
 }
 
+// The player loads, its activity indicator shown, until the first frame.
+func TestPlayerLoading(t *testing.T) {
+	h := newHarness(t, true, 1280, 800)
+	h.app.play(h.core.s.Server.ID, "atlas-s2e3", nil)
+	h.settle()
+	p := h.app.playerOf(nil)
+	if !p.loading {
+		t.Fatal("loading = false after the load, want = true")
+	}
+	h.video.emit(mpv.State{Loaded: true, Duration: 42 * time.Minute, Speed: 1, Tracks: tracks})
+	h.settle()
+	if !p.loading {
+		t.Error("loading = false once loaded, want = true until the first frame")
+	}
+	h.video.emit(mpv.State{Loaded: true, Duration: 42 * time.Minute, Speed: 1, Tracks: tracks, Restarts: 1})
+	h.settle()
+	if p.loading {
+		t.Error("loading = true after the first frame, want = false")
+	}
+}
+
 func TestFitWindow(t *testing.T) {
 	a := &App{}
 	for _, tt := range []struct {
