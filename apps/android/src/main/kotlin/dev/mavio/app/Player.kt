@@ -4,6 +4,7 @@ import android.app.PictureInPictureParams
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.view.View
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
@@ -69,6 +70,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -108,8 +112,12 @@ import dev.mavio.core.PlaybackSession
 import dev.mavio.core.Source
 import dev.mavio.core.SubtitleStream
 import dev.mavio.player.GroupControls
+import dev.mavio.player.MpvPlayer
+import dev.mavio.player.Seek
+import dev.mavio.player.rememberBuffering
+import dev.mavio.player.rememberSeek
 import dev.mavio.player.SubtitleShift
-import dev.mavio.player.NetworkRetry
+import dev.mavio.player.PlaybackRetry
 import dev.mavio.player.PlayerEngine
 import dev.mavio.player.chooseTracks
 import dev.mavio.player.createPlayer
@@ -122,6 +130,7 @@ import dev.mavio.ui.SeekPreview
 import dev.mavio.ui.chapterAt
 import dev.mavio.ui.chooseSheets
 import dev.mavio.ui.MavioIcon
+import dev.mavio.ui.MavioTheme
 import dev.mavio.ui.Quality
 import dev.mavio.ui.R
 import dev.mavio.ui.languageName
@@ -241,7 +250,7 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
         }
     }
     DisposableEffect(player) {
-        val retry = player?.let { NetworkRetry(it) }
+        val retry = player?.let { PlaybackRetry(it) }
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED && p != null && !position.ended) {
@@ -291,6 +300,7 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
             }
         }
     }
+    // Leaving the app, or closing picture in picture, pauses.
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { player?.pause() }
     // The system's media controls, headsets' keys and picture in picture's
     // buttons drive the player through its session; the next episode's
@@ -300,6 +310,11 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
         onDispose { session?.release() }
     }
     val pip = PictureInPicture(player)
+    val seek = rememberSeek(player)
+    val loading = rememberBuffering(player)
+    // How far up the subtitles go, a fraction of the height, above the controls while they show.
+    var lift by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(player, lift) { (player as? MpvPlayer)?.subtitleLift = lift }
     // The assistant controls the player as the user does.
     val currentNext by rememberUpdatedState(playNext)
     val currentSelection by rememberUpdatedState(selection)
@@ -346,41 +361,50 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
     }
     AssistantPlayerEffect(assistantPlayer)
 
-    Box(Modifier.fillMaxSize().background(Color.Black)) {
-        when {
-            player != null && engine == PlayerEngine.MPV -> PlayerSurface(player, Modifier.fillMaxSize())
-            player != null -> {
-                ContentFrame(player, Modifier.fillMaxSize())
-                Subtitles(player)
-            }
-        }
-        val error = failure
-        if (error != null) {
-            Failure(error)
-        } else if (player != null && p != null) {
-            // Picture in picture shows the video alone.
-            if (!pip.active) {
-                val chip: (@Composable (onOpen: (Boolean) -> Unit) -> Unit)? = group?.let { g -> { onOpen -> GroupChip(model, route.serverId, g.group, onOpen) } }
-                Controls(controls ?: player, route.title, p, selection.quality, shift, playNext, pip.enter, chip) { picked ->
-                    resume = Duration.ofMillis(player.currentPosition)
-                    // The quality stays this device's, as the web UI's.
-                    prefs.quality = picked.quality
-                    selection = picked
+    // The player is dark in either theme, as the web UI's.
+    MavioTheme(dark = true, layout = theme.layout, type = theme.type) {
+        Box(Modifier.fillMaxSize().background(Color.Black)) {
+            when {
+                player != null && engine == PlayerEngine.MPV -> PlayerSurface(player, Modifier.fillMaxSize())
+                player != null -> {
+                    ContentFrame(player, Modifier.fillMaxSize())
+                    Subtitles(player, hidden = seek != null, lift)
                 }
             }
-        } else {
-            CircularProgressIndicator(Modifier.align(Alignment.Center), color = Color.White)
+            // A seek that has not landed hides the frame from before it.
+            if (seek?.hidden == true) Box(Modifier.fillMaxSize().background(Color.Black))
+            val error = failure
+            if (error != null) {
+                Failure(error)
+            } else if (player != null && p != null) {
+                // Picture in picture shows the video and its subtitles alone, and the activity indicator while it waits.
+                if (pip.active) {
+                    if (loading || seek?.hidden == true) CircularProgressIndicator(Modifier.align(Alignment.Center).size(32.dp), color = Color.White, strokeWidth = 3.dp)
+                } else {
+                    val chip: (@Composable (onOpen: (Boolean) -> Unit) -> Unit)? = group?.let { g -> { onOpen -> GroupChip(model, route.serverId, g.group, onOpen) } }
+                    Controls(controls ?: player, route.title, p, selection.quality, shift, seek, loading, playNext, pip.enter, chip, { lift = it }) { picked ->
+                        resume = Duration.ofMillis(player.currentPosition)
+                        // The quality stays this device's, as the web UI's.
+                        prefs.quality = picked.quality
+                        selection = picked
+                    }
+                }
+            } else {
+                CircularProgressIndicator(Modifier.align(Alignment.Center), color = Color.White)
+            }
         }
     }
 }
 
 /**
  * The subtitles Media3 decodes, drawn by its own view over the video:
- * the Compose frame draws only the picture. libmpv draws its own.
+ * the Compose frame draws only the picture. libmpv draws its own. They
+ * hide while [hidden], and stand [lift] of the height up from the foot
+ * when that is above where they stand.
  */
 @OptIn(UnstableApi::class)
 @Composable
-private fun Subtitles(player: Player) {
+private fun Subtitles(player: Player, hidden: Boolean, lift: Float) {
     var view by remember { mutableStateOf<SubtitleView?>(null) }
     DisposableEffect(player, view) {
         val v = view ?: return@DisposableEffect onDispose {}
@@ -393,6 +417,10 @@ private fun Subtitles(player: Player) {
     AndroidView(
         { context -> SubtitleView(context).apply { setUserDefaultStyle(); setUserDefaultTextSize() }.also { view = it } },
         Modifier.fillMaxSize(),
+        update = {
+            it.visibility = if (hidden) View.INVISIBLE else View.VISIBLE
+            it.setBottomPaddingFraction(maxOf(SubtitleView.DEFAULT_BOTTOM_PADDING_FRACTION, lift))
+        },
     )
 }
 
@@ -460,9 +488,12 @@ private fun Controls(
     playback: Playback,
     quality: Quality,
     shift: SubtitleShift,
+    seek: Seek?,
+    loading: Boolean,
     playNext: (() -> Unit)?,
     pictureInPicture: (() -> Unit)?,
     chip: (@Composable (onOpen: (Boolean) -> Unit) -> Unit)?,
+    onLift: (Float) -> Unit,
     onPick: (Selection) -> Unit,
 ) {
     val navigator = LocalNavigator.current
@@ -482,13 +513,22 @@ private fun Controls(
             shown = false
         }
     }
-    val buffering = player.playbackState == Player.STATE_BUFFERING || player.playbackState == Player.STATE_IDLE
+    // The activity indicator shows with the frame a seek hides.
+    val buffering = loading || seek?.hidden == true
+    // The subtitles stand above the bottom bar while it shows, as the web UI's.
+    val density = LocalDensity.current
+    var height by remember { mutableFloatStateOf(0f) }
+    var barTop by remember { mutableFloatStateOf(0f) }
+    val lift = if (shown && height > 0f && barTop > 0f) (height - barTop + with(density) { SUBTITLE_GAP.toPx() }) / height else 0f
+    LaunchedEffect(lift) { onLift(lift) }
+    DisposableEffect(Unit) { onDispose { onLift(0f) } }
     // A press held plays at double speed, then at the speed it played at.
     var heldSpeed by remember { mutableStateOf<Float?>(null) }
     val swipe = rememberSwipeLevels()
     Box(
         Modifier
             .fillMaxSize()
+            .onSizeChanged { height = it.height.toFloat() }
             .pointerInput(player) {
                 detectTapGestures(
                     onTap = {
@@ -573,11 +613,13 @@ private fun Controls(
                         .padding(start = 20.dp, end = 20.dp, top = 64.dp, bottom = 16.dp),
                 ) {
                     val duration = progress.durationMs.coerceAtLeast(0)
-                    val now = seeking?.toLong() ?: progress.currentPositionMs
+                    // A seek's time shows at once.
+                    val now = seeking?.toLong() ?: seek?.targetMs ?: progress.currentPositionMs
                     SeekBar(
                         now,
                         duration,
                         playback,
+                        Modifier.onGloballyPositioned { barTop = it.positionInRoot().y },
                         onScrub = {
                             seeking = it?.toFloat()
                             touch()
@@ -885,8 +927,19 @@ private fun PictureInPicture(player: Player?): Pip {
     var active by remember { mutableStateOf(activity?.isInPictureInPictureMode == true) }
     val supported = activity?.packageManager?.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE) == true
     if (activity == null || !supported || player == null) return Pip(active, null)
+    // Back from picture in picture to the player plays on, as the web UI's;
+    // closing it stops the activity, which pauses.
+    var restoring by remember { mutableStateOf(false) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        if (restoring) player.play()
+        restoring = false
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { restoring = false }
     DisposableEffect(activity) {
-        val listener = Consumer<PictureInPictureModeChangedInfo> { active = it.isInPictureInPictureMode }
+        val listener = Consumer<PictureInPictureModeChangedInfo> {
+            if (active && !it.isInPictureInPictureMode) restoring = true
+            active = it.isInPictureInPictureMode
+        }
         activity.addOnPictureInPictureModeChangedListener(listener)
         onDispose { activity.removeOnPictureInPictureModeChangedListener(listener) }
     }
@@ -975,14 +1028,15 @@ private fun subtitleLabel(s: SubtitleStream): Pair<String, String> =
 private val PREVIEW_WIDTH = 160.dp
 
 /**
- * The seek bar, as the web UI's: the track with gaps where chapters start
- * and its thumb, which a touch moves; while it does, the trickplay
+ * The seek bar, as the web UI's: the track with gaps where chapters start,
+ * inset by half its thumb so that the thumb stays inside the bar at either
+ * end, and the thumb, which a touch moves; while it does, the trickplay
  * thumbnail there with the chapter's name and the time above it, kept
  * inside the bar's ends. [onScrub] hears where it is, and null once it
  * lets go; [onSeek] where it let go.
  */
 @Composable
-private fun SeekBar(positionMs: Long, durationMs: Long, playback: Playback, onScrub: (Long?) -> Unit, onSeek: (Long) -> Unit) {
+private fun SeekBar(positionMs: Long, durationMs: Long, playback: Playback, modifier: Modifier, onScrub: (Long?) -> Unit, onSeek: (Long) -> Unit) {
     val density = LocalDensity.current
     val chapters = playback.source?.chapters.orEmpty()
     val marks = remember(chapters, durationMs) {
@@ -995,11 +1049,12 @@ private fun SeekBar(positionMs: Long, durationMs: Long, playback: Playback, onSc
     val fraction = if (durationMs > 0) (positionMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f
     val currentDuration by rememberUpdatedState(durationMs)
     Box(
-        Modifier
+        modifier
             .fillMaxWidth()
             .height(32.dp)
             .pointerInput(Unit) {
-                fun at(x: Float) = (x / size.width).coerceIn(0f, 1f).let { (it * currentDuration).toLong() }
+                val inset = THUMB_SIZE.toPx() / 2
+                fun at(x: Float) = ((x - inset) / (size.width - 2 * inset).coerceAtLeast(1f)).coerceIn(0f, 1f).let { (it * currentDuration).toLong() }
                 awaitEachGesture {
                     val down = awaitFirstDown()
                     if (currentDuration <= 0) return@awaitEachGesture
@@ -1022,33 +1077,41 @@ private fun SeekBar(positionMs: Long, durationMs: Long, playback: Playback, onSc
             },
         contentAlignment = Alignment.CenterStart,
     ) {
-        ChapterTrack(fraction, marks, if (scrub != null) 6.dp else 4.dp, Modifier.fillMaxWidth())
-        // The thumb at the position, and the preview above it while dragged.
-        Box(
-            Modifier
-                .layout { measurable, constraints ->
-                    val thumb = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
-                    layout(constraints.maxWidth, thumb.height) {
-                        thumb.place((fraction * constraints.maxWidth - thumb.width / 2f).toInt(), 0)
-                    }
-                }
-                .size(14.dp)
-                .background(Color.White, CircleShape),
-        )
-        scrub?.let { ms ->
+        Box(Modifier.fillMaxWidth().padding(horizontal = THUMB_SIZE / 2), contentAlignment = Alignment.CenterStart) {
+            ChapterTrack(fraction, marks, if (scrub != null) 6.dp else 4.dp, Modifier.fillMaxWidth())
+            // The thumb at the position, and the preview above it while dragged.
             Box(
-                Modifier.layout { measurable, constraints ->
-                    val preview = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
-                    val x = (fraction * constraints.maxWidth - preview.width / 2f).toInt()
-                        .coerceIn(0, (constraints.maxWidth - preview.width).coerceAtLeast(0))
-                    layout(constraints.maxWidth, 0) { preview.place(x, -preview.height - 20.dp.roundToPx()) }
-                },
-            ) {
-                SeekPreview(sheets, ms, chapterAt(chapters, ms), clock(ms), PREVIEW_WIDTH, theme.type.footnote.text)
+                Modifier
+                    .layout { measurable, constraints ->
+                        val thumb = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
+                        layout(constraints.maxWidth, thumb.height) {
+                            thumb.place((fraction * constraints.maxWidth - thumb.width / 2f).toInt(), 0)
+                        }
+                    }
+                    .size(THUMB_SIZE)
+                    .background(Color.White, CircleShape),
+            )
+            scrub?.let { ms ->
+                Box(
+                    Modifier.layout { measurable, constraints ->
+                        val preview = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
+                        val x = (fraction * constraints.maxWidth - preview.width / 2f).toInt()
+                            .coerceIn(0, (constraints.maxWidth - preview.width).coerceAtLeast(0))
+                        layout(constraints.maxWidth, 0) { preview.place(x, -preview.height - 20.dp.roundToPx()) }
+                    },
+                ) {
+                    SeekPreview(sheets, ms, chapterAt(chapters, ms), clock(ms), PREVIEW_WIDTH, theme.type.footnote.text)
+                }
             }
         }
     }
 }
+
+/** How wide the seek bar's thumb is. */
+private val THUMB_SIZE = 14.dp
+
+/** How far above the bottom bar the subtitles stand while it shows. */
+private val SUBTITLE_GAP = 8.dp
 
 /**
  * The subtitle offset, as the web UI's: a tenth of a second earlier or
