@@ -1,9 +1,13 @@
 package app
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"log/slog"
+	"math"
+	"os"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -17,6 +21,7 @@ import (
 
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 	design "github.com/mavioai/mavio/libs/design/gen/go"
+	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
 
 	"github.com/mavioai/mavio/apps/desktop/internal/mpv"
 	"github.com/mavioai/mavio/apps/desktop/internal/style"
@@ -44,6 +49,12 @@ type Window interface {
 	SetTitle(title string)
 	ToggleFullScreen()
 	IsFullScreen() bool
+	// ContentSize and SetContentSize are the size of what the window
+	// shows, and Position and SetPosition where its frame is, in DIPs.
+	ContentSize() (width, height int)
+	SetContentSize(width, height int)
+	Position() (x, y int)
+	SetPosition(x, y int)
 }
 
 // panelTab is a tab of the player's side panel.
@@ -123,9 +134,39 @@ type player struct {
 	// focusChoice is for how many frames more the panel focuses its
 	// current choice as it opens.
 	want, rowAt, rowLen, opener, focusChoice int
-	// volume is mpv's, from 0 to 100, which the assistant sets.
-	volume int
+	// volume is mpv's, from 0 to 100, which the assistant, the slider,
+	// the keys and the wheel set; volumeValue is the slider's.
+	volume      int
+	volumeValue float64
+	// following is the episode after p's beyond its season, looked up
+	// when next has none.
+	following task[*capiv1.Card]
+	// wheelAt is when the wheel or trackpad last turned, wheelSeek tells
+	// that its gesture seeks, else it sets the volume, and wheelTarget is
+	// where it seeks to.
+	wheelAt     time.Time
+	wheelSeek   bool
+	wheelTarget time.Duration
+	// notice is what the player tells a moment over the picture.
+	notice playerNotice
+	// fitted is the size of the picture the window was fitted to.
+	fitted [2]int64
 }
+
+// playerNotice is what the player tells a moment over the picture, as the
+// volume, the speed or where the wheel seeks to: an icon, a text and a
+// level from 0 to 1, none when negative.
+type playerNotice struct {
+	icon, text string
+	level      float64
+	at         time.Time
+}
+
+// noticeTime is how long a notice shows.
+const noticeTime = time.Second
+
+// thumbWidth is the width of the timeline's thumbnails, in DIPs.
+const thumbWidth = 200
 
 // playerOf returns the player showing in win, nil for the app's window.
 func (a *App) playerOf(win Window) *player {
@@ -171,12 +212,27 @@ func (a *App) playIn(win Window, server, item string, options *capiv1.PlaybackOp
 		options = &capiv1.PlaybackOptions{}
 	}
 	p := &player{server: server, item: item, next: next, options: options, win: win, volume: 100}
+	if a.prefs.Volume != nil {
+		p.volume = *a.prefs.Volume
+	}
 	a.players = append(a.players, p)
 	if win != nil {
 		win.Focus()
 	}
 	if a.opts.NewVideo != nil {
 		p.video, p.err = a.opts.NewVideo(win, func(s mpv.State) { a.videoChanged(p, s) })
+	}
+	if p.video != nil {
+		// The sound as the last video left it.
+		if p.volume != 100 {
+			a.setVideo(p, "volume", strconv.Itoa(p.volume))
+		}
+		if a.prefs.AudioDevice != "" {
+			a.setVideo(p, "audio-device", a.prefs.AudioDevice)
+		}
+		if a.prefs.AudioDelay != 0 {
+			a.setVideo(p, "audio-delay", strconv.FormatFloat(a.prefs.AudioDelay, 'f', 3, 64))
+		}
 	}
 	if a.opts.KeepAwake != nil {
 		p.release = a.opts.KeepAwake("Playing")
@@ -286,6 +342,8 @@ func (a *App) endPlayer(p *player, stopped bool) {
 	if p.video != nil {
 		go p.video.Close()
 	}
+	// The volume, which the next video takes.
+	a.savePreferences()
 }
 
 // videoChanged takes the video's state, from its goroutine; the position
@@ -315,6 +373,9 @@ func (a *App) playerStateChanged(p *player, prev mpv.State) {
 	}
 	if s.Loaded && !p.selected && p.video != nil {
 		a.selectStreams(p)
+	}
+	if s.Width > 0 && s.Height > 0 && [2]int64{s.Width, s.Height} != p.fitted {
+		a.fitWindow(p)
 	}
 	if s.Loaded && (time.Since(p.reported) >= time.Second || s.Paused != prev.Paused) {
 		p.reported = time.Now()
@@ -496,8 +557,11 @@ func cmpOr(s ...string) string {
 	return ""
 }
 
-// playerKeys handles the player's keys: space and k, the arrows and j/l,
-// f, m; Escape closes the panel, then leaves full screen, then the player.
+// playerKeys handles the player's keys, as the Mac app's: space and k
+// play and pause, left and right and j and l seek, up and down set the
+// volume and m mutes, [ and ] change the speed and \ resets it, s saves a
+// screenshot in the Pictures folder, f enters full screen; Escape closes
+// the panel, then leaves full screen, then the player.
 func (a *App) playerKeys(c *ui.Context, p *player) {
 	// The assistant's panel over the player takes the keys.
 	if a.assistant.open && a.assistant.win == p.win {
@@ -535,8 +599,169 @@ func (a *App) playerKeys(c *ui.Context, p *player) {
 	case pressed(ui.KeyF):
 		a.toggleFullScreen(p)
 	case pressed(ui.KeyM):
-		a.setVideo(p, "mute", yesNo(!p.state.Muted))
+		a.toggleMute(c.Now(), p)
+	case pressed(ui.KeyUp):
+		a.changeVolume(c.Now(), p, 5)
+	case pressed(ui.KeyDown):
+		a.changeVolume(c.Now(), p, -5)
+	case pressed(ui.KeyBracketLeft):
+		a.stepSpeed(c.Now(), p, -1)
+	case pressed(ui.KeyBracketRight):
+		a.stepSpeed(c.Now(), p, 1)
+	case pressed(ui.KeyBackslash):
+		a.stepSpeed(c.Now(), p, 0)
+	case pressed(ui.KeyS):
+		a.screenshot(c, p)
 	}
+}
+
+// changeVolume changes p's volume by d and tells it.
+func (a *App) changeVolume(now time.Time, p *player, d int) {
+	level := p.volume
+	if p.state.Muted {
+		level = 0
+		a.setVideo(p, "mute", "no")
+		p.state.Muted = false
+	}
+	a.setVolume(p, level+d)
+	volumeNotice(now, p)
+}
+
+// toggleMute mutes p or restores its sound, and tells it.
+func (a *App) toggleMute(now time.Time, p *player) {
+	p.state.Muted = !p.state.Muted
+	a.setVideo(p, "mute", yesNo(p.state.Muted))
+	volumeNotice(now, p)
+}
+
+func volumeNotice(now time.Time, p *player) {
+	level := p.volume
+	icon := "volume"
+	if p.state.Muted || level == 0 {
+		level, icon = 0, "mute"
+	}
+	p.notice = playerNotice{icon: icon, text: strconv.Itoa(level) + "%", level: float64(level) / 100, at: now}
+}
+
+// stepSpeed sets p's speed to the next of speeds up or down, by step's
+// sign, or back to normal when step is 0, and tells it.
+func (a *App) stepSpeed(now time.Time, p *player, step int) {
+	speed := 1.0
+	if step != 0 {
+		i := slices.Index(speeds, p.state.Speed)
+		if i < 0 {
+			i = slices.Index(speeds, 1.0)
+		}
+		speed = speeds[min(max(i+step, 0), len(speeds)-1)]
+	}
+	p.state.Speed = speed
+	label := strconv.FormatFloat(speed, 'f', -1, 64)
+	a.setVideo(p, "speed", label)
+	p.notice = playerNotice{icon: "speed", text: label + "×", level: -1, at: now}
+}
+
+// screenshot saves the picture, without the subtitles, as a PNG in the
+// Pictures folder, named after what plays and where, and tells it.
+func (a *App) screenshot(c *ui.Context, p *player) {
+	home, err := os.UserHomeDir()
+	if err != nil || p.video == nil {
+		return
+	}
+	dir := filepath.Join(home, "Pictures")
+	title := cmpOr(p.details.value.GetCard().GetTitle(), "Mavio")
+	base := strings.NewReplacer("/", "-", ":", ".").Replace(title + " " + clock(p.state.Position))
+	path := filepath.Join(dir, base+".png")
+	for n := 2; ; n++ {
+		if _, err := os.Stat(path); err != nil {
+			break
+		}
+		path = filepath.Join(dir, fmt.Sprintf("%s %d.png", base, n))
+	}
+	if err := p.video.Command("screenshot-to-file", path, "video"); err != nil {
+		p.notice = playerNotice{icon: "error", text: err.Error(), level: -1, at: c.Now()}
+		return
+	}
+	p.notice = playerNotice{icon: "photos", text: style.T(c, "player.screenshotSaved"), level: -1, at: c.Now()}
+}
+
+// playerScrolled takes a turn of the wheel or trackpad over the picture,
+// or over the controller when bar: across seeks and up and down set the
+// volume, the axis held for the gesture, as the Mac app's; over the
+// controller up and down seek too. MyGo tells not a gesture's phases, so
+// one ends as the turns pause.
+func (a *App) playerScrolled(p *player, ev ui.InputEvent, bar bool) {
+	now := ev.Time
+	p.input, p.hidden = now, false
+	// Fingers to the right and up, with the system's natural scrolling.
+	right, up := -float64(ev.DX), float64(ev.DY)
+	if right == 0 && up == 0 {
+		return
+	}
+	gesture := now.Sub(p.wheelAt) < 300*time.Millisecond
+	p.wheelAt = now
+	if !gesture {
+		p.wheelSeek = bar || math.Abs(right) > math.Abs(up)
+		p.wheelTarget = p.state.Position
+	}
+	// A wheel turns by lines of 40 DIPs: 5 seconds or 5% a line.
+	perSecond, perLevel := 0.25, 0.5
+	if !ev.Precise {
+		perSecond, perLevel = 5.0/40, 5.0/40
+	}
+	if !p.wheelSeek {
+		a.changeVolume(now, p, int(math.Round(up*perLevel)))
+		return
+	}
+	delta := right
+	if bar && math.Abs(up) > math.Abs(right) {
+		delta = up
+	}
+	at := p.wheelTarget + seconds(delta*perSecond)
+	at = max(at, 0)
+	if p.state.Duration > 0 {
+		at = min(at, p.state.Duration)
+	}
+	p.wheelTarget = at
+	a.seekTo(p, at, true)
+	icon := "seekForward"
+	if delta < 0 {
+		icon = "seekBack"
+	}
+	level := -1.0
+	if p.state.Duration > 0 {
+		level = at.Seconds() / p.state.Duration.Seconds()
+	}
+	p.notice = playerNotice{icon: icon, text: clock(at) + " / " + clock(p.state.Duration), level: level, at: now}
+}
+
+// playerMinWidth and playerMinHeight are the least size of a window of
+// the player's.
+const playerMinWidth, playerMinHeight = 480, 270
+
+// fitWindow fits p's window to the aspect of its picture, keeping its area
+// and its center, unless it is in full screen; MyGo cannot lock the
+// window to the aspect as it is resized.
+func (a *App) fitWindow(p *player) {
+	s := p.state
+	p.fitted = [2]int64{s.Width, s.Height}
+	if p.win == nil || p.win.IsFullScreen() {
+		return
+	}
+	w, h := p.win.ContentSize()
+	if w <= 0 || h <= 0 {
+		return
+	}
+	aspect := float64(s.Width) / float64(s.Height)
+	tw := math.Sqrt(float64(w*h) * aspect)
+	th := tw / aspect
+	grow := max(1, playerMinWidth/tw, playerMinHeight/th)
+	nw, nh := int(math.Round(tw*grow)), int(math.Round(th*grow))
+	if nw == w && nh == h {
+		return
+	}
+	x, y := p.win.Position()
+	p.win.SetPosition(x+(w-nw)/2, y+(h-nh)/2)
+	p.win.SetContentSize(nw, nh)
 }
 
 // tvPlayerKeys handles the player's keys in the TV mode, as a remote's
@@ -707,6 +932,7 @@ func (a *App) playerView(c *ui.Context, p *player) {
 	load(a, &p.details, key("details", p.server, p.item), func(ctx context.Context) (*capiv1.Details, error) {
 		return a.getDetails(ctx, p.server, p.item)
 	})
+	a.followingEpisode(p)
 	now := c.Now()
 	if p.input.IsZero() {
 		// The controller shows as the player opens, and as it pauses or
@@ -730,6 +956,19 @@ func (a *App) playerView(c *ui.Context, p *player) {
 			ui.Video(c, p.video.View()).Absolute().Top(0).Left(0).Right(0).Bottom(0)
 		}
 		surface := ui.Box(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).DragWindow()
+		if !shown && !tv {
+			// The pointer hides with the controller.
+			surface.Cursor(ui.CursorNone)
+		}
+		if !tv {
+			surface.HandleInput(func(ev ui.InputEvent) bool {
+				if ev.Kind != ui.InputScroll {
+					return false
+				}
+				a.playerScrolled(p, ev, false)
+				return true
+			})
+		}
 		if tv && p.panel == tabNone {
 			// Focus off the controller's row is on an element of its own,
 			// which shows it nowhere and leaves select to the keys.
@@ -762,10 +1001,73 @@ func (a *App) playerView(c *ui.Context, p *player) {
 		if p.panel != tabNone {
 			a.playerPanel(c, p)
 		}
+		if since := now.Sub(p.notice.at); !p.notice.at.IsZero() && since < noticeTime {
+			c.After(noticeTime - since)
+			playerNoticeView(c, p.notice)
+		}
 		if p.err != nil {
 			a.playerError(c, p)
 		}
 	})
+}
+
+// playerNoticeView builds a notice over the picture: a pill of its icon
+// and text, with its level as a bar.
+func playerNoticeView(c *ui.Context, n playerNotice) {
+	white := ui.RGB(255, 255, 255)
+	ui.Row(c).Absolute().Top(72).Left(0).Right(0).Justify(ui.Center).PassThrough().Children(func() {
+		ui.Row(c).Height(40).Padding(0, 16).Gap(10).Radius(20).AlignItems(ui.Center).Background(ui.RGBA(0, 0, 0, 0.6)).
+			Children(func() {
+				ui.Icon(c, style.Icon(n.icon, true)).Size(18, 18).TextColor(white)
+				if n.level >= 0 {
+					level := float32(min(n.level, 1))
+					ui.Box(c).Size(120, 4).Draw(func(pt *ui.Painter, r ui.Rect) {
+						pt.Fill(r, white.Alpha(0.3), 2)
+						pt.Fill(ui.Rect{X: r.X, Y: r.Y, W: r.W * level, H: r.H}, white, 2)
+					})
+				}
+				style.Text(ui.Text(c, n.text), style.Type(c).Callout).FontWeight(600).FontFeatures("tnum").TextColor(white).SingleLine()
+			})
+	})
+}
+
+// followingEpisode looks up the episode after p's beyond its season when
+// no episode is to follow, as the web UI does: the series' episodes in
+// order of their seasons and numbers, and the one after p's.
+func (a *App) followingEpisode(p *player) {
+	card := p.details.value.GetCard()
+	if len(p.next) > 0 || card.GetKind() != capiv1.CardKind_CARD_KIND_EPISODE {
+		return
+	}
+	t := load(a, &p.following, key("following", p.server, p.item), func(ctx context.Context) (*capiv1.Card, error) {
+		items := a.itemService(p.server)
+		it, err := items.GetItem(ctx, libraryv1.GetItemRequest_builder{Id: &p.item}.Build())
+		if err != nil {
+			return nil, err
+		}
+		series := it.GetItem().GetSeriesId()
+		if series == "" {
+			return nil, nil
+		}
+		res, err := items.ListItems(ctx, libraryv1.ListItemsRequest_builder{
+			ParentId: &series, Recursive: new(true), Kinds: []libraryv1.ItemKind{libraryv1.ItemKind_ITEM_KIND_EPISODE},
+		}.Build())
+		if err != nil {
+			return nil, err
+		}
+		episodes := slices.SortedStableFunc(slices.Values(res.GetItems()), func(x, y *libraryv1.Item) int {
+			return cmp.Or(cmp.Compare(x.GetParentIndexNumber(), y.GetParentIndexNumber()), cmp.Compare(x.GetIndexNumber(), y.GetIndexNumber()))
+		})
+		i := slices.IndexFunc(episodes, func(e *libraryv1.Item) bool { return e.GetId() == p.item })
+		if i < 0 || i+1 >= len(episodes) {
+			return nil, nil
+		}
+		e := episodes[i+1]
+		return capiv1.Card_builder{ServerId: p.server, ItemId: e.GetId(), Kind: capiv1.CardKind_CARD_KIND_EPISODE, Title: e.GetName()}.Build(), nil
+	})
+	if t.value != nil {
+		p.next = []*capiv1.Card{t.value}
+	}
 }
 
 func boolf(b bool) float32 {
@@ -826,10 +1128,19 @@ func (a *App) playerBottomBar(c *ui.Context, p *player) {
 	if total == 0 {
 		total = time.Duration(p.details.value.GetCard().GetRuntimeMs()) * time.Millisecond
 	}
-	ui.Column(c).Absolute().Left(0).Right(0).Bottom(0).Padding(64, 20, 16).Gap(8).
-		LinearGradient(ui.LinearGradient{Angle: 0, Stops: []ui.GradientStop{
-			{At: 0, Color: ui.RGBA(0, 0, 0, 0.85)}, {At: 0.5, Color: ui.RGBA(0, 0, 0, 0.4)}, {At: 1, Color: ui.RGBA(0, 0, 0, 0)},
-		}}).
+	bar := ui.Column(c).Absolute().Left(0).Right(0).Bottom(0).Padding(64, 20, 16).Gap(8)
+	if !style.TV(c) {
+		bar.HandleInput(func(ev ui.InputEvent) bool {
+			if ev.Kind != ui.InputScroll {
+				return false
+			}
+			a.playerScrolled(p, ev, true)
+			return true
+		})
+	}
+	bar.LinearGradient(ui.LinearGradient{Angle: 0, Stops: []ui.GradientStop{
+		{At: 0, Color: ui.RGBA(0, 0, 0, 0.85)}, {At: 0.5, Color: ui.RGBA(0, 0, 0, 0.4)}, {At: 1, Color: ui.RGBA(0, 0, 0, 0)},
+	}}).
 		Children(func() {
 			if style.TV(c) {
 				a.tvPlayerRow(c, p, total)
@@ -855,8 +1166,9 @@ func (a *App) playerBottomBar(c *ui.Context, p *player) {
 					label, icon = style.T(c, "player.unmute"), "mute"
 				}
 				if playerButton(c, icon, label, false, false, 44).Clicked() {
-					a.setVideo(p, "mute", yesNo(!p.state.Muted))
+					a.toggleMute(c.Now(), p)
 				}
+				a.volumeSlider(c, p)
 				style.Text(ui.Text(c, clock(p.state.Position)+" / "+clock(total)), style.Type(c).Footnote).
 					TextColor(white.Alpha(0.85)).FontFeatures("tnum").Margin(0, 0, 0, 8).SingleLine()
 				ui.Spacer(c)
@@ -994,32 +1306,151 @@ func (a *App) nextEpisodeButton(c *ui.Context, p *player) {
 	}
 }
 
-// scrubber builds the timeline: a slim bar that thickens under the
-// pointer.
-func (a *App) scrubber(c *ui.Context, p *player, total time.Duration) {
+// volumeSlider builds the slider of the volume beside the mute button.
+func (a *App) volumeSlider(c *ui.Context, p *player) {
 	white := ui.RGB(255, 255, 255)
-	hi := max(total.Seconds(), 1)
-	s := ui.SliderBase(c, &p.scrub, 0, hi).Height(20).Padding(0, 8).Label(style.T(c, "player.position"))
-	if !s.Dragging() {
-		p.scrub = min(p.state.Position.Seconds(), hi)
-	}
-	if s.Changed() {
-		a.seekTo(p, time.Duration(p.scrub*float64(time.Second)), !s.Dragging())
-	}
-	active := s.Hovered() || s.Dragging()
-	s.Draw(func(pt *ui.Painter, r ui.Rect) {
-		h := float32(4)
-		if active {
-			h = 6
+	v := ui.SliderBase(c, &p.volumeValue, 0, 100).Width(96).Height(20).Padding(0, 6).Label(style.T(c, "player.volume"))
+	if !v.Dragging() {
+		p.volumeValue = float64(p.volume)
+		if p.state.Muted {
+			p.volumeValue = 0
 		}
-		x0, w := r.X+8, r.W-16
+	}
+	if v.Changed() {
+		if p.state.Muted {
+			p.state.Muted = false
+			a.setVideo(p, "mute", "no")
+		}
+		a.setVolume(p, int(math.Round(p.volumeValue)))
+	}
+	active := v.Hovered() || v.Dragging()
+	v.Draw(func(pt *ui.Painter, r ui.Rect) {
+		h := float32(4)
+		x0, w := r.X+6, r.W-12
 		y := r.Y + (r.H-h)/2
-		at := w * float32(p.scrub/hi)
+		at := w * float32(p.volumeValue/100)
 		pt.Fill(ui.Rect{X: x0, Y: y, W: w, H: h}, white.Alpha(0.3), h/2)
 		pt.Fill(ui.Rect{X: x0, Y: y, W: at, H: h}, white, h/2)
 		if active {
-			pt.Fill(ui.Rect{X: x0 + at - 7, Y: r.Y + r.H/2 - 7, W: 14, H: 14}, white, 7)
+			pt.Fill(ui.Rect{X: x0 + at - 6, Y: r.Y + r.H/2 - 6, W: 12, H: 12}, white, 6)
 		}
+	})
+}
+
+// scrubber builds the timeline: a slim bar that thickens under the
+// pointer, marked where the chapters start, and over the time under the
+// pointer, as the Mac app's, its thumbnail, its chapter and the time.
+func (a *App) scrubber(c *ui.Context, p *player, total time.Duration) {
+	white := ui.RGB(255, 255, 255)
+	hi := max(total.Seconds(), 1)
+	chapters := p.source().GetChapters()
+	ui.Box(c).FillWidth().Children(func() {
+		s := ui.SliderBase(c, &p.scrub, 0, hi).FillWidth().Height(20).Padding(0, 8).Label(style.T(c, "player.position"))
+		if !s.Dragging() {
+			p.scrub = min(p.state.Position.Seconds(), hi)
+		}
+		if s.Changed() {
+			a.seekTo(p, time.Duration(p.scrub*float64(time.Second)), !s.Dragging())
+		}
+		active := s.Hovered() || s.Dragging()
+		s.Draw(func(pt *ui.Painter, r ui.Rect) {
+			h := float32(4)
+			if active {
+				h = 6
+			}
+			x0, w := r.X+8, r.W-16
+			y := r.Y + (r.H-h)/2
+			at := w * float32(p.scrub/hi)
+			pt.Fill(ui.Rect{X: x0, Y: y, W: w, H: h}, white.Alpha(0.3), h/2)
+			pt.Fill(ui.Rect{X: x0, Y: y, W: at, H: h}, white, h/2)
+			for _, ch := range chapters {
+				if ch.GetStartMs() <= 0 {
+					continue
+				}
+				x := x0 + w*float32(float64(ch.GetStartMs())/1000/hi)
+				pt.Fill(ui.Rect{X: x - 1, Y: y, W: 2, H: h}, ui.RGBA(0, 0, 0, 0.6), 0)
+			}
+			if active {
+				pt.Fill(ui.Rect{X: x0 + at - 7, Y: r.Y + r.H/2 - 7, W: 14, H: 14}, white, 7)
+			}
+		})
+		width := s.LayoutBounds().W
+		x, _, over := s.PointerPosition()
+		if s.Dragging() {
+			x, over = 8+(width-16)*float32(p.scrub/hi), true
+		}
+		if !over || width <= 16 || total <= 0 {
+			return
+		}
+		at := time.Duration(min(max(float64((x-8)/(width-16)), 0), 1) * hi * float64(time.Second))
+		left := min(max(x-thumbWidth/2, 0), width-thumbWidth)
+		ui.Column(c).Absolute().Bottom(24).Left(left).Width(thumbWidth).Gap(4).AlignItems(ui.Center).PassThrough().Children(func() {
+			a.trickplayThumbnail(c, p, at)
+			if name := chapterAt(chapters, at); name != "" {
+				style.Text(ui.Text(c, name), style.Type(c).Footnote).FontWeight(600).TextColor(white).SingleLine().MaxWidth(thumbWidth)
+			}
+			style.Text(ui.Text(c, clock(at)), style.Type(c).Footnote).FontWeight(600).FontFeatures("tnum").TextColor(white).SingleLine()
+		})
+	})
+}
+
+// chapterAt names the chapter playing at, empty for none.
+func chapterAt(chapters []*capiv1.Chapter, at time.Duration) string {
+	name := ""
+	for _, ch := range chapters {
+		if time.Duration(ch.GetStartMs())*time.Millisecond > at {
+			break
+		}
+		name = ch.GetName()
+	}
+	return name
+}
+
+// chooseTrickplay returns the sheets whose thumbnails are at least wide
+// pixels wide, the narrowest of those, else the widest; nil for none.
+func chooseTrickplay(sheets []*capiv1.Trickplay, wide int32) *capiv1.Trickplay {
+	var at, widest *capiv1.Trickplay
+	for _, t := range sheets {
+		if t.GetWidth() >= wide && (at == nil || t.GetWidth() < at.GetWidth()) {
+			at = t
+		}
+		if widest == nil || t.GetWidth() > widest.GetWidth() {
+			widest = t
+		}
+	}
+	if at != nil {
+		return at
+	}
+	return widest
+}
+
+// trickplayThumbnail builds the thumbnail of p's video at, cut from its
+// sheet; nothing without sheets, and an empty frame while one loads.
+func (a *App) trickplayThumbnail(c *ui.Context, p *player, at time.Duration) {
+	t := chooseTrickplay(p.details.value.GetTrickplay(), int32(thumbWidth*scale))
+	cols, rows, count, interval := t.GetColumns(), t.GetRows(), t.GetCount(), t.GetIntervalMs()
+	if cols <= 0 || rows <= 0 || count <= 0 || interval <= 0 || t.GetWidth() <= 0 || t.GetHeight() <= 0 {
+		return
+	}
+	index := min(max(int32(at.Milliseconds()/interval), 0), count-1)
+	per := cols * rows
+	bitmap := a.opts.Images.Get(fmt.Sprintf("%s/%d.jpg", t.GetUrl(), index/per), 0, 0)
+	height := float32(thumbWidth * float64(t.GetHeight()) / float64(t.GetWidth()))
+	box := ui.Box(c).Size(thumbWidth, height).Radius(6).Clip().Background(ui.RGB(0, 0, 0)).Border(1, ui.RGBA(255, 255, 255, 0.3))
+	if bitmap == nil {
+		return
+	}
+	// The sheet's own size, should it have been scaled.
+	bw, bh := bitmap.Size()
+	tileW, tileH := float32(bw)/float32(cols), float32(bh)/float32(rows)
+	if tileW <= 0 || tileH <= 0 {
+		return
+	}
+	k := thumbWidth / tileW
+	tile := index % per
+	box.Children(func() {
+		ui.Image(c, bitmap).Absolute().Left(-float32(tile%cols)*thumbWidth).Top(-float32(tile/cols)*tileH*k).
+			Size(float32(bw)*k, float32(bh)*k)
 	})
 }
 
@@ -1120,10 +1551,72 @@ func (a *App) audioTab(c *ui.Context, p *player) {
 			}
 		}
 	})
+	a.audioOffset(c, p)
+	a.audioOutputs(c, p)
+}
+
+// audioOffset builds the offset of the sound, which the next videos keep.
+func (a *App) audioOffset(c *ui.Context, p *player) {
+	panelHeading(c, style.T(c, "player.audioOffset"))
+	offsetRow(c, "audio", p.state.AudioDelay, func(d time.Duration) {
+		a.prefs.AudioDelay = d.Seconds()
+		a.setVideo(p, "audio-delay", strconv.FormatFloat(d.Seconds(), 'f', 3, 64))
+	})
+}
+
+// audioOutputs builds the devices the sound can play to, the system's
+// first, as the Mac app's Audio Output menu.
+func (a *App) audioOutputs(c *ui.Context, p *player) {
+	devices := p.state.AudioDevices
+	if len(devices) < 2 {
+		return
+	}
+	panelHeading(c, style.T(c, "player.audioDevice"))
+	current := cmpOr(p.state.AudioDevice, "auto")
+	for _, d := range devices {
+		name := d.Description
+		if d.Name == "auto" {
+			name = style.T(c, "player.audioDeviceSystem")
+		}
+		checked := d.Name == current
+		if p.focusOpening(choice(c.Key(key("output", d.Name)), cmpOr(name, d.Name), "", checked), checked).Clicked() && !checked {
+			a.prefs.AudioDevice = d.Name
+			if d.Name == "auto" {
+				a.prefs.AudioDevice = ""
+			}
+			a.savePreferences()
+			a.setVideo(p, "audio-device", d.Name)
+		}
+	}
+}
+
+// offsetRow builds the steps of an offset, a tenth of a second earlier or
+// later, about the offset, set by set.
+func offsetRow(c *ui.Context, id string, offset time.Duration, set func(time.Duration)) {
+	white := ui.RGB(255, 255, 255)
+	ui.Row(c.Key(key("offset", id))).Gap(8).Padding(0, 10).AlignItems(ui.Center).Children(func() {
+		step := func(label string, d time.Duration) {
+			b := ui.ButtonBase(c.Key(key("delay", id, label))).Size(32, 32).Radius(16).Center().Label(label).Background(white.Alpha(0.1))
+			color := white
+			switch {
+			case tvLit(c, b):
+				color = ui.RGB(0, 0, 0)
+			case b.Hovered():
+				b.Background(white.Alpha(0.2))
+			}
+			b.Children(func() { style.Text(ui.Text(c, label), style.Type(c).Headline).TextColor(color) })
+			if b.Clicked() {
+				set((offset + d).Round(time.Millisecond))
+			}
+		}
+		step("−", -100*time.Millisecond)
+		style.Text(ui.Text(c, fmt.Sprintf("%+.1f s", offset.Seconds())), style.Type(c).Callout).FontFeatures("tnum").TextColor(white).
+			MinWidth(64).TextAlign(ui.Center)
+		step("+", 100*time.Millisecond)
+	})
 }
 
 func (a *App) subtitlesTab(c *ui.Context, p *player) {
-	white := ui.RGB(255, 255, 255)
 	current := p.playback.GetSubtitleStreamIndex()
 	if !p.playback.HasSubtitleStreamIndex() {
 		current = -1
@@ -1148,26 +1641,8 @@ func (a *App) subtitlesTab(c *ui.Context, p *player) {
 		return
 	}
 	panelHeading(c, style.T(c, "player.subtitleOffset"))
-	ui.Row(c).Gap(8).Padding(0, 10).AlignItems(ui.Center).Children(func() {
-		delay := p.state.SubtitleDelay
-		step := func(label string, d time.Duration) {
-			b := ui.ButtonBase(c.Key(key("delay", label))).Size(32, 32).Radius(16).Center().Label(label).Background(white.Alpha(0.1))
-			color := white
-			switch {
-			case tvLit(c, b):
-				color = ui.RGB(0, 0, 0)
-			case b.Hovered():
-				b.Background(white.Alpha(0.2))
-			}
-			b.Children(func() { style.Text(ui.Text(c, label), style.Type(c).Headline).TextColor(color) })
-			if b.Clicked() {
-				a.setVideo(p, "sub-delay", strconv.FormatFloat((delay+d).Seconds(), 'f', 3, 64))
-			}
-		}
-		step("−", -100*time.Millisecond)
-		style.Text(ui.Text(c, fmt.Sprintf("%+.1f s", delay.Seconds())), style.Type(c).Callout).FontFeatures("tnum").TextColor(white).
-			MinWidth(64).TextAlign(ui.Center)
-		step("+", 100*time.Millisecond)
+	offsetRow(c, "sub", p.state.SubtitleDelay, func(d time.Duration) {
+		a.setVideo(p, "sub-delay", strconv.FormatFloat(d.Seconds(), 'f', 3, 64))
 	})
 }
 

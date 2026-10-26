@@ -153,7 +153,7 @@ func (api *fakeAPI) item(id string) *libraryv1.Item {
 		b.Runtime = durationpb.New(time.Duration(it.RuntimeMinutes) * time.Minute)
 	}
 	if it.Kind == "episode" {
-		b.SeriesName = new(api.f.s.Items[it.Series].Name)
+		b.SeriesName, b.SeriesId = new(api.f.s.Items[it.Series].Name), new(it.Series)
 		b.ParentIndexNumber, b.IndexNumber = new(int32(it.Season)), new(int32(it.Episode))
 	}
 	return b.Build()
@@ -249,6 +249,12 @@ func (api *fakeAPI) ListItems(_ context.Context, r *libraryv1.ListItemsRequest) 
 		for _, id := range []string{"orbit", "harbor", "atlas", "atlas-s2e3"} {
 			items = append(items, api.item(id))
 		}
+	case r.GetRecursive() && len(r.GetKinds()) == 1 && r.GetKinds()[0] == libraryv1.ItemKind_ITEM_KIND_EPISODE:
+		// The series' episodes, out of order, over seasons.
+		episode := func(id string, season, number int32) *libraryv1.Item {
+			return libraryv1.Item_builder{Id: &id, Name: new(id), ParentIndexNumber: &season, IndexNumber: &number}.Build()
+		}
+		items = append(items, episode("atlas-s3e1", 3, 1), api.item("atlas-s2e3"), episode("atlas-s1e1", 1, 1))
 	case len(r.GetKinds()) == 1 && r.GetKinds()[0] == libraryv1.ItemKind_ITEM_KIND_COLLECTION:
 		items = append(items, libraryv1.Item_builder{
 			Id: new("orbit-collection"), Name: new("The Orbit Collection"), Kind: new(libraryv1.ItemKind_ITEM_KIND_COLLECTION),

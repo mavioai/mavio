@@ -132,6 +132,15 @@ type preferences struct {
 	// Microphone is the ID of the microphone voice sessions capture,
 	// empty for the system's default input.
 	Microphone string `json:"microphone,omitempty"`
+	// Volume is the player's volume as the last video left it, from 0 to
+	// 100; full when nil.
+	Volume *int `json:"volume,omitempty"`
+	// AudioDevice is the name of mpv's device the player's sound plays
+	// to, empty for the system's.
+	AudioDevice string `json:"audioDevice,omitempty"`
+	// AudioDelay shifts the player's sound later by as many seconds, or
+	// earlier when negative.
+	AudioDelay float64 `json:"audioDelay,omitempty"`
 }
 
 // App is the app's state, owned by the main thread.

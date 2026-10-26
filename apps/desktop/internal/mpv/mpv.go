@@ -127,6 +127,23 @@ type State struct {
 	Err error
 	// Tracks lists the tracks of what plays.
 	Tracks []Track
+	// Volume is the sound's level, from 0 to 100.
+	Volume float64
+	// AudioDelay shifts the sound later, or earlier when negative.
+	AudioDelay time.Duration
+	// AudioDevice is the device the sound plays to, "auto" for the
+	// system's, and AudioDevices those it can play to.
+	AudioDevice  string
+	AudioDevices []AudioDevice
+	// Width and Height are the picture's as it shows, 0 without one.
+	Width, Height int64
+}
+
+// AudioDevice is a device the sound can play to.
+type AudioDevice struct {
+	// Name is what the audio-device property takes.
+	Name        string
+	Description string
 }
 
 // Player is an mpv instance. Its methods are safe from any goroutine;
@@ -160,6 +177,12 @@ var observed = []struct {
 	{"mute", formatFlag},
 	{"sub-delay", formatDouble},
 	{"track-list", formatNone},
+	{"volume", formatDouble},
+	{"audio-delay", formatDouble},
+	{"audio-device", formatString},
+	{"audio-device-list", formatNone},
+	{"dwidth", formatInt64},
+	{"dheight", formatInt64},
 }
 
 // New starts a player with options, in order, as mpv's command line takes
@@ -170,7 +193,7 @@ func (l *Library) New(options [][2]string, changed func(State)) (*Player, error)
 	if h == 0 {
 		return nil, errors.New("mpv: cannot create a player")
 	}
-	p := &Player{l: l, h: h, changed: changed, state: State{Speed: 1}, done: make(chan struct{}), requests: map[uint64]string{}}
+	p := &Player{l: l, h: h, changed: changed, state: State{Speed: 1, Volume: 100}, done: make(chan struct{}), requests: map[uint64]string{}}
 	for _, o := range options {
 		if err := p.check(l.setOptionString(h, o[0], o[1])); err != nil {
 			l.terminateDestroy(h)
@@ -200,12 +223,20 @@ func (p *Player) loop() {
 	defer close(p.done)
 	for {
 		e := p.l.waitEvent(p.h, -1)
-		if e.id == eventPropertyChange && int(e.replyUserdata) < len(observed) && observed[e.replyUserdata].name == "track-list" {
-			// Read here, as the core is never waited for here.
-			tracks := p.tracks()
-			p.mu.Lock()
-			p.state.Tracks = tracks
-			p.mu.Unlock()
+		if e.id == eventPropertyChange && int(e.replyUserdata) < len(observed) {
+			// Lists are read here, as the core is never waited for here.
+			switch observed[e.replyUserdata].name {
+			case "track-list":
+				tracks := p.tracks()
+				p.mu.Lock()
+				p.state.Tracks = tracks
+				p.mu.Unlock()
+			case "audio-device-list":
+				devices := p.audioDevices()
+				p.mu.Lock()
+				p.state.AudioDevices = devices
+				p.mu.Unlock()
+			}
 		}
 		p.mu.Lock()
 		if p.closed || e.id == eventShutdown {
@@ -249,12 +280,18 @@ func (p *Player) apply(e *event) bool {
 		}
 		prop := (*eventProperty)(e.data)
 		var f float64
+		var n int64
 		var flag bool
+		var str string
 		switch prop.format {
 		case formatDouble:
 			f = *(*float64)(prop.data)
+		case formatInt64:
+			n = *(*int64)(prop.data)
 		case formatFlag:
 			flag = *(*int32)(prop.data) != 0
+		case formatString:
+			str = cString(*(**byte)(prop.data))
 		}
 		switch observed[e.replyUserdata].name {
 		case "time-pos":
@@ -271,7 +308,17 @@ func (p *Player) apply(e *event) bool {
 			s.Muted = flag
 		case "sub-delay":
 			s.SubtitleDelay = seconds(f)
-		case "track-list":
+		case "volume":
+			s.Volume = f
+		case "audio-delay":
+			s.AudioDelay = seconds(f)
+		case "audio-device":
+			s.AudioDevice = str
+		case "dwidth":
+			s.Width = n
+		case "dheight":
+			s.Height = n
+		case "track-list", "audio-device-list":
 		}
 	default:
 		return false
@@ -339,11 +386,19 @@ func (p *Player) String(name string) (string, bool) {
 		return "", false
 	}
 	defer p.l.free(b)
+	return cString(b), true
+}
+
+// cString copies a C string.
+func cString(b *byte) string {
+	if b == nil {
+		return ""
+	}
 	n := 0
 	for *(*byte)(unsafe.Add(unsafe.Pointer(b), n)) != 0 {
 		n++
 	}
-	return string(unsafe.Slice(b, n)), true
+	return string(unsafe.Slice(b, n))
 }
 
 // Int returns an integer property. It waits for mpv's core, so it must
@@ -403,6 +458,19 @@ func (p *Player) tracks() []Track {
 		tracks = append(tracks, t)
 	}
 	return tracks
+}
+
+// audioDevices reads the devices the sound can play to.
+func (p *Player) audioDevices() []AudioDevice {
+	n, _ := p.Int("audio-device-list/count")
+	devices := make([]AudioDevice, 0, n)
+	for i := range n {
+		var d AudioDevice
+		d.Name, _ = p.String(fmt.Sprintf("audio-device-list/%d/name", i))
+		d.Description, _ = p.String(fmt.Sprintf("audio-device-list/%d/description", i))
+		devices = append(devices, d)
+	}
+	return devices
 }
 
 // Close stops the player and frees it, waiting for its renderer to stop

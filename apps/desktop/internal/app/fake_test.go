@@ -285,6 +285,14 @@ func (f *fakeCore) Stream(ctx context.Context, req *capiv1.Request, part func(*c
 					capiv1.AudioStream_builder{Index: 1, Language: "eng", Title: "English Stereo", Codec: "aac", Channels: 2}.Build(),
 					capiv1.AudioStream_builder{Index: 2, Language: "jpn", Codec: "ac3", Channels: 6}.Build(),
 				},
+				Chapters: []*capiv1.Chapter{
+					capiv1.Chapter_builder{StartMs: 0, Name: "Opening"}.Build(),
+					capiv1.Chapter_builder{StartMs: (10 * time.Minute).Milliseconds(), Name: "The Station"}.Build(),
+					capiv1.Chapter_builder{StartMs: (30 * time.Minute).Milliseconds(), Name: "Breach"}.Build(),
+				},
+			}.Build()},
+			Trickplay: []*capiv1.Trickplay{capiv1.Trickplay_builder{
+				Width: 320, Height: 180, Columns: 10, Rows: 10, Count: 300, IntervalMs: 10_000, Url: f.images + "/images/" + id + "-trickplay",
 			}.Build()},
 		}.Build()
 	case req.HasPlay():

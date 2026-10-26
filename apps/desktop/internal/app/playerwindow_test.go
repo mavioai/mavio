@@ -13,6 +13,8 @@ type fakeWindow struct {
 	isClosed   bool
 	title      string
 	fullScreen bool
+	// size is the content's, and at where the frame is.
+	size, at [2]int
 }
 
 func (w *fakeWindow) Close() {
@@ -25,6 +27,12 @@ func (w *fakeWindow) Focus()                {}
 func (w *fakeWindow) SetTitle(title string) { w.title = title }
 func (w *fakeWindow) ToggleFullScreen()     { w.fullScreen = !w.fullScreen }
 func (w *fakeWindow) IsFullScreen() bool    { return w.fullScreen }
+func (w *fakeWindow) ContentSize() (int, int) {
+	return w.size[0], w.size[1]
+}
+func (w *fakeWindow) SetContentSize(width, height int) { w.size = [2]int{width, height} }
+func (w *fakeWindow) Position() (int, int)             { return w.at[0], w.at[1] }
+func (w *fakeWindow) SetPosition(x, y int)             { w.at = [2]int{x, y} }
 
 func TestPlayerWindows(t *testing.T) {
 	h := newHarness(t, true, 1280, 800)

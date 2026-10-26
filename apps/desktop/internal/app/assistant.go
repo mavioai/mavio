@@ -599,6 +599,7 @@ func seconds(s float64) time.Duration { return time.Duration(s * float64(time.Se
 // setVolume sets player p's volume, from 0 to 100.
 func (a *App) setVolume(p *player, level int) {
 	p.volume = min(max(level, 0), 100)
+	a.prefs.Volume = new(p.volume)
 	a.setVideo(p, "volume", strconv.Itoa(p.volume))
 }
 

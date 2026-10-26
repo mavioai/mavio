@@ -304,3 +304,120 @@ func TestTVPlayer(t *testing.T) {
 		t.Error("back did not leave the player")
 	}
 }
+
+func TestPlayerControls(t *testing.T) {
+	h := newHarness(t, true, 1280, 800)
+	server := h.core.s.Server.ID
+	h.app.play(server, "atlas-s2e3", nil)
+	h.settle()
+	v := h.video
+	v.emit(mpv.State{Loaded: true, Position: 12 * time.Minute, Duration: 42 * time.Minute, Speed: 1, Volume: 100, Tracks: tracks})
+	h.settle()
+	p := h.app.playerOf(nil)
+
+	// The last of a season is followed by the next season's first.
+	if len(p.next) != 1 || p.next[0].GetItemId() != "atlas-s3e1" {
+		t.Errorf("next = %v, want = atlas-s3e1", p.next)
+	}
+	if !h.tt.HasText("Next Episode") {
+		t.Errorf("texts = %q, want Next Episode", h.tt.Texts())
+	}
+
+	// Over the timeline: the chapter and the time under the pointer.
+	r, ok := h.tt.Find("Position")
+	if !ok {
+		t.Fatalf("no timeline; texts = %q", h.tt.Texts())
+	}
+	h.tt.Move(r.X+8+(r.W-16)*0.5, r.Y+r.H/2)
+	h.settle()
+	for _, want := range []string{"The Station", "21:00"} {
+		if !h.tt.HasText(want) {
+			t.Errorf("texts over the timeline = %q, want %q", h.tt.Texts(), want)
+		}
+	}
+	h.save(shots, "player-scrub")
+
+	// The keys set the volume and the speed, and tell them; the settling
+	// outlasts the notices.
+	h.tt.Key(0, ui.KeyDown)
+	h.settle()
+	if !v.has("set volume 95") || p.notice.text != "95%" {
+		t.Errorf("commands = %q, texts = %q, want the volume at 95", v.commands, h.tt.Texts())
+	}
+	h.tt.Key(0, ui.KeyBracketRight)
+	h.settle()
+	if !v.has("set speed 1.25") || p.notice.text != "1.25×" {
+		t.Errorf("commands = %q, texts = %q, want the speed at 1.25", v.commands, h.tt.Texts())
+	}
+
+	// Across, the wheel seeks over the picture, 5 seconds a line; up and
+	// down, a moment later, it sets the volume.
+	h.tt.Scroll(640, 300, -40, 0)
+	h.settle()
+	if !v.has("seek 725.000 absolute+exact") {
+		t.Errorf("commands = %q, want a seek 5 s later", v.commands)
+	}
+	h.tt.Advance(time.Second)
+	h.tt.Scroll(640, 300, 0, -40)
+	h.settle()
+	if !v.has("set volume 90") {
+		t.Errorf("commands = %q, want the volume at 90", v.commands)
+	}
+	if got := *h.app.prefs.Volume; got != 90 {
+		t.Errorf("volume kept = %d, want = 90", got)
+	}
+
+	// The pointer hides with the controller.
+	h.tt.Advance(controlsTimeout + time.Second)
+	h.settle()
+	if got := h.tt.Cursor(); got != ui.CursorNone {
+		t.Errorf("cursor = %v, want none with the controller hidden", got)
+	}
+
+	// The audio's tab offers the offset and the outputs.
+	p.state.AudioDevices = []mpv.AudioDevice{{Name: "auto", Description: "Autoselect device"}, {Name: "coreaudio/speakers", Description: "MacBook Speakers"}}
+	p.panel = tabAudio
+	h.settle()
+	for _, want := range []string{"Audio Offset", "System Default", "MacBook Speakers"} {
+		if !h.tt.HasText(want) {
+			t.Errorf("texts = %q, want %q", h.tt.Texts(), want)
+		}
+	}
+	if err := h.tt.Click("MacBook Speakers"); err != nil {
+		t.Fatal(err)
+	}
+	h.settle()
+	if !v.has("set audio-device coreaudio/speakers") || h.app.prefs.AudioDevice != "coreaudio/speakers" {
+		t.Errorf("commands = %q, want the speakers chosen", v.commands)
+	}
+
+	// S saves a screenshot.
+	p.panel = tabNone
+	h.tt.Key(0, ui.KeyS)
+	h.settle()
+	if !slices.ContainsFunc(v.commands, func(c string) bool {
+		return strings.HasPrefix(c, "screenshot-to-file ") && strings.Contains(c, "Pictures") && strings.HasSuffix(c, ".png video")
+	}) {
+		t.Errorf("commands = %q, want a screenshot", v.commands)
+	}
+}
+
+func TestFitWindow(t *testing.T) {
+	a := &App{}
+	for _, tt := range []struct {
+		name          string
+		size, picture [2]int
+		want, at      [2]int
+	}{
+		{"wider", [2]int{1280, 720}, [2]int{1920, 800}, [2]int{1487, 620}, [2]int{-3, 150}},
+		{"same", [2]int{1280, 720}, [2]int{1920, 1080}, [2]int{1280, 720}, [2]int{100, 100}},
+		{"least", [2]int{480, 270}, [2]int{1080, 1920}, [2]int{480, 853}, [2]int{100, -191}},
+	} {
+		w := &fakeWindow{size: tt.size, at: [2]int{100, 100}}
+		p := &player{win: w, state: mpv.State{Width: int64(tt.picture[0]), Height: int64(tt.picture[1])}}
+		a.fitWindow(p)
+		if w.size != tt.want || w.at != tt.at {
+			t.Errorf("%s: size = %v at %v, want = %v at %v", tt.name, w.size, w.at, tt.want, tt.at)
+		}
+	}
+}
