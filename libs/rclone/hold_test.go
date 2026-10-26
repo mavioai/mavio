@@ -165,3 +165,24 @@ func TestOpenWithFileInfo(t *testing.T) {
 }
 
 type fakeInfo struct{ fs.FileInfo }
+
+func TestThrottled(t *testing.T) {
+	for _, tt := range []struct {
+		status int
+		msg    string
+		want   bool
+	}{
+		{http.StatusTooManyRequests, "", true},
+		{500, "115's firewall blocked the request as too frequent: HTTP error 405", true},
+		{500, "HTTP error 429 (429 Too Many Requests) returned body: {}", true},
+		{500, "googleapi: Error 403: User rate limit exceeded., userRateLimitExceeded", true},
+		{500, "too_many_requests/..", true},
+		{500, "baidu netdisk error 31034: hit api limit (see https://pan.baidu.com/union/doc/)", true},
+		{500, "baidu netdisk error -9: file does not exist (see https://pan.baidu.com/union/doc/)", false},
+		{500, "directory not found", false},
+	} {
+		if got := throttled(&Error{Status: tt.status, Message: tt.msg}); got != tt.want {
+			t.Errorf("throttled(%d, %q) = %v, want = %v", tt.status, tt.msg, got, tt.want)
+		}
+	}
+}

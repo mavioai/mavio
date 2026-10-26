@@ -100,7 +100,8 @@ func throttled(err error) bool {
 		return true
 	}
 	m := strings.ToLower(e.Message)
-	for _, s := range []string{"too many requests", "too frequent", "rate limit", "ratelimit", "quota exceeded", "quotaexceeded"} {
+	// Baidu tells of its limit by errno 31034 alone, Dropbox by its tag.
+	for _, s := range []string{"too many requests", "too_many_requests", "too frequent", "rate limit", "ratelimit", "quota exceeded", "quotaexceeded", "baidu netdisk error 31034"} {
 		if strings.Contains(m, s) {
 			return true
 		}
