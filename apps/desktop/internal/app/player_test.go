@@ -414,6 +414,19 @@ func TestPlayerControls(t *testing.T) {
 	if p.subPos >= 100 || !v.has(fmt.Sprintf("set sub-pos %d", p.subPos)) {
 		t.Errorf("sub-pos = %d, commands = %q, want the subtitles lifted", p.subPos, v.commands)
 	}
+	// They stay as the activity indicator comes and goes, the controller
+	// shown while paused.
+	lifted := fmt.Sprintf("set sub-pos %d", p.subPos)
+	v.commands = nil
+	for _, buffering := range []bool{true, false} {
+		s := p.state
+		s.Paused, s.Buffering, s.Restarts = true, buffering, p.loaded+1
+		v.emit(s)
+		h.settle()
+	}
+	if slices.ContainsFunc(v.commands, func(c string) bool { return strings.HasPrefix(c, "set sub-pos ") && c != lifted }) {
+		t.Errorf("commands = %q, want the subtitles kept where they were", v.commands)
+	}
 
 	// S saves a screenshot.
 	h.tt.Key(0, ui.KeyS)

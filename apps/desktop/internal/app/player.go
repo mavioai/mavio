@@ -1096,7 +1096,10 @@ func (a *App) playerView(c *ui.Context, p *player) {
 				ui.Spinner(c).Size(48, 48).TextColor(ui.RGBA(255, 255, 255, 0.7))
 			})
 		}
-		controls := ui.Box(c).Absolute().Top(0).Left(0).Right(0).Bottom(0).PassThrough()
+		// Keyed, the controls keep their state, as their fade and the
+		// bottom bar's height, as the activity indicator before them comes
+		// and goes.
+		controls := ui.Box(c.Key("controls")).Absolute().Top(0).Left(0).Right(0).Bottom(0).PassThrough()
 		controls.Opacity(controls.Animate("shown", boolf(shown), 300*time.Millisecond))
 		lift := float32(0)
 		if shown {
