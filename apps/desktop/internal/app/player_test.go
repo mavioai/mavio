@@ -473,6 +473,55 @@ func TestPlayerSeek(t *testing.T) {
 	}
 }
 
+func TestPlayerScrub(t *testing.T) {
+	h := newHarness(t, true, 1280, 800)
+	h.app.play(h.core.s.Server.ID, "atlas-s2e3", nil)
+	h.settle()
+	v := h.video
+	v.emit(mpv.State{Loaded: true, Position: 12 * time.Minute, Duration: 42 * time.Minute, Speed: 1, Volume: 100, Tracks: tracks, Restarts: 1})
+	h.settle()
+	r, ok := h.tt.Find("Position")
+	if !ok {
+		t.Fatalf("no timeline; texts = %q", h.tt.Texts())
+	}
+	y := r.Y + r.H/2
+	x := func(f float32) float32 { return r.X + 8 + (r.W-16)*f }
+	last := func() string {
+		var seek string
+		for _, c := range v.commands {
+			if strings.HasPrefix(c, "seek ") {
+				seek = c
+			}
+		}
+		v.commands = nil
+		return seek
+	}
+
+	// A click seeks exactly where it is.
+	h.tt.ClickAt(x(0.25), y)
+	h.settle()
+	if got, want := last(), "seek 630.000 absolute+exact"; got != want {
+		t.Errorf("click: seek = %q, want = %q", got, want)
+	}
+
+	// A drag seeks to keyframes as it goes, and exactly where it lets go.
+	h.tt.Move(x(0.5), y)
+	h.tt.Press(x(0.5), y)
+	h.tt.Frame()
+	h.tt.Move(x(0.6), y)
+	h.tt.Frame()
+	if got, want := last(), "seek 1512.000 absolute+keyframes"; got != want {
+		t.Errorf("dragging: seek = %q, want = %q", got, want)
+	}
+	h.tt.Move(x(0.75), y)
+	h.tt.Frame()
+	h.tt.Release(x(0.75), y)
+	h.settle()
+	if got, want := last(), "seek 1890.000 absolute+exact"; got != want {
+		t.Errorf("let go: seek = %q, want = %q", got, want)
+	}
+}
+
 func TestFitWindow(t *testing.T) {
 	a := &App{}
 	for _, tt := range []struct {

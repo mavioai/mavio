@@ -115,8 +115,10 @@ type player struct {
 	input   time.Time
 	pointer [2]float32
 	panel   panelTab
-	// scrub is the scrubber's value, in seconds.
-	scrub float64
+	// scrub is the scrubber's value, in seconds, and scrubbing tells that
+	// the pointer holds it, its seeks to keyframes until it lets go.
+	scrub     float64
+	scrubbing bool
 	// reported is when the position was last sent to the core.
 	reported time.Time
 	release  func()
@@ -1411,20 +1413,20 @@ func togglePanel(open, tab panelTab) panelTab {
 func (a *App) volumeSlider(c *ui.Context, p *player) {
 	white := ui.RGB(255, 255, 255)
 	v := ui.SliderBase(c, &p.volumeValue, 0, 100).Width(96).Height(20).Padding(0, 6).Label(style.T(c, "player.volume"))
-	if !v.Dragging() {
-		p.volumeValue = float64(p.volume)
-		if p.state.Muted {
-			p.volumeValue = 0
-		}
-	}
+	held := v.Pressed() || v.Dragging()
 	if v.Changed() {
 		if p.state.Muted {
 			p.state.Muted = false
 			a.setVideo(p, "mute", "no")
 		}
 		a.setVolume(p, int(math.Round(p.volumeValue)))
+	} else if !held {
+		p.volumeValue = float64(p.volume)
+		if p.state.Muted {
+			p.volumeValue = 0
+		}
 	}
-	active := v.Hovered() || v.Dragging()
+	active := v.Hovered() || held
 	v.Draw(func(pt *ui.Painter, r ui.Rect) {
 		h := float32(4)
 		x0, w := r.X+6, r.W-12
@@ -1447,13 +1449,23 @@ func (a *App) scrubber(c *ui.Context, p *player, total time.Duration) {
 	chapters := p.source().GetChapters()
 	ui.Box(c).FillWidth().Children(func() {
 		s := ui.SliderBase(c, &p.scrub, 0, hi).FillWidth().Height(20).Padding(0, 8).Label(style.T(c, "player.position"))
-		if !s.Dragging() {
+		// The pointer's value, which Changed may have taken already in
+		// this frame, is not overwritten by the position. A slider held
+		// is not Dragging, which tells of Draggable's elements alone.
+		held := s.Pressed() || s.Dragging()
+		switch {
+		case s.Changed():
+			p.scrubbing = held
+			a.seekTo(p, time.Duration(p.scrub*float64(time.Second)), !held)
+		case held:
+		case p.scrubbing:
+			// Let go: exactly where it was let go.
+			p.scrubbing = false
+			a.seekTo(p, time.Duration(p.scrub*float64(time.Second)), true)
+		default:
 			p.scrub = min(p.state.Position.Seconds(), hi)
 		}
-		if s.Changed() {
-			a.seekTo(p, time.Duration(p.scrub*float64(time.Second)), !s.Dragging())
-		}
-		active := s.Hovered() || s.Dragging()
+		active := s.Hovered() || held
 		s.Draw(func(pt *ui.Painter, r ui.Rect) {
 			h := float32(4)
 			if active {
@@ -1489,7 +1501,7 @@ func (a *App) scrubber(c *ui.Context, p *player, total time.Duration) {
 		})
 		width := s.LayoutBounds().W
 		x, _, over := s.PointerPosition()
-		if s.Dragging() {
+		if held {
 			x, over = 8+(width-16)*float32(p.scrub/hi), true
 		}
 		if !over || width <= 16 || total <= 0 {
