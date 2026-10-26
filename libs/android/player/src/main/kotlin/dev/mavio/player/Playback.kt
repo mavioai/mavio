@@ -57,6 +57,8 @@ fun createPlayer(
             subtitles.onChange = null
             val renderers = ShiftedRenderersFactory(context, subtitles)
                 .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+                // A decoder that fails to start gives way to the next.
+                .setEnableDecoderFallback(true)
             ExoPlayer.Builder(context, renderers).build().apply {
                 // Off unless a subtitle was picked; chooseTracks picks it.
                 trackSelectionParameters = trackSelectionParameters.buildUpon()

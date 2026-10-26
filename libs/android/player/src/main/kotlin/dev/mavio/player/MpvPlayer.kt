@@ -56,6 +56,8 @@ class MpvPlayer(
     private var released = false
     private var aid = "auto"
     private var sid = "auto"
+    // Whether the frame at a new time has shown since the last state.
+    private var newFrame = false
 
     init {
         MPVLib.create(context.applicationContext)
@@ -101,6 +103,23 @@ class MpvPlayer(
             if (!released) MPVLib.setPropertyDouble("sub-delay", value / 1000.0)
         }
 
+    /** Whether the subtitles are hidden, as while a seek is under way. */
+    var subtitlesHidden: Boolean = false
+        set(value) {
+            field = value
+            if (!released) MPVLib.setPropertyBoolean("sub-visibility", !value)
+        }
+
+    /**
+     * How far up the subtitles are lifted, as a fraction of the height,
+     * above the controls while they show.
+     */
+    var subtitleLift: Float = 0f
+        set(value) {
+            field = value
+            if (!released) MPVLib.setPropertyDouble("sub-pos", (100.0 - value * 100.0).coerceIn(0.0, 100.0))
+        }
+
     override fun getState(): State {
         val playlist = items.mapIndexed { i, item ->
             MediaItemData.Builder(i)
@@ -125,6 +144,7 @@ class MpvPlayer(
             .setContentPositionMs { positionMs }
             .setVideoSize(videoSize)
             .setPlaybackParameters(PlaybackParameters(speed))
+            .setNewlyRenderedFirstFrame(newFrame.also { newFrame = false })
             .build()
     }
 
@@ -325,6 +345,8 @@ class MpvPlayer(
                         )
                     }
                 }
+                // Playing again after a load or a seek, its frame shown.
+                MpvEvent.MPV_EVENT_PLAYBACK_RESTART -> newFrame = true
                 MpvEvent.MPV_EVENT_END_FILE -> if (!loaded && prepared) {
                     // keep-open keeps a played file loaded, so it ends
                     // only when it failed to open.

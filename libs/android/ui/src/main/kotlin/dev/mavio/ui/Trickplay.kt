@@ -21,7 +21,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -46,24 +50,22 @@ fun chapterAt(chapters: List<Chapter>, ms: Long): String? =
     chapters.lastOrNull { it.start.toMillis() <= ms }?.name
 
 /**
- * A seek bar's track [height] tall: what has played, [fraction] of it,
- * white, the rest faint, with a gap of 2 dp where each chapter after the
+ * A seek bar's track [height] tall, as the web UI's and the Mac app's: one
+ * rounded track, what has played of it, [fraction], white and the rest
+ * faint, with a gap of 2 dp cut out of both where each chapter after the
  * first starts, at [chapters], fractions of the whole.
  */
 @Composable
 fun ChapterTrack(fraction: Float, chapters: List<Float>, height: Dp, modifier: Modifier = Modifier) {
-    Canvas(modifier.height(height)) {
-        val gap = 1.dp.toPx()
-        val starts = listOf(0f) + chapters.filter { it > 0f && it < 1f }.sorted()
+    // Drawn on a layer of its own, so that the gaps clear only the track.
+    Canvas(modifier.height(height).graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)) {
         val radius = CornerRadius(size.height / 2)
+        drawRoundRect(Color.White.copy(alpha = 0.3f), cornerRadius = radius)
         val played = fraction.coerceIn(0f, 1f) * size.width
-        starts.forEachIndexed { i, from ->
-            val left = from * size.width + if (i > 0) gap else 0f
-            val right = (starts.getOrNull(i + 1) ?: 1f) * size.width - if (i + 1 < starts.size) gap else 0f
-            if (right <= left) return@forEachIndexed
-            drawRoundRect(Color.White.copy(alpha = 0.3f), Offset(left, 0f), Size(right - left, size.height), radius)
-            val filled = played.coerceIn(left, right) - left
-            if (filled > 0f) drawRoundRect(Color.White, Offset(left, 0f), Size(filled, size.height), radius)
+        if (played > 0f) clipRect(right = played) { drawRoundRect(Color.White, cornerRadius = radius) }
+        val gap = 2.dp.toPx()
+        chapters.filter { it > 0f && it < 1f }.forEach { at ->
+            drawRect(Color.Black, Offset(at * size.width - gap / 2, 0f), Size(gap, size.height), blendMode = BlendMode.Clear)
         }
     }
 }
