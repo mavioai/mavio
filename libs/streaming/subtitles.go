@@ -46,33 +46,50 @@ func (s *Stream) Subtitle(ctx context.Context, stream, index int) (_ []byte, err
 	if err := s.lock(ctx); err != nil {
 		return nil, err
 	}
-	defer s.unlock()
+	held := true
+	defer func() {
+		if held {
+			s.unlock()
+		}
+	}()
 	t.locked()
 	if s.closed {
 		return nil, errors.New("streaming: stream closed")
 	}
 	t.decision = "written"
-	// The newest run that read the segment.
-	if s.job != nil && s.covers(s.job, stream, index) {
-		return s.readSubtitle(s.job, stream)
-	}
-	for _, j := range slices.Backward(s.past) {
-		if s.covers(j, stream, index) {
-			return s.readSubtitle(j, stream)
+	for {
+		// The newest run that read the segment.
+		if s.job != nil && s.covers(s.job, stream, index) {
+			return s.readSubtitle(s.job, stream)
+		}
+		for _, j := range slices.Backward(s.past) {
+			if s.covers(j, stream, index) {
+				return s.readSubtitle(j, stream)
+			}
+		}
+		if t.decide(s, index) {
+			if err := s.startAt(ctx, index); err != nil {
+				return nil, err
+			}
+		} else {
+			s.job.session.Touch()
+		}
+		j := s.job
+		// Checked only when no other request holds the stream, as covers
+		// reads the runs.
+		covered := func() bool {
+			select {
+			case s.sem <- struct{}{}:
+				defer s.unlock()
+				return s.covers(j, stream, index)
+			default:
+				return false
+			}
+		}
+		if held, err = s.await(ctx, covered); err != nil {
+			return nil, fmt.Errorf("subtitles of segment %d: %w", index, err)
 		}
 	}
-	if t.decide(s, index) {
-		if err := s.startAt(ctx, index); err != nil {
-			return nil, err
-		}
-	} else {
-		s.job.session.Touch()
-	}
-	j := s.job
-	if err := s.wait(ctx, func() bool { return s.covers(j, stream, index) }); err != nil {
-		return nil, fmt.Errorf("subtitles of segment %d: %w", index, err)
-	}
-	return s.readSubtitle(j, stream)
 }
 
 // covers reports whether a run has written all of segment index's

@@ -53,7 +53,9 @@ type Config struct {
 // are written by one ffmpeg run at a time, which is restarted at the
 // requested segment when a client seeks before what it has written or far
 // beyond; segments already written are kept and served again. Requests
-// are served one at a time, as one client plays a stream.
+// decide one at a time, as one client plays a stream, and wait for ffmpeg
+// apart, so that the latest, where the client seeked to, is never stuck
+// behind those it gave up on.
 type Stream struct {
 	cfg Config
 	sem chan struct{}
@@ -150,7 +152,12 @@ func (s *Stream) Segment(ctx context.Context, index int) (_ io.ReadCloser, _ int
 	if err := s.lock(ctx); err != nil {
 		return nil, 0, err
 	}
-	defer s.unlock()
+	held := true
+	defer func() {
+		if held {
+			s.unlock()
+		}
+	}()
 	t.locked()
 	if s.closed {
 		return nil, 0, errors.New("streaming: stream closed")
@@ -160,7 +167,8 @@ func (s *Stream) Segment(ctx context.Context, index int) (_ io.ReadCloser, _ int
 	}
 	first, last := l.files(index)
 	t.decision = "written"
-	if !s.written(first, last) {
+	written := func() bool { return s.written(first, last) }
+	for !written() {
 		if t.decide(s, index) {
 			if err := s.startAt(ctx, index); err != nil {
 				return nil, 0, err
@@ -168,7 +176,7 @@ func (s *Stream) Segment(ctx context.Context, index int) (_ io.ReadCloser, _ int
 		} else {
 			s.job.session.Request(l.Start(index))
 		}
-		if err := s.wait(ctx, func() bool { return s.written(first, last) }); err != nil {
+		if held, err = s.await(ctx, written); err != nil {
 			return nil, 0, fmt.Errorf("segment %d: %w", index, err)
 		}
 	}
@@ -180,6 +188,33 @@ func (s *Stream) Segment(ctx context.Context, index int) (_ io.ReadCloser, _ int
 		paths = append(paths, s.file(n))
 	}
 	return openAll(paths)
+}
+
+// errSuperseded is returned to a request whose run another request
+// replaced: the newer request is where the client went.
+var errSuperseded = errors.New("streaming: the run was restarted for a later request")
+
+// await waits, without holding the stream, for done or for the current
+// run to end, so that a request coming meanwhile, as after the client
+// seeks again, decides for itself at once. It returns holding the stream
+// again, as held reports. A run that ended by itself without done fails
+// the request, and one another request replaced supersedes it.
+func (s *Stream) await(ctx context.Context, done func() bool) (held bool, err error) {
+	j := s.job
+	s.unlock()
+	err = s.wait(ctx, j, done)
+	if lerr := s.lock(ctx); lerr != nil {
+		return false, lerr
+	}
+	switch {
+	case s.closed:
+		return true, errors.New("streaming: stream closed")
+	case err == nil:
+		return true, nil
+	case errors.Is(err, errRunEnded) && s.job != j:
+		return true, errSuperseded
+	}
+	return true, err
 }
 
 // Prepare starts ffmpeg at the segment playing at, where the client
@@ -213,7 +248,7 @@ func (s *Stream) init(ctx context.Context) (io.ReadCloser, int64, error) {
 		}
 		// A run's initialization segment is complete once its first
 		// file is.
-		if err := s.wait(ctx, func() bool { return exists(s.file(s.job.first)) }); err != nil {
+		if err := s.wait(ctx, s.job, func() bool { return exists(s.file(s.job.first)) }); err != nil {
 			return nil, 0, fmt.Errorf("initialization segment: %w", err)
 		}
 		if err := copyFile(filepath.Join(s.cfg.Dir, jobInit), s.initFile()); err != nil {
@@ -333,23 +368,26 @@ func (s *Stream) stopJob() {
 	}
 }
 
-// wait polls until done reports true, the run ends without it, or ctx is
+// errRunEnded is returned by wait when the run ended without done.
+var errRunEnded = errors.New("transcode ended before writing it")
+
+// wait polls until done reports true, run j ends without it, or ctx is
 // canceled.
-func (s *Stream) wait(ctx context.Context, done func() bool) error {
+func (s *Stream) wait(ctx context.Context, j *job, done func() bool) error {
 	t := time.NewTicker(s.cfg.Poll)
 	defer t.Stop()
 	for !done() {
 		select {
 		case <-ctx.Done():
 			return context.Cause(ctx)
-		case <-s.job.session.Done():
+		case <-j.session.Done():
 			if done() {
 				return nil
 			}
-			if err := s.job.session.Err(); err != nil {
-				return fmt.Errorf("transcode failed: %w", err)
+			if err := j.session.Err(); err != nil {
+				return fmt.Errorf("transcode failed: %w (%w)", err, errRunEnded)
 			}
-			return errors.New("transcode ended before writing it")
+			return errRunEnded
 		case <-t.C:
 		}
 	}

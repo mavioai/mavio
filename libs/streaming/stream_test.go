@@ -304,6 +304,38 @@ func TestStreamSerializesRequests(t *testing.T) {
 	}
 }
 
+func TestStreamSeekPassesWaitingRequest(t *testing.T) {
+	// Files far apart: segment 8 keeps its request waiting.
+	f := &fakeFFmpeg{last: 29, interval: 50 * time.Millisecond}
+	s := newTestStream(t, encoded(t, 30), f)
+	read(t, s, 0)
+	waiting := make(chan error, 1)
+	go func() {
+		r, _, err := s.Segment(t.Context(), 2)
+		if err == nil {
+			_ = r.Close()
+		}
+		waiting <- err
+	}()
+	time.Sleep(10 * time.Millisecond)
+	// The client seeks on: the new request restarts ffmpeg at once
+	// rather than queueing behind the one it gave up on.
+	start := time.Now()
+	if got := read(t, s, 20); got != "file20" {
+		t.Errorf("segment 20 = %q", got)
+	}
+	if took := time.Since(start); took > 500*time.Millisecond {
+		t.Errorf("segment 20 took %v, want = at once", took)
+	}
+	if err := <-waiting; !errors.Is(err, errSuperseded) {
+		t.Errorf("waiting request error = %v, want = %v", err, errSuperseded)
+	}
+	runs := f.runsSoFar()
+	if want := []run{{0, 0}, {20 * time.Second, 20}}; !slices.Equal(runs, want) {
+		t.Errorf("runs = %+v, want = %+v", runs, want)
+	}
+}
+
 func TestStreamRequestCanceled(t *testing.T) {
 	f := &fakeFFmpeg{last: 9, interval: time.Hour}
 	s := newTestStream(t, encoded(t, 10), f)
