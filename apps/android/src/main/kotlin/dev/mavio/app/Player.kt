@@ -42,10 +42,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -65,6 +67,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -103,6 +108,7 @@ import dev.mavio.core.PlaybackSession
 import dev.mavio.core.Source
 import dev.mavio.core.SubtitleStream
 import dev.mavio.player.GroupControls
+import dev.mavio.player.SubtitleShift
 import dev.mavio.player.NetworkRetry
 import dev.mavio.player.PlayerEngine
 import dev.mavio.player.chooseTracks
@@ -111,6 +117,10 @@ import dev.mavio.player.engineFor
 import dev.mavio.player.playing
 import dev.mavio.player.rememberGroupPlayer
 import dev.mavio.ui.LocalPrefs
+import dev.mavio.ui.ChapterTrack
+import dev.mavio.ui.SeekPreview
+import dev.mavio.ui.chapterAt
+import dev.mavio.ui.chooseSheets
 import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.Quality
 import dev.mavio.ui.R
@@ -119,6 +129,7 @@ import dev.mavio.ui.text
 import dev.mavio.ui.theme
 import java.time.Duration
 import java.util.UUID
+import kotlin.math.abs
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import dev.mavio.ui.Assistant
@@ -209,10 +220,12 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
     var engine by remember(p) { mutableStateOf(p?.engine) }
     var startMs by remember(p) { mutableLongStateOf(p?.info?.startPosition?.toMillis() ?: 0) }
     val position = remember(p) { Position().also { it.ms = startMs } }
+    // The subtitle offset, kept as streams change, as the web UI's.
+    val shift = remember(route) { SubtitleShift() }
     val player = remember(p, engine) {
         // A group's member waits for the group to play.
         val follows = model.syncPlay.joined.value.playing(route.serverId, route.itemId) != null
-        p?.let { createPlayer(context, engine ?: it.engine, it.info, it.source, startMs, autoplay = !follows) }
+        p?.let { createPlayer(context, engine ?: it.engine, it.info, it.source, startMs, autoplay = !follows, subtitles = shift) }
     }
     // The SyncPlay group playing the item, which the controls ask instead of the player.
     val group = rememberGroupPlayer(model, route.serverId, route.itemId, player) { navigator.back() }
@@ -348,7 +361,7 @@ fun PlayerScreen(model: AppModel, route: Route.Player) {
             // Picture in picture shows the video alone.
             if (!pip.active) {
                 val chip: (@Composable (onOpen: (Boolean) -> Unit) -> Unit)? = group?.let { g -> { onOpen -> GroupChip(model, route.serverId, g.group, onOpen) } }
-                Controls(controls ?: player, route.title, p, selection.quality, playNext, pip.enter, chip) { picked ->
+                Controls(controls ?: player, route.title, p, selection.quality, shift, playNext, pip.enter, chip) { picked ->
                     resume = Duration.ofMillis(player.currentPosition)
                     // The quality stays this device's, as the web UI's.
                     prefs.quality = picked.quality
@@ -446,6 +459,7 @@ private fun Controls(
     title: String,
     playback: Playback,
     quality: Quality,
+    shift: SubtitleShift,
     playNext: (() -> Unit)?,
     pictureInPicture: (() -> Unit)?,
     chip: (@Composable (onOpen: (Boolean) -> Unit) -> Unit)?,
@@ -469,19 +483,53 @@ private fun Controls(
         }
     }
     val buffering = player.playbackState == Player.STATE_BUFFERING || player.playbackState == Player.STATE_IDLE
+    // A press held plays at double speed, then at the speed it played at.
+    var heldSpeed by remember { mutableStateOf<Float?>(null) }
+    val swipe = rememberSwipeLevels()
     Box(
         Modifier
             .fillMaxSize()
-            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
-                if (panel != null) {
-                    panel = null
-                } else {
-                    shown = !shown
-                }
-                touch()
-            },
+            .pointerInput(player) {
+                detectTapGestures(
+                    onTap = {
+                        if (panel != null) panel = null else shown = !shown
+                        touch()
+                    },
+                    // A double tap seeks back on the left half and forward on the right.
+                    onDoubleTap = { at ->
+                        val end = player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
+                        val by = if (at.x < size.width / 2) -SEEK_MS else SEEK_MS
+                        player.seekTo((player.currentPosition + by).coerceIn(0, end))
+                        touch()
+                    },
+                    onLongPress = {
+                        // A group's speed stays the group's.
+                        if (panel == null && player.isCommandAvailable(Player.COMMAND_SET_SPEED_AND_PITCH)) {
+                            heldSpeed = player.playbackParameters.speed
+                            player.setPlaybackSpeed(2f)
+                        }
+                    },
+                    onPress = {
+                        tryAwaitRelease()
+                        heldSpeed?.let { player.setPlaybackSpeed(it) }
+                        heldSpeed = null
+                    },
+                )
+            }
+            .pointerInput(swipe) { swipe.detect(this) { panel == null && heldSpeed == null } },
     ) {
         if (buffering) CircularProgressIndicator(Modifier.align(Alignment.Center), color = Color.White)
+        val level = swipe.shown
+        when {
+            heldSpeed != null -> Indicator(R.drawable.ic_speed_fill, Modifier.align(Alignment.TopCenter)) {
+                Text("2×", style = theme.type.callout.text, fontWeight = FontWeight.SemiBold, color = Color.White)
+            }
+            level != null -> Indicator(level.icon, Modifier.align(Alignment.TopCenter)) {
+                Box(Modifier.size(120.dp, 4.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.25f))) {
+                    Box(Modifier.fillMaxWidth(level.value).fillMaxHeight().background(Color.White))
+                }
+            }
+        }
         AnimatedVisibility(shown, Modifier.fillMaxSize(), enter = fadeIn(), exit = fadeOut()) {
             Box(Modifier.fillMaxSize()) {
                 Row(
@@ -526,31 +574,15 @@ private fun Controls(
                 ) {
                     val duration = progress.durationMs.coerceAtLeast(0)
                     val now = seeking?.toLong() ?: progress.currentPositionMs
-                    Slider(
-                        value = now.coerceIn(0, duration.coerceAtLeast(1)).toFloat(),
-                        onValueChange = {
-                            seeking = it
+                    SeekBar(
+                        now,
+                        duration,
+                        playback,
+                        onScrub = {
+                            seeking = it?.toFloat()
                             touch()
                         },
-                        onValueChangeFinished = {
-                            seeking?.let { player.seekTo(it.toLong()) }
-                            seeking = null
-                        },
-                        valueRange = 0f..duration.coerceAtLeast(1).toFloat(),
-                        // A slim bar, as the web UI's timeline.
-                        thumb = { Box(Modifier.size(14.dp).background(Color.White, CircleShape)) },
-                        track = { state ->
-                            SliderDefaults.Track(
-                                state,
-                                Modifier.height(4.dp),
-                                colors = SliderDefaults.colors(
-                                    activeTrackColor = Color.White,
-                                    inactiveTrackColor = Color.White.copy(alpha = 0.3f),
-                                ),
-                                drawStopIndicator = null,
-                                thumbTrackGapSize = 0.dp,
-                            )
-                        },
+                        onSeek = { player.seekTo(it) },
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
                         PlayerButton(
@@ -634,6 +666,7 @@ private fun Controls(
                 player,
                 playback,
                 quality,
+                shift,
                 Modifier
                     .align(Alignment.BottomEnd)
                     .windowInsetsPadding(WindowInsets.safeDrawing)
@@ -669,6 +702,7 @@ private fun OptionsPanel(
     player: Player,
     playback: Playback,
     quality: Quality,
+    shift: SubtitleShift,
     modifier: Modifier,
     onTab: (Panel) -> Unit,
     onPick: (Selection) -> Unit,
@@ -768,6 +802,7 @@ private fun OptionsPanel(
                             ?: ((t.title ?: languageName(t.language) ?: "#${t.streamIndex}") to t.format.uppercase())
                         Choice(t.streamIndex == chosen, label) { onPick(current.copy(subtitle = t.streamIndex)) }
                     }
+                    if (chosen >= 0) SubtitleOffset(shift)
                 }
                 Panel.QUALITY -> Quality.entries.forEach { q ->
                     Choice(q == quality, (q.label?.let { stringResource(it) } ?: q.key) to "") {
@@ -935,6 +970,138 @@ private fun audioLabel(a: AudioStream): Pair<String, String> {
 private fun subtitleLabel(s: SubtitleStream): Pair<String, String> =
     (s.title ?: languageName(s.language) ?: "#${s.index}") to
         listOfNotNull(s.codec.uppercase(), "Forced".takeIf { s.forced }, "SDH".takeIf { s.hearingImpaired }).joinToString(" · ")
+
+/** How wide the seek bar's thumbnails are. */
+private val PREVIEW_WIDTH = 160.dp
+
+/**
+ * The seek bar, as the web UI's: the track with gaps where chapters start
+ * and its thumb, which a touch moves; while it does, the trickplay
+ * thumbnail there with the chapter's name and the time above it, kept
+ * inside the bar's ends. [onScrub] hears where it is, and null once it
+ * lets go; [onSeek] where it let go.
+ */
+@Composable
+private fun SeekBar(positionMs: Long, durationMs: Long, playback: Playback, onScrub: (Long?) -> Unit, onSeek: (Long) -> Unit) {
+    val density = LocalDensity.current
+    val chapters = playback.source?.chapters.orEmpty()
+    val marks = remember(chapters, durationMs) {
+        if (durationMs > 0) chapters.map { it.start.toMillis().toFloat() / durationMs } else emptyList()
+    }
+    val sheets = remember(playback.details) {
+        chooseSheets(playback.details?.trickplay.orEmpty(), with(density) { PREVIEW_WIDTH.roundToPx() })
+    }
+    var scrub by remember { mutableStateOf<Long?>(null) }
+    val fraction = if (durationMs > 0) (positionMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f
+    val currentDuration by rememberUpdatedState(durationMs)
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(32.dp)
+            .pointerInput(Unit) {
+                fun at(x: Float) = (x / size.width).coerceIn(0f, 1f).let { (it * currentDuration).toLong() }
+                awaitEachGesture {
+                    val down = awaitFirstDown()
+                    if (currentDuration <= 0) return@awaitEachGesture
+                    down.consume()
+                    var ms = at(down.position.x)
+                    scrub = ms
+                    onScrub(ms)
+                    while (true) {
+                        val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
+                        if (!change.pressed) break
+                        change.consume()
+                        ms = at(change.position.x)
+                        scrub = ms
+                        onScrub(ms)
+                    }
+                    scrub = null
+                    onSeek(ms)
+                    onScrub(null)
+                }
+            },
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        ChapterTrack(fraction, marks, if (scrub != null) 6.dp else 4.dp, Modifier.fillMaxWidth())
+        // The thumb at the position, and the preview above it while dragged.
+        Box(
+            Modifier
+                .layout { measurable, constraints ->
+                    val thumb = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
+                    layout(constraints.maxWidth, thumb.height) {
+                        thumb.place((fraction * constraints.maxWidth - thumb.width / 2f).toInt(), 0)
+                    }
+                }
+                .size(14.dp)
+                .background(Color.White, CircleShape),
+        )
+        scrub?.let { ms ->
+            Box(
+                Modifier.layout { measurable, constraints ->
+                    val preview = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
+                    val x = (fraction * constraints.maxWidth - preview.width / 2f).toInt()
+                        .coerceIn(0, (constraints.maxWidth - preview.width).coerceAtLeast(0))
+                    layout(constraints.maxWidth, 0) { preview.place(x, -preview.height - 20.dp.roundToPx()) }
+                },
+            ) {
+                SeekPreview(sheets, ms, chapterAt(chapters, ms), clock(ms), PREVIEW_WIDTH, theme.type.footnote.text)
+            }
+        }
+    }
+}
+
+/**
+ * The subtitle offset, as the web UI's: a tenth of a second earlier or
+ * later at a time, and back to none.
+ */
+@Composable
+private fun SubtitleOffset(shift: SubtitleShift) {
+    var ms by remember { mutableLongStateOf(shift.ms) }
+    val set = { to: Long ->
+        ms = to
+        shift.ms = to
+    }
+    Text(
+        stringResource(R.string.player_subtitle_offset),
+        Modifier.padding(start = 10.dp, top = 12.dp, bottom = 6.dp),
+        style = theme.type.footnote.text,
+        fontWeight = FontWeight.SemiBold,
+        color = Color.White.copy(alpha = 0.6f),
+    )
+    Row(Modifier.padding(horizontal = 10.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+        OffsetButton(stringResource(R.string.player_offset_earlier)) { set(ms - 100) }
+        Text(
+            offsetText(ms),
+            Modifier.widthIn(min = 64.dp),
+            style = theme.type.callout.text,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+        )
+        OffsetButton(stringResource(R.string.player_offset_later)) { set(ms + 100) }
+        OffsetButton(stringResource(R.string.player_offset_reset), enabled = ms != 0L) { set(0) }
+    }
+}
+
+/** A button of the subtitle offset, as the speeds'. */
+@Composable
+private fun OffsetButton(label: String, enabled: Boolean = true, onClick: () -> Unit) {
+    Text(
+        label,
+        Modifier
+            .alpha(if (enabled) 1f else 0.4f)
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = 0.1f))
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        style = theme.type.footnote.text,
+        fontWeight = FontWeight.SemiBold,
+        color = Color.White,
+    )
+}
+
+/** An offset in milliseconds as "+0.3 s", as the web UI's. */
+private fun offsetText(ms: Long): String =
+    if (ms == 0L) "0 s" else "${if (ms > 0) "+" else "−"}${"%.1f".format(abs(ms) / 1000.0)} s"
 
 /** How far the seek buttons move. */
 private const val SEEK_MS = 10_000L
