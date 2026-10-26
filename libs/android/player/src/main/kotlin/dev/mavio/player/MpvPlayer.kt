@@ -94,6 +94,13 @@ class MpvPlayer(
         }
     }
 
+    /** How much later the subtitles show, in milliseconds; earlier when negative. */
+    var subtitleDelayMs: Long = 0
+        set(value) {
+            field = value
+            if (!released) MPVLib.setPropertyDouble("sub-delay", value / 1000.0)
+        }
+
     override fun getState(): State {
         val playlist = items.mapIndexed { i, item ->
             MediaItemData.Builder(i)

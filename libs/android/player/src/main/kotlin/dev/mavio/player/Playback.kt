@@ -34,14 +34,28 @@ fun engineFor(info: PlaybackInfo, source: Source?): PlayerEngine =
 
 /**
  * Media3 with its FFmpeg extension, or libmpv, playing [info] of [source]
- * from [startMs] once prepared, with the streams the server picked.
+ * from [startMs] once prepared, with the streams the server picked, its
+ * subtitles shifted by [subtitles].
  */
 @OptIn(UnstableApi::class)
-fun createPlayer(context: Context, engine: PlayerEngine, info: PlaybackInfo, source: Source?, startMs: Long, autoplay: Boolean): Player {
+fun createPlayer(
+    context: Context,
+    engine: PlayerEngine,
+    info: PlaybackInfo,
+    source: Source?,
+    startMs: Long,
+    autoplay: Boolean,
+    subtitles: SubtitleShift = SubtitleShift(),
+): Player {
     val player = when (engine) {
-        PlayerEngine.MPV -> MpvPlayer(context).apply { mpvTracks(info, source)?.let { (audio, subtitle) -> selectTracks(audio, subtitle) } }
+        PlayerEngine.MPV -> MpvPlayer(context).apply {
+            mpvTracks(info, source)?.let { (audio, subtitle) -> selectTracks(audio, subtitle) }
+            subtitleDelayMs = subtitles.ms
+            subtitles.onChange = { subtitleDelayMs = it }
+        }
         PlayerEngine.MEDIA3 -> {
-            val renderers = DefaultRenderersFactory(context)
+            subtitles.onChange = null
+            val renderers = ShiftedRenderersFactory(context, subtitles)
                 .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
             ExoPlayer.Builder(context, renderers).build().apply {
                 // Off unless a subtitle was picked; chooseTracks picks it.
