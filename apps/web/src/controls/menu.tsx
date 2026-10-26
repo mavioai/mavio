@@ -4,7 +4,7 @@
 // items, opening on the item chosen.
 import { Menu as Base } from "@base-ui/react/menu";
 import { Link, type LinkProps } from "@tanstack/react-router";
-import { type KeyboardEvent, type ReactElement, type ReactNode, useRef } from "react";
+import { type KeyboardEvent, type ReactElement, type ReactNode, type RefObject, useRef } from "react";
 
 import { Icon, type IconName } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
@@ -12,7 +12,8 @@ import { popup } from "./styles.ts";
 
 /**
  * A menu opened by trigger, a button, placed on side of it and aligned
- * with its start or end; width is the popup's width class.
+ * with its start, center or end; width is the popup's width class. It opens in
+ * container where given, as an element in full screen, else the page.
  */
 export function Menu({
   trigger,
@@ -23,17 +24,19 @@ export function Menu({
   open,
   onOpenChange,
   start = "[aria-checked=true]",
+  container,
   children,
 }: {
   trigger: ReactElement;
   side?: "top" | "bottom";
-  align?: "start" | "end";
+  align?: "start" | "center" | "end";
   width?: string;
   label?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   /** The item a menu opens on on the television: its chosen one, else its first. */
   start?: string;
+  container?: RefObject<HTMLElement | null>;
   children: ReactNode;
 }) {
   const { tv } = usePrefs();
@@ -62,7 +65,7 @@ export function Menu({
         render={trigger}
         onKeyDown={tv ? (e) => (e.key === "ArrowDown" || e.key === "ArrowUp") && e.preventBaseUIHandler() : undefined}
       />
-      <Base.Portal>
+      <Base.Portal container={container}>
         <Base.Positioner side={side} align={align} sideOffset={8} className="z-50 outline-none">
           <Base.Popup
             ref={ref}

@@ -1,8 +1,10 @@
 // The player (docs/clients.md §4.1, §6.5): the server decides how the
 // browser plays an item; hls.js plays HLS where Media Source Extensions
 // exist, Safari plays it natively. Progress is reported every 10 seconds
-// and on pause, seek and stop. A side panel picks the audio, subtitles and
-// quality and tells how the item plays; an episode's end starts the next.
+// and on pause, seek and stop. As the Mac app's, the controls' row has a
+// menu each of the speed, subtitles, audio and quality and of how the item
+// plays; on the television a side panel has them. An episode's end starts
+// the next.
 // Other devices of the user control it remotely (§6.3.23), and it follows
 // the SyncPlay group playing its item (§6.3.24). A track shows its lyrics
 // (§6.3.27). The assistant controls it (docs/assistant.md §5.2).
@@ -32,6 +34,7 @@ import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
 import { AssistantButton } from "../assistant/panel.tsx";
 import { registerPlayer } from "../assistant/player.ts";
 import { Slider, Tabs } from "../controls/inputs.tsx";
+import { Menu, MenuChoice, MenuItem, MenuLabel, MenuOption, MenuSeparator } from "../controls/menu.tsx";
 import { Tip } from "../controls/tooltip.tsx";
 import { useServerEvents } from "../events.tsx";
 import { locale, t } from "../i18n.ts";
@@ -40,12 +43,13 @@ import { prefs, type Quality, qualities, qualityBitrates, setPrefs, usePrefs } f
 import { useGroupPlayer } from "../syncplay.tsx";
 import { Spinner, StatusView } from "../ui.tsx";
 import { LyricsView } from "./lyrics.tsx";
+import { PictureInPictureControls, usePictureInPicture } from "./pip.tsx";
 import { type ChapterMark, clock, SeekBar } from "./seekbar.tsx";
 import { GroupChip } from "./syncplay.tsx";
 
 const route = getRouteApi("/s/$serverId/play/$itemId");
 
-const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
+const speeds = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 /** Whether the browser lets a video's sound go to a device it picks. */
 const sinkable = typeof HTMLMediaElement !== "undefined" && "setSinkId" in HTMLMediaElement.prototype;
@@ -97,6 +101,9 @@ interface Selection {
 
 type Tab = "audio" | "subtitles" | "quality" | "info";
 
+/** A menu of the desktop's row. */
+type RowMenu = Tab | "speed";
+
 function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   const servers = useServersStore();
   const router = useRouter();
@@ -125,12 +132,17 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   const seekTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(seekTimer.current), []);
   const seekFrame = useRef<number>(undefined);
+  const landTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(landTimer.current), []);
   const landed = () => {
     clearTimeout(seekTimer.current);
+    clearTimeout(landTimer.current);
     setSeek(undefined);
   };
   // The seek ends with the first frame shown at the new time, where the
-  // browser reports frames shown; else when the video has the time's data.
+  // browser reports frames shown; else when the video has the time's data,
+  // and a second after that where no frame is reported, as in a window
+  // the browser does not draw frames of.
   const framed = (v: HTMLVideoElement) => "requestVideoFrameCallback" in v;
   const awaitFrame = (v: HTMLVideoElement) => {
     if (seekFrame.current !== undefined) v.cancelVideoFrameCallback(seekFrame.current);
@@ -140,6 +152,14 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
       else seekFrame.current = v.requestVideoFrameCallback(check);
     };
     seekFrame.current = v.requestVideoFrameCallback(check);
+  };
+  // The video has the new time's data: the seek ends, at once where no
+  // frame is reported, else a second on unless a frame ended it.
+  const landing = (v: HTMLVideoElement) => {
+    if (v.seeking || v.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
+    clearTimeout(landTimer.current);
+    if (!framed(v)) landed();
+    else landTimer.current = setTimeout(landed, 1000);
   };
   const [duration, setDuration] = useState(0);
   const [muted, setMuted] = useState(false);
@@ -154,6 +174,8 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   const [full, setFull] = useState(false);
   const [controls, setControls] = useState(true);
   const [panel, setPanel] = useState<Tab>();
+  const [menu, setMenu] = useState<RowMenu>();
+  const pip = usePictureInPicture(video);
   const lyrics = useLyrics(server, itemId, item.data?.item?.kind === ItemKind.TRACK);
   const [showLyrics, setShowLyrics] = useState(true);
 
@@ -332,12 +354,12 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   // The devices the sound can play to, as the audio's panel opens; the
   // browser names them only once the page may use a microphone.
   useEffect(() => {
-    if (!sinkable || panel !== "audio") return;
+    if (!sinkable || (panel !== "audio" && menu !== "audio")) return;
     void navigator.mediaDevices
       ?.enumerateDevices()
       .then((ds) => setOutputs(ds.filter((d) => d.kind === "audiooutput" && d.deviceId !== "default" && d.label)))
       .catch(() => setOutputs([]));
-  }, [panel]);
+  }, [panel, menu]);
   const pickOutput = (id: string) => {
     void video.current
       ?.setSinkId(id)
@@ -396,8 +418,8 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     setControls(false);
   }, []);
   useEffect(() => () => clearTimeout(hideTimer.current), []);
-  // An open panel keeps the controls up.
-  const shown = controls || panel !== undefined;
+  // An open panel or menu keeps the controls up.
+  const shown = controls || panel !== undefined || menu !== undefined;
   const tv = usePrefs().tv;
 
   // On the television (docs/tv.md §7), focus leaves the controls' row as
@@ -673,7 +695,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
       const focused = shell.current?.contains(document.activeElement) ?? false;
       // A slider's own arrows.
       if (e.defaultPrevented || (target instanceof HTMLInputElement && e.key.startsWith("Arrow"))) return;
-      if (panel !== undefined) return;
+      if (panel !== undefined || menu !== undefined) return;
       // A focused button presses with space and Return.
       if (focused && target instanceof HTMLButtonElement && (e.key === " " || e.key === "Enter")) {
         poke();
@@ -699,7 +721,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
-  }, [toggle, seekBy, fullScreen, back, poke, hide, play, pause, panel, tv, shown, changeVolume, tellVolume]);
+  }, [toggle, seekBy, fullScreen, back, poke, hide, play, pause, panel, menu, tv, shown, changeVolume, tellVolume]);
 
   const current = item.data?.item;
   const source = item.data?.mediaSources.find((m) => m.id === info?.info.mediaSourceId);
@@ -718,6 +740,30 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     if (document.activeElement instanceof HTMLElement) opener.current = document.activeElement;
     setPanel(panel === tab ? undefined : tab);
   };
+  // A menu of the desktop's row, above its button, opening in the player
+  // so that it shows in full screen.
+  const rowMenu = (which: RowMenu, label: string, icon: ReactNode, items: ReactNode) => (
+    <Menu
+      side="top"
+      align="center"
+      width="w-72"
+      label={label}
+      container={shell}
+      onOpenChange={(o) => {
+        setMenu((m) => (o ? which : m === which ? undefined : m));
+        if (!o) poke();
+      }}
+      trigger={
+        <Tip label={label}>
+          <button type="button" aria-label={label} className={`${playerButton} ${menu === which ? "bg-white/20" : ""}`}>
+            {icon}
+          </button>
+        </Tip>
+      }
+    >
+      {items}
+    </Menu>
+  );
 
   return (
     <div
@@ -758,23 +804,23 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
             setSeek("pending");
             seekTimer.current = setTimeout(() => setSeek("shown"), 200);
           }
+          clearTimeout(landTimer.current);
           if (framed(e.currentTarget)) awaitFrame(e.currentTarget);
         }}
         onSeeked={(e) => {
-          const v = e.currentTarget;
-          if (!framed(v) && v.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) landed();
+          landing(e.currentTarget);
           void playback.current?.report();
         }}
         onEmptied={landed}
         onWaiting={() => setLoading(true)}
         onPlaying={(e) => {
           setLoading(false);
-          if (!framed(e.currentTarget) && !e.currentTarget.seeking) landed();
+          landing(e.currentTarget);
         }}
         // Paused with enough to play, as a group's member waiting for the group.
         onCanPlay={(e) => {
           if (e.currentTarget.paused) setLoading(false);
-          if (!framed(e.currentTarget) && !e.currentTarget.seeking) landed();
+          landing(e.currentTarget);
         }}
         onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
         onDurationChange={(e) => Number.isFinite(e.currentTarget.duration) && setDuration(e.currentTarget.duration)}
@@ -798,6 +844,34 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
           />
         ))}
       </video>
+
+      {pip.host && (
+        <>
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/60">
+            <Icon name="pictureInPicture" size={48} />
+            <span className="type-callout">{t("player.pictureInPicture")}</span>
+          </div>
+          <PictureInPictureControls
+            host={pip.host}
+            paused={paused}
+            time={time}
+            total={total}
+            onToggle={toggle}
+            onClose={() => {
+              // Closed once the pause is told: the video's events still
+              // queued as it moves back are lost, and hls.js would play
+              // it again.
+              const v = video.current;
+              if (!v || v.paused) return pip.close();
+              v.addEventListener("pause", () => setTimeout(pip.close), { once: true });
+              pause();
+            }}
+            onRestore={pip.close}
+            onScrubStart={scrubStart}
+            onScrubEnd={scrubEnd}
+          />
+        </>
+      )}
 
       {lyrics.data && showLyrics && (
         <LyricsView lyrics={lyrics.data} time={time} onSeek={seekTo} onBackground={() => (panel !== undefined ? setPanel(undefined) : toggle())} />
@@ -859,15 +933,22 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
           {tv ? (
             <Timeline time={time} total={total} />
           ) : (
-            <SeekBar
-              time={time}
-              total={total}
-              chapters={chapters}
-              trickplay={item.data?.trickplay ?? []}
-              sheetUrl={(path) => urlOf(server, path)}
-              onScrubStart={scrubStart}
-              onScrubEnd={scrubEnd}
-            />
+            // The time played and the time left on either side of the bar, as the Mac app's.
+            <div className="flex items-center gap-3 type-footnote text-white/85 tabular-nums">
+              <span>{clock(time)}</span>
+              <div className="min-w-0 flex-1">
+                <SeekBar
+                  time={time}
+                  total={total}
+                  chapters={chapters}
+                  trickplay={item.data?.trickplay ?? []}
+                  sheetUrl={(path) => urlOf(server, path)}
+                  onScrubStart={scrubStart}
+                  onScrubEnd={scrubEnd}
+                />
+              </div>
+              <span>-{clock(Math.max(total - time, 0))}</span>
+            </div>
           )}
           {tv ? (
             // The television's row: the remote's keys play, pause and seek.
@@ -898,15 +979,11 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
               </div>
             </div>
           ) : (
+          // The desktop's row, as the Mac app's: playing and the sound on
+          // the leading side, the menus and the windows on the trailing one.
           <div className="mt-2 flex items-center gap-1">
             <PlayerButton label={paused ? t("player.play") : t("player.pause")} onClick={toggle} large>
               <Icon name={paused ? "play" : "pause"} fill size={30} />
-            </PlayerButton>
-            <PlayerButton label={t("player.seekBack", { count: 10 })} onClick={() => seekBy(-10)}>
-              <Icon name="seekBack" />
-            </PlayerButton>
-            <PlayerButton label={t("player.seekForward", { count: 10 })} onClick={() => seekBy(10)}>
-              <Icon name="seekForward" />
             </PlayerButton>
             <PlayerButton
               label={muted || volume === 0 ? t("player.unmute") : t("player.mute")}
@@ -940,43 +1017,133 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
               }}
               className="w-20"
             />
-            <span className="ml-2 type-footnote text-white/85 tabular-nums">
-              {clock(time)} / {clock(total)}
-            </span>
+            {(next.data || (group && group.group.currentIndex < group.group.queue.length - 1)) && (
+              <PlayerButton label={t("player.nextEpisode")} onClick={playNext}>
+                <Icon name="next" fill />
+              </PlayerButton>
+            )}
             <div className="ml-auto flex items-center gap-1">
-              {(next.data || (group && group.group.currentIndex < group.group.queue.length - 1)) && (
-                <button
-                  type="button"
-                  onClick={playNext}
-                  className="mr-1 flex h-9 items-center gap-1.5 rounded-full bg-white/15 px-3.5 type-footnote font-semibold backdrop-blur-xl hover:bg-white/25"
-                >
-                  <Icon name="next" fill size={16} />
-                  {t("player.nextEpisode")}
-                </button>
-              )}
               {lyrics.data && (
                 <PlayerButton label={t("player.lyrics")} onClick={() => setShowLyrics(!showLyrics)} active={showLyrics}>
                   <Icon name="music" fill={showLyrics} />
                 </PlayerButton>
               )}
-              {subtitleTracks.length > 0 && (
-                <PlayerButton label={t("player.subtitles")} onClick={() => openPanel("subtitles")} active={panel === "subtitles"}>
-                  <Icon name="subtitles" fill={subtitlesOn} />
-                </PlayerButton>
-              )}
               <AssistantButton className="flex size-11 items-center justify-center rounded-full hover:bg-white/15" />
-              <PlayerButton label={t("player.options")} onClick={() => openPanel("audio")} active={panel !== undefined && panel !== "subtitles"}>
-                <Icon name="settings" />
-              </PlayerButton>
-              {document.pictureInPictureEnabled && (
-                <PlayerButton
-                  label={t("player.pictureInPicture")}
-                  onClick={() =>
-                    document.pictureInPictureElement
-                      ? void document.exitPictureInPicture()
-                      : void video.current?.requestPictureInPicture()
-                  }
-                >
+              {rowMenu("speed", t("player.speed"), <Icon name="speed" />, (
+                <>
+                  <MenuLabel>{t("player.speed")}</MenuLabel>
+                  <MenuChoice
+                    value={String(speed)}
+                    onChange={(r) => {
+                      if (!video.current || group) return;
+                      video.current.playbackRate = Number(r);
+                      tell("speed", `${r}×`);
+                    }}
+                  >
+                    {speeds.map((r) => (
+                      <MenuOption key={r} value={String(r)}>
+                        {r}×
+                      </MenuOption>
+                    ))}
+                  </MenuChoice>
+                </>
+              ))}
+              {subtitleTracks.length > 0 &&
+                rowMenu("subtitles", t("player.subtitles"), <Icon name="subtitles" fill={subtitlesOn} />, (
+                  <>
+                    <MenuLabel>{t("player.subtitles")}</MenuLabel>
+                    <MenuChoice value={String(info?.info.subtitleStreamIndex ?? -1)} onChange={(i) => pick({ subtitle: Number(i) })}>
+                      <MenuOption value="-1">{t("player.subtitlesOff")}</MenuOption>
+                      {subtitleTracks.map((s) => {
+                        const stream = source?.streams.find((x) => x.index === s.streamIndex);
+                        return (
+                          <MenuOption key={s.streamIndex} value={String(s.streamIndex)}>
+                            <TrackName
+                              label={stream ? trackLabel(stream) : [s.title || languageOf(s.language) || `#${s.streamIndex}`, s.format.toUpperCase()]}
+                            />
+                          </MenuOption>
+                        );
+                      })}
+                    </MenuChoice>
+                    {subtitlesOn && (
+                      <>
+                        <MenuSeparator />
+                        <MenuLabel>
+                          {t("player.subtitleOffset")}: {offsetText(subtitleOffset)}
+                        </MenuLabel>
+                        <MenuItem closeOnClick={false} onClick={() => offsetSubtitles(subtitleOffset - 0.1)}>
+                          {t("player.offsetEarlier")}
+                        </MenuItem>
+                        <MenuItem closeOnClick={false} onClick={() => offsetSubtitles(subtitleOffset + 0.1)}>
+                          {t("player.offsetLater")}
+                        </MenuItem>
+                        <MenuItem closeOnClick={false} disabled={subtitleOffset === 0} onClick={() => offsetSubtitles(0)}>
+                          {t("player.offsetReset")}
+                        </MenuItem>
+                      </>
+                    )}
+                  </>
+                ))}
+              {rowMenu("audio", t("player.audio"), <Icon name="audio" />, (
+                <>
+                  <MenuLabel>{t("player.audio")}</MenuLabel>
+                  <MenuChoice value={String(info?.info.audioStreamIndex ?? -1)} onChange={(i) => pick({ audio: Number(i) })}>
+                    {audioTracks.map((s) => (
+                      <MenuOption key={s.index} value={String(s.index)}>
+                        <TrackName label={trackLabel(s)} />
+                      </MenuOption>
+                    ))}
+                  </MenuChoice>
+                  {sinkable && outputs.length > 0 && (
+                    <>
+                      <MenuSeparator />
+                      <MenuLabel>{t("player.audioDevice")}</MenuLabel>
+                      <MenuChoice value={sink} onChange={pickOutput}>
+                        <MenuOption value="">{t("player.audioDeviceSystem")}</MenuOption>
+                        {outputs.map((d) => (
+                          <MenuOption key={d.deviceId} value={d.deviceId}>
+                            {d.label}
+                          </MenuOption>
+                        ))}
+                      </MenuChoice>
+                    </>
+                  )}
+                </>
+              ))}
+              {rowMenu("quality", t("player.quality"), <Icon name="quality" />, (
+                <>
+                  <MenuLabel>{t("player.quality")}</MenuLabel>
+                  <MenuChoice value={selection.quality} onChange={(q) => pick({ quality: q })}>
+                    {qualities.map((q) => (
+                      <MenuOption key={q.value} value={q.value}>
+                        {q.label()}
+                      </MenuOption>
+                    ))}
+                  </MenuChoice>
+                </>
+              ))}
+              {info &&
+                rowMenu("info", t("player.info"), <Icon name="info" />, (
+                  <>
+                    <MenuLabel>{t("player.method")}</MenuLabel>
+                    <MenuFact>{methodText(info.info.method)}</MenuFact>
+                    {source && (
+                      <>
+                        <MenuLabel>{t("player.source")}</MenuLabel>
+                        <MenuFact>{[source.name, source.container.toUpperCase()].filter(Boolean).join(" · ")}</MenuFact>
+                      </>
+                    )}
+                    <MenuSeparator />
+                    <MenuItem icon="external" onClick={() => window.open(info.url, "_blank")}>
+                      {t("player.openExternal")}
+                    </MenuItem>
+                    <MenuItem icon="copy" onClick={() => void navigator.clipboard?.writeText(info.url)}>
+                      {t("player.copyLink")}
+                    </MenuItem>
+                  </>
+                ))}
+              {pip.supported && (
+                <PlayerButton label={t("player.pictureInPicture")} onClick={() => (pip.active ? pip.close() : void pip.open())} active={pip.active}>
                   <Icon name="pictureInPicture" />
                 </PlayerButton>
               )}
@@ -1128,6 +1295,23 @@ function Timeline({ time, total }: { time: number; total: number }) {
   );
 }
 
+const playerButton = "flex h-11 w-11 items-center justify-center rounded-full hover:bg-white/15";
+
+/** A track's name, and after it its codec and flags. */
+function TrackName({ label: [name, details] }: { label: [string, string] }) {
+  return (
+    <span className="flex min-w-0 items-baseline gap-2">
+      <span className="truncate">{name}</span>
+      {details && <span className="truncate type-caption text-text-secondary">{details}</span>}
+    </span>
+  );
+}
+
+/** A line of a menu that tells, not does. */
+function MenuFact({ children }: { children: ReactNode }) {
+  return <div className="px-2.5 pb-1.5 type-body desk:type-callout">{children}</div>;
+}
+
 function PlayerButton({
   label,
   onClick,
@@ -1148,7 +1332,7 @@ function PlayerButton({
         aria-label={label}
         aria-pressed={active}
         onClick={onClick}
-        className={`flex items-center justify-center rounded-full hover:bg-white/15 ${large ? "h-12 w-12" : "h-11 w-11"} ${active ? "bg-white/20" : ""}`}
+        className={`${large ? "flex h-12 w-12 items-center justify-center rounded-full hover:bg-white/15" : playerButton} ${active ? "bg-white/20" : ""}`}
       >
         {children}
       </button>
