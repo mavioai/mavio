@@ -1,10 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { type FormEvent, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 
-import { accounts, message } from "../lib/api.ts";
+import { Action, AuthField, AuthForm, AuthScreen, AuthText, Notice, SignedInAs } from "../auth-ui.tsx";
+import { accounts } from "../lib/api.ts";
+import { describe, useRich, useT } from "../lib/locale.tsx";
 import { useAccount } from "../lib/session.ts";
-import { Button, Card, ErrorText, Field, Muted, Page } from "../ui.tsx";
+import { Loading, Name } from "../ui.tsx";
 
 // A television shows a code and the person signs it in here (RFC 8628):
 // Mavio's apps and app.mavio.dev for any account, and a server's web UI
@@ -17,8 +19,11 @@ export const Route = createFileRoute("/link")({
 });
 
 function LinkDevice() {
+  const t = useT();
+  const rich = useRich();
   const me = useAccount();
   const search = Route.useSearch();
+  const navigate = useNavigate();
   const [code, setCode] = useState<string>();
   const [done, setDone] = useState<"approved" | "denied">();
   const check = useMutation({
@@ -34,44 +39,59 @@ function LinkDevice() {
       setDone(approve ? "approved" : "denied");
     },
   });
-  if (!me) return null;
+  if (!me) return <Loading />;
 
-  function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    check.mutate(String(new FormData(e.currentTarget).get("code")));
+  if (done) {
+    return (
+      <AuthScreen title={t("site.link.title")}>
+        <Notice tone={done === "approved" ? "success" : "danger"}>{t(done === "approved" ? "site.link.approved" : "site.link.denied")}</Notice>
+        <Action variant="secondary" onClick={() => void navigate({ to: "/" })}>
+          {t("site.nav.servers")}
+        </Action>
+      </AuthScreen>
+    );
   }
-
-  const target = check.data?.serverName ? `the web UI of ${check.data.serverName}` : "Mavio";
+  if (code && check.data) {
+    const shown = <Name>{code.toUpperCase()}</Name>;
+    return (
+      <AuthScreen title={t("site.link.title")} onBack={() => setCode(undefined)}>
+        <AuthText>
+          {check.data.serverName
+            ? rich("site.link.confirmServer", { server: <Name>{check.data.serverName}</Name>, code: shown })
+            : rich("site.link.confirmApp", { code: shown })}
+        </AuthText>
+        <SignedInAs me={me} />
+        <div className="flex flex-col gap-3">
+          <Action onClick={() => answer.mutate(true)} disabled={answer.isPending}>
+            {t("site.action.signIn")}
+          </Action>
+          <Action variant="secondary" onClick={() => answer.mutate(false)} disabled={answer.isPending}>
+            {t("site.action.cancel")}
+          </Action>
+        </div>
+        <Notice>{describe(t, answer.error)}</Notice>
+      </AuthScreen>
+    );
+  }
   return (
-    <Page title="Sign in a television">
-      <Card>
-        {done ? (
-          <Muted>{done === "approved" ? "The television is signed in to your account." : "The television was not signed in."}</Muted>
-        ) : code && check.data ? (
-          <>
-            <Muted>
-              Sign in {target} on the television showing {code.toUpperCase()} as {me.name}? It reaches your account's
-              servers.
-            </Muted>
-            <div className="flex gap-3">
-              <Button onClick={() => answer.mutate(true)} disabled={answer.isPending}>
-                Sign in
-              </Button>
-              <Button kind="secondary" onClick={() => answer.mutate(false)} disabled={answer.isPending}>
-                Cancel
-              </Button>
-            </div>
-          </>
-        ) : (
-          <form className="flex flex-col gap-4" onSubmit={submit}>
-            <Field label="The code on the television" name="code" defaultValue={search.code} autoComplete="off" required />
-            <Button type="submit" disabled={check.isPending}>
-              Continue
-            </Button>
-          </form>
-        )}
-        <ErrorText error={check.error ? message(check.error) : answer.error ? message(answer.error) : undefined} />
-      </Card>
-    </Page>
+    <AuthScreen title={t("site.link.title")} subtitle={t("site.link.subtitle")}>
+      <AuthForm onSubmit={(f) => check.mutate(String(f.get("code")).trim())}>
+        <AuthField
+          label={t("site.field.code")}
+          name="code"
+          defaultValue={search.code}
+          autoComplete="off"
+          autoCapitalize="characters"
+          spellCheck={false}
+          autoFocus
+          required
+          className="text-center text-[22px] font-semibold tracking-[0.25em] uppercase"
+        />
+        <Notice>{describe(t, check.error)}</Notice>
+        <Action type="submit" disabled={check.isPending}>
+          {t("site.action.continue")}
+        </Action>
+      </AuthForm>
+    </AuthScreen>
   );
 }

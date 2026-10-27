@@ -1,13 +1,14 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { type ReactNode, useEffect } from "react";
+import { useEffect } from "react";
 
-import { accounts, config, message } from "../lib/api.ts";
-import { authClient } from "../lib/auth-client.ts";
+import { Action, actionClass, AuthScreen, AuthText, Notice, SignedInAs } from "../auth-ui.tsx";
+import { accounts, config } from "../lib/api.ts";
+import type { MessageKey } from "../lib/i18n.ts";
+import { describe, useRich, useT } from "../lib/locale.tsx";
 import { expectedOrigin } from "../lib/origins.ts";
 import { useAccount } from "../lib/session.ts";
-import { Wordmark } from "../logo.tsx";
-import { Button, ErrorText, Muted } from "../ui.tsx";
+import { Loading, Name } from "../ui.tsx";
 
 // A web UI signs the account in (docs/accounts.md §6): an authorization
 // request with PKCE, carrying the key of the device whose session it
@@ -63,25 +64,15 @@ type Me = { name: string; email: string; username?: string | null };
 function Authorize() {
   const me = useAccount();
   const q = Route.useSearch();
-  if (!me) return null;
+  if (!me) return <Loading />;
   if (q.request_uri) return <ServerRequest request={q.request_uri} me={me} />;
   if (q.client_id && q.client_id !== "app") return <NativeRequest q={q} me={me} />;
   return <AppRequest q={q} />;
 }
 
-/** The page of its own that asks the account, centered under the logo. */
-function Frame({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <main className="mx-auto flex min-h-dvh max-w-sm flex-col items-center justify-center gap-6 px-4 py-10 text-center">
-      <Wordmark height={36} />
-      <h1 className="type-title2">{title}</h1>
-      {children}
-    </main>
-  );
-}
-
 /** app.mavio.dev's request, which is mavio.dev's own: it signs in without asking. */
 function AppRequest({ q }: { q: Search }) {
+  const t = useT();
   const site = useQuery({ queryKey: ["config"], queryFn: config });
   const approve = useMutation({
     mutationFn: async () => {
@@ -101,28 +92,27 @@ function AppRequest({ q }: { q: Search }) {
   useEffect(() => {
     if (toApp && isIdle) mutate();
   }, [toApp, isIdle, mutate]);
-  if (!complete) {
-    return (
-      <Frame title="Sign in to Mavio">
-        <ErrorText error="This sign-in request is incomplete. Start signing in again." />
-      </Frame>
-    );
-  }
+  const error = !complete ? t("site.authorize.incomplete") : site.error || approve.error ? describe(t, site.error ?? approve.error) : undefined;
   return (
-    <Frame title="Sign in to Mavio">
-      {site.isPending || toApp ? <Muted>Signing in…</Muted> : <ErrorText error="This sign-in request does not come from Mavio on the web." />}
-      <ErrorText error={site.error ? message(site.error) : approve.error ? message(approve.error) : undefined} />
-    </Frame>
+    <AuthScreen title={t("site.signIn.title")}>
+      {error ? (
+        <Notice>{error}</Notice>
+      ) : site.isPending || toApp ? (
+        <AuthText>{t("site.authorize.signingIn")}</AuthText>
+      ) : (
+        <Notice>{t("site.authorize.notWeb")}</Notice>
+      )}
+    </AuthScreen>
   );
 }
 
 /** The names of Mavio's apps by their client IDs. */
-const appNames: Record<string, string> = {
-  "dev.mavio.desktop": "Mavio for Desktop",
-  "dev.mavio.app": "Mavio for Android",
-  "dev.mavio.ios": "Mavio for iPhone and iPad",
-  "dev.mavio.macos": "Mavio for Mac",
-  "dev.mavio.tvos": "Mavio for Apple TV",
+const appNames: Record<string, MessageKey> = {
+  "dev.mavio.desktop": "site.app.desktop",
+  "dev.mavio.app": "site.app.android",
+  "dev.mavio.ios": "site.app.ios",
+  "dev.mavio.macos": "site.app.macos",
+  "dev.mavio.tvos": "site.app.tvos",
 };
 
 /**
@@ -136,12 +126,28 @@ function appRedirect(uri: string | undefined, clientId: string | undefined): boo
   return u.protocol === "http:" && (u.hostname === "127.0.0.1" || u.hostname === "[::1]");
 }
 
+/** Approving or cancelling a request. */
+function Answer({ onAnswer, pending }: { onAnswer: (approve: boolean) => void; pending: boolean }) {
+  const t = useT();
+  return (
+    <div className="flex flex-col gap-3">
+      <Action onClick={() => onAnswer(true)} disabled={pending}>
+        {t("site.action.signIn")}
+      </Action>
+      <Action variant="secondary" onClick={() => onAnswer(false)} disabled={pending}>
+        {t("site.action.cancel")}
+      </Action>
+    </div>
+  );
+}
+
 /**
  * One of Mavio's apps signing the account in, from the browser it opened:
  * the account approves it, and the code goes back to the app on its
  * loopback address or through its own URI scheme.
  */
 function NativeRequest({ q, me }: { q: Search; me: Me }) {
+  const t = useT();
   const answer = useMutation({
     mutationFn: async (approve: boolean) => {
       if (!approve) return redirectTo(q.redirect_uri ?? "", { error: "access_denied", state: q.state });
@@ -155,7 +161,8 @@ function NativeRequest({ q, me }: { q: Search; me: Me }) {
     },
   });
   const key = fromBase64url(q.device_key ?? "");
-  const app = appNames[q.client_id ?? ""] ?? q.client_id;
+  const name = appNames[q.client_id ?? ""];
+  const app = name ? t(name) : (q.client_id ?? "");
   const complete =
     /^dev\.mavio\.[a-z0-9.-]+$/.test(q.client_id ?? "") &&
     q.code_challenge_method === "S256" &&
@@ -164,78 +171,25 @@ function NativeRequest({ q, me }: { q: Search; me: Me }) {
     appRedirect(q.redirect_uri, q.client_id);
   if (!complete) {
     return (
-      <Frame title="Sign in to Mavio">
-        <ErrorText error="This sign-in request is incomplete. Start signing in again." />
-      </Frame>
+      <AuthScreen title={t("site.signIn.title")}>
+        <Notice>{t("site.authorize.incomplete")}</Notice>
+      </AuthScreen>
     );
   }
   return (
-    <Frame title={`${app} would like to sign in to your Mavio account`}>
-      <Muted>The app on this device reaches every server of your account. Continue only if you started signing in from it.</Muted>
+    <AuthScreen title={t("site.authorize.appTitle", { app })}>
+      <AuthText>{t("site.authorize.appBody")}</AuthText>
       <SignedInAs me={me} />
-      <div className="flex w-full flex-col gap-3">
-        <Button onClick={() => answer.mutate(true)} disabled={answer.isPending}>
-          Sign in
-        </Button>
-        <Button kind="secondary" onClick={() => answer.mutate(false)} disabled={answer.isPending}>
-          Cancel
-        </Button>
-      </div>
-      <DifferentAccount />
-      <ErrorText error={answer.error ? message(answer.error) : undefined} />
-    </Frame>
-  );
-}
-
-/** The account's avatar, on the quiet fill of every client (libs/design/components.md, Avatar). */
-function Avatar({ name }: { name: string }) {
-  return (
-    <span
-      aria-hidden
-      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--mavio-color-fill-selected)] font-semibold text-text-secondary"
-      style={{ fontSize: 36 * 0.42 }}
-    >
-      {[...name][0]?.toUpperCase()}
-    </span>
-  );
-}
-
-/** The account signing in, as a card. */
-function SignedInAs({ me }: { me: Me }) {
-  // A managed account's e-mail address is a placeholder, never shown.
-  const email = me.email.startsWith("managed:") ? undefined : me.email;
-  const detail = me.username && me.username !== me.name ? `@${me.username}` : email;
-  return (
-    <div className="flex w-full items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-left">
-      <Avatar name={me.name || me.username || "?"} />
-      <span className="flex min-w-0 flex-col">
-        <span className="type-callout truncate font-semibold">{me.name || me.username}</span>
-        {detail && <span className="type-footnote truncate text-text-secondary">{detail}</span>}
-      </span>
-    </div>
-  );
-}
-
-/** A link signing another account in on mavio.dev, which comes back here. */
-function DifferentAccount() {
-  const switchAccount = async () => {
-    const back = window.location.pathname + window.location.search;
-    await authClient.signOut();
-    window.location.href = `/sign-in?${new URLSearchParams({ next: back })}`;
-  };
-  return (
-    <p className="type-footnote text-text-secondary">
-      Or{" "}
-      <button type="button" className="text-accent hover:underline" onClick={() => void switchAccount()}>
-        use a different account
-      </button>
-      .
-    </p>
+      <Answer onAnswer={(approve) => answer.mutate(approve)} pending={answer.isPending} />
+      <Notice>{describe(t, answer.error)}</Notice>
+    </AuthScreen>
   );
 }
 
 /** A server's web UI signing in its administrator, or claiming the server. */
 function ServerRequest({ request, me }: { request: string; me: Me }) {
+  const t = useT();
+  const rich = useRich();
   const site = useQuery({ queryKey: ["config"], queryFn: config });
   const r = useQuery({
     queryKey: ["authorizationRequest", request],
@@ -249,69 +203,33 @@ function ServerRequest({ request, me }: { request: string; me: Me }) {
     },
   });
   const c = r.data;
-  const server = <span className="font-mono font-semibold text-on-background">{c?.serverName || "this server"}</span>;
-  const origin = c && URL.canParse(c.redirectUri) ? new URL(c.redirectUri).origin : undefined;
-  const at = <span className="font-mono font-semibold text-on-background">{origin}</span>;
+  const server = <Name>{c?.serverName || t("site.authorize.thisServer")}</Name>;
+  const address = <Name>{c && URL.canParse(c.redirectUri) ? new URL(c.redirectUri).host : ""}</Name>;
   const appOrigin = site.data && new URL(site.data.appURL).origin;
-  const elsewhere = c && !expectedOrigin(c.redirectUri, c.serverId) && (
-    <ErrorText error="This address is neither one of the server's mavio.site names nor on your local network. Continue only if you reach the server there." />
-  );
-  const signedInAs = <SignedInAs me={me} />;
-  const differentAccount = <DifferentAccount />;
-  const buttons = (
-    <div className="flex w-full flex-col gap-3">
-      <Button onClick={() => answer.mutate(true)} disabled={answer.isPending}>
-        Sign in
-      </Button>
-      <Button kind="secondary" onClick={() => answer.mutate(false)} disabled={answer.isPending}>
-        Cancel
-      </Button>
-    </div>
-  );
   return (
-    <Frame title="Mavio Web would like to sign in to your Mavio account">
+    <AuthScreen title={t("site.authorize.webTitle")}>
+      {r.isPending && <AuthText>{t("site.authorize.signingIn")}</AuthText>}
       {c &&
         (c.claim || c.administrator ? (
           <>
-            <Muted>
-              {c.claim ? (
-                <>
-                  You become the administrator of {server} at {at}, and your account reaches it everywhere.
-                </>
-              ) : (
-                <>
-                  You sign in to the web UI of {server} at {at}, which reaches your account's servers.
-                </>
-              )}
-            </Muted>
-            {c.claim && c.claimed && !c.administrator && (
-              <ErrorText error="Another account claimed this server before. Signing in takes it over." />
-            )}
-            {elsewhere}
-            {signedInAs}
-            {buttons}
-            {differentAccount}
+            <AuthText>{rich(c.claim ? "site.authorize.claim" : "site.authorize.web", { server, address })}</AuthText>
+            {c.claim && c.claimed && !c.administrator && <Notice>{t("site.authorize.claimed")}</Notice>}
+            {!expectedOrigin(c.redirectUri, c.serverId) && <Notice>{t("site.authorize.elsewhere")}</Notice>}
+            <SignedInAs me={me} />
+            <Answer onAnswer={(approve) => answer.mutate(approve)} pending={answer.isPending} />
           </>
         ) : (
           <>
-            <Muted>
-              Only the administrator of {server} signs in to its web UI with a Mavio account. Watch the servers your account reaches on
-              Mavio on the web.
-            </Muted>
-            {signedInAs}
+            <AuthText>{rich("site.authorize.adminOnly", { server })}</AuthText>
+            <SignedInAs me={me} />
             {appOrigin && (
-              <a className="type-callout font-semibold text-accent" href={appOrigin}>
-                Open Mavio on the web
+              <a className={actionClass()} href={appOrigin}>
+                {t("site.authorize.openApp")}
               </a>
             )}
-            {differentAccount}
           </>
         ))}
-      <ErrorText
-        error={
-          r.error ? "This sign-in request is unknown or expired. Start signing in again from the server." : answer.error ? message(answer.error) : undefined
-        }
-      />
-    </Frame>
+      <Notice>{r.error ? t("site.authorize.unknown") : describe(t, answer.error)}</Notice>
+    </AuthScreen>
   );
 }

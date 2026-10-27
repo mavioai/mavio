@@ -29,16 +29,23 @@
   --color-surface: var(--mavio-color-surface);
   --color-surface-raised: var(--mavio-color-surface-raised);
   --color-surface-overlay: var(--mavio-color-surface-overlay);
+  --color-fill: var(--mavio-color-fill);
+  --color-fill-selected: var(--mavio-color-fill-selected);
   --color-border: var(--mavio-color-border);
   --color-on-background: var(--mavio-color-text-primary);
   --color-text-secondary: var(--mavio-color-text-secondary);
   --color-text-tertiary: var(--mavio-color-text-tertiary);
   --color-text-disabled: var(--mavio-color-text-disabled);
+  --color-button: var(--mavio-color-button);
+  --color-on-button: var(--mavio-color-on-button);
   --color-accent: var(--mavio-color-accent);
   --color-accent-pressed: var(--mavio-color-accent-pressed);
   --color-on-accent: var(--mavio-color-on-accent);
+  --color-accent-text: var(--mavio-color-accent-text);
   --color-focus: var(--mavio-color-focus);
   --color-danger: var(--mavio-color-danger);
+  --color-success: var(--mavio-color-success);
+  --color-warning: var(--mavio-color-warning);
   --color-progress: var(--mavio-color-progress);
   --color-scrim: var(--mavio-color-scrim);
   --radius-xs: var(--mavio-radius-xs);
@@ -106,35 +113,6 @@ body {
   font-size: var(--mavio-type-body-size);
   font-weight: var(--mavio-type-body-weight);
   line-height: var(--mavio-type-body-line-height);
-}
-@utility type-callout {
-  font-size: var(--mavio-type-callout-size);
-  font-weight: var(--mavio-type-callout-weight);
-  line-height: var(--mavio-type-callout-line-height);
-}
-@utility type-footnote {
-  font-size: var(--mavio-type-footnote-size);
-  font-weight: var(--mavio-type-footnote-weight);
-  line-height: var(--mavio-type-footnote-line-height);
-}
-@utility type-caption {
-  font-size: var(--mavio-type-caption-size);
-  font-weight: var(--mavio-type-caption-weight);
-  line-height: var(--mavio-type-caption-line-height);
-}
-
-/* A row that scrolls sideways without a visible scroll bar. */
-@utility scroll-row {
-  scrollbar-width: none;
-  scroll-snap-type: x proximity;
-  /* Snapping keeps the row's margin before the first card. */
-  scroll-padding-inline: var(--spacing-margin);
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-body {
   background: var(--mavio-color-background);
   color: var(--mavio-color-text-primary);
   font-family: var(--mavio-font-family);
@@ -143,4 +121,43 @@ body {
 :focus-visible {
   outline: 2px solid var(--mavio-color-focus);
   outline-offset: 2px;
+}
+
+/* The pages of signing in (docs/mavio-dev.md §2), as the web UI's sign-in
+   screen (docs/clients.md §4.1): a wall of posters, tilted and blurred
+   under a veil, with the card's glass above it, in each theme. */
+:root {
+  --signin-card: rgb(28 28 30 / 0.82);
+  --signin-field: rgb(118 118 128 / 0.12);
+  --signin-separator: rgb(84 84 88 / 0.5);
+  --signin-wall: 0.7;
+  --signin-veil: radial-gradient(ellipse at center, rgb(0 0 0 / 0.4), rgb(0 0 0 / 0.82));
+  --signin-shadow: 0 30px 80px rgb(0 0 0 / 0.5);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --signin-card: rgb(255 255 255 / 0.84);
+    --signin-field: rgb(255 255 255 / 0.9);
+    --signin-separator: rgb(60 60 67 / 0.14);
+    --signin-wall: 0.6;
+    --signin-veil: radial-gradient(ellipse at center, rgb(255 255 255 / 0.4), rgb(255 255 255 / 0.8));
+    --signin-shadow: 0 30px 80px rgb(0 0 0 / 0.14);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes spinner {
+  to {
+    rotate: 360deg;
+  }
+}
+
+/* A dialog's backdrop dims and blurs the page, as the web UI's. */
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(4px);
 }

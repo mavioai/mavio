@@ -2,189 +2,306 @@ import { timestampDate } from "@bufbuild/protobuf/wkt";
 import { AccountKind } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { type FormEvent, useState } from "react";
+import { type ReactNode, useState } from "react";
 
-import { accounts, homes, message } from "../lib/api.ts";
+import { accounts, homes } from "../lib/api.ts";
 import { authClient } from "../lib/auth-client.ts";
+import { describe, useLocale, useT } from "../lib/locale.tsx";
 import { useAccount } from "../lib/session.ts";
-import { Button, Card, ErrorText, Field, Muted, Page } from "../ui.tsx";
+import { Actions, Avatar, Block, Button, ErrorText, Field, Group, Icon, Loading, Muted, Page, Row, useConfirm } from "../ui.tsx";
 
 export const Route = createFileRoute("/account")({ component: AccountPage });
 
+type Me = NonNullable<ReturnType<typeof useAccount>> & { emailVerified?: boolean; twoFactorEnabled?: boolean | null };
+
 function AccountPage() {
-  const me = useAccount();
+  const t = useT();
+  const me = useAccount() as Me | undefined;
   const account = useQuery({ queryKey: ["account"], queryFn: () => accounts.getAccount({}), enabled: !!me });
-  if (!me || !account.data) return null;
+  if (!me || !account.data) return <Loading />;
   const a = account.data;
+  const pass = <Pass expires={a.passExpireTime && timestampDate(a.passExpireTime)} effective={a.effectivePass} />;
   if (a.account?.kind === AccountKind.MANAGED) {
     return (
-      <Page title="Account">
-        <Card title={a.account.displayName}>
-          <Muted>@{a.account.userName} · a managed account, which your Home's administrator manages.</Muted>
-        </Card>
-        <Pass expires={a.passExpireTime && timestampDate(a.passExpireTime)} effective={a.effectivePass} />
+      <Page title={t("site.nav.account")}>
+        <Group>
+          <Row leading={<Avatar name={a.account.displayName || "?"} size={44} />} label={<span className="type-headline">{a.account.displayName}</span>} detail={`@${a.account.userName}`} />
+          <Block>
+            <Muted>{t("site.account.managed")}</Muted>
+          </Block>
+        </Group>
+        {pass}
       </Page>
     );
   }
   return (
-    <Page title="Account">
-      <Profile name={a.account?.displayName ?? ""} userName={a.account?.userName ?? ""} email={a.email} />
-      <Pass expires={a.passExpireTime && timestampDate(a.passExpireTime)} effective={a.effectivePass} />
-      <Pin id={me.id} has={a.hasPin} />
+    <Page title={t("site.nav.account")}>
+      <Profile name={a.account?.displayName ?? ""} userName={a.account?.userName ?? ""} email={a.email} verified={!!me.emailVerified} />
+      {pass}
+      <Security id={me.id} hasPin={a.hasPin} twoFactor={!!me.twoFactorEnabled} />
       <Passkeys />
-      <TwoFactor enabled={!!(me as { twoFactorEnabled?: boolean | null }).twoFactorEnabled} />
       <Danger />
     </Page>
   );
 }
 
-function Pass({ expires, effective }: { expires?: Date; effective: boolean }) {
+function Profile({ name, userName, email, verified }: { name: string; userName: string; email: string; verified: boolean }) {
+  const t = useT();
+  const qc = useQueryClient();
+  const [error, setError] = useState<string>();
+  const [saved, setSaved] = useState(false);
   return (
-    <Card title="Mavio Pass">
-      <Muted>
-        {expires
-          ? `Your Mavio Pass runs until ${expires.toLocaleDateString()}.`
-          : effective
-            ? "You share your Home administrator's Mavio Pass."
-            : "You have no Mavio Pass. It pays for what mavio.dev provides, such as the relay; nothing your servers do depends on it."}
-      </Muted>
-    </Card>
+    <Group title={t("site.account.profile")}>
+      <Row leading={<Avatar name={name || userName || "?"} size={44} />} label={<span className="type-headline">{name}</span>} detail={`@${userName}`} />
+      <Row label={t("site.field.email")} detail={email}>
+        <span className={`inline-flex items-center gap-1 type-footnote font-semibold ${verified ? "text-success" : "text-warning"}`}>
+          <Icon name={verified ? "check" : "info"} size={16} />
+          {t(verified ? "site.account.verified" : "site.account.unverified")}
+        </span>
+      </Row>
+      <Block>
+        <form
+          className="flex flex-col gap-3 sm:flex-row sm:items-end"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const res = await authClient.updateUser({ name: String(new FormData(e.currentTarget).get("name")).trim() });
+            setError(describe(t, res.error));
+            setSaved(!res.error);
+            await qc.invalidateQueries({ queryKey: ["account"] });
+          }}
+        >
+          <Field label={t("site.field.displayName")} name="name" defaultValue={name} required maxLength={64} onChange={() => setSaved(false)} />
+          <Button type="submit" className="min-h-11" disabled={saved}>
+            {saved ? <Icon name="check" size={18} /> : null}
+            {t("site.action.save")}
+          </Button>
+        </form>
+        <ErrorText error={error} />
+      </Block>
+    </Group>
   );
 }
 
-function Pin({ id, has }: { id: string; has: boolean }) {
+function Pass({ expires, effective }: { expires?: Date; effective: boolean }) {
+  const t = useT();
+  const locale = useLocale();
+  return (
+    <Group title={t("site.pass.title")}>
+      <Row
+        leading={<Icon name="key" size={24} className={expires || effective ? "text-accent" : "text-text-tertiary"} />}
+        label={expires ? t("site.pass.until", { date: expires.toLocaleDateString(locale, { dateStyle: "long" }) }) : effective ? t("site.pass.shared") : t("site.pass.none")}
+      />
+    </Group>
+  );
+}
+
+/** A row opening a form under it. */
+function Opening({ label, detail, action, open, onToggle, children }: { label: ReactNode; detail?: ReactNode; action: string; open: boolean; onToggle: () => void; children: ReactNode }) {
+  const t = useT();
+  return (
+    <div>
+      <Row label={label} detail={detail}>
+        <Button variant="secondary" onClick={onToggle}>
+          {open ? t("site.action.cancel") : action}
+        </Button>
+      </Row>
+      {open && <div className="flex flex-col gap-3 px-4 pb-4">{children}</div>}
+    </div>
+  );
+}
+
+function Security({ id, hasPin, twoFactor }: { id: string; hasPin: boolean; twoFactor: boolean }) {
+  const t = useT();
+  const [open, setOpen] = useState<"password" | "pin" | "twoFactor">();
+  const toggle = (what: typeof open) => setOpen(open === what ? undefined : what);
+  return (
+    <Group title={t("site.account.security")}>
+      <Opening label={t("site.field.password")} action={t("site.account.changePassword")} open={open === "password"} onToggle={() => toggle("password")}>
+        <ChangePassword />
+      </Opening>
+      <Opening label={t("site.field.pin")} detail={t(hasPin ? "site.account.pinSet" : "site.account.pinNone")} action={t("site.action.set")} open={open === "pin"} onToggle={() => toggle("pin")}>
+        <Pin id={id} has={hasPin} onDone={() => setOpen(undefined)} />
+      </Opening>
+      <Opening
+        label={
+          <span className="flex items-center gap-2">
+            {t("site.account.twoFactor")}
+            <span className={`type-footnote font-semibold ${twoFactor ? "text-success" : "text-text-tertiary"}`}>{t(twoFactor ? "site.account.on" : "site.account.off")}</span>
+          </span>
+        }
+        detail={t(twoFactor ? "site.account.twoFactorOn" : "site.account.twoFactorOff")}
+        action={t(twoFactor ? "site.account.turnOff" : "site.account.setUp")}
+        open={open === "twoFactor"}
+        onToggle={() => toggle("twoFactor")}
+      >
+        <TwoFactor enabled={twoFactor} />
+      </Opening>
+    </Group>
+  );
+}
+
+function ChangePassword() {
+  const t = useT();
+  const [error, setError] = useState<string>();
+  const [done, setDone] = useState(false);
+  return (
+    <form
+      className="flex flex-col gap-3"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        const form = e.currentTarget;
+        const f = new FormData(form);
+        const res = await authClient.changePassword({ currentPassword: String(f.get("current")), newPassword: String(f.get("password")), revokeOtherSessions: true });
+        setError(describe(t, res.error));
+        setDone(!res.error);
+        if (!res.error) form.reset();
+      }}
+    >
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Field label={t("site.field.currentPassword")} name="current" type="password" autoComplete="current-password" required />
+        <Field label={t("site.field.newPassword")} name="password" type="password" autoComplete="new-password" placeholder={t("site.field.passwordHint")} minLength={8} required />
+      </div>
+      <ErrorText error={error} />
+      {done && <p className="type-callout text-success">{t("site.account.passwordChanged")}</p>}
+      <Actions>
+        <Button type="submit">{t("site.account.changePassword")}</Button>
+      </Actions>
+    </form>
+  );
+}
+
+function Pin({ id, has, onDone }: { id: string; has: boolean; onDone: () => void }) {
+  const t = useT();
   const qc = useQueryClient();
   const set = useMutation({
     mutationFn: (pin: string) => homes.setPin({ accountId: id, pin }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["account"] }),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["account"] });
+      onDone();
+    },
   });
   return (
-    <Card title="PIN">
-      <Muted>
-        {has
-          ? "Switching to you in your Home needs your PIN."
-          : "Without a PIN, anyone in your Home can switch to you on a shared device."}
-      </Muted>
+    <>
       <form
-        className="flex items-end gap-3"
+        className="flex flex-col gap-3 sm:flex-row sm:items-end"
         onSubmit={(e) => {
           e.preventDefault();
-          const form = e.currentTarget;
-          set.mutate(String(new FormData(form).get("pin")), { onSuccess: () => form.reset() });
+          set.mutate(String(new FormData(e.currentTarget).get("pin")));
         }}
       >
-        <Field label={has ? "New PIN" : "PIN"} name="pin" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} required />
-        <Button type="submit">Set</Button>
+        <Field label={t(has ? "site.field.newPin" : "site.field.pin")} name="pin" type="password" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} autoFocus required />
+        <Button type="submit" className="min-h-11">
+          {t("site.action.set")}
+        </Button>
         {has && (
-          <Button kind="secondary" onClick={() => set.mutate("")}>
-            Remove
+          <Button variant="danger" className="min-h-11" onClick={() => set.mutate("")}>
+            {t("site.action.remove")}
           </Button>
         )}
       </form>
-      <ErrorText error={set.error ? message(set.error) : undefined} />
-    </Card>
-  );
-}
-
-function Profile({ name, userName, email }: { name: string; userName: string; email: string }) {
-  const qc = useQueryClient();
-  const [error, setError] = useState<string>();
-  async function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const res = await authClient.updateUser({ name: String(new FormData(e.currentTarget).get("name")) });
-    setError(res.error?.message);
-    await qc.invalidateQueries({ queryKey: ["account"] });
-  }
-  return (
-    <Card title="Profile">
-      <Muted>
-        @{userName} · {email}
-      </Muted>
-      <form className="flex flex-col gap-3" onSubmit={submit}>
-        <Field label="Display name" name="name" defaultValue={name} required />
-        <ErrorText error={error} />
-        <Button type="submit">Save</Button>
-      </form>
-    </Card>
-  );
-}
-
-function Passkeys() {
-  const list = authClient.useListPasskeys();
-  const [error, setError] = useState<string>();
-  return (
-    <Card title="Passkeys">
-      <ul className="flex flex-col gap-2">
-        {list.data?.map((p) => (
-          <li key={p.id} className="flex items-center gap-3">
-            <span className="type-body flex-1">{p.name || "Passkey"}</span>
-            <Button
-              kind="danger"
-              onClick={async () => {
-                const res = await authClient.passkey.deletePasskey({ id: p.id });
-                setError(res.error?.message);
-              }}
-            >
-              Remove
-            </Button>
-          </li>
-        ))}
-      </ul>
-      <ErrorText error={error} />
-      <Button
-        kind="secondary"
-        onClick={async () => {
-          const res = await authClient.passkey.addPasskey();
-          setError(res?.error?.message);
-        }}
-      >
-        Add a passkey
-      </Button>
-    </Card>
+      <ErrorText error={describe(t, set.error)} />
+    </>
   );
 }
 
 function TwoFactor({ enabled }: { enabled: boolean }) {
+  const t = useT();
   const [uri, setUri] = useState<string>();
   const [error, setError] = useState<string>();
-  async function start(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const password = String(new FormData(e.currentTarget).get("password"));
-    const res = enabled ? await authClient.twoFactor.disable({ password }) : await authClient.twoFactor.enable({ password });
-    if (res.error) setError(res.error.message);
-    else if (res.data && "totpURI" in res.data) setUri(res.data.totpURI);
-    else window.location.reload();
-  }
-  async function confirmCode(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const res = await authClient.twoFactor.verifyTotp({ code: String(new FormData(e.currentTarget).get("code")) });
-    if (res.error) setError(res.error.message);
-    else window.location.reload();
+  if (uri) {
+    const secret = new URL(uri).searchParams.get("secret") ?? uri;
+    return (
+      <form
+        className="flex flex-col gap-3"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          const res = await authClient.twoFactor.verifyTotp({ code: String(new FormData(e.currentTarget).get("code")).trim() });
+          if (res.error) setError(describe(t, res.error));
+          else window.location.reload();
+        }}
+      >
+        <Muted>{t("site.account.addKey")}</Muted>
+        <a href={uri} className="rounded-[10px] bg-fill px-3 py-2.5 text-center font-mono type-callout tracking-wider break-all select-all">
+          {secret}
+        </a>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <Field label={t("site.field.code")} name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required />
+          <Button type="submit" className="min-h-11">
+            {t("site.account.turnOn")}
+          </Button>
+        </div>
+        <ErrorText error={error} />
+      </form>
+    );
   }
   return (
-    <Card title="Two-factor authentication">
-      <Muted>{enabled ? "Signing in with a password also asks for a code of your authenticator app." : "Ask for a code of an authenticator app after your password."}</Muted>
-      {uri ? (
-        <form className="flex flex-col gap-3" onSubmit={confirmCode}>
-          <Muted>Add this key to your authenticator app, then enter the code it shows:</Muted>
-          <code className="type-footnote break-all">{uri}</code>
-          <Field label="Code" name="code" inputMode="numeric" autoComplete="one-time-code" required />
-          <Button type="submit">Turn on</Button>
-        </form>
-      ) : (
-        <form className="flex flex-col gap-3" onSubmit={start}>
-          <Field label="Password" name="password" type="password" autoComplete="current-password" required />
-          <Button type="submit" kind={enabled ? "danger" : "primary"}>
-            {enabled ? "Turn off" : "Set up"}
-          </Button>
-        </form>
-      )}
+    <form
+      className="flex flex-col gap-3"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        const password = String(new FormData(e.currentTarget).get("password"));
+        const res = enabled ? await authClient.twoFactor.disable({ password }) : await authClient.twoFactor.enable({ password });
+        if (res.error) setError(describe(t, res.error));
+        else if (res.data && "totpURI" in res.data) setUri(res.data.totpURI);
+        else window.location.reload();
+      }}
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <Field label={t("site.field.password")} name="password" type="password" autoComplete="current-password" autoFocus required />
+        <Button type="submit" variant={enabled ? "danger" : "primary"} className="min-h-11">
+          {t(enabled ? "site.account.turnOff" : "site.action.continue")}
+        </Button>
+      </div>
       <ErrorText error={error} />
-    </Card>
+    </form>
+  );
+}
+
+function Passkeys() {
+  const t = useT();
+  const list = authClient.useListPasskeys();
+  const [error, setError] = useState<string>();
+  return (
+    <Group title={t("site.account.passkeys")} footer={<ErrorText error={error} />}>
+      {list.data?.length === 0 && (
+        <Block>
+          <Muted>{t("site.account.noPasskeys")}</Muted>
+        </Block>
+      )}
+      {list.data?.map((p) => (
+        <Row key={p.id} leading={<Icon name="key" size={22} className="text-text-secondary" />} label={p.name || t("site.account.passkey")} detail={new Date(p.createdAt).toLocaleDateString()}>
+          <Button
+            variant="danger"
+            onClick={async () => {
+              const res = await authClient.passkey.deletePasskey({ id: p.id });
+              setError(describe(t, res.error));
+            }}
+          >
+            {t("site.action.remove")}
+          </Button>
+        </Row>
+      ))}
+      <Block>
+        <Actions>
+          <Button
+            variant="secondary"
+            onClick={async () => {
+              const res = await authClient.passkey.addPasskey();
+              setError(describe(t, res?.error));
+            }}
+          >
+            <Icon name="add" size={18} />
+            {t("site.account.addPasskey")}
+          </Button>
+        </Actions>
+      </Block>
+    </Group>
   );
 }
 
 function Danger() {
+  const t = useT();
+  const confirm = useConfirm();
   const report = useMutation({
     mutationFn: () => accounts.reportCompromised({}),
     onSuccess: () => {
@@ -192,28 +309,49 @@ function Danger() {
     },
   });
   const [error, setError] = useState<string>();
-  async function remove(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!confirm("Delete your Mavio account? Servers delete your user and its data.")) return;
-    const res = await authClient.deleteUser({ password: String(new FormData(e.currentTarget).get("password")) });
-    if (res.error) setError(res.error.message);
-    else window.location.href = "/sign-up";
-  }
+  const [deleting, setDeleting] = useState(false);
   return (
-    <Card title="Security">
-      <Muted>If someone else may have signed in to your account, sign out everywhere: your servers end your sessions too. Then change your password.</Muted>
-      <Button kind="danger" onClick={() => confirm("Sign out everywhere?") && report.mutate()}>
-        Report compromised
-      </Button>
-      <ErrorText error={report.error ? message(report.error) : undefined} />
-      <form className="flex flex-col gap-3 border-t border-border pt-4" onSubmit={remove}>
-        <Muted>Deleting the account removes it from every server you have access to, with your watch history there.</Muted>
-        <Field label="Password" name="password" type="password" autoComplete="current-password" required />
-        <ErrorText error={error} />
-        <Button type="submit" kind="danger">
-          Delete account
+    <Group title={t("site.account.danger")}>
+      <Row label={t("site.account.compromised")} detail={t("site.account.compromisedBody")}>
+        <Button
+          variant="danger"
+          onClick={async () => {
+            if (await confirm({ title: t("site.account.compromisedConfirm"), message: t("site.account.compromisedBody"), action: t("site.account.compromised"), destructive: true })) report.mutate();
+          }}
+        >
+          {t("site.account.compromised")}
         </Button>
-      </form>
-    </Card>
+      </Row>
+      <div>
+        <Row label={t("site.account.delete")} detail={t("site.account.deleteBody")}>
+          <Button variant="danger" onClick={() => setDeleting(!deleting)}>
+            {deleting ? t("site.action.cancel") : t("site.account.delete")}
+          </Button>
+        </Row>
+        {deleting && (
+          <form
+            className="flex flex-col gap-3 px-4 pb-4 sm:flex-row sm:items-end"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const password = String(new FormData(e.currentTarget).get("password"));
+              if (!(await confirm({ title: t("site.account.deleteConfirm"), message: t("site.account.deleteBody"), action: t("site.account.delete"), destructive: true }))) return;
+              const res = await authClient.deleteUser({ password });
+              if (res.error) setError(describe(t, res.error));
+              else window.location.href = "/sign-up";
+            }}
+          >
+            <Field label={t("site.field.password")} name="password" type="password" autoComplete="current-password" autoFocus required />
+            <Button type="submit" variant="danger" className="min-h-11">
+              {t("site.account.delete")}
+            </Button>
+          </form>
+        )}
+      </div>
+      {(error || report.error) && (
+        <Block>
+          <ErrorText error={error ?? describe(t, report.error)} />
+        </Block>
+      )}
+    </Group>
   );
 }

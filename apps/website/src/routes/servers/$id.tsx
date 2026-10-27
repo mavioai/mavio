@@ -1,16 +1,19 @@
 import { create } from "@bufbuild/protobuf";
 import { type Access, AccessSchema, type Library } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { type FormEvent, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 
-import { accounts, message } from "../../lib/api.ts";
+import { accounts } from "../../lib/api.ts";
+import { describe, useT } from "../../lib/locale.tsx";
 import { useAccount } from "../../lib/session.ts";
-import { Button, Card, Check, ErrorText, Field, Muted, Page } from "../../ui.tsx";
+import { Actions, Avatar, Block, Button, Check, Empty, ErrorText, Field, Group, Icon, Loading, Muted, Page, Row, useConfirm } from "../../ui.tsx";
 
 export const Route = createFileRoute("/servers/$id")({ component: ServerPage });
 
 function ServerPage() {
+  const t = useT();
+  const confirm = useConfirm();
   const { id } = Route.useParams();
   const me = useAccount();
   const qc = useQueryClient();
@@ -28,38 +31,60 @@ function ServerPage() {
       await navigate({ to: "/" });
     },
   });
-  if (!me || !servers.data) return null;
-  if (!server) return <Page title="Server">{<Muted>You have no access to this server.</Muted>}</Page>;
+  if (!me || !servers.data) return <Loading />;
+  if (!server) {
+    return (
+      <Page title={t("site.nav.servers")}>
+        <Empty icon="server" title={t("site.server.unknown")} />
+      </Page>
+    );
+  }
+  const name = server.name || server.id;
 
   return (
-    <Page title={server.name || server.id}>
-      <Card title="Libraries">
-        {server.libraries.length === 0 && <Muted>The server has published no libraries yet.</Muted>}
-        <ul className="type-body flex flex-col gap-1">
-          {server.libraries.map((l) => (
-            <li key={l.id}>
-              {l.name} <span className="text-text-tertiary">· {l.kind}</span>
-            </li>
-          ))}
-        </ul>
-      </Card>
+    <Page
+      title={
+        <span className="flex flex-col gap-2">
+          <Link to="/" className="inline-flex items-center gap-0.5 self-start type-body font-normal text-accent-text hover:opacity-80">
+            <Icon name="back" size={18} />
+            {t("site.nav.servers")}
+          </Link>
+          {name}
+        </span>
+      }
+    >
+      <Group title={t("site.server.libraries")}>
+        {server.libraries.length === 0 ? (
+          <Block>
+            <Muted>{t("site.server.noLibraries")}</Muted>
+          </Block>
+        ) : (
+          server.libraries.map((l) => <Row key={l.id} leading={<Icon name="folder" size={22} className="text-text-secondary" />} label={l.name} detail={l.kind} />)
+        )}
+      </Group>
       {admin && <AccessRecords serverId={id} libraries={server.libraries} />}
-      <Card>
-        <Muted>
-          {admin
-            ? "Removing the server from mavio.dev deletes its access records; the server keeps running until you change its mode."
-            : "Leaving the server removes your access; its administrator can invite you again."}
-        </Muted>
-        <Button kind="danger" onClick={() => confirm(admin ? "Remove this server?" : "Leave this server?") && leave.mutate()}>
-          {admin ? "Remove server" : "Leave server"}
-        </Button>
-        <ErrorText error={leave.error ? message(leave.error) : undefined} />
-      </Card>
+      <Group footer={t(admin ? "site.server.removeBody" : "site.server.leaveBody")}>
+        <Block>
+          <Actions>
+            <Button
+              variant="danger"
+              onClick={async () => {
+                if (await confirm({ title: t(admin ? "site.server.removeConfirm" : "site.server.leaveConfirm", { name }), action: t(admin ? "site.server.remove" : "site.server.leave"), destructive: true }))
+                  leave.mutate();
+              }}
+            >
+              {t(admin ? "site.server.remove" : "site.server.leave")}
+            </Button>
+          </Actions>
+          <ErrorText error={describe(t, leave.error)} />
+        </Block>
+      </Group>
     </Page>
   );
 }
 
 function AccessRecords({ serverId, libraries }: { serverId: string; libraries: Library[] }) {
+  const t = useT();
   const qc = useQueryClient();
   const records = useQuery({ queryKey: ["access", serverId], queryFn: () => accounts.listAccess({ serverId }) });
   const [editing, setEditing] = useState<{ userName: string; access: Access }>();
@@ -68,47 +93,36 @@ function AccessRecords({ serverId, libraries }: { serverId: string; libraries: L
     onSuccess: () => qc.invalidateQueries({ queryKey: ["access", serverId] }),
   });
   return (
-    <Card title="Access">
-      {records.data?.records.length === 0 && <Muted>Nobody else has access yet.</Muted>}
-      <ul className="flex flex-col gap-3">
+    <>
+      <Group title={t("site.server.access")} footer={<ErrorText error={describe(t, revoke.error)} />}>
+        {records.data?.records.length === 0 && (
+          <Block>
+            <Muted>{t("site.server.noAccess")}</Muted>
+          </Block>
+        )}
         {records.data?.records.map((r) => (
-          <li key={r.account?.id} className="flex items-center gap-3">
-            <span className="type-body flex-1">
-              {r.account?.displayName} <span className="text-text-tertiary">@{r.account?.userName}</span>
-              {r.invitation && <span className="type-footnote text-text-secondary"> · invited</span>}
-            </span>
-            <Button kind="secondary" onClick={() => setEditing({ userName: r.account?.userName ?? "", access: r.access ?? create(AccessSchema) })}>
-              Edit
+          <Row
+            key={r.account?.id}
+            leading={<Avatar name={r.account?.displayName || r.account?.userName || "?"} />}
+            label={r.account?.displayName || r.account?.userName}
+            detail={[`@${r.account?.userName}`, r.invitation && t("site.server.invited")].filter(Boolean).join(" · ")}
+          >
+            <Button variant="secondary" onClick={() => setEditing({ userName: r.account?.userName ?? "", access: r.access ?? create(AccessSchema) })}>
+              {t("site.action.edit")}
             </Button>
-            <Button kind="danger" onClick={() => r.account && revoke.mutate(r.account.id)}>
-              {r.invitation ? "Withdraw" : "Revoke"}
+            <Button variant="danger" onClick={() => r.account && revoke.mutate(r.account.id)}>
+              {t(r.invitation ? "site.action.withdraw" : "site.server.revoke")}
             </Button>
-          </li>
+          </Row>
         ))}
-      </ul>
-      <ErrorText error={revoke.error ? message(revoke.error) : undefined} />
-      <Grant
-        key={editing?.userName ?? ""}
-        serverId={serverId}
-        libraries={libraries}
-        initial={editing}
-        onDone={() => setEditing(undefined)}
-      />
-    </Card>
+      </Group>
+      <Grant key={editing?.userName ?? ""} serverId={serverId} libraries={libraries} initial={editing} onDone={() => setEditing(undefined)} />
+    </>
   );
 }
 
-function Grant({
-  serverId,
-  libraries,
-  initial,
-  onDone,
-}: {
-  serverId: string;
-  libraries: Library[];
-  initial?: { userName: string; access: Access };
-  onDone: () => void;
-}) {
+function Grant({ serverId, libraries, initial, onDone }: { serverId: string; libraries: Library[]; initial?: { userName: string; access: Access }; onDone: () => void }) {
+  const t = useT();
   const qc = useQueryClient();
   const a = initial?.access;
   const [all, setAll] = useState(a ? a.allLibraries : true);
@@ -120,60 +134,73 @@ function Grant({
     },
   });
 
-  function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const f = new FormData(e.currentTarget);
+  function submit(f: FormData, form: HTMLFormElement) {
     const rating = String(f.get("rating"));
     const labels = (name: string) =>
       String(f.get(name))
         .split(",")
         .map((l) => l.trim())
         .filter(Boolean);
-    grant.mutate({
-      userName: String(f.get("userName")),
-      access: create(AccessSchema, {
-        allLibraries: all,
-        libraryIds: all ? [] : f.getAll("library").map(String),
-        maxParentalRating: rating === "" ? undefined : Number(rating),
-        blockUnrated: f.get("blockUnrated") === "on",
-        allowedLabels: labels("allowedLabels"),
-        blockedLabels: labels("blockedLabels"),
-        allowDownload: f.get("allowDownload") === "on",
-      }),
-    });
+    grant.mutate(
+      {
+        userName: String(f.get("userName")).trim(),
+        access: create(AccessSchema, {
+          allLibraries: all,
+          libraryIds: all ? [] : f.getAll("library").map(String),
+          maxParentalRating: rating === "" ? undefined : Number(rating),
+          blockUnrated: f.get("blockUnrated") === "on",
+          allowedLabels: labels("allowedLabels"),
+          blockedLabels: labels("blockedLabels"),
+          allowDownload: f.get("allowDownload") === "on",
+        }),
+      },
+      { onSuccess: () => !initial && form.reset() },
+    );
   }
 
   return (
-    <form className="flex flex-col gap-3 border-t border-border pt-4" onSubmit={submit}>
-      <h3 className="type-headline">{initial ? `Access of @${initial.userName}` : "Invite an account"}</h3>
-      <Field label="User name" name="userName" defaultValue={initial?.userName} readOnly={!!initial} required />
-      <Check label="Every library" checked={all} onChange={(e) => setAll(e.target.checked)} />
-      {!all &&
-        libraries.map((l) => (
-          <Check key={l.id} label={l.name} name="library" value={l.id} defaultChecked={a?.libraryIds.includes(l.id)} />
-        ))}
-      <Field
-        label="Highest rating score shown (empty for every rating)"
-        name="rating"
-        type="number"
-        min={0}
-        defaultValue={a?.maxParentalRating}
-      />
-      <Check label="Hide unrated items" name="blockUnrated" defaultChecked={a?.blockUnrated} />
-      <Field label="Show only items with these labels" name="allowedLabels" defaultValue={a?.allowedLabels.join(", ")} />
-      <Field label="Hide items with these labels" name="blockedLabels" defaultValue={a?.blockedLabels.join(", ")} />
-      <Check label="Allow downloads" name="allowDownload" defaultChecked={a?.allowDownload} />
-      <ErrorText error={grant.error ? message(grant.error) : undefined} />
-      <div className="flex gap-3">
-        <Button type="submit" disabled={grant.isPending}>
-          {initial ? "Save" : "Invite"}
-        </Button>
-        {initial && (
-          <Button kind="secondary" onClick={onDone}>
-            Cancel
-          </Button>
-        )}
-      </div>
-    </form>
+    <Group title={initial ? t("site.server.accessOf", { name: initial.userName }) : t("site.server.invite")}>
+      <Block>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            submit(new FormData(e.currentTarget), e.currentTarget);
+          }}
+        >
+          <Field label={t("site.field.userName")} name="userName" defaultValue={initial?.userName} readOnly={!!initial} autoCapitalize="none" spellCheck={false} required />
+          <div className="flex flex-col gap-1">
+            <Check label={t("site.server.everyLibrary")} checked={all} onChange={(e) => setAll(e.target.checked)} />
+            {!all && (
+              <div className="flex flex-col gap-1 pl-7">
+                {libraries.map((l) => (
+                  <Check key={l.id} label={l.name} name="library" value={l.id} defaultChecked={a?.libraryIds.includes(l.id)} />
+                ))}
+              </div>
+            )}
+          </div>
+          <Field label={t("site.server.rating")} name="rating" type="number" min={0} placeholder={t("site.server.ratingHint")} defaultValue={a?.maxParentalRating} />
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <Field label={t("site.server.allowedLabels")} name="allowedLabels" placeholder={t("site.server.labelsHint")} defaultValue={a?.allowedLabels.join(", ")} />
+            <Field label={t("site.server.blockedLabels")} name="blockedLabels" placeholder={t("site.server.labelsHint")} defaultValue={a?.blockedLabels.join(", ")} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Check label={t("site.server.blockUnrated")} name="blockUnrated" defaultChecked={a?.blockUnrated} />
+            <Check label={t("site.server.allowDownload")} name="allowDownload" defaultChecked={a?.allowDownload} />
+          </div>
+          <ErrorText error={describe(t, grant.error)} />
+          <Actions>
+            <Button type="submit" disabled={grant.isPending}>
+              {initial ? t("site.action.save") : t("site.action.invite")}
+            </Button>
+            {initial && (
+              <Button variant="secondary" onClick={onDone}>
+                {t("site.action.cancel")}
+              </Button>
+            )}
+          </Actions>
+        </form>
+      </Block>
+    </Group>
   );
 }

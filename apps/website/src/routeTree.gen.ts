@@ -13,11 +13,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AuthorizeRouteImport } from './routes/authorize'
 import { Route as ClaimRouteImport } from './routes/claim'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FriendsRouteImport } from './routes/friends'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as LinkRouteImport } from './routes/link'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as VerifiedRouteImport } from './routes/verified'
 import { Route as ServersIdRouteImport } from './routes/servers/$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -40,6 +43,11 @@ const ClaimRoute = ClaimRouteImport.update({
   path: '/claim',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FriendsRoute = FriendsRouteImport.update({
   id: '/friends',
   path: '/friends',
@@ -55,6 +63,11 @@ const LinkRoute = LinkRouteImport.update({
   path: '/link',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
@@ -63,6 +76,11 @@ const SignInRoute = SignInRouteImport.update({
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifiedRoute = VerifiedRouteImport.update({
+  id: '/verified',
+  path: '/verified',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServersIdRoute = ServersIdRouteImport.update({
@@ -76,11 +94,14 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/authorize': typeof AuthorizeRoute
   '/claim': typeof ClaimRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/friends': typeof FriendsRoute
   '/home': typeof HomeRoute
   '/link': typeof LinkRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/verified': typeof VerifiedRoute
   '/servers/$id': typeof ServersIdRoute
 }
 export interface FileRoutesByTo {
@@ -88,11 +109,14 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/authorize': typeof AuthorizeRoute
   '/claim': typeof ClaimRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/friends': typeof FriendsRoute
   '/home': typeof HomeRoute
   '/link': typeof LinkRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/verified': typeof VerifiedRoute
   '/servers/$id': typeof ServersIdRoute
 }
 export interface FileRoutesById {
@@ -101,11 +125,14 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/authorize': typeof AuthorizeRoute
   '/claim': typeof ClaimRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/friends': typeof FriendsRoute
   '/home': typeof HomeRoute
   '/link': typeof LinkRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/verified': typeof VerifiedRoute
   '/servers/$id': typeof ServersIdRoute
 }
 export interface FileRouteTypes {
@@ -115,11 +142,14 @@ export interface FileRouteTypes {
     | '/account'
     | '/authorize'
     | '/claim'
+    | '/forgot-password'
     | '/friends'
     | '/home'
     | '/link'
+    | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/verified'
     | '/servers/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -127,11 +157,14 @@ export interface FileRouteTypes {
     | '/account'
     | '/authorize'
     | '/claim'
+    | '/forgot-password'
     | '/friends'
     | '/home'
     | '/link'
+    | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/verified'
     | '/servers/$id'
   id:
     | '__root__'
@@ -139,11 +172,14 @@ export interface FileRouteTypes {
     | '/account'
     | '/authorize'
     | '/claim'
+    | '/forgot-password'
     | '/friends'
     | '/home'
     | '/link'
+    | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/verified'
     | '/servers/$id'
   fileRoutesById: FileRoutesById
 }
@@ -152,11 +188,14 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   AuthorizeRoute: typeof AuthorizeRoute
   ClaimRoute: typeof ClaimRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   FriendsRoute: typeof FriendsRoute
   HomeRoute: typeof HomeRoute
   LinkRoute: typeof LinkRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  VerifiedRoute: typeof VerifiedRoute
   ServersIdRoute: typeof ServersIdRoute
 }
 
@@ -190,6 +229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClaimRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/friends': {
       id: '/friends'
       path: '/friends'
@@ -211,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LinkRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sign-in': {
       id: '/sign-in'
       path: '/sign-in'
@@ -223,6 +276,13 @@ declare module '@tanstack/react-router' {
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verified': {
+      id: '/verified'
+      path: '/verified'
+      fullPath: '/verified'
+      preLoaderRoute: typeof VerifiedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/servers/$id': {
@@ -240,11 +300,14 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   AuthorizeRoute: AuthorizeRoute,
   ClaimRoute: ClaimRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   FriendsRoute: FriendsRoute,
   HomeRoute: HomeRoute,
   LinkRoute: LinkRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  VerifiedRoute: VerifiedRoute,
   ServersIdRoute: ServersIdRoute,
 }
 export const routeTree = rootRouteImport

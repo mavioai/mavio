@@ -4,33 +4,47 @@ import type { Home, HomeInvitation, HomeMember } from "@mavio/proto/mavio/cloud/
 import { RestrictionProfile } from "@mavio/proto/mavio/user/v1/user_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { type FormEvent, useState } from "react";
+import { type ReactNode, useState } from "react";
 
-import { accounts, homes, message, switchTo } from "../lib/api.ts";
+import { accounts, homes, switchTo } from "../lib/api.ts";
+import type { MessageKey } from "../lib/i18n.ts";
+import { describe, useRich, useT } from "../lib/locale.tsx";
 import { useAccount } from "../lib/session.ts";
-import { Button, Card, ErrorText, Field, Muted, Page } from "../ui.tsx";
+import { Actions, Avatar, Block, Button, Check, ErrorText, Field, Group, Icon, Loading, Muted, Name, Page, Row, Select, useConfirm } from "../ui.tsx";
 
 export const Route = createFileRoute("/home")({ component: HomePage });
 
-const restrictions: [RestrictionProfile, string][] = [
-  [RestrictionProfile.UNSPECIFIED, "No restriction"],
-  [RestrictionProfile.YOUNGER_CHILD, "Younger child"],
-  [RestrictionProfile.OLDER_CHILD, "Older child"],
-  [RestrictionProfile.TEEN, "Teenager"],
+const restrictions: [RestrictionProfile, MessageKey][] = [
+  [RestrictionProfile.UNSPECIFIED, "site.restriction.none"],
+  [RestrictionProfile.YOUNGER_CHILD, "site.restriction.youngerChild"],
+  [RestrictionProfile.OLDER_CHILD, "site.restriction.olderChild"],
+  [RestrictionProfile.TEEN, "site.restriction.teen"],
 ];
 
 const nameOf = (m?: { displayName: string; userName: string }) => m?.displayName || m?.userName || "";
 
 function HomePage() {
+  const t = useT();
   const me = useAccount();
   const data = useQuery({ queryKey: ["home"], queryFn: () => homes.getHome({}), enabled: !!me });
-  if (!me || !data.data) return <ErrorText error={data.error ? message(data.error) : undefined} />;
+  if (!me || data.isPending) return <Loading />;
+  if (!data.data) {
+    return (
+      <Page title={t("site.nav.home")}>
+        <ErrorText error={describe(t, data.error)} />
+      </Page>
+    );
+  }
   const { home, invitations } = data.data;
   return (
-    <Page title={home?.name || "Home"}>
-      {invitations.map((i) => (
-        <Invitation key={i.homeId} invitation={i} />
-      ))}
+    <Page title={home?.name || t("site.nav.home")}>
+      {invitations.length > 0 && (
+        <Group title={t("site.invitations.title")}>
+          {invitations.map((i) => (
+            <Invitation key={i.homeId} invitation={i} />
+          ))}
+        </Group>
+      )}
       {home ? <Members home={home} me={me.id} /> : <CreateHome />}
     </Page>
   );
@@ -42,6 +56,8 @@ function useDone() {
 }
 
 function Invitation({ invitation: i }: { invitation: HomeInvitation }) {
+  const t = useT();
+  const rich = useRich();
   const done = useDone();
   const answer = useMutation({
     mutationFn: async (accept: boolean) => {
@@ -50,47 +66,55 @@ function Invitation({ invitation: i }: { invitation: HomeInvitation }) {
     },
     onSuccess: done,
   });
+  const servers = i.offers.map((o) => o.serverName || o.serverId).join(", ");
   return (
-    <Card title={`Invitation to ${i.homeName}`}>
-      <Muted>
-        {nameOf(i.administrator)} invites you to their Home
-        {i.offers.length > 0 && `, with access to ${i.offers.map((o) => o.serverName || o.serverId).join(", ")}`}. Joining leaves
-        the Home you are in.
-      </Muted>
-      <ErrorText error={answer.error ? message(answer.error) : undefined} />
-      <div className="flex gap-3">
-        <Button onClick={() => answer.mutate(true)}>Join</Button>
-        <Button kind="secondary" onClick={() => answer.mutate(false)}>
-          Decline
-        </Button>
+    <Block>
+      <div className="flex items-start gap-3">
+        <Icon name="home" size={28} className="shrink-0 text-accent" />
+        <div className="flex flex-col gap-1">
+          <p className="type-body">{rich("site.home.invitation", { name: nameOf(i.administrator), home: <Name>{i.homeName}</Name> })}</p>
+          <Muted>{[servers && t("site.home.invitationServers", { servers }), t("site.home.joinLeaves")].filter(Boolean).join(" ")}</Muted>
+        </div>
       </div>
-    </Card>
+      <Actions>
+        <Button onClick={() => answer.mutate(true)}>{t("site.home.join")}</Button>
+        <Button variant="secondary" onClick={() => answer.mutate(false)}>
+          {t("site.action.decline")}
+        </Button>
+      </Actions>
+      <ErrorText error={describe(t, answer.error)} />
+    </Block>
   );
 }
 
 function CreateHome() {
+  const t = useT();
   const done = useDone();
   const create = useMutation({ mutationFn: (name: string) => homes.createHome({ name }), onSuccess: done });
-  function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    create.mutate(String(new FormData(e.currentTarget).get("name")));
-  }
   return (
-    <Card title="Create a Home">
-      <Muted>
-        A Home is up to 15 people who share devices: they switch between each other, and children get managed accounts with
-        restriction profiles.
-      </Muted>
-      <form className="flex flex-col gap-3" onSubmit={submit}>
-        <Field label="Name" name="name" defaultValue="Home" required maxLength={64} />
-        <ErrorText error={create.error ? message(create.error) : undefined} />
-        <Button type="submit">Create</Button>
-      </form>
-    </Card>
+    <Group title={t("site.home.create")} footer={t("site.home.createBody")}>
+      <Block>
+        <form
+          className="flex flex-col gap-3 sm:flex-row sm:items-end"
+          onSubmit={(e) => {
+            e.preventDefault();
+            create.mutate(String(new FormData(e.currentTarget).get("name")).trim());
+          }}
+        >
+          <Field label={t("site.field.name")} name="name" defaultValue={t("site.home.defaultName")} required maxLength={64} />
+          <Button type="submit" className="min-h-11" disabled={create.isPending}>
+            {t("site.action.create")}
+          </Button>
+        </form>
+        <ErrorText error={describe(t, create.error)} />
+      </Block>
+    </Group>
   );
 }
 
 function Members({ home, me }: { home: Home; me: string }) {
+  const t = useT();
+  const confirm = useConfirm();
   const admin = home.administrator?.id === me;
   const done = useDone();
   const router = useRouter();
@@ -104,42 +128,48 @@ function Members({ home, me }: { home: Home; me: string }) {
   return (
     <>
       {home.frozen && (
-        <Card>
-          <Muted>
-            This Home is frozen: {admin ? "your" : "its administrator's"} Mavio Pass lapsed, so no one can be invited and the Pass is
-            not shared. Switching and managed accounts keep working.
-          </Muted>
-        </Card>
+        <p className="flex items-start gap-2.5 rounded-[14px] bg-fill px-4 py-3 type-callout text-text-secondary">
+          <Icon name="info" size={20} className="mt-px shrink-0 text-warning" />
+          {t(admin ? "site.home.frozenMine" : "site.home.frozenTheirs")}
+        </p>
       )}
-      <Card title="Members">
-        <ul className="flex flex-col gap-4">
-          {home.members.map((m) => (
-            <Member key={m.account?.id} member={m} me={me} admin={admin} onSwitched={() => router.navigate({ to: "/" })} />
-          ))}
-        </ul>
-      </Card>
+      <Group title={t("site.home.members")}>
+        {home.members.map((m) => (
+          <Member key={m.account?.id} member={m} me={me} admin={admin} administrator={m.account?.id === home.administrator?.id} onSwitched={() => router.navigate({ to: "/" })} />
+        ))}
+      </Group>
       {admin && <CreateManaged />}
       {admin && <Invite home={home} />}
-      <Card title={admin ? "Dissolve the Home" : "Leave the Home"}>
-        <Muted>
-          {admin
-            ? "Full members become your friends and keep their access. Managed accounts are deleted, with their data on every server."
-            : "You become the administrator's friend and keep your access."}
-        </Muted>
-        <ErrorText error={leave.error ? message(leave.error) : undefined} />
-        <Button kind="danger" onClick={() => confirm(admin ? "Dissolve the Home?" : "Leave the Home?") && leave.mutate()}>
-          {admin ? "Dissolve" : "Leave"}
-        </Button>
-      </Card>
+      <Group footer={t(admin ? "site.home.dissolveBody" : "site.home.leaveBody")}>
+        <Block>
+          <Actions>
+            <Button
+              variant="danger"
+              onClick={async () => {
+                if (await confirm({ title: t(admin ? "site.home.dissolveConfirm" : "site.home.leaveConfirm", { home: home.name }), action: t(admin ? "site.home.dissolve" : "site.home.leave"), destructive: true }))
+                  leave.mutate();
+              }}
+            >
+              {t(admin ? "site.home.dissolve" : "site.home.leave")}
+            </Button>
+          </Actions>
+          <ErrorText error={describe(t, leave.error)} />
+        </Block>
+      </Group>
     </>
   );
 }
 
-function Member({ member: m, me, admin, onSwitched }: { member: HomeMember; me: string; admin: boolean; onSwitched: () => void }) {
+/** What opens under a member's row: switching with a PIN or password, editing a managed account, making it a full one. */
+type Mode = "pin" | "password" | "edit" | "convert";
+
+function Member({ member: m, me, admin, administrator, onSwitched }: { member: HomeMember; me: string; admin: boolean; administrator: boolean; onSwitched: () => void }) {
+  const t = useT();
+  const confirm = useConfirm();
   const account = m.account!;
   const isManaged = account.kind === AccountKind.MANAGED;
   const done = useDone();
-  const [mode, setMode] = useState<"pin" | "password" | "edit" | "convert">();
+  const [mode, setMode] = useState<Mode>();
   const [error, setError] = useState<string>();
   const remove = useMutation({ mutationFn: () => homes.removeMember({ accountId: account.id }), onSuccess: done });
 
@@ -149,237 +179,258 @@ function Member({ member: m, me, admin, onSwitched }: { member: HomeMember; me: 
       await done();
       onSwitched();
     } catch (e) {
-      const text = message(e);
+      const text = describe(t, e) ?? "";
       setError(text);
       if (/password/.test(text)) setMode("password");
       else if (/PIN/.test(text)) setMode("pin");
     }
   }
 
-  function removeMember() {
-    const lost = m.servers.map((s) => s.name || s.id);
-    const what = isManaged
-      ? `Delete ${nameOf(account)}? The account is deleted with its watch history and playlists${lost.length ? ` on ${lost.join(", ")}` : ""}.`
-      : `Remove ${nameOf(account)} from the Home? They become your friend and keep their access.`;
-    if (confirm(what)) remove.mutate();
+  async function removeMember() {
+    const yes = await confirm(
+      isManaged
+        ? { title: t("site.home.removeManagedConfirm", { name: nameOf(account) }), message: t("site.home.removeManagedBody"), action: t("site.action.remove"), destructive: true }
+        : { title: t("site.home.removeMemberConfirm", { name: nameOf(account) }), message: t("site.home.removeMemberBody"), action: t("site.action.remove"), destructive: true },
+    );
+    if (yes) remove.mutate();
   }
 
+  const restriction = restrictions.find(([r]) => r === account.restriction)?.[1];
+  const tags = [
+    `@${account.userName}`,
+    account.id === me && t("site.home.you"),
+    administrator && t("site.home.administrator"),
+    isManaged && t("site.home.managed"),
+    isManaged && restriction && t(restriction),
+    m.hasPin && t("site.field.pin"),
+  ].filter(Boolean);
+  const toggle = (next: Mode) => setMode(mode === next ? undefined : next);
+  let below: ReactNode;
+  if (mode === "pin" || mode === "password") {
+    below = (
+      <form
+        className="flex flex-col gap-3 sm:flex-row sm:items-end"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const v = String(new FormData(e.currentTarget).get("secret"));
+          void switchWith(mode === "pin" ? { pin: v } : { password: v });
+        }}
+      >
+        {mode === "pin" ? (
+          <Field label={t("site.home.switchPin", { name: nameOf(account) })} name="secret" type="password" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} autoFocus required />
+        ) : (
+          <Field label={t("site.home.switchPassword", { name: nameOf(account) })} name="secret" type="password" autoFocus required />
+        )}
+        <Button type="submit" className="min-h-11">
+          {t("site.home.switch")}
+        </Button>
+      </form>
+    );
+  } else if (mode === "edit") below = <EditManaged member={m} onConvert={() => setMode("convert")} onDone={() => setMode(undefined)} />;
+  else if (mode === "convert") below = <Convert accountId={account.id} />;
+  const failed = error ?? describe(t, remove.error);
   return (
-    <li className="flex flex-col gap-2">
-      <div className="flex items-center gap-3">
-        <div className="flex flex-1 flex-col">
-          <span className="type-body">{nameOf(account)}</span>
-          <span className="type-footnote text-text-secondary">
-            @{account.userName}
-            {isManaged && ` · managed · ${restrictions.find(([r]) => r === account.restriction)?.[1]}`}
-            {m.hasPin && " · PIN"}
-          </span>
-        </div>
+    <div>
+      <Row leading={<Avatar name={nameOf(account) || "?"} size={36} />} label={nameOf(account)} detail={tags.join(" · ")}>
         {account.id !== me && (
-          <Button kind="secondary" onClick={() => (m.hasPin ? setMode("pin") : switchWith({}))}>
-            Switch
+          <Button variant="secondary" onClick={() => (m.hasPin ? toggle("pin") : void switchWith({}))}>
+            {t("site.home.switch")}
           </Button>
         )}
         {admin && isManaged && (
-          <Button kind="secondary" onClick={() => setMode(mode === "edit" ? undefined : "edit")}>
-            Edit
+          <Button variant="secondary" onClick={() => toggle("edit")}>
+            {t("site.action.edit")}
           </Button>
         )}
         {admin && account.id !== me && (
-          <Button kind="danger" onClick={removeMember}>
-            Remove
+          <Button variant="danger" onClick={() => void removeMember()}>
+            {t("site.action.remove")}
           </Button>
         )}
-      </div>
-      {(mode === "pin" || mode === "password") && (
-        <form
-          className="flex items-end gap-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const v = String(new FormData(e.currentTarget).get("secret"));
-            void switchWith(mode === "pin" ? { pin: v } : { password: v });
-          }}
-        >
-          {mode === "pin" ? (
-            <Field label="PIN" name="secret" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} autoFocus required />
-          ) : (
-            <Field label={`${nameOf(account)}'s password`} name="secret" type="password" autoFocus required />
-          )}
-          <Button type="submit">Switch</Button>
-        </form>
+      </Row>
+      {(below || failed) && (
+        <div className="flex flex-col gap-3 px-4 pb-4">
+          {below}
+          <ErrorText error={failed} />
+        </div>
       )}
-      {mode === "edit" && <EditManaged member={m} onConvert={() => setMode("convert")} />}
-      {mode === "convert" && <Convert accountId={account.id} />}
-      <ErrorText error={error ?? (remove.error ? message(remove.error) : undefined)} />
-    </li>
+    </div>
   );
 }
 
 function RestrictionSelect({ value }: { value?: RestrictionProfile }) {
-  return (
-    <label className="flex flex-col gap-1">
-      <span className="type-footnote text-text-secondary">Restriction profile</span>
-      <select name="restriction" defaultValue={value ?? RestrictionProfile.OLDER_CHILD} className="type-body rounded-md border border-border bg-background px-3 py-2">
-        {restrictions.map(([r, label]) => (
-          <option key={r} value={r}>
-            {label}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
+  const t = useT();
+  return <Select label={t("site.field.restriction")} name="restriction" defaultValue={value ?? RestrictionProfile.OLDER_CHILD} options={restrictions.map(([r, key]) => [r, t(key)])} />;
 }
 
-function EditManaged({ member: m, onConvert }: { member: HomeMember; onConvert: () => void }) {
+function EditManaged({ member: m, onConvert, onDone }: { member: HomeMember; onConvert: () => void; onDone: () => void }) {
+  const t = useT();
   const account = m.account!;
   const done = useDone();
   const save = useMutation({
     mutationFn: async (form: FormData) => {
       await homes.updateManagedAccount({
         accountId: account.id,
-        displayName: String(form.get("name")),
+        displayName: String(form.get("name")).trim(),
         restriction: Number(form.get("restriction")) as RestrictionProfile,
       });
       const pin = String(form.get("pin"));
       if (pin || form.get("clearPin")) await homes.setPin({ accountId: account.id, pin });
     },
-    onSuccess: done,
+    onSuccess: async () => {
+      await done();
+      onDone();
+    },
   });
   return (
     <form
-      className="flex flex-col gap-3 rounded-md border border-border p-4"
+      className="flex flex-col gap-4 rounded-[12px] bg-fill p-4"
       onSubmit={(e) => {
         e.preventDefault();
         save.mutate(new FormData(e.currentTarget));
       }}
     >
-      <Field label="Display name" name="name" defaultValue={account.displayName} required maxLength={64} />
-      <RestrictionSelect value={account.restriction} />
-      <Field label={m.hasPin ? "New PIN" : "PIN"} name="pin" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} />
-      {m.hasPin && (
-        <label className="type-callout flex items-center gap-2">
-          <input type="checkbox" name="clearPin" /> Remove the PIN
-        </label>
-      )}
-      <ErrorText error={save.error ? message(save.error) : undefined} />
-      <div className="flex gap-3">
-        <Button type="submit">Save</Button>
-        <Button kind="secondary" onClick={onConvert}>
-          Make a full account
-        </Button>
+      <div className="flex flex-col gap-4 sm:flex-row">
+        <Field label={t("site.field.displayName")} name="name" defaultValue={account.displayName} required maxLength={64} />
+        <RestrictionSelect value={account.restriction} />
       </div>
+      <Field label={m.hasPin ? t("site.field.newPin") : t("site.field.pin")} name="pin" type="password" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} />
+      {m.hasPin && <Check name="clearPin" label={t("site.home.removePin")} />}
+      <ErrorText error={describe(t, save.error)} />
+      <Actions>
+        <Button type="submit" disabled={save.isPending}>
+          {t("site.action.save")}
+        </Button>
+        <Button variant="secondary" onClick={onConvert}>
+          {t("site.home.makeFull")}
+        </Button>
+      </Actions>
     </form>
   );
 }
 
 function Convert({ accountId }: { accountId: string }) {
+  const t = useT();
   const done = useDone();
   const convert = useMutation({
-    mutationFn: (form: FormData) =>
-      homes.convertManagedAccount({ accountId, email: String(form.get("email")), password: String(form.get("password")) }),
+    mutationFn: (form: FormData) => homes.convertManagedAccount({ accountId, email: String(form.get("email")).trim(), password: String(form.get("password")) }),
     onSuccess: done,
   });
   return (
     <form
-      className="flex flex-col gap-3 rounded-md border border-border p-4"
+      className="flex flex-col gap-4 rounded-[12px] bg-fill p-4"
       onSubmit={(e) => {
         e.preventDefault();
         convert.mutate(new FormData(e.currentTarget));
       }}
     >
-      <Muted>
-        The account signs in with its own e-mail address and password from now on, and keeps its data, access and place in the
-        Home; its restriction profile is removed.
-      </Muted>
-      <Field label="E-mail address" name="email" type="email" required />
-      <Field label="Password" name="password" type="password" minLength={8} required />
-      <ErrorText error={convert.error ? message(convert.error) : undefined} />
-      <Button type="submit">Make a full account</Button>
+      <Muted>{t("site.home.convertBody")}</Muted>
+      <div className="flex flex-col gap-4 sm:flex-row">
+        <Field label={t("site.field.email")} name="email" type="email" required />
+        <Field label={t("site.field.password")} name="password" type="password" autoComplete="new-password" placeholder={t("site.field.passwordHint")} minLength={8} required />
+      </div>
+      <ErrorText error={describe(t, convert.error)} />
+      <Actions>
+        <Button type="submit" disabled={convert.isPending}>
+          {t("site.home.makeFull")}
+        </Button>
+      </Actions>
     </form>
   );
 }
 
 function CreateManaged() {
+  const t = useT();
   const done = useDone();
   const add = useMutation({
     mutationFn: (form: FormData) =>
       homes.createManagedAccount({
-        userName: String(form.get("userName")),
-        displayName: String(form.get("displayName")),
+        userName: String(form.get("userName")).trim(),
+        displayName: String(form.get("displayName")).trim(),
         restriction: Number(form.get("restriction")) as RestrictionProfile,
         pin: String(form.get("pin")) || undefined,
       }),
     onSuccess: done,
   });
   return (
-    <Card title="Add a managed account">
-      <Muted>A managed account has no sign-in of its own; it is reached by switching in the Home, and sees only your servers.</Muted>
-      <form
-        className="flex flex-col gap-3"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const form = e.currentTarget;
-          add.mutate(new FormData(form), { onSuccess: () => form.reset() });
-        }}
-      >
-        <Field label="Display name" name="displayName" required maxLength={64} />
-        <Field label="User name" name="userName" required minLength={3} maxLength={32} pattern="[A-Za-z0-9_.]+" />
-        <RestrictionSelect />
-        <Field label="PIN (optional)" name="pin" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} />
-        <ErrorText error={add.error ? message(add.error) : undefined} />
-        <Button type="submit">Add</Button>
-      </form>
-    </Card>
+    <Group title={t("site.home.addManaged")} footer={t("site.home.addManagedBody")}>
+      <Block>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const form = e.currentTarget;
+            add.mutate(new FormData(form), { onSuccess: () => form.reset() });
+          }}
+        >
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <Field label={t("site.field.displayName")} name="displayName" required maxLength={64} />
+            <Field label={t("site.field.userName")} name="userName" autoCapitalize="none" spellCheck={false} required minLength={3} maxLength={32} pattern="[A-Za-z0-9_.]+" />
+          </div>
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <RestrictionSelect />
+            <Field label={t("site.field.pinOptional")} name="pin" type="password" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} />
+          </div>
+          <ErrorText error={describe(t, add.error)} />
+          <Actions>
+            <Button type="submit" disabled={add.isPending}>
+              {t("site.action.add")}
+            </Button>
+          </Actions>
+        </form>
+      </Block>
+    </Group>
   );
 }
 
 function Invite({ home }: { home: Home }) {
+  const t = useT();
   const done = useDone();
   const servers = useQuery({ queryKey: ["servers"], queryFn: () => accounts.listServers({}) });
   const mine = servers.data?.servers.filter((s) => s.administrator?.id === home.administrator?.id) ?? [];
   const invite = useMutation({
     mutationFn: (form: FormData) =>
       homes.inviteToHome({
-        userName: String(form.get("userName")),
+        userName: String(form.get("userName")).trim(),
         offers: form.getAll("server").map((id) => ({ serverId: String(id), access: create(AccessSchema, { allLibraries: true }) })),
       }),
     onSuccess: done,
   });
   const cancel = useMutation({ mutationFn: (accountId: string) => homes.cancelHomeInvitation({ accountId }), onSuccess: done });
   return (
-    <Card title="Invite someone">
-      <Muted>Inviting a full account needs your Mavio Pass, which the Home then shares.</Muted>
-      <form
-        className="flex flex-col gap-3"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const form = e.currentTarget;
-          invite.mutate(new FormData(form), { onSuccess: () => form.reset() });
-        }}
-      >
-        <Field label="User name" name="userName" required />
-        {mine.map((s) => (
-          <label key={s.id} className="type-callout flex items-center gap-2">
-            <input type="checkbox" name="server" value={s.id} defaultChecked /> Every library of {s.name || s.id}
-          </label>
-        ))}
-        <ErrorText error={invite.error ? message(invite.error) : undefined} />
-        <Button type="submit" disabled={home.frozen}>
-          Invite
-        </Button>
-      </form>
-      {home.invitations.length > 0 && (
-        <ul className="flex flex-col gap-2">
-          {home.invitations.map((i) => (
-            <li key={i.account?.id} className="flex items-center gap-3">
-              <span className="type-body flex-1">Invited @{i.account?.userName}</span>
-              <Button kind="secondary" onClick={() => cancel.mutate(i.account!.id)}>
-                Withdraw
-              </Button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Card>
+    <Group title={t("site.home.invite")} footer={t("site.home.inviteBody")}>
+      <Block>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const form = e.currentTarget;
+            invite.mutate(new FormData(form), { onSuccess: () => form.reset() });
+          }}
+        >
+          <Field label={t("site.field.userName")} name="userName" autoCapitalize="none" spellCheck={false} required />
+          {mine.length > 0 && (
+            <div className="flex flex-col gap-1">
+              {mine.map((s) => (
+                <Check key={s.id} name="server" value={s.id} defaultChecked label={t("site.home.inviteServer", { server: s.name || s.id })} />
+              ))}
+            </div>
+          )}
+          <ErrorText error={describe(t, invite.error ?? cancel.error)} />
+          <Actions>
+            <Button type="submit" disabled={home.frozen || invite.isPending}>
+              {t("site.action.invite")}
+            </Button>
+          </Actions>
+        </form>
+      </Block>
+      {home.invitations.map((i) => (
+        <Row key={i.account?.id} leading={<Avatar name={i.account?.userName || "?"} />} label={`@${i.account?.userName}`} detail={t("site.home.invited")}>
+          <Button variant="secondary" onClick={() => cancel.mutate(i.account!.id)}>
+            {t("site.action.withdraw")}
+          </Button>
+        </Row>
+      ))}
+    </Group>
   );
 }
