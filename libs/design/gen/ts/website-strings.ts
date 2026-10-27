@@ -236,7 +236,82 @@ export type MessageKey =
   | 'site.link.confirmApp'
   | 'site.link.confirmServer'
   | 'site.link.approved'
-  | 'site.link.denied';
+  | 'site.link.denied'
+  | 'site.nav.docs'
+  | 'site.nav.pass'
+  | 'site.nav.staff'
+  | 'site.nav.getStarted'
+  | 'site.footer.privacy'
+  | 'site.footer.terms'
+  | 'site.footer.contact'
+  | 'site.legal.updated'
+  | 'site.landing.title'
+  | 'site.landing.subtitle'
+  | 'site.landing.start'
+  | 'site.landing.docs'
+  | 'site.landing.features'
+  | 'site.landing.own.title'
+  | 'site.landing.own.body'
+  | 'site.landing.library.title'
+  | 'site.landing.library.body'
+  | 'site.landing.screens.title'
+  | 'site.landing.screens.body'
+  | 'site.landing.anywhere.title'
+  | 'site.landing.anywhere.body'
+  | 'site.landing.home.title'
+  | 'site.landing.home.body'
+  | 'site.landing.play.title'
+  | 'site.landing.play.body'
+  | 'site.landing.pass.body'
+  | 'site.landing.pass.more'
+  | 'site.pass.intro'
+  | 'site.pass.relay.title'
+  | 'site.pass.relay.body'
+  | 'site.pass.home.title'
+  | 'site.pass.home.body'
+  | 'site.pass.support.title'
+  | 'site.pass.support.body'
+  | 'site.pass.plans'
+  | 'site.pass.month'
+  | 'site.pass.year'
+  | 'site.pass.perMonth'
+  | 'site.pass.perYear'
+  | 'site.pass.saving'
+  | 'site.pass.subscribe'
+  | 'site.pass.signInToSubscribe'
+  | 'site.pass.manage'
+  | 'site.pass.yours'
+  | 'site.pass.renews'
+  | 'site.pass.ends'
+  | 'site.pass.pastDue'
+  | 'site.pass.thanks'
+  | 'site.pass.unavailable'
+  | 'site.pass.managed'
+  | 'site.pass.payments'
+  | 'site.signUp.agree'
+  | 'site.error.suspended'
+  | 'site.staff.search'
+  | 'site.staff.searchHint'
+  | 'site.staff.none'
+  | 'site.staff.suspended'
+  | 'site.staff.staff'
+  | 'site.staff.managed'
+  | 'site.staff.joined'
+  | 'site.staff.servers'
+  | 'site.staff.devices'
+  | 'site.staff.homeAdmin'
+  | 'site.staff.homeMember'
+  | 'site.staff.subscription'
+  | 'site.staff.reason'
+  | 'site.staff.suspend'
+  | 'site.staff.restore'
+  | 'site.staff.suspendTitle'
+  | 'site.staff.suspendBody'
+  | 'site.staff.suspendReason'
+  | 'site.staff.passUntil'
+  | 'site.staff.endPass'
+  | 'site.staff.noPass'
+  | 'site.staff.forbidden';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -465,7 +540,82 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "site.link.confirmApp": "Sign in Mavio on the television showing {code}? It reaches every server of your account.",
     "site.link.confirmServer": "Sign in the web UI of {server} on the television showing {code}?",
     "site.link.approved": "The television is signed in. You can close this page.",
-    "site.link.denied": "The television was not signed in."
+    "site.link.denied": "The television was not signed in.",
+    "site.nav.docs": "Docs",
+    "site.nav.pass": "Mavio Pass",
+    "site.nav.staff": "Staff Tools",
+    "site.nav.getStarted": "Get Started",
+    "site.footer.privacy": "Privacy Policy",
+    "site.footer.terms": "Terms of Service",
+    "site.footer.contact": "Contact",
+    "site.legal.updated": "Last updated {date}",
+    "site.landing.title": "Your movies and shows, on every screen.",
+    "site.landing.subtitle": "Mavio is a media server you run yourself. It organizes your library and plays it on your TV, phone and computer, at home or away.",
+    "site.landing.start": "Create a Free Account",
+    "site.landing.docs": "Read the Docs",
+    "site.landing.features": "What Mavio does",
+    "site.landing.own.title": "Yours to run",
+    "site.landing.own.body": "Mavio runs on your computer or NAS. Your library stays on your disks, and your server keeps working without mavio.dev.",
+    "site.landing.library.title": "A library that organizes itself",
+    "site.landing.library.body": "Movies, shows, music, books and photos, with artwork and details, and every episode in its season.",
+    "site.landing.screens.title": "Every screen",
+    "site.landing.screens.body": "Apps for iPhone, iPad, Mac, Apple TV, Android, Android TV, Windows and Linux, and the web in any browser.",
+    "site.landing.anywhere.title": "At home or away",
+    "site.landing.anywhere.body": "Sign in once with your Mavio account and reach your servers from anywhere, over secure connections set up for you.",
+    "site.landing.home.title": "Everyone at home",
+    "site.landing.home.body": "A Home gives each person on your devices a profile of their own, with the libraries and ratings that suit them, and friends see what you share with them.",
+    "site.landing.play.title": "Plays what you have",
+    "site.landing.play.body": "Devices play your files as they are when they can, and Mavio converts them on the fly when they cannot, with your subtitles.",
+    "site.landing.pass.body": "Mavio is free. Mavio Pass pays for the services mavio.dev runs for you, such as the relay that reaches servers behind any network.",
+    "site.landing.pass.more": "About Mavio Pass",
+    "site.pass.intro": "Mavio is free, and your servers never depend on mavio.dev. Mavio Pass pays for the services mavio.dev runs for you.",
+    "site.pass.relay.title": "Relay",
+    "site.pass.relay.body": "Watch your servers away from home even when they cannot be reached directly: mavio.dev's relay carries the connection, encrypted end to end. Servers you are invited to are covered too.",
+    "site.pass.home.title": "Full members in your Home",
+    "site.pass.home.body": "Invite people with accounts of their own to your Home, up to 15 accounts. Everyone in it shares your Pass.",
+    "site.pass.support.title": "Mavio's development",
+    "site.pass.support.body": "Your Pass keeps Mavio free for everyone and in development.",
+    "site.pass.plans": "Plans",
+    "site.pass.month": "Monthly",
+    "site.pass.year": "Yearly",
+    "site.pass.perMonth": "{price} / month",
+    "site.pass.perYear": "{price} / year",
+    "site.pass.saving": "Save {percent}%",
+    "site.pass.subscribe": "Subscribe",
+    "site.pass.signInToSubscribe": "Sign In to Subscribe",
+    "site.pass.manage": "Manage Subscription",
+    "site.pass.yours": "Your Pass",
+    "site.pass.renews": "Your {plan} subscription renews on {date}.",
+    "site.pass.ends": "Your subscription ends on {date} and will not renew.",
+    "site.pass.pastDue": "The last payment did not go through. Update your payment method to keep your Pass.",
+    "site.pass.thanks": "Thank you for subscribing. Your Pass starts as soon as the payment goes through.",
+    "site.pass.unavailable": "Mavio Pass cannot be bought yet.",
+    "site.pass.managed": "Your Home administrator manages the Pass of your Home.",
+    "site.pass.payments": "Payments are handled by Stripe. Cancel at any time; your Pass lasts until the end of the period paid for.",
+    "site.signUp.agree": "By creating an account, you agree to the {terms} and the {privacy}.",
+    "site.error.suspended": "This account is suspended. Write to support@mavio.dev if you think this is a mistake.",
+    "site.staff.search": "Find an account",
+    "site.staff.searchHint": "An e-mail address, or part of a name",
+    "site.staff.none": "No accounts match.",
+    "site.staff.suspended": "Suspended",
+    "site.staff.staff": "Staff",
+    "site.staff.managed": "Managed",
+    "site.staff.joined": "Joined {date}",
+    "site.staff.servers": "{count, plural, one {Administers # server} other {Administers # servers}}",
+    "site.staff.devices": "{count, plural, one {# signed-in device} other {# signed-in devices}}",
+    "site.staff.homeAdmin": "Administers a Home",
+    "site.staff.homeMember": "Member of a Home",
+    "site.staff.subscription": "Subscription: {status}",
+    "site.staff.reason": "Reason: {reason}",
+    "site.staff.suspend": "Suspend",
+    "site.staff.restore": "Restore",
+    "site.staff.suspendTitle": "Suspend {name}?",
+    "site.staff.suspendBody": "Their sessions end on mavio.dev, their devices and the servers they reach, and they cannot sign in until restored.",
+    "site.staff.suspendReason": "Reason",
+    "site.staff.passUntil": "Pass until",
+    "site.staff.endPass": "End Pass",
+    "site.staff.noPass": "No Pass",
+    "site.staff.forbidden": "Only mavio.dev's staff can use these tools."
   },
   "zh-Hans": {
     "mail.greeting": "{name}，你好：",
@@ -692,6 +842,81 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "site.link.confirmApp": "要在显示 {code} 的电视上登录 Mavio 吗？它将可以访问你账户的所有服务器。",
     "site.link.confirmServer": "要在显示 {code} 的电视上登录 {server} 的网页界面吗？",
     "site.link.approved": "电视已登录，你可以关闭此页面。",
-    "site.link.denied": "电视未登录。"
+    "site.link.denied": "电视未登录。",
+    "site.nav.docs": "文档",
+    "site.nav.pass": "Mavio Pass",
+    "site.nav.staff": "工作人员工具",
+    "site.nav.getStarted": "开始使用",
+    "site.footer.privacy": "隐私政策",
+    "site.footer.terms": "服务条款",
+    "site.footer.contact": "联系我们",
+    "site.legal.updated": "最后更新于 {date}",
+    "site.landing.title": "你的电影和剧集，在每一块屏幕上。",
+    "site.landing.subtitle": "Mavio 是一款由你自己运行的媒体服务器。它整理你的媒体库，并在电视、手机和电脑上播放，无论在家还是在外。",
+    "site.landing.start": "免费创建账户",
+    "site.landing.docs": "阅读文档",
+    "site.landing.features": "Mavio 能做什么",
+    "site.landing.own.title": "由你掌控",
+    "site.landing.own.body": "Mavio 运行在你的电脑或 NAS 上。媒体库留在你自己的硬盘里，即使没有 mavio.dev，服务器也照常工作。",
+    "site.landing.library.title": "自动整理的媒体库",
+    "site.landing.library.body": "电影、剧集、音乐、图书和照片，配有海报和详细信息，每一集都归入它的季。",
+    "site.landing.screens.title": "每一块屏幕",
+    "site.landing.screens.body": "适用于 iPhone、iPad、Mac、Apple TV、Android、Android TV、Windows 和 Linux 的应用，以及任意浏览器中的网页版。",
+    "site.landing.anywhere.title": "在家或在外",
+    "site.landing.anywhere.body": "用 Mavio 账户登录一次，即可随处访问你的服务器，安全连接会自动为你配置好。",
+    "site.landing.home.title": "全家共享",
+    "site.landing.home.body": "Home 让共用设备的每个人都有自己的个人资料，各有适合的媒体库和分级；好友可以看到你与他们分享的内容。",
+    "site.landing.play.title": "播放你拥有的一切",
+    "site.landing.play.body": "设备能直接播放时就原样播放；不能时，Mavio 会实时转换，字幕也一并呈现。",
+    "site.landing.pass.body": "Mavio 是免费的。Mavio Pass 用于支付 mavio.dev 为你运行的服务，例如能穿越任何网络访问服务器的中继。",
+    "site.landing.pass.more": "了解 Mavio Pass",
+    "site.pass.intro": "Mavio 是免费的，你的服务器也从不依赖 mavio.dev。Mavio Pass 用于支付 mavio.dev 为你运行的服务。",
+    "site.pass.relay.title": "中继",
+    "site.pass.relay.body": "即使服务器无法被直接访问，也能在外观看：mavio.dev 的中继会转发连接，全程端到端加密。你受邀访问的服务器同样适用。",
+    "site.pass.home.title": "Home 中的完整成员",
+    "site.pass.home.body": "邀请拥有自己账户的人加入你的 Home，最多 15 个账户。Home 中的每个人都共享你的 Pass。",
+    "site.pass.support.title": "Mavio 的开发",
+    "site.pass.support.body": "你的 Pass 让 Mavio 对所有人保持免费，并持续开发。",
+    "site.pass.plans": "方案",
+    "site.pass.month": "按月",
+    "site.pass.year": "按年",
+    "site.pass.perMonth": "{price} / 月",
+    "site.pass.perYear": "{price} / 年",
+    "site.pass.saving": "节省 {percent}%",
+    "site.pass.subscribe": "订阅",
+    "site.pass.signInToSubscribe": "登录以订阅",
+    "site.pass.manage": "管理订阅",
+    "site.pass.yours": "你的 Pass",
+    "site.pass.renews": "你的{plan}订阅将于 {date} 续订。",
+    "site.pass.ends": "你的订阅将于 {date} 结束，不再续订。",
+    "site.pass.pastDue": "最近一次付款未成功。请更新付款方式以保留你的 Pass。",
+    "site.pass.thanks": "感谢订阅。付款完成后，你的 Pass 即会生效。",
+    "site.pass.unavailable": "暂时还不能购买 Mavio Pass。",
+    "site.pass.managed": "你的 Home 管理员负责管理 Home 的 Pass。",
+    "site.pass.payments": "付款由 Stripe 处理。可随时取消，你的 Pass 会持续到已付费周期结束。",
+    "site.signUp.agree": "创建账户即表示你同意{terms}和{privacy}。",
+    "site.error.suspended": "此账户已被停用。如果你认为这是误判，请写信至 support@mavio.dev。",
+    "site.staff.search": "查找账户",
+    "site.staff.searchHint": "电子邮件地址，或名称的一部分",
+    "site.staff.none": "没有匹配的账户。",
+    "site.staff.suspended": "已停用",
+    "site.staff.staff": "工作人员",
+    "site.staff.managed": "受管理",
+    "site.staff.joined": "注册于 {date}",
+    "site.staff.servers": "{count, plural, other {管理 # 台服务器}}",
+    "site.staff.devices": "{count, plural, other {# 台已登录设备}}",
+    "site.staff.homeAdmin": "管理一个 Home",
+    "site.staff.homeMember": "Home 成员",
+    "site.staff.subscription": "订阅：{status}",
+    "site.staff.reason": "原因：{reason}",
+    "site.staff.suspend": "停用",
+    "site.staff.restore": "恢复",
+    "site.staff.suspendTitle": "停用 {name}？",
+    "site.staff.suspendBody": "此账户在 mavio.dev、其设备以及其访问的服务器上的会话都会结束，恢复之前无法登录。",
+    "site.staff.suspendReason": "原因",
+    "site.staff.passUntil": "Pass 到期日",
+    "site.staff.endPass": "结束 Pass",
+    "site.staff.noPass": "没有 Pass",
+    "site.staff.forbidden": "只有 mavio.dev 的工作人员才能使用这些工具。"
   }
 };
