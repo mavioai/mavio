@@ -43,6 +43,13 @@
       "when": 1792245476967,
       "tag": "0005_app_authorization_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793084324450,
+      "tag": "0006_staff_and_billing",
+      "breakpoints": true
     }
   ]
 }

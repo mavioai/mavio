@@ -42,6 +42,12 @@ export default defineConfig(({ mode }) => ({
       GOOGLE_CA_CREDENTIALS: bindings.secret(),
       RELAYS: Object.keys(relays).length > 0 && bindings.json(relays),
       RELAY_TICKET_SECRET: bindings.secret(),
+      // Mavio Pass on Stripe Billing: the recurring prices of $4 a month
+      // and $35 a year, the API key and the webhook's signing secret.
+      STRIPE_PRICE_MONTH: bindings.text(""),
+      STRIPE_PRICE_YEAR: bindings.text(""),
+      STRIPE_SECRET_KEY: bindings.secret(),
+      STRIPE_WEBHOOK_SECRET: bindings.secret(),
     },
     exports: { NoticeHub: exports.durableObject({ storage: "sqlite" }) },
     observability: { enabled: true },

@@ -12,6 +12,7 @@ import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 
 import { handleApi } from "../src/server/api.ts";
+import type { Stripe } from "../src/server/billing.ts";
 import { createAuth } from "../src/server/auth.ts";
 import { type Database, schema } from "../src/server/db/index.ts";
 import { base64url, serverID } from "../src/server/ids.ts";
@@ -23,13 +24,18 @@ export const apiURL = `${baseURL}/api`;
 /** The relays' ticket secret, that of apps/relay's ticket test vector. */
 export const relaySecret = new TextEncoder().encode("0123456789abcdef0123456789abcdef");
 
-/** newSite returns a mavio.dev over an empty database. */
-export async function newSite() {
+/** newSite returns a mavio.dev over an empty database, selling Mavio Pass through stripe when given. */
+export async function newSite(options: { stripe?: Stripe } = {}) {
   const pg = new PGlite();
   const db = drizzle(pg, { schema }) as unknown as Database;
   await migrate(drizzle(pg), { migrationsFolder: fileURLToPath(new URL("../drizzle", import.meta.url)) });
   const mails: Mail[] = [];
-  const auth = createAuth(db, { baseURL, secret: "a test secret that is long enough to pass", mailer: { send: async (m) => void mails.push(m) } });
+  const auth = createAuth(db, {
+    baseURL,
+    secret: "a test secret that is long enough to pass",
+    mailer: { send: async (m) => void mails.push(m) },
+    stripe: options.stripe,
+  });
   const site = {
     /** The e-mails sent, oldest first. */
     mails,
@@ -48,6 +54,7 @@ export async function newSite() {
         db,
         auth,
         baseURL,
+        stripe: options.stripe,
         notify: (cursors) => site.notices.push(cursors),
         connectNotices: async (id) => {
           site.connected.push(id);

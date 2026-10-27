@@ -7,15 +7,18 @@ import { passkey } from "@better-auth/passkey";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError, createAuthMiddleware } from "better-auth/api";
-import { bearer, jwt, twoFactor, username } from "better-auth/plugins";
+import { admin, bearer, jwt, twoFactor, username } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { eq } from "drizzle-orm";
 
+import { cancel, type Stripe } from "./billing.ts";
 import { AccountRevoked_Reason, accountChanged, accountOf, accountRevoked } from "./changes.ts";
 import { type Database, schema } from "./db/index.ts";
 import { homes } from "./homes-plugin.ts";
 import { type Mailer, resetMail, verificationMail } from "./mail.ts";
+import { pass } from "./pass-plugin.ts";
 import * as password from "./password.ts";
+import { staff, staffRole, staffRoles } from "./staff-plugin.ts";
 
 /** Config is the configuration of mavio.dev's accounts. */
 export interface Config {
@@ -25,6 +28,8 @@ export interface Config {
   secret: string;
   /** mailer sends the e-mails verifying addresses and resetting passwords. */
   mailer: Mailer;
+  /** stripe sells Mavio Pass; without it nothing can be bought. */
+  stripe?: Stripe;
 }
 
 /** How long the links of e-mails stay valid, in seconds. */
@@ -85,6 +90,7 @@ export function createAuth(db: Database, config: Config) {
           }
           const home = await db.query.homes.findFirst({ where: eq(schema.homes.administratorId, u.id) });
           if (home) throw new APIError("BAD_REQUEST", { message: "Dissolve your Home first." });
+          if (config.stripe) await cancel(db, config.stripe, u.id);
         },
       },
       additionalFields: {
@@ -103,7 +109,11 @@ export function createAuth(db: Database, config: Config) {
         jwt: { issuer: apiURL(config.baseURL) },
       }),
       bearer(),
+      // Staff suspend accounts (staff-plugin.ts); no role is given by the API.
+      admin({ roles: staffRoles, adminRoles: [staffRole], defaultRole: "user", bannedUserMessage: "This account is suspended." }),
       homes(db),
+      pass(db, config.baseURL, config.stripe),
+      staff(db),
       tanstackStartCookies(),
     ],
     hooks: {
@@ -123,6 +133,11 @@ export function createAuth(db: Database, config: Config) {
         update: {
           after: async (u, ctx) => {
             if (ctx?.path === "/update-user") await accountChanged(db, accountOf(u));
+            // A suspended account's sessions end, devices' and servers' too.
+            if (ctx?.path === "/admin/ban-user") {
+              await db.delete(schema.deviceSessions).where(eq(schema.deviceSessions.accountId, u.id));
+              await accountRevoked(db, u.id, AccountRevoked_Reason.SUSPENDED);
+            }
           },
         },
         delete: {

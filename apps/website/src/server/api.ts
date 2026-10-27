@@ -1,7 +1,8 @@
 // mavio.dev's API under /api (docs/mavio-dev.md §2, §3): better-auth at
 // /api/auth, the Connect services of mavio.cloud.v1, the OAuth endpoints
-// of devices at /api/oauth, the pages' configuration at /api/config, and
-// servers' WebSockets at /api/servers/notices. Web UIs call the accounts'
+// of devices at /api/oauth, the pages' configuration at /api/config,
+// servers' WebSockets at /api/servers/notices and Stripe's webhooks at
+// /api/billing/stripe. Web UIs call the accounts'
 // services and the OAuth endpoints from their own origins.
 import { ConnectError, type ConnectRouter, createConnectRouter } from "@connectrpc/connect";
 import { createFetchHandler } from "@connectrpc/connect/protocol";
@@ -14,6 +15,7 @@ import { accountService } from "./account-service.ts";
 import type { Acme } from "./acme.ts";
 import { type Auth, apiURL } from "./auth.ts";
 import { cors, handleOAuth, preflight } from "./authorization.ts";
+import { handleEvent, type Stripe } from "./billing.ts";
 import type { Database } from "./db/index.ts";
 import { friendService } from "./friend-service.ts";
 import { homeService } from "./home-service.ts";
@@ -41,10 +43,15 @@ export interface ApiOptions {
   connectNotices?: (serverId: string, req: Request) => Promise<Response>;
   /** limit tells whether a request of a limited kind may go on; without it nothing is limited. */
   limit?: Limit;
+  /** stripe sells Mavio Pass and signs the webhooks of its payments. */
+  stripe?: Stripe;
 }
 
 /** noticesPath is where servers open their WebSockets (docs/mavio-dev.md §3). */
 export const noticesPath = "/api/servers/notices";
+
+/** stripeWebhookPath is where Stripe sends the events of Mavio Pass's subscriptions. */
+export const stripeWebhookPath = "/api/billing/stripe";
 
 /** configPath is where the pages read the site's configuration. */
 export const configPath = "/api/config";
@@ -81,6 +88,13 @@ async function route(req: Request, pathname: string, options: ApiOptions, deps: 
   // Public, and read by the web UIs of servers.
   if (pathname === configPath) {
     return Response.json({ appURL: options.appURL ?? defaultAppURL }, { headers: { "access-control-allow-origin": "*" } });
+  }
+  if (pathname === stripeWebhookPath && req.method === "POST") {
+    if (!options.stripe) return new Response("Not Implemented", { status: 501 });
+    const event = await options.stripe.verify(await req.text(), req.headers.get("stripe-signature"), (options.now ?? (() => new Date()))());
+    if (!event) return new Response("Bad Signature", { status: 400 });
+    await handleEvent(options.db, event);
+    return Response.json({ received: true });
   }
   const oauth = await handleOAuth(req, pathname, {
     db: options.db,

@@ -29,6 +29,8 @@ const forbiddenToManaged = [
   "/passkey/",
   "/two-factor/",
   "/link-social",
+  "/pass/checkout",
+  "/pass/portal",
 ];
 
 // sessionUser returns the user of a request's session, from its bearer

@@ -284,6 +284,22 @@ export const passes = pgTable("passes", {
   expiresAt: time("expires_at").notNull(),
 });
 
+/** billing is accounts' Stripe customers and subscriptions, which pay for their Passes (billing.ts). */
+export const billing = pgTable("billing", {
+  accountId: text("account_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  customerId: text("customer_id").notNull().unique(),
+  subscriptionId: text("subscription_id"),
+  // Stripe's state of the subscription, such as "active" or "canceled".
+  status: text("status").notNull().default(""),
+  // "month" or "year".
+  plan: text("plan"),
+  periodEnd: time("period_end"),
+  // Whether the subscription ends with its period.
+  canceling: boolean("canceling").notNull().default(false),
+});
+
 export const serversRelations = relations(servers, ({ one, many }) => ({
   administrator: one(user, { fields: [servers.administratorId], references: [user.id] }),
   libraries: many(serverLibraries),
