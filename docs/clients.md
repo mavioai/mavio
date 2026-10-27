@@ -374,7 +374,7 @@ Every player follows one layout and state machine:
 * **Input**: keyboard shortcuts on desktops and the web (space, arrows, `f`, `m`, `j`/`l`); the D-pad and remote on television, where the controller follows the platform's focus (the tvOS focus engine, Compose for TV focus) and stays up while it has focus.
 
 ### 6.6 Copy and Localization
-The strings of every client are defined once in `libs/design/strings` in ICU MessageFormat, with English the source language, and compiled into the web UI's message catalogs, String Catalogs (`.xcstrings`) for Apple platforms, `strings.xml` for Android and a Go package for the desktop app. The same term names the same thing everywhere, plurals follow CLDR rules, and each string is translated once. Strings only one platform uses carry that platform's tag.
+The strings of every client are defined once in `libs/design/strings` in ICU MessageFormat, with English the source language, and compiled into the web UI's message catalogs, String Catalogs (`.xcstrings`) for Apple platforms, `strings.xml` for Android and a Go package for the desktop app. The same term names the same thing everywhere, plurals follow CLDR rules, and each string is translated once. Strings only one platform uses carry that platform's tag; mavio.dev's pages and e-mails are the `website` platform's, compiled into `gen/ts/website-strings.ts` (`@mavio/design/website-strings`) with their messages only ([mavio.dev §2](mavio-dev.md#2-website-and-api-appswebsite)).
 
 ### 6.7 Platform Conventions
 Consistency of brand does not override the platforms:

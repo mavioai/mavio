@@ -1070,10 +1070,13 @@ flowchart TD
 - [x] Server identity keys, claiming, reclaiming and the server's connection to mavio.dev: the server's ID from its identity key, `AuthService.ClaimServer` and `claim-token`, `mavio admin unclaim`, JWT-signed calls to `mavio.cloud.v1.ServerService`, and the link that holds the WebSocket and applies changes after its cursor, tested against a simulated mavio.dev; the kinds of changes come with access records
 - [x] Sign-in assertions, access records and revocations on the server: `AuthService.SignInWithAssertion` against mavio.dev's cached key set, the kinds of changes applied to users and sessions, `PublishLibraries`, and the RPCs of the server's own credentials and users refused in mavio.dev mode
 - [x] mavio.dev: accounts, sign-in assertions, code sign-in for televisions, access records, invitations and revocations: `apps/website` on TanStack Start and better-auth with passwords, passkeys, TOTP and device codes, `ServerService` and `AccountService` over PostgreSQL with their changes, and pages for claiming, servers, access records, invitations and the account; tested against PGlite, and end to end with a server claiming and signing in through the Worker in workerd (the server fetches changes once the push exists)
-- [ ] mavio.dev's e-mail through Cloudflare Email Service: verifying addresses, resetting passwords, and telling accounts of invitations
+- [x] mavio.dev's e-mail through Cloudflare Email Service and rate limits: verifying addresses before signing in, resetting passwords, which ends the account's sessions, and the `credentials`, `mail` and `codes` buckets per client address
+- [ ] Telling accounts of invitations, friend requests and Home invitations by e-mail
 - [ ] Suspending accounts by mavio.dev's staff, which sends the suspension to the account's servers
 - [ ] Deploying `apps/website` from CI: the Hyperdrive configuration, the secret and the migrations
-- [ ] Translations of mavio.dev's pages, with their strings in `libs/design/strings` as the web UI's
+- [x] mavio.dev's pages drawn as the web UI, in English and Simplified Chinese: the `website` platform's strings in `libs/design/strings`, the language of `Accept-Language`, the sign-in card on a wall of posters and the account's pages in groups of rows
+- [ ] Checking servers' published addresses from mavio.dev with Workers' outbound TCP connections
+- [ ] Running PostgreSQL on VMs with a streaming replica and its WAL archived to R2, reached through Hyperdrive
 - [x] mavio.dev: friends, Homes, managed accounts and their conversion, switching, Mavio Pass and frozen Homes: `FriendService` and `HomeService`, switching with PINs through Mavio's better-auth plugin, managed accounts' restriction profiles applied by servers, and the pages of the Home and friends
 - [ ] Buying and renewing Mavio Pass
 - [x] mavio.dev: the push to servers through Durable Objects, with changes fetched after a cursor: `NoticeHub` holding each server's hibernating WebSocket, notified after the requests that record changes; tested end to end with a server in workerd

@@ -374,7 +374,7 @@ flowchart LR
 * **输入**：桌面与 Web 上的键盘快捷键（空格、方向键、`f`、`m`、`j`/`l`）；电视上的方向键与遥控器，控制器遵循平台的焦点机制（tvOS 焦点引擎、Compose for TV 焦点），获得焦点时保持显示。
 
 ### 6.6 文案与本地化
-所有客户端的字符串在 `libs/design/strings` 中以 ICU MessageFormat 一次定义，以英文为源语言，编译为 Web UI 的消息包、Apple 平台的 String Catalog（`.xcstrings`）、Android 的 `strings.xml`，以及供桌面应用使用的 Go 包。同一事物在各处使用同一术语，复数遵循 CLDR 规则，每个字符串只翻译一次。仅某一平台使用的字符串带有该平台的标签。
+所有客户端的字符串在 `libs/design/strings` 中以 ICU MessageFormat 一次定义，以英文为源语言，编译为 Web UI 的消息包、Apple 平台的 String Catalog（`.xcstrings`）、Android 的 `strings.xml`，以及供桌面应用使用的 Go 包。同一事物在各处使用同一术语，复数遵循 CLDR 规则，每个字符串只翻译一次。仅某一平台使用的字符串带有该平台的标签；mavio.dev 的页面与邮件属于 `website` 平台，只把它们的消息编译到 `gen/ts/website-strings.ts`（`@mavio/design/website-strings`）（[mavio.dev §2](mavio-dev.zh-CN.md#2-网站与-apiappswebsite)）。
 
 ### 6.7 平台惯例
 品牌一致不凌驾于平台之上：

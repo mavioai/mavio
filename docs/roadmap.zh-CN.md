@@ -1070,10 +1070,13 @@ flowchart TD
 - [x] 服务端身份密钥、认领、重新认领，以及服务端到 mavio.dev 的连接：由身份密钥得出的服务端 ID、`AuthService.ClaimServer` 与 `claim-token`、`mavio admin unclaim`、以 JWT 签名调用 `mavio.cloud.v1.ServerService`，以及保持 WebSocket 并应用游标之后变更的连接，均以模拟的 mavio.dev 测试；变更的种类随访问记录一起实现
 - [x] 服务端的登录断言、访问记录与吊销：用缓存的 mavio.dev 密钥集检查的 `AuthService.SignInWithAssertion`，应用到用户和会话的各类变更，`PublishLibraries`，以及 mavio.dev 模式下拒绝服务端自身凭据和用户的 RPC
 - [x] mavio.dev：账户、登录断言、电视代码登录、访问记录、邀请与吊销：基于 TanStack Start 与 better-auth 的 `apps/website`，支持密码、通行密钥、TOTP 和设备代码；基于 PostgreSQL 的 `ServerService` 与 `AccountService` 及其变更；认领、服务端、访问记录、邀请与账户的页面；针对 PGlite 测试，并端到端测试了服务端通过 workerd 中的 Worker 认领和登录（推送完成后服务端才取回变更）
-- [ ] 通过 Cloudflare Email Service 发送 mavio.dev 的邮件：验证邮箱地址、重置密码、通知账户收到邀请
+- [x] 通过 Cloudflare Email Service 发送 mavio.dev 的邮件与限流：登录前验证邮箱地址、重置密码（结束账户的所有会话），以及按客户端地址的 `credentials`、`mail` 与 `codes` 三个桶
+- [ ] 以邮件通知账户收到访问邀请、好友请求与 Home 邀请
 - [ ] mavio.dev 工作人员停用账户，并把停用发送给账户能访问的服务端
 - [ ] 从 CI 部署 `apps/website`：Hyperdrive 配置、机密与迁移
-- [ ] 翻译 mavio.dev 的页面，其字符串与 Web UI 一样放在 `libs/design/strings` 中
+- [x] mavio.dev 的页面按 Web UI 绘制，提供英文与简体中文：`libs/design/strings` 中 `website` 平台的字符串、按 `Accept-Language` 选择语言、海报墙上的登录卡片，以及由成组的行构成的账户页面
+- [ ] 由 mavio.dev 用 Workers 的出站 TCP 连接检查服务端公布的地址
+- [ ] 在虚拟机上运行 PostgreSQL，带一个流复制副本并把 WAL 归档到 R2，经 Hyperdrive 访问
 - [x] mavio.dev：好友、Home、托管账户及其转换、切换、Mavio Pass 与冻结的 Home：`FriendService` 与 `HomeService`，通过 Mavio 的 better-auth 插件以 PIN 切换，服务端应用托管账户的限制配置，以及 Home 与好友的页面
 - [ ] 购买与续订 Mavio Pass
 - [x] mavio.dev：通过 Durable Object 向服务端推送，按游标取回变更：`NoticeHub` 保持每个服务端可休眠的 WebSocket，在记录变更的请求之后收到通知；在 workerd 中与服务端端到端测试
