@@ -5,12 +5,13 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { authClient } from "../lib/auth-client.ts";
 import type { Locale } from "../lib/i18n.ts";
 import { currentLocale, useLocale, useT } from "../lib/locale.tsx";
+import { hasSession, useSignedIn } from "../lib/session.ts";
 import { Wordmark } from "../logo.tsx";
 import styles from "../styles.css?url";
 import { Avatar, ConfirmProvider, Icon, type IconName } from "../ui.tsx";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  beforeLoad: (): { locale: Locale } => ({ locale: currentLocale() }),
+  beforeLoad: (): { locale: Locale; session: boolean } => ({ locale: currentLocale(), session: hasSession() }),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -26,9 +27,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 /** The pages of signing in and of answering a device, which are cards of their own without the site's header. */
 const cards = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/verified", "/authorize", "/link"];
 
+/** Whether a page is one of the documentation's, which draw their own navigation. */
+const isDocs = (pathname: string) => pathname === "/docs" || pathname.startsWith("/docs/");
+
 function Root() {
   const { queryClient } = Route.useRouteContext();
-  const card = useRouterState({ select: (s) => cards.includes(s.location.pathname) });
+  const card = useRouterState({ select: (s) => cards.includes(s.location.pathname) || isDocs(s.location.pathname) });
   return (
     <Document>
       <QueryClientProvider client={queryClient}>
@@ -39,6 +43,7 @@ function Root() {
             <div className="flex min-h-dvh flex-col">
               <Header />
               <Outlet />
+              <Footer />
             </div>
           )}
         </ConfirmProvider>
@@ -62,10 +67,14 @@ function NavLink({ to, icon, children }: { to: "/" | "/home" | "/friends"; icon:
   );
 }
 
-/** The header of the account's pages: the wordmark, the navigation and the account's menu. */
+/**
+ * The header of the site's pages: the wordmark, and the navigation and the
+ * account's menu when signed in, or the ways in when not.
+ */
 function Header() {
   const t = useT();
   const { data } = authClient.useSession();
+  const signedIn = useSignedIn();
   const managed = (data?.user as { kind?: string } | undefined)?.kind === "managed";
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl backdrop-saturate-150">
@@ -91,13 +100,70 @@ function Header() {
             <AccountMenu user={data.user} managed={managed} />
           </>
         )}
+        {!signedIn && <Visitor />}
       </div>
     </header>
   );
 }
 
-/** The account's avatar, opening its menu: its page, claiming a server and signing out. */
-function AccountMenu({ user, managed }: { user: { name: string; email: string; username?: string | null }; managed: boolean }) {
+/** The header's links for visitors: the documentation, Mavio Pass, signing in and up. */
+function Visitor() {
+  const t = useT();
+  const link = "inline-flex h-9 items-center rounded-full px-3.5 type-callout font-semibold text-text-secondary transition-colors hover:text-on-background";
+  return (
+    <>
+      <nav className="flex items-center gap-1 max-sm:hidden">
+        <a href="/docs" className={link}>
+          {t("site.nav.docs")}
+        </a>
+        <Link to="/pass" className={link} activeProps={{ className: "bg-fill text-on-background" }}>
+          {t("site.nav.pass")}
+        </Link>
+      </nav>
+      <div className="ml-auto flex items-center gap-1">
+        <Link to="/sign-in" className={link}>
+          {t("site.action.signIn")}
+        </Link>
+        <Link to="/sign-up" className="inline-flex h-9 items-center rounded-full bg-button px-4 type-callout font-semibold text-on-button transition hover:opacity-85">
+          {t("site.nav.getStarted")}
+        </Link>
+      </div>
+    </>
+  );
+}
+
+/** The foot of the site's pages: the documentation, Mavio Pass, the policies and the way to write to support. */
+function Footer() {
+  const t = useT();
+  const link = "hover:text-on-background";
+  return (
+    <footer className="mt-auto border-t border-border">
+      <div className="mx-auto flex max-w-[1080px] flex-wrap items-center gap-x-6 gap-y-3 px-margin py-6 type-footnote text-text-secondary">
+        <Wordmark height={16} />
+        <nav className="flex flex-wrap gap-x-5 gap-y-2">
+          <a href="/docs" className={link}>
+            {t("site.nav.docs")}
+          </a>
+          <Link to="/pass" className={link}>
+            {t("site.nav.pass")}
+          </Link>
+          <Link to="/privacy" className={link}>
+            {t("site.footer.privacy")}
+          </Link>
+          <Link to="/terms" className={link}>
+            {t("site.footer.terms")}
+          </Link>
+          <a href="mailto:support@mavio.dev" className={link}>
+            {t("site.footer.contact")}
+          </a>
+        </nav>
+      </div>
+    </footer>
+  );
+}
+
+/** The account's avatar, opening its menu: its page, Mavio Pass, claiming a server, the staff's tools and signing out. */
+function AccountMenu({ user, managed }: { user: { name: string; email: string; username?: string | null; role?: string | null }; managed: boolean }) {
   const t = useT();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -148,10 +214,20 @@ function AccountMenu({ user, managed }: { user: { name: string; email: string; u
             <Icon name="profile" size={20} />
             {t("site.nav.account")}
           </Link>
+          <Link to="/pass" role="menuitem" className={item}>
+            <Icon name="key" size={20} />
+            {t("site.nav.pass")}
+          </Link>
           {!managed && (
             <Link to="/claim" role="menuitem" className={item}>
               <Icon name="add" size={20} />
               {t("site.nav.claim")}
+            </Link>
+          )}
+          {user.role === "staff" && (
+            <Link to="/staff" role="menuitem" className={item}>
+              <Icon name="admin" size={20} />
+              {t("site.nav.staff")}
             </Link>
           )}
           <div className="my-1 h-px bg-border" />
@@ -175,8 +251,9 @@ function AccountMenu({ user, managed }: { user: { name: string; email: string; u
 
 function Document({ children }: { children: ReactNode }) {
   const locale = useLocale();
+  const session = Route.useRouteContext({ select: (c) => c.session });
   return (
-    <html lang={locale}>
+    <html lang={locale} data-session={session ? "1" : undefined}>
       <head>
         <HeadContent />
       </head>

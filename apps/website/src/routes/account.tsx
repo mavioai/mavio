@@ -1,7 +1,7 @@
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import { AccountKind } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
 
 import { accounts, homes } from "../lib/api.ts";
@@ -90,7 +90,11 @@ function Pass({ expires, effective }: { expires?: Date; effective: boolean }) {
       <Row
         leading={<Icon name="key" size={24} className={expires || effective ? "text-accent" : "text-text-tertiary"} />}
         label={expires ? t("site.pass.until", { date: expires.toLocaleDateString(locale, { dateStyle: "long" }) }) : effective ? t("site.pass.shared") : t("site.pass.none")}
-      />
+      >
+        <Link to="/pass" className="inline-flex min-h-9 items-center rounded-md bg-fill px-4 type-headline text-on-background hover:bg-fill-selected">
+          {t("site.nav.pass")}
+        </Link>
+      </Row>
     </Group>
   );
 }

@@ -17,10 +17,16 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FriendsRouteImport } from './routes/friends'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as LinkRouteImport } from './routes/link'
+import { Route as PassRouteImport } from './routes/pass'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as StaffRouteImport } from './routes/staff'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VerifiedRouteImport } from './routes/verified'
+import { Route as ApiSearchRouteImport } from './routes/api/search'
+import { Route as DocsSplatRouteImport } from './routes/docs/$'
 import { Route as ServersIdRouteImport } from './routes/servers/$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -63,6 +69,16 @@ const LinkRoute = LinkRouteImport.update({
   path: '/link',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PassRoute = PassRouteImport.update({
+  id: '/pass',
+  path: '/pass',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -78,9 +94,29 @@ const SignUpRoute = SignUpRouteImport.update({
   path: '/sign-up',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StaffRoute = StaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VerifiedRoute = VerifiedRouteImport.update({
   id: '/verified',
   path: '/verified',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSearchRoute = ApiSearchRouteImport.update({
+  id: '/api/search',
+  path: '/api/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsSplatRoute = DocsSplatRouteImport.update({
+  id: '/docs/$',
+  path: '/docs/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServersIdRoute = ServersIdRouteImport.update({
@@ -98,10 +134,16 @@ export interface FileRoutesByFullPath {
   '/friends': typeof FriendsRoute
   '/home': typeof HomeRoute
   '/link': typeof LinkRoute
+  '/pass': typeof PassRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/staff': typeof StaffRoute
+  '/terms': typeof TermsRoute
   '/verified': typeof VerifiedRoute
+  '/api/search': typeof ApiSearchRoute
+  '/docs/$': typeof DocsSplatRoute
   '/servers/$id': typeof ServersIdRoute
 }
 export interface FileRoutesByTo {
@@ -113,10 +155,16 @@ export interface FileRoutesByTo {
   '/friends': typeof FriendsRoute
   '/home': typeof HomeRoute
   '/link': typeof LinkRoute
+  '/pass': typeof PassRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/staff': typeof StaffRoute
+  '/terms': typeof TermsRoute
   '/verified': typeof VerifiedRoute
+  '/api/search': typeof ApiSearchRoute
+  '/docs/$': typeof DocsSplatRoute
   '/servers/$id': typeof ServersIdRoute
 }
 export interface FileRoutesById {
@@ -129,10 +177,16 @@ export interface FileRoutesById {
   '/friends': typeof FriendsRoute
   '/home': typeof HomeRoute
   '/link': typeof LinkRoute
+  '/pass': typeof PassRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/staff': typeof StaffRoute
+  '/terms': typeof TermsRoute
   '/verified': typeof VerifiedRoute
+  '/api/search': typeof ApiSearchRoute
+  '/docs/$': typeof DocsSplatRoute
   '/servers/$id': typeof ServersIdRoute
 }
 export interface FileRouteTypes {
@@ -146,10 +200,16 @@ export interface FileRouteTypes {
     | '/friends'
     | '/home'
     | '/link'
+    | '/pass'
+    | '/privacy'
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/staff'
+    | '/terms'
     | '/verified'
+    | '/api/search'
+    | '/docs/$'
     | '/servers/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -161,10 +221,16 @@ export interface FileRouteTypes {
     | '/friends'
     | '/home'
     | '/link'
+    | '/pass'
+    | '/privacy'
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/staff'
+    | '/terms'
     | '/verified'
+    | '/api/search'
+    | '/docs/$'
     | '/servers/$id'
   id:
     | '__root__'
@@ -176,10 +242,16 @@ export interface FileRouteTypes {
     | '/friends'
     | '/home'
     | '/link'
+    | '/pass'
+    | '/privacy'
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/staff'
+    | '/terms'
     | '/verified'
+    | '/api/search'
+    | '/docs/$'
     | '/servers/$id'
   fileRoutesById: FileRoutesById
 }
@@ -192,10 +264,16 @@ export interface RootRouteChildren {
   FriendsRoute: typeof FriendsRoute
   HomeRoute: typeof HomeRoute
   LinkRoute: typeof LinkRoute
+  PassRoute: typeof PassRoute
+  PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  StaffRoute: typeof StaffRoute
+  TermsRoute: typeof TermsRoute
   VerifiedRoute: typeof VerifiedRoute
+  ApiSearchRoute: typeof ApiSearchRoute
+  DocsSplatRoute: typeof DocsSplatRoute
   ServersIdRoute: typeof ServersIdRoute
 }
 
@@ -257,6 +335,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LinkRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pass': {
+      id: '/pass'
+      path: '/pass'
+      fullPath: '/pass'
+      preLoaderRoute: typeof PassRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
@@ -278,11 +370,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignUpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/staff': {
+      id: '/staff'
+      path: '/staff'
+      fullPath: '/staff'
+      preLoaderRoute: typeof StaffRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/verified': {
       id: '/verified'
       path: '/verified'
       fullPath: '/verified'
       preLoaderRoute: typeof VerifiedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/search': {
+      id: '/api/search'
+      path: '/api/search'
+      fullPath: '/api/search'
+      preLoaderRoute: typeof ApiSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs/$': {
+      id: '/docs/$'
+      path: '/docs/$'
+      fullPath: '/docs/$'
+      preLoaderRoute: typeof DocsSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/servers/$id': {
@@ -304,10 +424,16 @@ const rootRouteChildren: RootRouteChildren = {
   FriendsRoute: FriendsRoute,
   HomeRoute: HomeRoute,
   LinkRoute: LinkRoute,
+  PassRoute: PassRoute,
+  PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  StaffRoute: StaffRoute,
+  TermsRoute: TermsRoute,
   VerifiedRoute: VerifiedRoute,
+  ApiSearchRoute: ApiSearchRoute,
+  DocsSplatRoute: DocsSplatRoute,
   ServersIdRoute: ServersIdRoute,
 }
 export const routeTree = rootRouteImport

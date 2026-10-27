@@ -77,6 +77,20 @@ function SignUp() {
         <Action type="submit" disabled={pending}>
           {t("site.signUp.create")}
         </Action>
+        <p className="text-center text-[13px] leading-[18px] text-text-secondary">
+          {rich("site.signUp.agree", {
+            terms: (
+              <Link to="/terms" className={authLink}>
+                {t("site.footer.terms")}
+              </Link>
+            ),
+            privacy: (
+              <Link to="/privacy" className={authLink}>
+                {t("site.footer.privacy")}
+              </Link>
+            ),
+          })}
+        </p>
       </AuthForm>
       <AuthFoot>
         {t("site.signUp.haveAccount")}{" "}

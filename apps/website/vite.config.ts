@@ -1,6 +1,7 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import { fumadocsMdx } from "fumadocs-mdx/vite";
 import react from "@vitejs/plugin-react";
 import { readFileSync } from "node:fs";
 import { defineConfig } from "vite";
@@ -14,6 +15,7 @@ const key = process.env.DEV_TLS_KEY;
 // mavio.dev on Cloudflare Workers (docs/mavio-dev.md §2). The Worker
 // answers CORS itself, as in production: Vite's own answers only localhost.
 export default defineConfig({
-  plugins: [cloudflare({ viteEnvironment: { name: "ssr" } }), tanstackStart(), react(), tailwindcss()],
+  // fumadocsMdx compiles the documentation in content/docs (src/lib/docs.ts).
+  plugins: [fumadocsMdx(), cloudflare({ viteEnvironment: { name: "ssr" } }), tanstackStart(), react(), tailwindcss()],
   server: { cors: false, ...(cert && key ? { host: true, https: { cert: readFileSync(cert), key: readFileSync(key) } } : {}) },
 });

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @import "@mavio/design/tokens.css";
+/* fumadocs' layouts of the documentation, in the colors of the tokens below. */
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
 
 /* Inter, the family the tokens name, as in the web UI (docs/clients.md §6.1). */
 @font-face {
@@ -60,6 +63,28 @@
   --spacing-gutter: var(--mavio-layout-gutter);
   --spacing-poster: var(--mavio-layout-poster);
   --spacing-thumbnail: var(--mavio-layout-thumbnail);
+}
+
+/* The documentation's colors (fumadocs) are the design tokens', following
+   the system's theme as the site's pages do. */
+@theme {
+  --color-fd-background: var(--mavio-color-background);
+  --color-fd-foreground: var(--mavio-color-text-primary);
+  --color-fd-muted: var(--mavio-color-surface);
+  --color-fd-muted-foreground: var(--mavio-color-text-secondary);
+  --color-fd-popover: var(--mavio-color-surface-overlay);
+  --color-fd-popover-foreground: var(--mavio-color-text-primary);
+  --color-fd-card: var(--mavio-color-surface);
+  --color-fd-card-foreground: var(--mavio-color-text-primary);
+  --color-fd-border: var(--mavio-color-border);
+  --color-fd-primary: var(--mavio-color-accent-text);
+  --color-fd-primary-foreground: var(--mavio-color-on-accent);
+  --color-fd-secondary: var(--mavio-color-fill);
+  --color-fd-secondary-foreground: var(--mavio-color-text-primary);
+  --color-fd-accent: var(--mavio-color-fill-selected);
+  --color-fd-accent-foreground: var(--mavio-color-text-primary);
+  --color-fd-ring: var(--mavio-color-focus);
+  --color-fd-overlay: var(--mavio-color-scrim);
 }
 
 /* The type scale of the design tokens. */

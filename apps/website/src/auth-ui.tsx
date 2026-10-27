@@ -23,8 +23,8 @@ const tones = [
   ["#E07A5F", "#2E1A3A"],
 ];
 
-/** The screen behind the card: a wall of posters drawn from gradients, tilted and blurred under a veil. */
-function PosterWall() {
+/** The screen behind the card, and the front page's: a wall of posters drawn from gradients, tilted and blurred under a veil. */
+export function PosterWall() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       <div className="absolute -inset-[25%] flex gap-[1%]" style={{ transform: "rotate(-8deg) scale(1.15)", filter: "blur(2px)", opacity: "var(--signin-wall)" }}>

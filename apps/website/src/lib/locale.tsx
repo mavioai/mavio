@@ -52,6 +52,7 @@ const authErrors: Record<string, MessageKey> = {
   INVALID_TOKEN: "site.reset.invalid",
   INVALID_CODE: "site.error.code",
   TOO_MANY_REQUESTS: "site.error.tooMany",
+  BANNED_USER: "site.error.suspended",
 };
 
 /**
