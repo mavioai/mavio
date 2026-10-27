@@ -1072,13 +1072,17 @@ flowchart TD
 - [x] mavio.dev：账户、登录断言、电视代码登录、访问记录、邀请与吊销：基于 TanStack Start 与 better-auth 的 `apps/website`，支持密码、通行密钥、TOTP 和设备代码；基于 PostgreSQL 的 `ServerService` 与 `AccountService` 及其变更；认领、服务端、访问记录、邀请与账户的页面；针对 PGlite 测试，并端到端测试了服务端通过 workerd 中的 Worker 认领和登录（推送完成后服务端才取回变更）
 - [x] 通过 Cloudflare Email Service 发送 mavio.dev 的邮件与限流：登录前验证邮箱地址、重置密码（结束账户的所有会话），以及按客户端地址的 `credentials`、`mail` 与 `codes` 三个桶
 - [ ] 以邮件通知账户收到访问邀请、好友请求与 Home 邀请
-- [ ] mavio.dev 工作人员停用账户，并把停用发送给账户能访问的服务端
+- [x] mavio.dev 工作人员停用账户，并把停用发送给账户能访问的服务端：基于 better-auth admin 插件的 `staff` 角色，`/staff` 查找、停用和恢复账户并设置其 Pass
 - [ ] 从 CI 部署 `apps/website`：Hyperdrive 配置、机密与迁移
 - [x] mavio.dev 的页面按 Web UI 绘制，提供英文与简体中文：`libs/design/strings` 中 `website` 平台的字符串、按 `Accept-Language` 选择语言、海报墙上的登录卡片，以及由成组的行构成的账户页面
+- [x] mavio.dev 的首页、隐私政策与服务条款，以及基于 fumadocs 及其 ZBSearch 搜索的 `/docs` 文档
+- [ ] 撰写 mavio.dev 的文档：安装服务端、添加媒体库、应用、账户、Home 与 Mavio Pass；目前页面只是占位
+- [ ] 通过 Cloudflare Email Routing 接收发往 `support@mavio.dev` 的邮件
 - [ ] 由 mavio.dev 用 Workers 的出站 TCP 连接检查服务端公布的地址
 - [ ] 在虚拟机上运行 PostgreSQL，带一个流复制副本并把 WAL 归档到 R2，经 Hyperdrive 访问
 - [x] mavio.dev：好友、Home、托管账户及其转换、切换、Mavio Pass 与冻结的 Home：`FriendService` 与 `HomeService`，通过 Mavio 的 better-auth 插件以 PIN 切换，服务端应用托管账户的限制配置，以及 Home 与好友的页面
-- [ ] 购买与续订 Mavio Pass
+- [x] 购买与续订 Mavio Pass：Stripe Checkout、客户门户，以及按每个已付周期延长 Pass 的 webhook，和 `/pass`
+- [ ] 为 Mavio Pass 设置 Stripe：产品及其两个价格、webhook 端点、客户门户、税务，以及 Worker 的 Stripe 变量与机密
 - [x] mavio.dev：通过 Durable Object 向服务端推送，按游标取回变更：`NoticeHub` 保持每个服务端可休眠的 WebSocket，在记录变更的请求之后收到通知；在 workerd 中与服务端端到端测试
 - [x] `apps/dns` 与通过 ACME DNS-01 质询获取的服务端证书：用 `miekg/dns` 从名称计算区域应答；基于 Cloudflare DNS API 与 Google Public CA API 的 `ServerService.SetAcmeChallenge`、`ClearAcmeChallenge` 和 `CreateAcmeBinding`；服务端的 `internal/certs` 从 Let's Encrypt 或 Google Trust Services 获取并按 ACME 续期信息续期 `*.<ID>.mavio.site`，并用它提供 HTTPS；以 `certstest` 中模拟的 ACME CA 测试
 - [ ] 在两台虚拟机上运行 `apps/dns`，用胶水记录把 `mavio.site` 委派给它们，并把 `mavio.site` 加入公共后缀列表

@@ -109,7 +109,7 @@
 Home 信任其成员：不希望 Home 中的其他人切换到自己的完整成员应设置 PIN。错误的 PIN 会逐步减速；完整账户连续五次输错 PIN 后，切换到它需要输入密码。
 
 ### 3.7 Mavio Pass
-Mavio Pass 为 mavio.dev 自身提供的服务付费，例如中转；服务端的任何功能都不依赖它。账户的**有效 Pass** 是它自己的 Pass，或者在 Home 未冻结时其 Home 管理员的 Pass。观看者或服务端管理员拥有有效 Pass 时，串流可以经过中转。
+Mavio Pass 为 mavio.dev 自身提供的服务付费，例如中转；服务端的任何功能都不依赖它。账户的**有效 Pass** 是它自己的 Pass，或者在 Home 未冻结时其 Home 管理员的 Pass。观看者或服务端管理员拥有有效 Pass 时，串流可以经过中转。Pass 在 mavio.dev 上购买，每月 4 美元或每年 35 美元（[mavio.dev §2](mavio-dev.zh-CN.md#2-网站与-apiappswebsite)）。
 
 ## 4. 独立模式
 

@@ -1072,13 +1072,17 @@ flowchart TD
 - [x] mavio.dev: accounts, sign-in assertions, code sign-in for televisions, access records, invitations and revocations: `apps/website` on TanStack Start and better-auth with passwords, passkeys, TOTP and device codes, `ServerService` and `AccountService` over PostgreSQL with their changes, and pages for claiming, servers, access records, invitations and the account; tested against PGlite, and end to end with a server claiming and signing in through the Worker in workerd (the server fetches changes once the push exists)
 - [x] mavio.dev's e-mail through Cloudflare Email Service and rate limits: verifying addresses before signing in, resetting passwords, which ends the account's sessions, and the `credentials`, `mail` and `codes` buckets per client address
 - [ ] Telling accounts of invitations, friend requests and Home invitations by e-mail
-- [ ] Suspending accounts by mavio.dev's staff, which sends the suspension to the account's servers
+- [x] Suspending accounts by mavio.dev's staff, which sends the suspension to the account's servers: the `staff` role on better-auth's admin plugin, `/staff` finding, suspending and restoring accounts and setting their Pass
 - [ ] Deploying `apps/website` from CI: the Hyperdrive configuration, the secret and the migrations
 - [x] mavio.dev's pages drawn as the web UI, in English and Simplified Chinese: the `website` platform's strings in `libs/design/strings`, the language of `Accept-Language`, the sign-in card on a wall of posters and the account's pages in groups of rows
+- [x] mavio.dev's landing page, privacy policy and terms of service, and its documentation at `/docs` on fumadocs with its ZBSearch search
+- [ ] Writing mavio.dev's documentation: installing a server, adding libraries, the apps, accounts, Homes and Mavio Pass; its pages are placeholders
+- [ ] Receiving mail at `support@mavio.dev` through Cloudflare Email Routing
 - [ ] Checking servers' published addresses from mavio.dev with Workers' outbound TCP connections
 - [ ] Running PostgreSQL on VMs with a streaming replica and its WAL archived to R2, reached through Hyperdrive
 - [x] mavio.dev: friends, Homes, managed accounts and their conversion, switching, Mavio Pass and frozen Homes: `FriendService` and `HomeService`, switching with PINs through Mavio's better-auth plugin, managed accounts' restriction profiles applied by servers, and the pages of the Home and friends
-- [ ] Buying and renewing Mavio Pass
+- [x] Buying and renewing Mavio Pass: Stripe Checkout, the customer portal and the webhooks extending the Pass by each paid period, and `/pass`
+- [ ] Setting up Stripe for Mavio Pass: the product and its two prices, the webhook endpoint, the customer portal, taxes, and the Worker's Stripe variables and secrets
 - [x] mavio.dev: the push to servers through Durable Objects, with changes fetched after a cursor: `NoticeHub` holding each server's hibernating WebSocket, notified after the requests that record changes; tested end to end with a server in workerd
 - [x] `apps/dns` and servers' certificates through ACME DNS-01 challenges: the zone computed from names with `miekg/dns`; `ServerService.SetAcmeChallenge`, `ClearAcmeChallenge` and `CreateAcmeBinding` over Cloudflare's DNS API and Google's Public CA API; the server's `internal/certs`, which obtains and renews `*.<ID>.mavio.site` from Let's Encrypt or Google Trust Services with ACME Renewal Information and serves it over HTTPS; tested against an ACME CA simulated in `certstest`
 - [ ] Running `apps/dns` on two VMs, delegating `mavio.site` to them with glue records, and adding `mavio.site` to the Public Suffix List

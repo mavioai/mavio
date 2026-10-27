@@ -109,7 +109,7 @@ On any device signed in as a member of a Home, a client lists every member of th
 A Home trusts its members: a full member who does not want others in the Home to switch to them sets a PIN. Wrong PINs slow down progressively; after five wrong PINs for a full account, switching to it needs its password.
 
 ### 3.7 Mavio Pass
-Mavio Pass pays for what mavio.dev itself provides, such as the relay; nothing a server does depends on it. An account's **effective Pass** is its own, or its Home administrator's while the Home is not frozen. A stream may go through the relay when the viewer or the server's administrator has an effective Pass.
+Mavio Pass pays for what mavio.dev itself provides, such as the relay; nothing a server does depends on it. An account's **effective Pass** is its own, or its Home administrator's while the Home is not frozen. A stream may go through the relay when the viewer or the server's administrator has an effective Pass. A Pass is bought on mavio.dev, for $4 a month or $35 a year ([mavio.dev §2](mavio-dev.md#2-website-and-api-appswebsite)).
 
 ## 4. Standalone Mode
 
