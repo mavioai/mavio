@@ -9,7 +9,10 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { parse, TYPE } from '@formatjs/icu-messageformat-parser';
 
 export const SOURCE_LOCALE = 'en';
-export const PLATFORMS = ['web', 'apple', 'android', 'desktop'];
+// The clients, whose strings are the default, and mavio.dev's website,
+// whose strings name it.
+export const CLIENTS = ['web', 'apple', 'android', 'desktop'];
+export const PLATFORMS = [...CLIENTS, 'website'];
 const PLURAL_FORMS = ['zero', 'one', 'two', 'few', 'many', 'other'];
 
 // Parts are strings (text), { arg } and { count: true } for #.
@@ -90,7 +93,7 @@ export function readStrings() {
     if (!/^[a-z]+(\.[a-zA-Z]+)+$/.test(key)) throw new Error(`${key}: keys are dotted camelCase`);
     if (!v.description) throw new Error(`${key}: no description`);
     for (const p of v.platforms ?? []) if (!PLATFORMS.includes(p)) throw new Error(`${key}: unknown platform ${p}`);
-    return { key, description: v.description, platforms: v.platforms ?? PLATFORMS };
+    return { key, description: v.description, platforms: v.platforms ?? CLIENTS };
   });
 
   const messages = {};

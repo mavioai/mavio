@@ -1,4 +1,5 @@
-// Writes gen/ts: tokens.ts, tokens.css, icons.ts and strings.ts for the web UI.
+// Writes gen/ts: tokens.ts, tokens.css, icons.ts and strings.ts for the web UI,
+// and website-strings.ts for mavio.dev's website.
 import { HEADER, hex, write } from './util.js';
 import { entriesFor } from './strings.js';
 import { BREAKPOINTS } from './tokens.js';
@@ -85,7 +86,8 @@ function typeVars(scale) {
 function tokensCss(t) {
   return `${HEADER('/*', ' */')}
 /* The dark theme is the default; the light theme follows the system unless
-   data-theme on the root element picks one. */
+   data-theme on the root element picks one. data-theme='dark' on another
+   element keeps it and what it holds dark, as the player. */
 :root {
   --mavio-font-family: Inter, system-ui, sans-serif;
 ${themeVars(t.themes.dark)}
@@ -106,6 +108,10 @@ ${themeVars(t.themes.light).replace(/^/gm, '  ')}
 
 :root[data-theme='light'] {
 ${themeVars(t.themes.light)}
+}
+
+:root [data-theme='dark'] {
+${themeVars(t.themes.dark)}
 }
 
 @media (min-width: ${BREAKPOINTS.tablet}px) {
@@ -136,8 +142,8 @@ export type IconWeight = 'regular' | 'fill';
 `;
 }
 
-function stringsTs(s) {
-  const entries = entriesFor(s, 'web');
+function stringsTs(s, platform, what) {
+  const entries = entriesFor(s, platform);
   const keys = entries.map((e) => e.key);
   const messages = Object.fromEntries(
     s.locales.map((l) => [l, Object.fromEntries(keys.map((k) => [k, s.messages[l][k].text]))]),
@@ -151,7 +157,7 @@ export const locales = ${json(s.locales)} as const;
 
 export type Locale = (typeof locales)[number];
 
-/** The keys of the strings of the web UI. */
+/** The keys of the strings of ${what}. */
 export type MessageKey =
 ${keys.map((k) => `  | '${k}'`).join('\n')};
 
@@ -164,5 +170,6 @@ export function emitTs(tokens, icons, strings) {
   write('gen/ts/tokens.ts', tokensTs(tokens));
   write('gen/ts/tokens.css', tokensCss(tokens));
   write('gen/ts/icons.ts', iconsTs(icons));
-  write('gen/ts/strings.ts', stringsTs(strings));
+  write('gen/ts/strings.ts', stringsTs(strings, 'web', 'the web UI'));
+  write('gen/ts/website-strings.ts', stringsTs(strings, 'website', "mavio.dev's website"));
 }
