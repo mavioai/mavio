@@ -9,6 +9,7 @@
     "./tokens.css": "./gen/ts/tokens.css",
     "./icons": "./gen/ts/icons.ts",
     "./strings": "./gen/ts/strings.ts",
+    "./website-strings": "./gen/ts/website-strings.ts",
     "./providers": "./gen/ts/providers.ts",
     "./snapshots/screens.json": "./snapshots/screens.json"
   },
