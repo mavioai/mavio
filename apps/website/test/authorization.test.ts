@@ -230,6 +230,14 @@ describe("device sessions", () => {
       Code.Unauthenticated,
     );
   });
+
+  test("end when the password is reset", async () => {
+    const { site, token } = await session();
+    await site.auth.api.requestPasswordReset({ body: { email: "alice@example.com", redirectTo: "/reset-password" } });
+    const link = /\/reset-password\/([\w-]+)/.exec(site.mails.at(-1)!.text)!;
+    await site.auth.api.resetPassword({ body: { token: link[1], newPassword: "a new password" } });
+    expect(await code(site.client(AccountService, { authorization: `Bearer ${token}` }).getAccount({}))).toBe(Code.Unauthenticated);
+  });
 });
 
 describe("authorization requests that claim the server", () => {

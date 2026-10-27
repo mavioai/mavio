@@ -28,6 +28,13 @@ export default defineConfig(({ mode }) => ({
         dev: { connectionString: "postgres://mavio:mavio@localhost:5432/mavio" },
       }),
       NOTICES: bindings.durableObject({ worker: name, exportName: "NoticeHub" }),
+      // The e-mails verifying addresses and resetting passwords.
+      EMAIL: bindings.sendEmail({ allowedSenderAddresses: ["noreply@mavio.dev"] }),
+      // Per client address and minute: passwords, codes and PINs tried,
+      // e-mails sent, and link codes and devices' sessions asked for.
+      CREDENTIALS_LIMIT: bindings.rateLimit({ namespace: "1001", simple: { limit: 10, period: 60 } }),
+      MAIL_LIMIT: bindings.rateLimit({ namespace: "1002", simple: { limit: 3, period: 60 } }),
+      CODES_LIMIT: bindings.rateLimit({ namespace: "1003", simple: { limit: 30, period: 60 } }),
       BETTER_AUTH_SECRET: bindings.secret(),
       CLOUDFLARE_ZONE_ID: bindings.secret(),
       CLOUDFLARE_API_TOKEN: bindings.secret(),

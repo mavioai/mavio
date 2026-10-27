@@ -9,6 +9,8 @@ import { type Acme, cloudflareDns, googleBindings } from "./acme.ts";
 import { handleApi } from "./api.ts";
 import { createAuth } from "./auth.ts";
 import { type Database, schema } from "./db/index.ts";
+import { bindingLimit } from "./limits.ts";
+import { emailService } from "./mail.ts";
 import type { NoticeHub } from "./notice-hub.ts";
 import { parseRelays } from "./relay.ts";
 
@@ -21,7 +23,7 @@ export async function serveApi(req: Request, ctx: ExecutionContext): Promise<Res
   await client.connect();
   try {
     const db: Database = drizzle(client, { schema });
-    const auth = createAuth(db, { baseURL: env.BASE_URL, secret: env.BETTER_AUTH_SECRET });
+    const auth = createAuth(db, { baseURL: env.BASE_URL, secret: env.BETTER_AUTH_SECRET, mailer: emailService(env.EMAIL) });
     const res = await handleApi(req, {
       db,
       auth,
@@ -31,6 +33,7 @@ export async function serveApi(req: Request, ctx: ExecutionContext): Promise<Res
       connectNotices: (id, r) => hub(id).fetch(r),
       acme: acme(),
       relays: env.RELAYS && env.RELAY_TICKET_SECRET ? parseRelays(env.RELAYS, env.RELAY_TICKET_SECRET) : undefined,
+      limit: bindingLimit({ credentials: env.CREDENTIALS_LIMIT, mail: env.MAIL_LIMIT, codes: env.CODES_LIMIT }),
     });
     return res ?? new Response("Not Found", { status: 404 });
   } finally {

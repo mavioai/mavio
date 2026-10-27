@@ -174,6 +174,10 @@ describe("Homes", () => {
     await home.createHome({ name: "Family" });
     const { member } = await home.createManagedAccount({ userName: "teen", displayName: "Teen", restriction: RestrictionProfile.TEEN });
     await home.convertManagedAccount({ accountId: member!.account!.id, email: "teen@example.com", password: "teen password" });
+    // It signs in once it verified its address.
+    await expect(site.auth.api.signInEmail({ body: { email: "teen@example.com", password: "teen password" } })).rejects.toThrow(/verified/);
+    const mail = site.mails.findLast((m) => m.to === "teen@example.com");
+    await site.fetch(new Request(/https?:\/\/\S+verify-email\S+/.exec(mail!.text)![0]));
     const signedIn = await site.auth.api.signInEmail({ body: { email: "teen@example.com", password: "teen password" } });
     const account = await site.client(AccountService, { authorization: `Bearer ${signedIn.token}` }).getAccount({});
     expect([account.account?.kind, account.account?.restriction]).toEqual([AccountKind.FULL, RestrictionProfile.UNSPECIFIED]);

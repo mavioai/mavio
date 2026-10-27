@@ -1,6 +1,7 @@
 // Accounts at mavio.dev (docs/mavio-dev.md §2), built on better-auth:
-// e-mail and password, passkeys, TOTP, user names, bearer sessions, and
-// the JWT plugin whose keys sign sign-in assertions. Devices hold sessions
+// e-mail and password, verified addresses and passwords reset by e-mail,
+// passkeys, TOTP, user names, bearer sessions, and the JWT plugin whose
+// keys sign sign-in assertions. Devices hold sessions
 // of their own keys instead (device-sessions.ts).
 import { passkey } from "@better-auth/passkey";
 import { betterAuth } from "better-auth";
@@ -12,8 +13,9 @@ import { eq } from "drizzle-orm";
 
 import { AccountRevoked_Reason, accountChanged, accountOf, accountRevoked } from "./changes.ts";
 import { type Database, schema } from "./db/index.ts";
-import * as password from "./password.ts";
 import { homes } from "./homes-plugin.ts";
+import { type Mailer, resetMail, verificationMail } from "./mail.ts";
+import * as password from "./password.ts";
 
 /** Config is the configuration of mavio.dev's accounts. */
 export interface Config {
@@ -21,7 +23,12 @@ export interface Config {
   baseURL: string;
   /** The secret better-auth signs cookies and seals keys with. */
   secret: string;
+  /** mailer sends the e-mails verifying addresses and resetting passwords. */
+  mailer: Mailer;
 }
+
+/** How long the links of e-mails stay valid, in seconds. */
+export const mailLinkLifetime = 60 * 60;
 
 /** apiURL returns the API's base URL, which servers call and which issues assertions. */
 export function apiURL(baseURL: string): string {
@@ -39,7 +46,29 @@ export function createAuth(db: Database, config: Config) {
     database: drizzleAdapter(db, { provider: "pg", schema }),
     emailAndPassword: {
       enabled: true,
+      // An address is someone's once they show it is: friends and Homes
+      // find accounts by it.
+      requireEmailVerification: true,
       password: { hash: password.hash, verify: password.verify },
+      resetPasswordTokenExpiresIn: mailLinkLifetime,
+      sendResetPassword: async ({ user, url }, req) => {
+        await config.mailer.send(resetMail(user, url, req?.headers.get("accept-language")));
+      },
+      // A new password ends every session, devices' included.
+      revokeSessionsOnPasswordReset: true,
+      onPasswordReset: async ({ user }) => {
+        await db.delete(schema.deviceSessions).where(eq(schema.deviceSessions.accountId, user.id));
+      },
+    },
+    emailVerification: {
+      sendOnSignUp: true,
+      // Signing in with an address not verified sends the link again.
+      sendOnSignIn: true,
+      autoSignInAfterVerification: true,
+      expiresIn: mailLinkLifetime,
+      sendVerificationEmail: async ({ user, url }, req) => {
+        await config.mailer.send(verificationMail(user, url, req?.headers.get("accept-language")));
+      },
     },
     user: {
       deleteUser: {

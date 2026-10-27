@@ -7,6 +7,7 @@ import { type Client, Code, ConnectError, createClient, type Interceptor } from 
 import { createConnectTransport } from "@connectrpc/connect-web";
 import { AccountService } from "@mavio/proto/mavio/cloud/v1/account_pb";
 import { ServerService } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 
@@ -14,6 +15,8 @@ import { handleApi } from "../src/server/api.ts";
 import { createAuth } from "../src/server/auth.ts";
 import { type Database, schema } from "../src/server/db/index.ts";
 import { base64url, serverID } from "../src/server/ids.ts";
+import type { Bucket } from "../src/server/limits.ts";
+import type { Mail } from "../src/server/mail.ts";
 
 export const baseURL = "http://localhost:3000";
 export const apiURL = `${baseURL}/api`;
@@ -25,8 +28,13 @@ export async function newSite() {
   const pg = new PGlite();
   const db = drizzle(pg, { schema }) as unknown as Database;
   await migrate(drizzle(pg), { migrationsFolder: fileURLToPath(new URL("../drizzle", import.meta.url)) });
-  const auth = createAuth(db, { baseURL, secret: "a test secret that is long enough to pass" });
+  const mails: Mail[] = [];
+  const auth = createAuth(db, { baseURL, secret: "a test secret that is long enough to pass", mailer: { send: async (m) => void mails.push(m) } });
   const site = {
+    /** The e-mails sent, oldest first. */
+    mails,
+    /** The requests each bucket still lets through, by client address; unlimited when a bucket is absent. */
+    allowance: new Map<Bucket, number>(),
     db,
     auth,
     /** The cursors each request notified servers of. */
@@ -54,6 +62,12 @@ export async function newSite() {
           bindings: { create: async () => ({ keyId: "kid-1", hmacKey: new Uint8Array([1, 2, 3]) }) },
         },
         relays: { urls: new Map([["eu", "https://relay-eu.test"]]), secret: relaySecret, zone: "mavio.site" },
+        limit: async (bucket) => {
+          const left = site.allowance.get(bucket);
+          if (left === undefined) return true;
+          site.allowance.set(bucket, left - 1);
+          return left > 0;
+        },
       })) ?? new Response("Not Found", { status: 404 }),
     /** client returns a Connect client of service sending headers. */
     client<T extends DescService>(service: T, headers: Record<string, string> = {}, interceptors: Interceptor[] = []): Client<T> {
@@ -78,11 +92,14 @@ export async function newSite() {
       };
       return site.client(ServerService, {}, [sign]);
     },
-    /** signUp creates an account and returns its bearer header. */
+    /** signUp creates an account with its address verified, and returns its bearer header. */
     async signUp(username: string) {
-      const res = await auth.api.signUpEmail({
-        body: { email: `${username}@example.com`, password: `${username} password`, name: username, username },
-      });
+      const email = `${username}@example.com`;
+      const password = `${username} password`;
+      const { user } = await auth.api.signUpEmail({ body: { email, password, name: username, username } });
+      await db.update(schema.user).set({ emailVerified: true }).where(eq(schema.user.id, user.id));
+      mails.length = 0;
+      const res = await auth.api.signInEmail({ body: { email, password } });
       return { id: res.user.id, headers: { authorization: `Bearer ${res.token}` } };
     },
   };

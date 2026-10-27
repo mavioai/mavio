@@ -58,7 +58,10 @@ export function friendService({ db, auth, now = () => new Date() }: Deps & { aut
     async addFriend(req, ctx) {
       const me = await signedIn(ctx);
       const name = req.name.trim().toLowerCase();
-      const other = await db.query.user.findFirst({ where: or(eq(schema.user.username, name), eq(schema.user.email, name)) });
+      // An address finds its account only once the account verified it.
+      const other = await db.query.user.findFirst({
+        where: or(eq(schema.user.username, name), and(eq(schema.user.email, name), eq(schema.user.emailVerified, true))),
+      });
       if (!other || managed(other)) throw new ConnectError(`no account ${req.name}`, Code.NotFound);
       if (other.id === me.id) throw new ConnectError("you cannot befriend yourself", Code.InvalidArgument);
       const at = now();

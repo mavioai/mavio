@@ -17,6 +17,7 @@ import { cors, handleOAuth, preflight } from "./authorization.ts";
 import type { Database } from "./db/index.ts";
 import { friendService } from "./friend-service.ts";
 import { homeService } from "./home-service.ts";
+import { bucketOf, clientOf, type Limit, limited } from "./limits.ts";
 import { collectNotices } from "./notices.ts";
 import type { Relays } from "./relay.ts";
 import { authenticateServer, type Deps, serverService } from "./server-service.ts";
@@ -38,6 +39,8 @@ export interface ApiOptions {
   relays?: Relays;
   /** connectNotices hands an authenticated server's WebSocket request to its Durable Object. */
   connectNotices?: (serverId: string, req: Request) => Promise<Response>;
+  /** limit tells whether a request of a limited kind may go on; without it nothing is limited. */
+  limit?: Limit;
 }
 
 /** noticesPath is where servers open their WebSockets (docs/mavio-dev.md §3). */
@@ -66,6 +69,8 @@ export async function handleApi(req: Request, options: ApiOptions): Promise<Resp
     if (req.headers.get("upgrade")?.toLowerCase() !== "websocket") return new Response("Expected a WebSocket", { status: 426 });
     return options.connectNotices?.(server.id, req) ?? new Response("Not Implemented", { status: 501 });
   }
+  const bucket = options.limit && bucketOf(req.method, pathname);
+  if (bucket && !(await options.limit!(bucket, clientOf(req)))) return limited(req, pathname);
   const [res, cursors] = await collectNotices(() => route(req, pathname, options, deps));
   if (cursors.size > 0) options.notify?.(cursors);
   return res;

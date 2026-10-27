@@ -3,4 +3,4 @@
 import { createAuth } from "../src/server/auth.ts";
 import type { Database } from "../src/server/db/index.ts";
 
-export const auth = createAuth({} as Database, { baseURL: "https://mavio.dev", secret: "generate" });
+export const auth = createAuth({} as Database, { baseURL: "https://mavio.dev", secret: "generate", mailer: { send: async () => {} } });

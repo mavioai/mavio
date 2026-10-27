@@ -416,6 +416,10 @@ export function homeService({ db, auth, now = () => new Date() }: Deps & { auth:
         });
         await accountChanged(tx, accountOf(u));
       });
+      // The account signs in once its new address is verified.
+      // Not the administrator's session, which would be the address sent to.
+      const headers = new Headers({ "accept-language": ctx.requestHeader.get("accept-language") ?? "" });
+      await auth.api.sendVerificationEmail({ body: { email: req.email.toLowerCase() }, headers });
       return create(ConvertManagedAccountResponseSchema);
     },
 
