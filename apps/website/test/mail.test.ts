@@ -96,6 +96,7 @@ describe("mails", () => {
     const m = verificationMail({ email: "a@example.com", name: "<b>Ann</b>" }, "https://mavio.dev/api/auth/verify-email?token=x&callbackURL=/", "en-US");
     expect(m.subject).toBe("Verify your e-mail address for Mavio");
     expect(m.text).toContain("Hi <b>Ann</b>,");
+    expect(m.text).toContain("Verify E-mail Address\nhttps://mavio.dev/api/auth/verify-email?token=x&callbackURL=/");
     expect(m.html).toContain("Hi &lt;b&gt;Ann&lt;/b&gt;,");
     expect(m.html).toContain('href="https://mavio.dev/api/auth/verify-email?token=x&amp;callbackURL=/"');
     expect(resetMail({ email: "a@example.com", name: "Ann" }, "https://x", "fr, zh-TW;q=0.8").subject).toBe("重设你的 Mavio 密码");

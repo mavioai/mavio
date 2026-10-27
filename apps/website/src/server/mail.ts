@@ -44,7 +44,7 @@ function escape(s: string): string {
  * its link spelled out, and what to do when the reader did not ask for it.
  */
 function actionMail(to: string, subject: string, t: T, parts: { greeting: string; body: string; action: string; url: string; ignore: string }): Mail {
-  const text = [parts.greeting, parts.body, `${parts.action}: ${parts.url}`, parts.ignore, "— Mavio"].join("\n\n");
+  const text = [parts.greeting, parts.body, `${parts.action}\n${parts.url}`, parts.ignore, "— Mavio"].join("\n\n");
   // Inline styles and a table: what e-mail clients draw alike. The colors
   // are the design's accent and grays (libs/design/tokens).
   const html = `<!doctype html>
