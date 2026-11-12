@@ -15,6 +15,14 @@ const bytea = customType<{ data: Uint8Array; driverData: Uint8Array }>({
 
 const time = (name: string) => timestamp(name, { withTimezone: true, mode: "date" });
 
+/** ConnectionCheckRow is whether a published URL accepted a TCP connection from mavio.dev, and when. */
+export interface ConnectionCheckRow {
+  url: string;
+  reachable: boolean;
+  /** An ISO 8601 time. */
+  checkedAt: string;
+}
+
 /** servers are the claimed servers, by the ID of their identity key. */
 export const servers = pgTable(
   "servers",
@@ -35,6 +43,10 @@ export const servers = pgTable(
     relayRegion: text("relay_region").notNull().default(""),
     // The URLs the server published, best first.
     connections: jsonb("connections").$type<string[]>().notNull().default([]),
+    // What the last check of the published URLs found (reachability.ts),
+    // and when it started; null before the first.
+    connectionChecks: jsonb("connection_checks").$type<ConnectionCheckRow[]>().notNull().default([]),
+    connectionsCheckedAt: time("connections_checked_at"),
   },
   (t) => [index("servers_administrator_id_idx").on(t.administratorId)],
 );

@@ -66,9 +66,12 @@ mavio.dev is the OpenID Connect issuer of servers in mavio.dev mode ([Accounts �
 ### 4.3 Connecting
 Browsers reach a server by its names through DNS. Native clients connect to an address directly, with the address's name as the TLS server name, so that they also work where DNS answers with private addresses are filtered, and they check the server's identity key as well ([Accounts §5.1](accounts.md#51-server-identity)).
 
+* mavio.dev checks the URLs a server publishes from the internet: when they change, and when listing an account's servers finds their checks older than six hours, it opens a TCP connection from the Worker to the host and port of each of the first eight, within three seconds, after answering the request, and at most once a minute per server. URLs at loopback, private, shared, link-local or documentation addresses, written as addresses or as their `s.mavio.fyi` names, and single-label or `.local` names are not checked, as only the server's own network reaches them. `ListServers` gives each server's checks of the URLs it still publishes (`connection_checks`).
+* Clients try a server's URLs in the order it published them, those the checks found closed last; when none answers, they ask for a relay ticket (§5.1) and reach the server through its relay, asking for a new ticket a minute before the last expires.
+
 ## 5. Relay (`apps/relay`)
 * A Go service on VMs in Europe, the United States and Singapore, for servers that cannot be reached directly. A server whose relay use is allowed keeps a connection to the relay of its region.
-* A client reaches the server through the relay at `relay-<region>-<ticket>.<ID>.s.mavio.fyi`. The ticket is issued by mavio.dev, valid for a few minutes, and only when the viewer or the server's administrator has an effective Mavio Pass ([Accounts §3.7](accounts.md#37-mavio-pass)).
+* A client reaches the server through the relay at `relay-<region>-<ticket>.<ID>.s.mavio.fyi` when none of the server's published URLs answers (§4.3). The ticket is issued by mavio.dev, valid for a few minutes, and only when the viewer or the server's administrator has an effective Mavio Pass ([Accounts §3.7](accounts.md#37-mavio-pass)).
 * The relay reads the name from the TLS ClientHello, checks the ticket and splices the client's connection to the server's without terminating TLS, so encryption stays end to end and the relay sees only encrypted bytes.
 
 ### 5.1 Tickets

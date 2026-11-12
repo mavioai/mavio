@@ -18,7 +18,7 @@ import {
   SetAcmeChallengeResponseSchema,
   SetRelayRegionResponseSchema,
 } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
-import { and, asc, eq, gt, lt } from "drizzle-orm";
+import { and, asc, eq, gt, isNull, lt, or } from "drizzle-orm";
 
 import type { Acme } from "./acme.ts";
 import { redirectURI } from "./authorization.ts";
@@ -27,6 +27,7 @@ import { claimCodeHash, claimCodeLifetime } from "./claim-codes.ts";
 import type { Database, Tx } from "./db/index.ts";
 import { schema } from "./db/index.ts";
 import { base64url } from "./ids.ts";
+import { type Checks, checkConnections, due, minInterval } from "./reachability.ts";
 import type { Relays } from "./relay.ts";
 import { bearer, keyID, verifyServerToken } from "./server-token.ts";
 
@@ -40,6 +41,33 @@ export interface Deps {
   acme?: Acme;
   /** The relays; undefined where there are none. */
   relays?: Relays;
+  /** How servers' published URLs are checked; undefined where they are not. */
+  checks?: Checks;
+}
+
+type ServerRow = typeof schema.servers.$inferSelect;
+
+/**
+ * checkLater checks a server's published URLs after the response when they
+ * are due (reachability.ts). Taking the check's time first, only where the
+ * last is older than minInterval, lets one request alone check at a time.
+ */
+export function checkLater({ db, checks, now = () => new Date() }: Deps, s: Pick<ServerRow, "id" | "connections" | "connectionChecks" | "connectionsCheckedAt">) {
+  const at = now();
+  if (!checks || !due(s, at)) return;
+  checks.background(
+    (async () => {
+      const since = new Date(at.getTime() - minInterval);
+      const [taken] = await db
+        .update(schema.servers)
+        .set({ connectionsCheckedAt: at })
+        .where(and(eq(schema.servers.id, s.id), or(isNull(schema.servers.connectionsCheckedAt), lt(schema.servers.connectionsCheckedAt, since))))
+        .returning({ id: schema.servers.id });
+      if (!taken) return;
+      const found = await checkConnections(s.connections, checks.dial, at);
+      await db.update(schema.servers).set({ connectionChecks: found }).where(eq(schema.servers.id, s.id));
+    })().catch((e) => console.error("checking a server's URLs failed", { server: s.id, error: e instanceof Error ? e.message : String(e) })),
+  );
 }
 
 const defaultPageSize = 100;
@@ -200,7 +228,8 @@ export function serverService(deps: Deps): ServiceImpl<typeof ServerService> {
 
     async publishConnections(req, ctx) {
       const server = await authenticate(ctx);
-      await db.update(schema.servers).set({ connections: req.urls }).where(eq(schema.servers.id, server.id));
+      const [s] = await db.update(schema.servers).set({ connections: req.urls }).where(eq(schema.servers.id, server.id)).returning();
+      if (s) checkLater(deps, s);
       return create(PublishConnectionsResponseSchema);
     },
 

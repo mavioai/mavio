@@ -1,6 +1,7 @@
 // Serving the API on Workers: one PostgreSQL client per request, reached
 // through Hyperdrive, and the notices of the servers' Durable Objects
 // (docs/mavio-dev.md §2, §3).
+import { connect } from "cloudflare:sockets";
 import { env } from "cloudflare:workers";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
@@ -13,6 +14,7 @@ import { type Database, schema } from "./db/index.ts";
 import { bindingLimit } from "./limits.ts";
 import { emailService } from "./mail.ts";
 import type { NoticeHub } from "./notice-hub.ts";
+import type { Dial } from "./reachability.ts";
 import { parseRelays } from "./relay.ts";
 
 /** serveApi serves a request under /api; notices go to the servers' Durable Objects once it is done. */
@@ -22,6 +24,9 @@ export async function serveApi(req: Request, ctx: ExecutionContext): Promise<Res
   const hub = (id: string) => notices.get(notices.idFromName(id));
   const client = new pg.Client({ connectionString: env.HYPERDRIVE.connectionString });
   await client.connect();
+  // Work carried on after the response, such as checking servers' URLs,
+  // keeps the database client until it is done.
+  const background: Promise<unknown>[] = [];
   try {
     const db: Database = drizzle(client, { schema });
     const stripe = stripeOf();
@@ -39,12 +44,29 @@ export async function serveApi(req: Request, ctx: ExecutionContext): Promise<Res
       relays: env.RELAYS && env.RELAY_TICKET_SECRET ? parseRelays(env.RELAYS, env.RELAY_TICKET_SECRET) : undefined,
       stripe,
       limit: bindingLimit({ credentials: env.CREDENTIALS_LIMIT, mail: env.MAIL_LIMIT, codes: env.CODES_LIMIT }),
+      checks: { dial, background: (work) => background.push(work) },
     });
     return res ?? new Response("Not Found", { status: 404 });
   } finally {
-    await client.end();
+    if (background.length === 0) await client.end();
+    else ctx.waitUntil(Promise.allSettled(background).then(() => client.end()));
   }
 }
+
+/** dial opens a TCP connection from the Worker (docs/mavio-dev.md §4.3) and closes it. */
+const dial: Dial = async (host, port, timeout) => {
+  const socket = connect({ hostname: host, port });
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await Promise.race([socket.opened, new Promise((_, reject) => (timer = setTimeout(() => reject(new Error("timed out")), timeout)))]);
+    return true;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+    socket.close().catch(() => {});
+  }
+};
 
 /** stripeOf returns the Stripe account Mavio Pass is sold through, undefined when not configured. */
 function stripeOf(): Stripe | undefined {

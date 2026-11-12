@@ -57,6 +57,15 @@ export async function newSite(options: { stripe?: Stripe } = {}) {
     connected: [] as string[],
     /** The TXT records of servers' ACME challenges, by name. */
     txt: new Map<string, string[]>(),
+    /** The host:port pairs dialed to check servers' URLs, and those that accept connections. */
+    dialed: [] as string[],
+    listening: new Set<string>(),
+    /** The work carried on after responses. */
+    background: [] as Promise<unknown>[],
+    /** settle waits for the work carried on after responses. */
+    async settle() {
+      while (site.background.length > 0) await Promise.all(site.background.splice(0));
+    },
     fetch: async (req: Request) =>
       (await handleApi(req, {
         db,
@@ -64,6 +73,13 @@ export async function newSite(options: { stripe?: Stripe } = {}) {
         baseURL,
         stripe: options.stripe,
         mailer,
+        checks: {
+          dial: async (host, port) => {
+            site.dialed.push(`${host}:${port}`);
+            return site.listening.has(`${host}:${port}`);
+          },
+          background: (work) => void site.background.push(work),
+        },
         notify: (cursors) => site.notices.push(cursors),
         connectNotices: async (id) => {
           site.connected.push(id);

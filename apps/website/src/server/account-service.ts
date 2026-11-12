@@ -15,6 +15,7 @@ import {
   CreateClaimCodeResponseSchema,
   CreateRelayTicketResponseSchema,
   DeclineInvitationResponseSchema,
+  ConnectionCheckSchema,
   GetAccountResponseSchema,
   GetAuthorizationRequestResponseSchema,
   GetLinkCodeResponseSchema,
@@ -58,7 +59,8 @@ import { between, effectivePass, homeOf, ownPass } from "./home.ts";
 import { userCodeKey } from "./link-codes.ts";
 import { deliver, invitationMail, inviterOf, type Mail, type Mailer, mailTo } from "./mail.ts";
 import { relayHost, relayTicket, ticketLifetime } from "./relay.ts";
-import { available, type Deps, registerServer, siteURL } from "./server-service.ts";
+import { current } from "./reachability.ts";
+import { available, checkLater, type Deps, registerServer, siteURL } from "./server-service.ts";
 
 type User = typeof schema.user.$inferSelect;
 type Record = typeof schema.accessRecords.$inferSelect;
@@ -124,14 +126,8 @@ async function pendingLink(db: Database | Tx, userCode: string, at: Date) {
 }
 
 /** accountService implements AccountService; a new invitation to a server is e-mailed to the account invited by mailer. */
-export function accountService({
-  db,
-  apiURL,
-  auth,
-  relays,
-  mailer,
-  now = () => new Date(),
-}: Deps & { auth: Auth; mailer?: Mailer }): ServiceImpl<typeof AccountService> {
+export function accountService(deps: Deps & { auth: Auth; mailer?: Mailer }): ServiceImpl<typeof AccountService> {
+  const { db, apiURL, auth, relays, mailer, now = () => new Date() } = deps;
   // signedIn returns the account of the request's session.
   const signedIn = (ctx: HandlerContext): Promise<User> => sessionAccount(db, auth, ctx.requestHeader, now());
 
@@ -245,8 +241,13 @@ export function accountService({
               .map((l) => create(LibrarySchema, { id: l.id, name: l.name, kind: l.kind })),
             claimTime: timestampFromDate(s.claimedAt),
             connections: s.connections,
+            connectionChecks: current(s).map((c) =>
+              create(ConnectionCheckSchema, { url: c.url, reachable: c.reachable, checkTime: timestampFromDate(new Date(c.checkedAt)) }),
+            ),
           });
         });
+      // Checks grown old or missing are made for the next listing.
+      for (const s of rows) if (s.administratorId === me.id || s.accessRecords.length > 0) checkLater(deps, s);
       return create(ListServersResponseSchema, { servers });
     },
 

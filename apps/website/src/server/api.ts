@@ -21,6 +21,7 @@ import { friendService } from "./friend-service.ts";
 import { homeService } from "./home-service.ts";
 import { bucketOf, clientOf, type Limit, limited } from "./limits.ts";
 import type { Mailer } from "./mail.ts";
+import type { Checks } from "./reachability.ts";
 import { collectNotices } from "./notices.ts";
 import type { Relays } from "./relay.ts";
 import { authenticateServer, type Deps, serverService } from "./server-service.ts";
@@ -48,6 +49,8 @@ export interface ApiOptions {
   stripe?: Stripe;
   /** mailer tells accounts of invitations and friend requests; without it nothing is sent. */
   mailer?: Mailer;
+  /** checks are how servers' published URLs are checked; without them they are not. */
+  checks?: Checks;
 }
 
 /** noticesPath is where servers open their WebSockets (docs/mavio-dev.md §3). */
@@ -68,7 +71,7 @@ const crossOrigin = ["/api/mavio.cloud.v1.AccountService/", "/api/mavio.cloud.v1
 /** handleApi serves a request under /api, or returns undefined for other paths. */
 export async function handleApi(req: Request, options: ApiOptions): Promise<Response | undefined> {
   const { pathname } = new URL(req.url);
-  const deps = { db: options.db, apiURL: apiURL(options.baseURL), now: options.now, acme: options.acme, relays: options.relays };
+  const deps = { db: options.db, apiURL: apiURL(options.baseURL), now: options.now, acme: options.acme, relays: options.relays, checks: options.checks };
   if (pathname === noticesPath) {
     let server;
     try {
