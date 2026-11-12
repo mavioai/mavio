@@ -64,18 +64,22 @@ import { Security, SwitchUser } from "./security.tsx";
 import { useUnsavedGuard } from "../controls/unsaved.tsx";
 import { isMenu, isTool, type MenuId, menuOf, menuSections, toolLooks, tools } from "./settings-menus.ts";
 import { IndexerSearch, PinButton } from "./indexer-search.tsx";
+import { FriendsGroups, HomeGroups, MavioAccountGroups, SharingGroups, useHasMavioAccount } from "./mavio-account.tsx";
 
 /** Where the settings are, which the pages of the sections read. */
 export type { SettingsSearch } from "../search-params.ts";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "assistant" | "account" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "plugins" | "tasks" | "backups" | "logs" | "api-keys" | "proxies" | "indexer-search" | "about";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "assistant" | "account" | "home" | "friends" | "sharing" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "plugins" | "tasks" | "backups" | "logs" | "api-keys" | "proxies" | "indexer-search" | "about";
 
-const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
+const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean; mavio?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
   playback: { icon: "play", color: "#FF3B30", title: () => t("settings.playback") },
   "subtitles-audio": { icon: "subtitles", color: "#34C759", title: () => t("settings.subtitlesAudio") },
   assistant: { icon: "microphone", color: "#FF2D55", title: () => t("assistant.title") },
   account: { icon: "profile", color: "#FF9500", title: () => t("settings.account") },
+  home: { icon: "home", color: "#FF9500", title: () => t("site.nav.home"), mavio: true },
+  friends: { icon: "users", color: "#34C759", title: () => t("site.nav.friends"), mavio: true },
+  sharing: { icon: "network", color: "#007AFF", title: () => t("settings.sharing"), mavio: true },
   overview: { icon: "server", color: "#8E8E93", title: () => t("settings.overview"), admin: true },
   activity: { icon: "activity", color: "#FF2D55", title: () => t("settings.activity"), admin: true },
   general: { icon: "settings", color: "#8E8E93", title: () => t("settings.general"), admin: true },
@@ -114,7 +118,7 @@ function lookOf(e: Entry) {
 }
 
 /** The sections not of the server chosen: this device's, and the tools, which choose their servers themselves. */
-const deviceSections: SectionId[] = ["appearance", "playback", "subtitles-audio", "assistant", "account", "about", ...tools];
+const deviceSections: SectionId[] = ["appearance", "playback", "subtitles-audio", "assistant", "account", "home", "friends", "sharing", "about", ...tools];
 
 /**
  * The groups: the advanced tools, for administrators; this device's sections; and the server's, in
@@ -126,6 +130,8 @@ const deviceSections: SectionId[] = ["appearance", "playback", "subtitles-audio"
 const allGroups: { title?: () => string; entries: Entry[]; server?: boolean; tools?: boolean }[] = [
   { title: () => t("settings.advancedGroup"), entries: [...tools], tools: true },
   { title: () => t("settings.thisDevice"), entries: ["appearance", "playback", "subtitles-audio", "assistant"] },
+  // The Mavio account's, at mavio.dev.
+  { title: () => t("settings.accountGroup"), entries: ["home", "friends", "sharing"] },
   { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "media", "acquiring", "ai", "plugins", "proxies", "maintenance"], server: true },
   { title: () => t("settings.about"), entries: ["about"] },
 ];
@@ -162,10 +168,12 @@ function useChosen(): Chosen | undefined {
  * not shown.
  */
 function useGroups(chosen: Chosen | undefined) {
-  const shown = (id: SectionId) => !sections[id].admin || !!chosen?.admin;
+  const mavio = useHasMavioAccount();
+  const shown = (id: SectionId) => (!sections[id].admin || !!chosen?.admin) && (!sections[id].mavio || mavio);
   const administers = useAdminServers().length > 0;
   return allGroups
     .filter((g) => (!g.server || chosen) && (!g.tools || administers))
+    .filter((g) => g.entries.some((e) => isMenu(e) || shown(e)))
     .map((g) => ({
       ...g,
       entries: g.entries.flatMap((e): Entry[] => {
@@ -543,6 +551,24 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
           <AssistantPrefs key={chosen?.server.id} server={chosen?.server} />
         </Section>
       );
+    case "home":
+      return (
+        <Section title={t("site.nav.home")} message={t("settings.homeMessage")}>
+          <HomeGroups />
+        </Section>
+      );
+    case "friends":
+      return (
+        <Section title={t("site.nav.friends")} message={t("settings.friendsMessage")}>
+          <FriendsGroups />
+        </Section>
+      );
+    case "sharing":
+      return (
+        <Section title={t("settings.sharing")} message={t("settings.sharingMessage")}>
+          <SharingGroups />
+        </Section>
+      );
     case "account":
       return <AccountSection />;
     case "about":
@@ -899,7 +925,7 @@ function AccountSection() {
   if (!shown) return null;
   if (shown.kind === "mavioDev") {
     return (
-      <Section title={t("settings.account")} message={t("settings.mavioAccountMessage")}>
+      <Section title={t("settings.account")} message={t("settings.mavioAccountWebMessage")}>
         <Group>
           <Row label={account.name} detail={account.line} leading={<Avatar name={account.name} size={44} />}>
             {manage && (
@@ -910,6 +936,7 @@ function AccountSection() {
             )}
           </Row>
         </Group>
+        <MavioAccountGroups />
         <ServersGroup />
       </Section>
     );

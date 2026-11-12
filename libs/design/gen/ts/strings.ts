@@ -430,6 +430,20 @@ export type MessageKey =
   | 'settings.mavioAccountMessage'
   | 'settings.standaloneAccountMessage'
   | 'settings.manageAtMavio'
+  | 'settings.mavioAccountWebMessage'
+  | 'settings.accountGroup'
+  | 'settings.homeMessage'
+  | 'settings.friendsMessage'
+  | 'settings.sharing'
+  | 'settings.sharingMessage'
+  | 'sharing.grant'
+  | 'sharing.sharedWithYou'
+  | 'sharing.nothing'
+  | 'sharing.downloads'
+  | 'sharing.revokeConfirm'
+  | 'sharing.revokeBody'
+  | 'friends.removeConfirm'
+  | 'friends.removeBody'
   | 'settings.admin'
   | 'settings.serverGroup'
   | 'settings.mediaMenu'
@@ -562,6 +576,7 @@ export type MessageKey =
   | 'plugins.command'
   | 'plugins.containerError'
   | 'auth.unreachable'
+  | 'auth.scanLinkCode'
   | 'auth.othersUseApp'
   | 'auth.setUpElsewhere'
   | 'auth.setUpElsewhereMessage'
@@ -576,7 +591,6 @@ export type MessageKey =
   | 'schema.remove'
   | 'schema.needsContainer'
   | 'schema.item'
-  | 'auth.scanLinkCode'
   | 'schema.onePerLine'
   | 'schema.invalidJson'
   | 'schema.default'
@@ -2157,7 +2171,103 @@ export type MessageKey =
   | 'indexers.page'
   | 'indexers.previous'
   | 'indexers.next'
-  | 'indexers.prompt';
+  | 'indexers.prompt'
+  | 'site.nav.home'
+  | 'site.nav.friends'
+  | 'site.action.remove'
+  | 'site.action.accept'
+  | 'site.action.decline'
+  | 'site.action.withdraw'
+  | 'site.action.edit'
+  | 'site.action.create'
+  | 'site.action.add'
+  | 'site.action.invite'
+  | 'site.action.set'
+  | 'site.action.leave'
+  | 'site.field.password'
+  | 'site.field.passwordHint'
+  | 'site.field.email'
+  | 'site.field.userName'
+  | 'site.field.displayName'
+  | 'site.field.name'
+  | 'site.field.pin'
+  | 'site.field.newPin'
+  | 'site.field.pinOptional'
+  | 'site.field.restriction'
+  | 'site.servers.administeredBy'
+  | 'site.servers.libraries'
+  | 'site.invitations.title'
+  | 'site.invitations.server'
+  | 'site.server.noAccess'
+  | 'site.server.invited'
+  | 'site.server.revoke'
+  | 'site.server.invite'
+  | 'site.server.accessOf'
+  | 'site.server.everyLibrary'
+  | 'site.server.rating'
+  | 'site.server.ratingHint'
+  | 'site.server.blockUnrated'
+  | 'site.server.allowedLabels'
+  | 'site.server.blockedLabels'
+  | 'site.server.labelsHint'
+  | 'site.server.allowDownload'
+  | 'site.server.leave'
+  | 'site.server.leaveBody'
+  | 'site.server.leaveConfirm'
+  | 'site.friends.add'
+  | 'site.friends.addField'
+  | 'site.friends.addHint'
+  | 'site.friends.send'
+  | 'site.friends.empty'
+  | 'site.friends.friend'
+  | 'site.friends.received'
+  | 'site.friends.sent'
+  | 'site.home.invitation'
+  | 'site.home.invitationServers'
+  | 'site.home.joinLeaves'
+  | 'site.home.join'
+  | 'site.home.create'
+  | 'site.home.createBody'
+  | 'site.home.defaultName'
+  | 'site.home.frozenMine'
+  | 'site.home.frozenTheirs'
+  | 'site.home.members'
+  | 'site.home.administrator'
+  | 'site.home.managed'
+  | 'site.home.you'
+  | 'site.home.removeManagedConfirm'
+  | 'site.home.removeManagedBody'
+  | 'site.home.removeMemberConfirm'
+  | 'site.home.removeMemberBody'
+  | 'site.home.removePin'
+  | 'site.home.makeFull'
+  | 'site.home.convertBody'
+  | 'site.home.addManaged'
+  | 'site.home.addManagedBody'
+  | 'site.home.invite'
+  | 'site.home.inviteBody'
+  | 'site.home.inviteServer'
+  | 'site.home.invited'
+  | 'site.home.dissolve'
+  | 'site.home.dissolveBody'
+  | 'site.home.leave'
+  | 'site.home.leaveBody'
+  | 'site.home.dissolveConfirm'
+  | 'site.home.leaveConfirm'
+  | 'site.restriction.none'
+  | 'site.restriction.youngerChild'
+  | 'site.restriction.olderChild'
+  | 'site.restriction.teen'
+  | 'site.account.managed'
+  | 'site.account.verified'
+  | 'site.account.unverified'
+  | 'site.pass.title'
+  | 'site.pass.until'
+  | 'site.pass.shared'
+  | 'site.pass.none'
+  | 'site.account.pinSet'
+  | 'site.account.pinNone'
+  | 'site.nav.pass';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -2580,6 +2690,20 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.mavioAccountMessage": "Your Mavio account. Its password, passkeys, two-step verification, Home and friends are managed at mavio.dev.",
     "settings.standaloneAccountMessage": "User {name} of {server}.",
     "settings.manageAtMavio": "Manage at mavio.dev",
+    "settings.mavioAccountWebMessage": "Your Mavio account. Its password, passkeys and two-step verification are managed at mavio.dev.",
+    "settings.accountGroup": "Mavio Account",
+    "settings.homeMessage": "The people who share your devices and your Mavio Pass: full members, and managed accounts for children.",
+    "settings.friendsMessage": "Friends are whom you give access to your servers, and who give you access to theirs.",
+    "settings.sharing": "Sharing",
+    "settings.sharingMessage": "Who reaches the libraries of the servers you administer, and the servers others share with you.",
+    "sharing.grant": "Give Access",
+    "sharing.sharedWithYou": "Shared with You",
+    "sharing.nothing": "You administer no server, and none is shared with you yet.",
+    "sharing.downloads": "Downloads",
+    "sharing.revokeConfirm": "Revoke {name}'s access to {server}?",
+    "sharing.revokeBody": "Their sessions on the server end. Their watch history stays, should you give them access again.",
+    "friends.removeConfirm": "Remove {name} from your friends?",
+    "friends.removeBody": "Access to each other's servers stays as it is.",
     "settings.admin": "Administrator",
     "settings.serverGroup": "Server",
     "settings.mediaMenu": "Media",
@@ -2712,6 +2836,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.command": "Start Command",
     "plugins.containerError": "Error",
     "auth.unreachable": "Can't be reached",
+    "auth.scanLinkCode": "Or scan this code with your phone's camera.",
     "auth.othersUseApp": "Only the administrator signs in here. Everyone else watches at {host}.",
     "auth.setUpElsewhere": "Set Up {server} on a Computer or Phone",
     "auth.setUpElsewhereMessage": "Open this address in a browser:",
@@ -2836,7 +2961,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "users.restrictionYoungerChild": "Younger child",
     "users.restrictionOlderChild": "Older child",
     "users.restrictionTeen": "Teen",
-    "auth.scanLinkCode": "Or scan this code with your phone's camera.",
     "users.notFound": "This user is no longer on the server.",
     "users.mavioDevNote": "This server uses Mavio accounts: the user's name, access and state are set at mavio.dev.",
     "users.deleteTitle": "Delete {name}?",
@@ -4307,7 +4431,103 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "indexers.page": "Page {page} of {pages}",
     "indexers.previous": "Previous Page",
     "indexers.next": "Next Page",
-    "indexers.prompt": "Enter what to search for."
+    "indexers.prompt": "Enter what to search for.",
+    "site.nav.home": "Home",
+    "site.nav.friends": "Friends",
+    "site.action.remove": "Remove",
+    "site.action.accept": "Accept",
+    "site.action.decline": "Decline",
+    "site.action.withdraw": "Withdraw",
+    "site.action.edit": "Edit",
+    "site.action.create": "Create",
+    "site.action.add": "Add",
+    "site.action.invite": "Invite",
+    "site.action.set": "Set",
+    "site.action.leave": "Leave",
+    "site.field.password": "Password",
+    "site.field.passwordHint": "At least 8 characters",
+    "site.field.email": "E-mail address",
+    "site.field.userName": "User name",
+    "site.field.displayName": "Display name",
+    "site.field.name": "Name",
+    "site.field.pin": "PIN",
+    "site.field.newPin": "New PIN",
+    "site.field.pinOptional": "PIN (optional)",
+    "site.field.restriction": "Restriction profile",
+    "site.servers.administeredBy": "Administered by {name}",
+    "site.servers.libraries": "{count, plural, one {# library} other {# libraries}}",
+    "site.invitations.title": "Invitations",
+    "site.invitations.server": "{name} invites you to {server}.",
+    "site.server.noAccess": "Nobody else has access yet.",
+    "site.server.invited": "Invited",
+    "site.server.revoke": "Revoke",
+    "site.server.invite": "Invite an account",
+    "site.server.accessOf": "Access of @{name}",
+    "site.server.everyLibrary": "Every library",
+    "site.server.rating": "Highest rating score shown",
+    "site.server.ratingHint": "Every rating",
+    "site.server.blockUnrated": "Hide unrated items",
+    "site.server.allowedLabels": "Show only items with these labels",
+    "site.server.blockedLabels": "Hide items with these labels",
+    "site.server.labelsHint": "Separated by commas",
+    "site.server.allowDownload": "Allow downloads",
+    "site.server.leave": "Leave Server",
+    "site.server.leaveBody": "Leaving removes your access; its administrator can invite you again.",
+    "site.server.leaveConfirm": "Leave {name}?",
+    "site.friends.add": "Add a friend",
+    "site.friends.addField": "User name or e-mail address",
+    "site.friends.addHint": "Friends are whom you give access to your servers. They find you by your user name, or by your e-mail address once it is verified.",
+    "site.friends.send": "Send Request",
+    "site.friends.empty": "No friends yet.",
+    "site.friends.friend": "Friend",
+    "site.friends.received": "Wants to be your friend",
+    "site.friends.sent": "Request sent",
+    "site.home.invitation": "{name} invites you to their Home, {home}.",
+    "site.home.invitationServers": "With access to {servers}.",
+    "site.home.joinLeaves": "Joining leaves the Home you are in.",
+    "site.home.join": "Join",
+    "site.home.create": "Create a Home",
+    "site.home.createBody": "A Home is up to 15 people who share devices: they switch between each other, and children get managed accounts with restriction profiles.",
+    "site.home.defaultName": "Home",
+    "site.home.frozenMine": "This Home is frozen: your Mavio Pass lapsed, so no one can be invited and the Pass is not shared. Switching and managed accounts keep working.",
+    "site.home.frozenTheirs": "This Home is frozen: its administrator's Mavio Pass lapsed, so no one can be invited and the Pass is not shared. Switching and managed accounts keep working.",
+    "site.home.members": "Members",
+    "site.home.administrator": "Administrator",
+    "site.home.managed": "Managed",
+    "site.home.you": "You",
+    "site.home.removeManagedConfirm": "Delete {name}?",
+    "site.home.removeManagedBody": "The account is deleted with its watch history and playlists on every server.",
+    "site.home.removeMemberConfirm": "Remove {name} from the Home?",
+    "site.home.removeMemberBody": "They become your friend and keep their access.",
+    "site.home.removePin": "Remove the PIN",
+    "site.home.makeFull": "Make a Full Account",
+    "site.home.convertBody": "The account signs in with its own e-mail address and password from now on, and keeps its data, access and place in the Home; its restriction profile is removed. Mavio sends a link to verify the address.",
+    "site.home.addManaged": "Add a managed account",
+    "site.home.addManagedBody": "A managed account has no sign-in of its own: it is reached by switching in the Home, and sees only your servers.",
+    "site.home.invite": "Invite someone",
+    "site.home.inviteBody": "Inviting a full account needs your Mavio Pass, which the Home then shares.",
+    "site.home.inviteServer": "Every library of {server}",
+    "site.home.invited": "Invited",
+    "site.home.dissolve": "Dissolve the Home",
+    "site.home.dissolveBody": "Full members become your friends and keep their access. Managed accounts are deleted, with their data on every server.",
+    "site.home.leave": "Leave the Home",
+    "site.home.leaveBody": "You become the administrator's friend and keep your access.",
+    "site.home.dissolveConfirm": "Dissolve {home}?",
+    "site.home.leaveConfirm": "Leave {home}?",
+    "site.restriction.none": "No restriction",
+    "site.restriction.youngerChild": "Younger child",
+    "site.restriction.olderChild": "Older child",
+    "site.restriction.teen": "Teenager",
+    "site.account.managed": "A managed account, which your Home's administrator manages.",
+    "site.account.verified": "Verified",
+    "site.account.unverified": "Not verified",
+    "site.pass.title": "Mavio Pass",
+    "site.pass.until": "Runs until {date}.",
+    "site.pass.shared": "You share your Home administrator's Mavio Pass.",
+    "site.pass.none": "You have no Mavio Pass. It pays for what mavio.dev provides, such as the relay; nothing your servers do depends on it.",
+    "site.account.pinSet": "Switching to you in your Home needs your PIN.",
+    "site.account.pinNone": "Without a PIN, anyone in your Home can switch to you on a shared device.",
+    "site.nav.pass": "Mavio Pass"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -4728,6 +4948,20 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.mavioAccountMessage": "你的 Mavio 账户。密码、通行密钥、两步验证、家庭与好友都在 mavio.dev 上管理。",
     "settings.standaloneAccountMessage": "{server} 上的用户 {name}。",
     "settings.manageAtMavio": "在 mavio.dev 管理",
+    "settings.mavioAccountWebMessage": "你的 Mavio 账户。密码、通行密钥与两步验证在 mavio.dev 上管理。",
+    "settings.accountGroup": "Mavio 账户",
+    "settings.homeMessage": "与你共享设备和 Mavio Pass 的人：正式成员，以及给孩子使用的托管账户。",
+    "settings.friendsMessage": "好友是你可以授予服务器访问权限的人，他们也可以授予你访问权限。",
+    "settings.sharing": "共享",
+    "settings.sharingMessage": "谁能访问你管理的服务器上的媒体库，以及别人与你共享的服务器。",
+    "sharing.grant": "授予访问权限",
+    "sharing.sharedWithYou": "与你共享",
+    "sharing.nothing": "你还没有管理任何服务器，也还没有人与你共享服务器。",
+    "sharing.downloads": "可下载",
+    "sharing.revokeConfirm": "撤销 {name} 对 {server} 的访问权限？",
+    "sharing.revokeBody": "其在该服务器上的会话会结束。观看记录会保留，以便你再次授予访问权限。",
+    "friends.removeConfirm": "将 {name} 从好友中移除？",
+    "friends.removeBody": "彼此服务器的访问权限保持不变。",
     "settings.admin": "管理员",
     "settings.serverGroup": "服务器",
     "settings.mediaMenu": "媒体",
@@ -4860,6 +5094,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.command": "启动命令",
     "plugins.containerError": "错误原因",
     "auth.unreachable": "无法连接",
+    "auth.scanLinkCode": "或用手机相机扫描这个二维码。",
     "auth.othersUseApp": "只有管理员可以登录，其他人请在 {host} 观看。",
     "auth.setUpElsewhere": "请在电脑或手机上设置 {server}",
     "auth.setUpElsewhereMessage": "在浏览器中打开这个地址：",
@@ -5094,7 +5329,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.read": "读取",
     "overview.write": "写入",
     "overview.diskAvailable": "可用，共 {total}",
-    "auth.scanLinkCode": "或用手机相机扫描这个二维码。",
     "overview.written": "已写入",
     "overview.network": "网络",
     "overview.download": "下载",
@@ -6455,6 +6689,102 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "indexers.page": "第 {page} / {pages} 页",
     "indexers.previous": "上一页",
     "indexers.next": "下一页",
-    "indexers.prompt": "输入要搜索的内容。"
+    "indexers.prompt": "输入要搜索的内容。",
+    "site.nav.home": "家庭",
+    "site.nav.friends": "好友",
+    "site.action.remove": "移除",
+    "site.action.accept": "接受",
+    "site.action.decline": "拒绝",
+    "site.action.withdraw": "撤回",
+    "site.action.edit": "编辑",
+    "site.action.create": "创建",
+    "site.action.add": "添加",
+    "site.action.invite": "邀请",
+    "site.action.set": "设置",
+    "site.action.leave": "离开",
+    "site.field.password": "密码",
+    "site.field.passwordHint": "至少 8 个字符",
+    "site.field.email": "电子邮件地址",
+    "site.field.userName": "用户名",
+    "site.field.displayName": "显示名称",
+    "site.field.name": "名称",
+    "site.field.pin": "PIN",
+    "site.field.newPin": "新 PIN",
+    "site.field.pinOptional": "PIN（可选）",
+    "site.field.restriction": "限制配置",
+    "site.servers.administeredBy": "由 {name} 管理",
+    "site.servers.libraries": "{count, plural, other {# 个媒体库}}",
+    "site.invitations.title": "邀请",
+    "site.invitations.server": "{name} 邀请你使用 {server}。",
+    "site.server.noAccess": "还没有其他人可以访问。",
+    "site.server.invited": "已邀请",
+    "site.server.revoke": "撤销",
+    "site.server.invite": "邀请账户",
+    "site.server.accessOf": "@{name} 的访问权限",
+    "site.server.everyLibrary": "所有媒体库",
+    "site.server.rating": "显示的最高分级分数",
+    "site.server.ratingHint": "不限分级",
+    "site.server.blockUnrated": "隐藏未分级项目",
+    "site.server.allowedLabels": "仅显示带有这些标签的项目",
+    "site.server.blockedLabels": "隐藏带有这些标签的项目",
+    "site.server.labelsHint": "以逗号分隔",
+    "site.server.allowDownload": "允许下载",
+    "site.server.leave": "离开服务器",
+    "site.server.leaveBody": "离开后你将失去访问权限；管理员可以再次邀请你。",
+    "site.server.leaveConfirm": "离开 {name}？",
+    "site.friends.add": "添加好友",
+    "site.friends.addField": "用户名或电子邮件地址",
+    "site.friends.addHint": "好友是你可以授予服务器访问权限的人。对方可以通过你的用户名找到你，电子邮件地址验证后也可以通过它找到你。",
+    "site.friends.send": "发送请求",
+    "site.friends.empty": "还没有好友。",
+    "site.friends.friend": "好友",
+    "site.friends.received": "想加你为好友",
+    "site.friends.sent": "已发送请求",
+    "site.home.invitation": "{name} 邀请你加入其家庭“{home}”。",
+    "site.home.invitationServers": "可访问 {servers}。",
+    "site.home.joinLeaves": "加入后会离开你当前的家庭。",
+    "site.home.join": "加入",
+    "site.home.create": "创建家庭",
+    "site.home.createBody": "家庭最多 15 人，共享设备：成员之间可以互相切换，孩子可以使用带限制配置的托管账户。",
+    "site.home.defaultName": "我的家",
+    "site.home.frozenMine": "此家庭已冻结：你的 Mavio Pass 已过期，因此无法邀请他人，也不再共享 Pass。切换和托管账户仍可正常使用。",
+    "site.home.frozenTheirs": "此家庭已冻结：管理员的 Mavio Pass 已过期，因此无法邀请他人，也不再共享 Pass。切换和托管账户仍可正常使用。",
+    "site.home.members": "成员",
+    "site.home.administrator": "管理员",
+    "site.home.managed": "托管",
+    "site.home.you": "你",
+    "site.home.removeManagedConfirm": "删除 {name}？",
+    "site.home.removeManagedBody": "该账户及其在所有服务器上的观看记录和播放列表都将被删除。",
+    "site.home.removeMemberConfirm": "将 {name} 移出家庭？",
+    "site.home.removeMemberBody": "对方会成为你的好友，并保留访问权限。",
+    "site.home.removePin": "移除 PIN",
+    "site.home.makeFull": "转为完整账户",
+    "site.home.convertBody": "此后该账户使用自己的电子邮件地址和密码登录，并保留其数据、访问权限和家庭成员身份；限制配置将被移除。Mavio 会发送验证该地址的链接。",
+    "site.home.addManaged": "添加托管账户",
+    "site.home.addManagedBody": "托管账户没有自己的登录方式：只能在家庭中切换使用，并且只能看到你的服务器。",
+    "site.home.invite": "邀请他人",
+    "site.home.inviteBody": "邀请完整账户需要你的 Mavio Pass，加入后家庭成员共享该 Pass。",
+    "site.home.inviteServer": "{server} 的所有媒体库",
+    "site.home.invited": "已邀请",
+    "site.home.dissolve": "解散家庭",
+    "site.home.dissolveBody": "完整账户成员会成为你的好友并保留访问权限。托管账户及其在所有服务器上的数据都将被删除。",
+    "site.home.leave": "离开家庭",
+    "site.home.leaveBody": "你会成为管理员的好友，并保留访问权限。",
+    "site.home.dissolveConfirm": "解散“{home}”？",
+    "site.home.leaveConfirm": "离开“{home}”？",
+    "site.restriction.none": "无限制",
+    "site.restriction.youngerChild": "幼儿",
+    "site.restriction.olderChild": "儿童",
+    "site.restriction.teen": "青少年",
+    "site.account.managed": "托管账户，由家庭管理员管理。",
+    "site.account.verified": "已验证",
+    "site.account.unverified": "未验证",
+    "site.pass.title": "Mavio Pass",
+    "site.pass.until": "有效期至 {date}。",
+    "site.pass.shared": "你共享家庭管理员的 Mavio Pass。",
+    "site.pass.none": "你还没有 Mavio Pass。它用于支付 mavio.dev 提供的服务，例如中继；你的服务器的任何功能都不依赖它。",
+    "site.account.pinSet": "在家庭中切换到你需要输入你的 PIN。",
+    "site.account.pinNone": "没有 PIN 时，家庭中任何人都能在共享设备上切换到你。",
+    "site.nav.pass": "Mavio Pass"
   }
 };
