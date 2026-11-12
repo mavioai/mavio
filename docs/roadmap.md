@@ -1092,7 +1092,7 @@ flowchart TD
 - [ ] A QR code of the server's address on a new server's television setup, and of mavio.dev/link beside a television's link code, in the web UI and the Apple and Android apps; the desktop app shows one beside its link code
 - [ ] Reaching a Mavio account's servers through the relay when none of their published URLs answers
 - [ ] Managing the account, its Homes, friends and access records inside the web UI rather than on mavio.dev's pages
-- [ ] Deploying app.mavio.dev: the web UI built with `VITE_MAVIO_DEV_URL` on Cloudflare at that address
+- [x] Deploying app.mavio.dev: the web UI built with `VITE_MAVIO_DEV_URL` on Cloudflare at that address
 - [x] The apps (Apple, Android and desktop) and the shared Rust core: the same as the web UI, Mavio accounts signing in with mavio.dev sessions of their own (bearer sessions and television codes)
   - [x] The core (`account.rs`): link codes (the device code grant), the browser's sign-in to a loopback address with PKCE, the session of the device key renewed by its signature, the account's servers signed in to with assertions and kept in step with its list, and signing out of every session; in the C ABI, and the desktop app's sign-in
   - [x] The account's calls in the UniFFI bindings, and the Apple and Android apps' sign-in

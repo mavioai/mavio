@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "typecheck": "tsc -p tsconfig.json && tsc -p snapshots/tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json && tsc -p snapshots/tsconfig.json",
+    "deploy": "cf deploy --mode app"
   },
   "dependencies": {
     "@base-ui/react": "1.9.0",
@@ -24,12 +25,14 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "2.0.0-beta.sha-8c6014f9a",
     "@playwright/test": "1.63.0",
     "@tailwindcss/vite": "4.3.3",
     "@types/node": "26.6.3",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
+    "cf": "1.0.0-beta.16",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2",
     "vite": "8.3.4"

@@ -212,6 +212,9 @@ importers:
         specifier: 19.3.0
         version: 19.3.0(react@19.3.0)
     devDependencies:
+      '@cloudflare/vite-plugin':
+        specifier: 2.0.0-beta.sha-8c6014f9a
+        version: 2.0.0-beta.sha-8c6014f9a(@types/node@26.6.3)(vite@8.3.4(@types/node@26.6.3)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.0))(workerd@1.20261006.1)
       '@playwright/test':
         specifier: 1.63.0
         version: 1.63.0
@@ -230,6 +233,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 6.1.2
         version: 6.1.2(vite@8.3.4(@types/node@26.6.3)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.0))
+      cf:
+        specifier: 1.0.0-beta.16
+        version: 1.0.0-beta.16(@types/node@26.6.3)
       tailwindcss:
         specifier: 4.3.3
         version: 4.3.3

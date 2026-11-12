@@ -1,3 +1,4 @@
+import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { execFileSync } from "node:child_process";
@@ -26,13 +27,14 @@ function version(): string {
   }
 }
 
-// The server embeds the build and serves it at / (docs/clients.md §4.1).
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
+// The server embeds the build and serves it at / (docs/clients.md §4.1). In
+// the mode app, which .env.app configures, it is app.mavio.dev instead,
+// built and deployed by cf with the Worker of cloudflare.config.ts.
+export default defineConfig(({ mode }) => ({
+  plugins: [react(), tailwindcss(), ...(mode === "app" ? [cloudflare()] : [])],
   define: { "import.meta.env.MAVIO_VERSION": JSON.stringify(version()) },
   build: {
-    outDir: "../server/internal/webui/dist",
-    emptyOutDir: true,
+    ...(mode === "app" ? {} : { outDir: "../server/internal/webui/dist", emptyOutDir: true }),
     // The API's generated descriptors and hls.js are large by themselves.
     chunkSizeWarningLimit: 1024,
   },
@@ -48,4 +50,4 @@ export default defineConfig({
       "/assistant/": { target: server, ws: true },
     },
   },
-});
+}));

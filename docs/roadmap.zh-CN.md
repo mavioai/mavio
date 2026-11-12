@@ -1092,7 +1092,7 @@ flowchart TD
 - [ ] 新服务器的电视设置页显示服务器地址的二维码，电视关联代码旁显示 mavio.dev/link 的二维码，在 Web UI 与 Apple、Android 应用中；桌面应用已在其关联代码旁显示二维码
 - [ ] Mavio 账户的服务器发布的 URL 均无应答时，经中转访问
 - [ ] 在 Web UI 中而不是 mavio.dev 的页面上管理账户、其 Home、好友与访问记录
-- [ ] 部署 app.mavio.dev：在 Cloudflare 上以该地址部署以 `VITE_MAVIO_DEV_URL` 构建的 Web UI
+- [x] 部署 app.mavio.dev：在 Cloudflare 上以该地址部署以 `VITE_MAVIO_DEV_URL` 构建的 Web UI
 - [x] 各应用（Apple、Android 与桌面）和共享的 Rust 核心：与 Web UI 相同，Mavio 账户以它们自己的 mavio.dev 会话登录（Bearer 会话与电视代码）
   - [x] 核心（`account.rs`）：关联代码（设备码授权）、浏览器登录回到带 PKCE 的回环地址、以设备密钥签名续期的会话、以断言登录账户的服务器并与其列表保持同步、退出所有会话；C ABI 中的对应调用，以及桌面应用的登录
   - [x] UniFFI 绑定中的账户调用，以及 Apple、Android 应用的登录
