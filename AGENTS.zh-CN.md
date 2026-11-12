@@ -24,7 +24,7 @@
 
 Mavio 是以 Go 为服务端核心的自托管媒体服务器，借鉴 Jellyfin 的领域知识与测试资产，但不兼容 Jellyfin 生态。许可证为 **GPL-3.0**。
 
-当前阶段：**P6 服务端装配与分发**、**P16 资源获取数据源**（只差 Mavio 自己的 TMDB key）、**P21 客户端与生态**、**P27 AI 网关与字幕翻译**、**P28 账户**、**P29 助手**、**P31 代理与质询求解**和 **P32 多语言元数据**（见 [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md)）。[docs/clients.zh-CN.md](docs/clients.zh-CN.md) 中的客户端按路线图给出的顺序构建；客户端的目录（`apps/web`、`apps/ios`、`apps/tvos`、`apps/macos`、`apps/android`、`apps/android-tv`、`apps/desktop`、`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）在其步骤开始时才创建。
+当前阶段：**P6 服务端装配与分发**、**P16 资源获取数据源**（只差 Mavio 自己的 TMDB key）、**P21 客户端与生态**、**P25 存储后端与 rclone**、**P27 AI 网关与字幕翻译**、**P28 账户**、**P29 助手**、**P30 容器依赖**、**P31 代理与质询求解**和 **P32 多语言元数据**（见 [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md)）。[docs/clients.zh-CN.md](docs/clients.zh-CN.md) 中的客户端按路线图给出的顺序构建；客户端的目录（`apps/web`、`apps/ios`、`apps/tvos`、`apps/macos`、`apps/android`、`apps/android-tv`、`apps/desktop`、`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）在其步骤开始时才创建。
 
 ## 目录结构
 

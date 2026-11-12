@@ -127,13 +127,13 @@ flowchart TD
 | P21 | 客户端与生态 | 进行中 |
 | P22 | 真实设备验收 | 未开始 |
 | P23 | 打包与发布 | 未开始 |
-| P24 | 存储 I/O 效率 | 进行中 |
+| P24 | 存储 I/O 效率 | ✅ 完成 |
 | P25 | 存储后端与 rclone | 进行中 |
 | P26 | 字幕获取 | ✅ 完成 |
 | P27 | AI 网关与字幕翻译 | 进行中 |
 | P28 | 账户 | 进行中 |
 | P29 | 助手 | 进行中 |
-| P30 | 容器依赖 | 未开始 |
+| P30 | 容器依赖 | 进行中 |
 | P31 | 代理与质询求解 | 进行中 |
 | P32 | 多语言元数据 | 进行中 |
 
@@ -719,7 +719,7 @@ flowchart TD
   - [x] Apple 应用为管理员提供的元数据编辑，从详情页的“更多”菜单打开：编辑条目的元数据与锁定、从提供者的结果中识别、刷新，以及从提供者的图片中选择或上传一张（iPhone 与 iPad 从照片，Mac 从文件，Apple TV 省去）；界面共享于 `MavioAdmin`，Mac 的对话框位于 `MavioMacMedia`
   - [ ] 用服务器与群组中的另一台设备检查 Apple 应用的“一起看”：播放、暂停、跳转与离开；用服务器检查其元数据编辑，并用提供者的密钥检查识别与提供者的图片
   - [ ] iPhone 与 iPad 应用其余的设置：服务器分组中供管理员使用的各节（App Store 不接受的除外，见[客户端 §4.2](clients.zh-CN.md)）已有概览、通用、用户、API 密钥、媒体库、存储、转码、活动、问题、任务、日志与备份均已完成；以及添加通行密钥（iOS 只允许在应用关联的域名上添加），留待 mavio.dev 正式部署之后
-  - [ ] Mac 应用（`MavioTypography.desktop`）使用桌面字号层级（正文 13，[客户端 §6.1](clients.zh-CN.md)）；Web UI 已在桌面布局下使用，桌面应用（`design.DesktopTypography`）也已使用，并采用 macOS 的控件尺寸，窗口最小 1024 × 680，因为它只有桌面布局
+  - [x] Mac 应用（`MavioTypography.desktop`）使用桌面字号层级（正文 13，[客户端 §6.1](clients.zh-CN.md)）；Web UI 已在桌面布局下使用，桌面应用（`design.DesktopTypography`）也已使用，并采用 macOS 的控件尺寸，窗口最小 1024 × 680，因为它只有桌面布局
   - [x] 桌面应用的电视模式：[电视](tv.zh-CN.md)的电视布局——顶部导航栏及其标签页、媒体库与用户菜单的三点按钮，磨砂玻璃的菜单，方向键按行移动焦点、返回键回到上一级，电视的背景、字号层级与获得焦点的卡片，首页的主视觉，占屏幕 86% 背景图、带标志且焦点在“播放”上的详情页，与 Web UI 一致的详情页头部、操作按钮、季与集、推荐和“关于”，焦点在季、集、演职人员、预告与花絮以及合集间的移动，以及按 Web UI 的流式区域（`data-focus-flow`、`beside`、`end`、`block`）在“关于”的两栏间移动，发现中标题页的类型、操作按钮以及简介与右侧信息栏作为流式区域，获得焦点时变白浮起的各季方框（从季按下键落在演职人员的第一位），以及打开全部演职人员的演员行“查看全部”（§6.3），获得焦点时变白且不挤动周围内容的链接，随焦点滚动、在聚焦卡片旁保留页面边距且不显示滚动条的横行，媒体库的“推荐/媒体库”胶囊及其筛选，行末的“查看全部”卡片，列表形式的设置及越过同级页面回到上一级的返回，输入框的键盘，键盘输入之前确认键与退格键不留在输入框中，焦点在所有控件与对话框中按位置移动（MyGo 的按位置焦点），页面打开时焦点在其第一个控件上、返回时回到离开时的位置，焦点无法移动时元素的抖动，搜索页的键盘及其旁边的首页各行或搜索结果，返回键先删除字符、再回到打开搜索页的页面（§6.4），选择框只在按下时在其下方展开选项、收起时上下键与带建议的输入框一样移动焦点（§4），以及视频在应用窗口而非播放窗口中播放
   - [x] 桌面应用电视模式的更多部分：媒体库的排序改为应用自己的菜单，打开时焦点在当前排序上，关闭后回到其按钮（§5、§6.3）；用实体键盘在输入框的键盘中输入（§4）；以及播放器的控制条：时间轴与下一集、字幕、音频一行按钮，按下键焦点进入该行，遥控器的按键快进快退、暂停与继续播放，返回键依次关闭面板、隐藏控制条、离开播放器，面板打开时焦点在当前选项上并留在面板内（§7）
   - [x] 桌面应用电视模式下 MyGo 自身的控件（如外观的选项、设置中的按钮与下拉选择）获得焦点时变白、内容变黑，而不是带强调色的描边，输入框则带 3 pt 的白色描边（§4），由 MyGo fork 主题的焦点填充实现
@@ -754,9 +754,9 @@ flowchart TD
       - [ ] 在质量配置中将质量编组与取消编组；目前配置中的质量只能启用、停用与排序
     - [x] 获取的选项（`apps/web/src/screens/admin/options.tsx`）：命名、导入、下载客户端、发布与回收站（`ProfileService.UpdateAcquisitionSettings`）
     - [x] 获取的请求（`apps/web/src/screens/admin/requestsettings.tsx`），如 Seerr：通过的电影、剧集与动画的去处、新用户的权限与配额，以及屏蔽标签（`RequestService.UpdateRequestSettings`）
-    - [ ] Apple 应用（`MavioAdmin`、`MavioMac*`）与 Android 应用（`libs/android/admin`）改用按领域划分的设置 RPC（`GetGeneralSettings`、`GetTranscodingSettings`、`GetPluginCatalogs`、`GetOutboundProxies`、`GetAcquisitionSettings`、`GetRequestSettings`），它们取代了 `GetServerSettings` 与 `UpdateServerSettings`
-    - [ ] Apple 应用与 Android 应用改用远端页面上的离线下载（`GetOfflineDownloads`、`UpdateOfflineDownloads`，每个远端一个，带下载文件夹），取代离线下载客户端（`ListOfflineClients`、`SetOfflineClients`），远端的文件夹写作 `remote:<remote>:<path>` 而非 `rclone:`
-    - [ ] Mac 应用中下载客户端的页面及其文件夹（`GetDownloadClientPaths`、`UpdateDownloadClientPaths`），取代 `ProfileService` 的远程路径映射
+    - [x] Apple 应用（`MavioAdmin`、`MavioMac*`）与 Android 应用（`libs/android/admin`）改用按领域划分的设置 RPC（`GetGeneralSettings`、`GetTranscodingSettings`、`GetPluginCatalogs`、`GetOutboundProxies`、`GetAcquisitionSettings`、`GetRequestSettings`），它们取代了 `GetServerSettings` 与 `UpdateServerSettings`
+    - [x] Apple 应用与 Android 应用改用远端页面上的离线下载（`GetOfflineDownloads`、`UpdateOfflineDownloads`，每个远端一个，带下载文件夹），取代离线下载客户端（`ListOfflineClients`、`SetOfflineClients`），远端的文件夹写作 `remote:<remote>:<path>` 而非 `rclone:`
+    - [x] Mac 应用中下载客户端的页面及其文件夹（`GetDownloadClientPaths`、`UpdateDownloadClientPaths`），取代 `ProfileService` 的远程路径映射
     - [x] 字幕（`apps/web/src/screens/admin/{subtitles,subtitle-settings}.tsx`、`libs/client-ts/src/subtitles.ts`）：字幕配置及其适用的媒体库、提供商与翻译器，以及搜索与保存、同步和翻译的设置（`SubtitleService`、`ListSubtitleProfileAssignments`）
       - [ ] 在详情页为电影或剧集分配其自己的字幕配置（`AssignSubtitleProfile`）
     - [x] AI（`apps/web/src/screens/admin/ai.tsx`、`libs/client-ts/src/ai.ts`）：AI 网关插件的提供商及其凭据、API 密钥、跟随显示并就地回答问题的登录、退出登录，以及模型（`AiProviderService`）
@@ -764,7 +764,7 @@ flowchart TD
     - [x] 备份与日志（`apps/web/src/screens/admin/backups.tsx`、`libs/client-ts/src/backups.ts`）：创建、下载与删除备份，以及按级别、时间段与词筛选的最近日志记录（`BackupService`、`ListLogs`）
     - [x] API 密钥（`apps/web/src/screens/admin/backups.tsx` 中的 `ApiKeysSection`）：作为“服务器”分组的一个部分，因为密钥属于服务器，在两种模式下都能访问；创建密钥并只显示一次其令牌，以及撤销密钥（`CreateApiKey`、`ListApiKeys`、`RevokeApiKey`）
   - [ ] Web UI：在 mavio.dev 模式的服务器上切换 Home 的成员，目前在 mavio.dev 上进行
-  - [ ] Web UI 的详情页：预告片与其他附加内容
+  - [x] Web UI 的详情页：预告片与其他附加内容
   - [x] Web UI 的人物页面（`apps/web/src/screens/person.tsx`、`libs/client-ts/src/people.ts`），由演职人员卡片打开：人物及署名此人的作品
   - [x] Web UI 的发现页（`apps/web/src/screens/discover.tsx`、`libs/client-ts/src/discover.ts`）：第一台提供发现的服务器的目录按行显示，每个目录的网格，作品及其各季，观看，以及请求电影或剧集的若干季；首页热门趋势中没有服务器拥有的作品打开作品页
     - [x] 目录的筛选与排序（`apps/web/src/screens/discover-filters.tsx`）：目录支持的排序、类型、制片公司、关键词、按国家的流媒体服务、原始语言、年份、时长、评分与评分人数，保存在页面地址中（`ListFilterValues`）；以及搜索结果中提供发现的服务器找到的作品（`SearchTitles`）
@@ -797,7 +797,7 @@ flowchart TD
   - [x] Web UI 的 AI 助手会话（`AgentSessionService`）：设置中供管理员使用的“AI 对话”，回答以流式传送（§6.3.26）
     - [ ] 管理员以外用户的对话，各自独立（需要 `AgentSessionService` 会话的所有者）
   - [ ] Apple 与 Android 应用，其横向列表也采用[横向列表](../libs/design/components.zh-CN.md#横向列表)的间距，Mac 上还有标题栏末端的箭头
-- [ ] 切片：Android 手机与平板应用、Apple TV 与 Android TV 应用、Mac 应用
+- [x] 切片：Android 手机与平板应用、Apple TV 与 Android TV 应用、Mac 应用
 - [ ] Android 手机与平板应用（`apps/android`、`libs/android`）
   - [x] 与 Web UI 一致的登录，背景是海报墙：在 Auth Tab 中用 Mavio 登录（mavio.dev 经应用自己的 scheme `dev.mavio.app:/callback` 交回应用）、到期时自动续期的链接码、服务器地址与附近发现的服务器、用户名与密码、快速连接与新服务器的首个用户；启动时请求 `ACCESS_LOCAL_NETWORK`。Debug 构建从 Gradle 属性 `mavio.devApi` 取 mavio.dev 的 API，并信任放在应用文件中的开发 CA（`dev-ca.pem`，经 `MAVIO_EXTRA_CA_CERTS`）
   - [x] 与 Web UI 手机布局一致的首页：带搜索与头像的页头、悬浮的标签栏，二者都是覆盖在页面上的毛玻璃（Haze），紧接页头之下、按屏幕宽度 4:5 裁切、图片顶部向上延伸到页头之后、带 Logo、信息与分级的 Hero，各货架，下拉刷新；包含账户、服务器与退出登录的设置；每个标签各有一个页面栈（Navigation 3）
@@ -867,7 +867,7 @@ flowchart TD
   - [x] Mac 应用：与 Web UI 桌面布局一致、在自己边栏旁的设置，平铺并含“高级功能”分组；iOS 为 App Store 省去、Mac 不经 App Store 分发而保留的功能：获取、想要、下载、字幕、AI 与 AI 对话、插件、代理与索引搜索，以及发现的请求
   - [x] Mac 应用：与桌面应用一致的边栏，含搜索框（按 Return 在搜索页搜索）与保留的宽度；⌃⌘T 进入全屏的电视模式，含其焦点移动、导航栏与键盘
   - [ ] Mac 应用：“功能”分组与助手，其语音从采集开始缓冲麦克风音频，直到会话的套接字打开；电视模式中玻璃材质的菜单、焦点可达的弹出表单、报告问题与麦克风按钮；离开设置页时提示未保存的更改；从标题的“管理”中手动导入
-  - [ ] Mac 应用：AI 对话移到“AI”设置的末尾，与 Web UI 一致，不再位于“高级功能”分组
+  - [x] Mac 应用：AI 对话移到“AI”设置的末尾，与 Web UI 一致，不再位于“高级功能”分组
   - [x] Mac 应用与桌面应用：侧边栏拖动范围为 200 到 320 px，与 Web UI 一致，Mac 设置的侧边栏也从 200 起
   - [x] Mac 应用：播放器进度条加章节标记，指针所在时间上方显示缩略图与章节名，核心交出拼图后用 trickplay 拼图，否则对 AVPlayer 直接播放的文件用 `Player.thumbnail(at:)`；上方放不下时放到进度条下方；拖动时暂停，松开后继续播放
   - [x] Mac 应用：播放器中的滚轮与触控板，横向跳转、纵向调音量，轴向在手势开始时确定，惯性只在真正结束之后处理，在进度条上始终是跳转；触控板跳转期间暂停，结束后继续
@@ -887,9 +887,9 @@ flowchart TD
   - [x] 播放器跟随 Web UI 照 Mac 应用所做的改动（clients §6.5）：章节从一条圆角轨道上挖出，两端内缩半个滑块；跳转立即显示目标时间，片刻后旧画面藏在加载指示后面，直到 mpv 重新开始播放（`playback-restart`）；视频解码失败时在原位置以软件解码重新加载一次；控制列去掉快退与快进，时间轴两侧显示已播与剩余时间，速度、字幕、音频、画质与信息改为在按钮上方弹出的深色毛玻璃菜单，文字对齐在勾选栏之后；字幕按控制列的高度抬到其上方（`sub-pos`）；mpv 为每个音频输出各列一次的设备只显示一次
   - [ ] 播放器窗口在调整大小时锁定视频比例、捏合缩放窗口、画中画、「正在播放」与媒体键，以及 ⇧S 复制截图：MyGo 没有比例锁定、放大手势事件、AVPictureInPicture、MPNowPlayingInfoCenter 或远程命令，也不能把图像放入剪贴板
   - [ ] 以临时（ad hoc）签名的开发构建每次重建后都会请求钥匙串；改用稳定的开发身份签名
-  - [ ] 登录之外的电视模式：顶部导航、遥控器焦点与电视的各页面（[电视](tv.zh-CN.md)）
+  - [x] 登录之外的电视模式：顶部导航、遥控器焦点与电视的各页面（[电视](tv.zh-CN.md)）
   - [x] 核心未建模的界面经核心（`CallServer`）以 `libs/proto` 的 Connect 客户端调用服务器 API：人物页面、完整演职人员与仅剧组页面，以及详情中按职务列出的演职人员、花絮、合集横幅，和详情的资料、评分、关键词、链接与媒体信息
-  - [ ] 详情的推荐，以及发现提供方给出的作品信息（预算、票房、下一集、提供流媒体的服务），面向管理员的获取、字幕与问题，以及由类型、出品方与关键词打开媒体库中的条目
+  - [x] 详情的推荐，以及发现提供方给出的作品信息（预算、票房、下一集、提供流媒体的服务），面向管理员的获取、字幕与问题，以及由类型、出品方与关键词打开媒体库中的条目
   - [x] 与 Web UI 相同、自成布局的设置，以及用户菜单：外观、语言与电视模式；最高画质与自动播放下一集；用户的语言与字幕显示时机，保存到每台服务器；账户、其服务器的顺序与快速连接；以及已登录的设备及其登出
   - [x] 设置中供管理员使用的服务器管理：状态概览、用户、可扫描的媒体库、含正在播放的活动、可运行的任务与作业，以及可筛选的日志
   - [x] 与 Web UI 相同的用户添加与编辑：成员与受管用户、其访问范围、分级与标签、播放、请求与配额、其密码、PIN、验证器与通行密钥，以及邀请链接；以及媒体库的添加与编辑：在服务器及其 rclone 远程上浏览选择的文件夹及其存储类型、元数据、扫描与缺失剧集
@@ -941,12 +941,12 @@ flowchart TD
 - [x] 存储类别：`core.StorageClass` 按媒体库路径设定或由设备检测得出，`LibraryService` 同时返回实际类别
 - [x] 检测：Linux 按子类型识别 FUSE 挂载，macOS 识别本机回环的 NFS、SMB 和 macFUSE，Windows 识别 WinFsp 卷
 - [x] 存储策略：按类别决定整文件读取、抽样、推测式读取和目录跳过（`library.PolicyOf`）
-- [ ] 在 Web 界面中设定存储类别，随其媒体库管理一起实现
+- [x] 在 Web 界面中设定存储类别，随其媒体库管理一起实现
 - [x] 从 Matroska Cues 和 MP4 的样本表、`mfra`、`sidx` 读取关键帧，随 probe 一起提取；只在没有索引且不在云存储上时用 ffprobe
 - [x] 用关键帧生成 trickplay：Matroska 和 MP4 按索引抽样，适用于所有存储类别；其他文件只解码关键帧，失败时解码每一帧，云存储上不做；ffmpeg 单线程、低优先级运行
 - [x] 用关键帧生成章节图和检测黑边：通过同一索引每个章节或采样点读一个关键帧，一次 ffmpeg 运行完成，适用于所有存储类别；没有索引的文件逐个 seek，云存储上不做
 - [x] 本地存储上内嵌文字字幕一次提取到持久缓存；云存储上由播放视频的流一并输出，绝不整条提取
-- [ ] 字幕搜索下载，把字幕文件写在视频旁边
+- [x] 字幕搜索下载，把字幕文件写在视频旁边
 
 ### P25 存储后端与 rclone
 **范围**：服务端经存储端口而非文件系统访问的媒体库：基于 `os.Root` 的本地实现，以及经服务端运行或连接的 `rclone rcd` 访问 rclone 远端（[架构 §9](architecture.zh-CN.md)）。
@@ -961,7 +961,7 @@ flowchart TD
 - [x] 分发 mavioai/rclone 二进制：由 fork 的 CI 为 Linux、macOS 与 Windows 的 amd64 和 arm64 构建发布版本，`mise.toml` 锁定这些构建，容器镜像内置之，并与服务端二进制一起打包（`server:dist`），服务端默认使用其旁边的 `rclone`
 - [x] 远端内部的硬链接：fork 的 `operations/hardlink`（本地目录，以及支持 OpenSSH hardlink 扩展的 SFTP 服务器），用于从远端的下载目录入库到同一远端上的媒体库路径，并显示在下载客户端的文件夹中
 - [x] SMB 共享上的硬链接：fork 的 `smb` 后端经 mavioai/go-smb2 的 `Share.Link`（fork 的子模块）在共享内建立硬链接，自 v1.75.2-mavio.2 起
-- [ ] Web UI：服务器设置中的远端管理、媒体库表单目录选择器中的 rclone 目录（`StorageService.ListFolders`），以及下载客户端设置中的离线下载客户端
+- [x] Web UI：服务器设置中的远端管理、媒体库表单目录选择器中的 rclone 目录（`StorageService.ListFolders`），以及下载客户端设置中的离线下载客户端
 - [ ] Web UI 目录选择器中从远端目录手动导入
 - [ ] rclone 远端读取（[优化 §3](optimization.zh-CN.md#3-通过-rclone-读取远端存储reading-remote-storage-through-rclone)），按以下顺序：
   - [x] 经 rcd 与 Mavio 惠及所有后端：mavioai/rclone 中带版本校验的对象缓存、经 `--rc-serve` 传递存储状态码与拖动方式、由选项设定的数据流限制，以及对 webdav 与 http（以 200 回应的范围请求）和 crypt（nonce）的修正；Mavio 中每个远端一个 `Fs`、每次读取固定版本，以及 `libs/rclone` 中按意图预读的块缓存
@@ -1093,9 +1093,9 @@ flowchart TD
 - [ ] Mavio 账户的服务器发布的 URL 均无应答时，经中转访问
 - [ ] 在 Web UI 中而不是 mavio.dev 的页面上管理账户、其 Home、好友与访问记录
 - [ ] 部署 app.mavio.dev：在 Cloudflare 上以该地址部署以 `VITE_MAVIO_DEV_URL` 构建的 Web UI
-- [ ] 各应用（Apple、Android 与桌面）和共享的 Rust 核心：与 Web UI 相同，Mavio 账户以它们自己的 mavio.dev 会话登录（Bearer 会话与电视代码）
+- [x] 各应用（Apple、Android 与桌面）和共享的 Rust 核心：与 Web UI 相同，Mavio 账户以它们自己的 mavio.dev 会话登录（Bearer 会话与电视代码）
   - [x] 核心（`account.rs`）：关联代码（设备码授权）、浏览器登录回到带 PKCE 的回环地址、以设备密钥签名续期的会话、以断言登录账户的服务器并与其列表保持同步、退出所有会话；C ABI 中的对应调用，以及桌面应用的登录
-  - [ ] UniFFI 绑定中的账户调用，以及 Apple、Android 应用的登录
+  - [x] UniFFI 绑定中的账户调用，以及 Apple、Android 应用的登录
 
 ### P29 助手
 **范围**：[助手](assistant.zh-CN.md)所述的助手：`libs/intent` 的语法及其各处运行；`AssistantService` 及工具、槽位解析、确认与客户端动作；`AGENT_SESSION` 中的远程工具、代码模式、滚动会话与记忆；`plugins/pipecat` 中的语音会话，它是基于 Pipecat 的 Python 子进程插件，提供 `VOICE_SESSION` 以及用于字幕的 `SPEECH_TO_TEXT`，由服务端凭会话令牌中继，可被引导与中止；各客户端，Web UI 最先。
@@ -1145,7 +1145,7 @@ flowchart TD
 - [ ] 在 Windows 上运行 Windows 的包
 - [ ] 以后：在 WebSocket 之外加入 SmallWebRTC 作为传输，用于弱网，并为经由中转访问的服务端在 mavio.dev 上提供 TURN，在容器镜像中开放 UDP 端口
 - [ ] 以后：WebSocket 上回答的语音使用 Opus
-- [ ] Web 播放器：助手的动作会要求、而播放器尚不能执行的字幕偏移与多个条目的队列；在播放器的快捷键中列出 V
+- [ ] Web 播放器：助手的动作会要求、而播放器尚不能执行的多个条目的队列，以及把助手的字幕偏移动作交给播放器已有的字幕偏移；在播放器的快捷键中列出 V
 - [ ] Pipecat 缺少的中文服务：火山引擎与阿里云，作为 `plugins/pipecat` 的服务
 - [x] Mac、iPhone 与 iPad 应用：光球与卡片，页眉或侧边栏、电视导航栏与播放器控制栏中的助手按钮，Mac 上按住说话的按键，使用 `AVAudioEngine` 语音处理的语音会话，以及在其页面与播放器上执行的客户端动作
 - [x] Apple TV：助手按钮在连接到 Apple TV 的麦克风（iPhone、iPad 或耳机的麦克风）存在时开始语音会话，否则打开系统键盘供 Siri Remote 听写；页面与播放器上的光球与卡片，返回键关闭它们；在其页面与播放器上执行的客户端动作

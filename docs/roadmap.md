@@ -127,13 +127,13 @@ flowchart TD
 | P21 | Clients and ecosystem | In progress |
 | P22 | Real-device acceptance | Not started |
 | P23 | Packaging and release | Not started |
-| P24 | Storage I/O efficiency | In progress |
+| P24 | Storage I/O efficiency | ✅ Done |
 | P25 | Storage backends and rclone | In progress |
 | P26 | Subtitle acquisition | ✅ Done |
 | P27 | AI gateway and subtitle translation | In progress |
 | P28 | Accounts | In progress |
 | P29 | Assistant | In progress |
-| P30 | Container dependencies | Not started |
+| P30 | Container dependencies | In progress |
 | P31 | Proxies and challenge solving | In progress |
 | P32 | Metadata in several languages | In progress |
 
@@ -719,7 +719,7 @@ flowchart TD
   - [x] The Apple apps' metadata editing for administrators, from the details' More menu: editing an item's metadata and locks, identifying it from the providers' results, refreshing it, and choosing its images from the providers' or uploading one (from Photos on iPhone and iPad, a file on the Mac, left out on Apple TV); the screens shared in `MavioAdmin`, the Mac's dialogs in `MavioMacMedia`
   - [ ] The Apple apps' Watch Together checked with a server and another device in a group, playing, pausing, seeking and leaving; their metadata editing checked against a server, identifying and the providers' images with a provider's key
   - [ ] The rest of the iPhone and iPad app's settings: of the Server group's sections for its administrators but those the App Store does not accept ([Clients §4.2](clients.md)), Overview, General, Users, API keys, Libraries, Storage, Transcoding, Activity, Issues, Tasks, Logs and Backups are done, which are all of them; and adding a passkey, which iOS allows only at the domains the app is associated with, left until mavio.dev is deployed
-  - [ ] The desktop type scale (body 13, [Clients §6.1](clients.md)) in the Mac app (`MavioTypography.desktop`); the web UI takes it with the desktop layout, and the desktop app (`design.DesktopTypography`) has it, with macOS's control sizes and a window of at least 1024 × 680, since it has the desktop layout alone
+  - [x] The desktop type scale (body 13, [Clients §6.1](clients.md)) in the Mac app (`MavioTypography.desktop`); the web UI takes it with the desktop layout, and the desktop app (`design.DesktopTypography`) has it, with macOS's control sizes and a window of at least 1024 × 680, since it has the desktop layout alone
   - [x] The desktop app's television mode: the TV layout of [Television](tv.md) — the navigation bar at the top with its tabs, Libraries and the user menu's dots, the menu in frosted glass, focus moved by the arrow keys by rows with back going up a level, the television's background, type scale and focused cards, Home's hero, the details on a backdrop of 86% of the screen with the logo and focus on Play, the details' header, actions, seasons and episodes, recommendations and About as the web UI's, focus through the seasons, episodes, cast, crew, extras and the collection, and through About's columns as the web UI's flow regions (`data-focus-flow`, `beside`, `end`, `block`), Discover's title page with its genres, actions and overview beside the facts as regions of the flow, its seasons as boxes white and raised with focus, down from them landing on the cast's first, and the cast's See All opening the whole cast and crew (§6.3), links turning white with focus without moving what is around them, rows scrolling with focus and without scrollbars, keeping the page's margin beside the focused card, a library's pill of Recommended and Library and its filters, a row's See All card, the settings as a list with back going up a level past pages beside the one it leaves, the keyboard for fields, Return and Backspace leaving a field until a keyboard types into it, focus moved by position through every control and dialog (MyGo's spatial focus), a page opening with focus on its first control and returning with it where it was left, an element shaking where focus cannot move, Search with its keyboard beside Home's rows or the results, back deleting before it leaves for where Search was opened from (§6.4), selects opening their options below them only as they are pressed, up and down moving on from them and from fields with suggestions while closed (§4), and videos playing in the app's window rather than the player's
   - [x] More of the desktop app's television mode: a library's order as a menu of the app's own, opening with focus on the current order and closing back to its button (§5, §6.3); a computer's keyboard typing into the keyboard for fields (§4); and the player's controller with its timeline and a row of the next episode, the subtitles and the audio that down moves focus into, the remote's keys seeking, pausing and playing on, back closing the panel, then hiding the controller, then leaving, and the panel opening with focus on its current choice and keeping it within (§7)
   - [x] MyGo's own controls in the desktop app's television mode, as the appearance's choices and the settings' buttons and selects, turning white with black content with focus rather than taking the accent's ring, and a field's ring of 3 pt white (§4), by the theme's focus fill of the MyGo fork's
@@ -754,9 +754,9 @@ flowchart TD
       - [ ] Grouping qualities in a profile and ungrouping them; a profile's qualities are only turned on, off and reordered
     - [x] Acquisition's Options (`apps/web/src/screens/admin/options.tsx`): naming, importing, download clients, releases and the recycle bin (`ProfileService.UpdateAcquisitionSettings`)
     - [x] Acquisition's Requests (`apps/web/src/screens/admin/requestsettings.tsx`), as Seerr's: where approved movies, series and anime go, new users' permissions and quotas, and blocklisted tags (`RequestService.UpdateRequestSettings`)
-    - [ ] The settings RPCs per domain (`GetGeneralSettings`, `GetTranscodingSettings`, `GetPluginCatalogs`, `GetOutboundProxies`, `GetAcquisitionSettings`, `GetRequestSettings`), which replaced `GetServerSettings` and `UpdateServerSettings`, used by the Apple apps (`MavioAdmin`, `MavioMac*`) and the Android apps (`libs/android/admin`)
-    - [ ] A remote's offline downloads on its page (`GetOfflineDownloads`, `UpdateOfflineDownloads`, one per remote with its download folder), which replaced the offline download clients (`ListOfflineClients`, `SetOfflineClients`), and remotes' folders written `remote:<remote>:<path>` rather than `rclone:`, in the Apple apps and the Android apps
-    - [ ] A download client's page with its folders (`GetDownloadClientPaths`, `UpdateDownloadClientPaths`), which replaced the remote path mappings of `ProfileService`, in the Mac app
+    - [x] The settings RPCs per domain (`GetGeneralSettings`, `GetTranscodingSettings`, `GetPluginCatalogs`, `GetOutboundProxies`, `GetAcquisitionSettings`, `GetRequestSettings`), which replaced `GetServerSettings` and `UpdateServerSettings`, used by the Apple apps (`MavioAdmin`, `MavioMac*`) and the Android apps (`libs/android/admin`)
+    - [x] A remote's offline downloads on its page (`GetOfflineDownloads`, `UpdateOfflineDownloads`, one per remote with its download folder), which replaced the offline download clients (`ListOfflineClients`, `SetOfflineClients`), and remotes' folders written `remote:<remote>:<path>` rather than `rclone:`, in the Apple apps and the Android apps
+    - [x] A download client's page with its folders (`GetDownloadClientPaths`, `UpdateDownloadClientPaths`), which replaced the remote path mappings of `ProfileService`, in the Mac app
     - [x] Subtitles (`apps/web/src/screens/admin/{subtitles,subtitle-settings}.tsx`, `libs/client-ts/src/subtitles.ts`): subtitle profiles and the libraries they apply to, the providers and translators, and the settings of searching and saving, synchronization and translation (`SubtitleService`, `ListSubtitleProfileAssignments`)
       - [ ] A movie's or series' own subtitle profile, assigned from its details (`AssignSubtitleProfile`)
     - [x] AI (`apps/web/src/screens/admin/ai.tsx`, `libs/client-ts/src/ai.ts`): the AI gateway plugin's providers with their credentials, API keys, sign-ins followed with their questions answered in place, signing out, and the models (`AiProviderService`)
@@ -764,7 +764,7 @@ flowchart TD
     - [x] Backups and logs (`apps/web/src/screens/admin/backups.tsx`, `libs/client-ts/src/backups.ts`): making, downloading and deleting backups, and the recent log records by level, period and words (`BackupService`, `ListLogs`)
     - [x] API keys (`ApiKeysSection` in `apps/web/src/screens/admin/backups.tsx`): a section of the Server group, since keys are the server's and reach it in either mode; making a key with its token shown once, and revoking one (`CreateApiKey`, `ListApiKeys`, `RevokeApiKey`)
   - [ ] The web UI: switching between the members of a Home on a server in mavio.dev mode, which now happens on mavio.dev
-  - [ ] The web UI's details: trailers and other extras
+  - [x] The web UI's details: trailers and other extras
   - [x] The web UI's person page (`apps/web/src/screens/person.tsx`, `libs/client-ts/src/people.ts`), opened from the cast's cards: the person and the titles crediting them
   - [x] The web UI's Discover (`apps/web/src/screens/discover.tsx`, `libs/client-ts/src/discover.ts`): the catalogs of the first server that discovers in rows, each catalog's grid, a title with its seasons, Watch, and requests of a movie or of seasons of a series; Home's Trending opens a title no server has
     - [x] The catalogs' filters and sorts (`apps/web/src/screens/discover-filters.tsx`): the order, genres, studios, keywords, streaming services by country, original language, years, runtime, rating and votes a catalog takes, kept in the page's address (`ListFilterValues`); and the titles the server that discovers finds among Search's results (`SearchTitles`)
@@ -797,7 +797,7 @@ flowchart TD
   - [x] The web UI's AI agent sessions (`AgentSessionService`): the settings' AI Conversations for administrators, the answers streamed (§6.3.26)
     - [ ] Conversations for users other than administrators, each user's own (needs an owner of `AgentSessionService`'s sessions)
   - [ ] The Apple and Android apps, whose shelves also take the spacing of [the shelf](../libs/design/components.md#shelf) and, on the Mac, the arrows at the end of its title
-- [ ] Slices: the Android phone and tablet app, the Apple TV and Android TV apps, and the Mac app
+- [x] Slices: the Android phone and tablet app, the Apple TV and Android TV apps, and the Mac app
 - [ ] Android phone and tablet app (`apps/android`, `libs/android`)
   - [x] Sign-in as the web UI's, over the wall of posters: Sign In with Mavio in an Auth Tab, which mavio.dev sends back to the app's own scheme `dev.mavio.app:/callback`, a link code renewed as it expires, a server's address with the servers found nearby, a name and password, Quick Connect and a new server's first user; asking for `ACCESS_LOCAL_NETWORK` at launch. Debug builds take mavio.dev's API from the Gradle property `mavio.devApi` and trust a development CA put in the app's files (`dev-ca.pem`, through `MAVIO_EXTRA_CA_CERTS`)
   - [x] Home as the web UI's phone layout: the header with search and the avatar, the floating tab bar, both of glass (Haze) over the page, the hero at 4:5 of the screen's width right below the header, its artwork's top going on up behind the header, logos, facts and the rating, the shelves, and pull to refresh; settings with the account, the servers and signing out; a stack of screens for each tab (Navigation 3)
@@ -867,7 +867,7 @@ flowchart TD
   - [x] Mac app: the settings beside their own sidebar as the web UI's desktop layout, flat, with the Advanced group; the features iOS leaves out for the App Store, which the Mac, distributed outside it, keeps: acquisition, Wanted, downloads, subtitles, AI and the AI conversations, plugins, proxies and the indexer search, and Discover's requests
   - [x] Mac app: the sidebar as the desktop app's, with the search field, whose Return searches on Search, and its width kept; television mode on ⌃⌘T, in full screen, with its focus movement, bar and keyboard
   - [ ] Mac app: the Features group and the assistant, whose voice buffers the microphone's audio from capture until the session's socket is open; television mode's menus in glass, its sheets reachable by focus, reporting an issue and the microphone's button; unsaved changes warned of on leaving a settings page; manual import from a title's Manage
-  - [ ] Mac app: the AI conversations at the end of the AI section, as the web UI's, no longer in the Advanced group
+  - [x] Mac app: the AI conversations at the end of the AI section, as the web UI's, no longer in the Advanced group
   - [x] Mac app and desktop app: the sidebars dragged between 200 and 320 px, as the web UI's, the settings' sidebar of the Mac from 200 too
   - [x] Mac app: the player's seek bar with chapter marks and, over the time the pointer is on, a thumbnail with the chapter's name, from the trickplay sheets once the core hands them over and else `Player.thumbnail(at:)` for files AVPlayer plays directly; below the bar where it does not fit above; dragging pauses and releasing plays on
   - [x] Mac app: the wheel and trackpad in the player, sideways seeking and up and down setting the volume, the axis taken at the gesture's start, momentum only after a real end, and over the seek bar always seeking; a trackpad's seek pausing until it ends
@@ -887,9 +887,9 @@ flowchart TD
   - [x] The player as the web UI's since it followed the Mac app (clients §6.5): chapters cut out of one rounded track, inset by half the knob; a seek showing its time at once, the old frame hidden behind the spinner after a beat until mpv starts again (`playback-restart`); a video that fails loaded once more where it was, decoded in software; the row without seeking buttons, the elapsed and remaining times beside the timeline, and the speed, subtitles, audio, quality and info as menus above their buttons in dark frosted glass, their text lined up after the column of the checks; the subtitles lifted above the controls by their height (`sub-pos`); a device mpv lists for each of its audio outputs offered once
   - [ ] The player's window locked to the video's aspect as it is resized, a pinch resizing it, Picture in Picture, Now Playing and the media keys, and ⇧S copying a screenshot: MyGo has no aspect lock, magnify events, AVPictureInPicture, MPNowPlayingInfoCenter or remote commands, nor images on the clipboard
   - [ ] Development builds signed ad hoc ask for the keychain after every rebuild; sign them with a stable development identity
-  - [ ] Television mode beyond sign-in: the top navigation, remote focus and the television's screens ([Television](tv.md))
+  - [x] Television mode beyond sign-in: the top navigation, remote focus and the television's screens ([Television](tv.md))
   - [x] The screens the core does not model call the server's API through the core (`CallServer`) with `libs/proto`'s Connect clients: person pages, the whole cast and crew and the crew alone, and on the details the cast and crew by job, the extras, the collection's banner, and the details' facts, ratings, keywords, links and media
-  - [ ] The details' recommendations and what the discovery providers tell of a title (budget, takings, next episode, the services streaming it), its acquisition, subtitles and issues for administrators, and genres, studios and keywords opening their items in the library
+  - [x] The details' recommendations and what the discovery providers tell of a title (budget, takings, next episode, the services streaming it), its acquisition, subtitles and issues for administrators, and genres, studios and keywords opening their items in the library
   - [x] The settings in a layout of their own, as the web UI's, and the user menu: appearance, language and TV mode; the maximum quality and playing the next episode; the user's languages and when subtitles show, saved to every server; the account, its servers in order and Quick Connect; and the devices signed in, signed out
   - [x] The server's administration in the settings, for administrators: the overview of its state, the users, the libraries scanned, the activity with who is playing, the tasks run and the jobs, and the logs filtered
   - [x] Adding and editing users, as the web UI's: members and managed users, their access, ratings and labels, playback, requests and quotas, their passwords, PINs, authenticators and passkeys, and invitation links; and adding and editing libraries: their folders browsed on the server and its rclone remotes with their storage, metadata, scans and missing episodes
@@ -941,12 +941,12 @@ flowchart TD
 - [x] Storage classes: `core.StorageClass` set per library path or detected from the device, returned with the effective classes by `LibraryService`
 - [x] Detection: FUSE mounts by their subtype on Linux, loopback NFS and SMB and macFUSE on macOS, WinFsp volumes on Windows
 - [x] Storage policy: whole-file reads, samples, speculative reads and folder pruning by class (`library.PolicyOf`)
-- [ ] Setting storage classes in the web UI, with its library administration
+- [x] Setting storage classes in the web UI, with its library administration
 - [x] Keyframes from Matroska Cues and MP4 sample tables, `mfra` and `sidx`, extracted with the probe; ffprobe only without an index and off cloud storage
 - [x] Trickplay from keyframes: Matroska and MP4 sampled through their index, on every storage class; other files decode only their keyframes, falling back to every frame, off cloud storage; ffmpeg on one thread at a low priority
 - [x] Chapter images and black borders from keyframes: a keyframe a chapter or point through the same index, in one ffmpeg run, on every storage class; files without an index seek to each, off cloud storage
 - [x] Embedded text subtitles extracted once into a persistent cache on local storage; on cloud storage, delivered by the stream that plays the video and never extracted whole
-- [ ] Subtitle search and download, which writes sidecar subtitles beside the video
+- [x] Subtitle search and download, which writes sidecar subtitles beside the video
 
 ### P25 Storage Backends and rclone
 **Scope**: libraries on storage the server reaches through a storage port rather than the file system: the local implementation over `os.Root`, and rclone's remotes through an `rclone rcd` the server runs or reaches ([Architecture §9](architecture.md)).
@@ -961,7 +961,7 @@ flowchart TD
 - [x] Distribution of the mavioai/rclone binary: release builds for Linux, macOS and Windows on amd64 and arm64 by the fork's CI, pinned in `mise.toml`, bundled into the container image and packaged beside the server's binaries (`server:dist`), whose default `rclone` is the one beside it
 - [x] Hard links within remotes: the fork's `operations/hardlink` (local folders, and SFTP servers with OpenSSH's hardlink extension), used by imports from a remote's download folder into a library path on the same remote, and shown on a download client's folders
 - [x] Hard links on SMB shares: the fork's `smb` backend links within a share through mavioai/go-smb2's `Share.Link` (a submodule of the fork), from v1.75.2-mavio.2
-- [ ] Web UI: remotes in the server settings, rclone folders in the library form's folder picker (`StorageService.ListFolders`), and the offline download clients in the download client settings
+- [x] Web UI: remotes in the server settings, rclone folders in the library form's folder picker (`StorageService.ListFolders`), and the offline download clients in the download client settings
 - [ ] Manual imports from folders on remotes in the web UI's folder picker
 - [ ] Reads of rclone remotes ([Optimization §3](optimization.md#3-reading-remote-storage-through-rclone)), in this order:
   - [x] Every backend, through the rcd and Mavio: in mavioai/rclone, the object cache with its version checks, the storage's statuses and seeking through `--rc-serve`, stream limits set by options, and the fixes of webdav and http (ranges answered with 200) and crypt (the nonce); in Mavio, one `Fs` per remote, the version pinned on every read and the block cache in `libs/rclone` with read-ahead by intent
@@ -1093,9 +1093,9 @@ flowchart TD
 - [ ] Reaching a Mavio account's servers through the relay when none of their published URLs answers
 - [ ] Managing the account, its Homes, friends and access records inside the web UI rather than on mavio.dev's pages
 - [ ] Deploying app.mavio.dev: the web UI built with `VITE_MAVIO_DEV_URL` on Cloudflare at that address
-- [ ] The apps (Apple, Android and desktop) and the shared Rust core: the same as the web UI, Mavio accounts signing in with mavio.dev sessions of their own (bearer sessions and television codes)
+- [x] The apps (Apple, Android and desktop) and the shared Rust core: the same as the web UI, Mavio accounts signing in with mavio.dev sessions of their own (bearer sessions and television codes)
   - [x] The core (`account.rs`): link codes (the device code grant), the browser's sign-in to a loopback address with PKCE, the session of the device key renewed by its signature, the account's servers signed in to with assertions and kept in step with its list, and signing out of every session; in the C ABI, and the desktop app's sign-in
-  - [ ] The account's calls in the UniFFI bindings, and the Apple and Android apps' sign-in
+  - [x] The account's calls in the UniFFI bindings, and the Apple and Android apps' sign-in
 
 ### P29 Assistant
 **Scope**: the assistant of [Assistant](assistant.md): the grammar of `libs/intent` on its hosts; `AssistantService` with the tools, slot resolution, confirmation and client actions; remote tools, code mode, rolling conversations and memory in `AGENT_SESSION`; voice sessions in `plugins/pipecat`, a Python process plugin on Pipecat providing `VOICE_SESSION` and, for subtitles, `SPEECH_TO_TEXT`, relayed by the server with session tokens, steered and aborted; the clients, the web UI first.
@@ -1145,7 +1145,7 @@ flowchart TD
 - [ ] The Windows package run on Windows
 - [ ] Later: SmallWebRTC as a transport beside the WebSocket, for weak networks, with TURN on mavio.dev for servers reached through the relay and UDP ports in the container image
 - [ ] Later: Opus for the answer's speech on the WebSocket
-- [ ] The web player: the subtitle offset and queues of several items, which the assistant's actions ask for and the player cannot yet carry out; V listed with the player's shortcuts
+- [ ] The web player: queues of several items, which the assistant's actions ask for and the player cannot yet carry out, and the assistant's subtitle offset handed to the player's own; V listed with the player's shortcuts
 - [ ] Services Pipecat lacks for Chinese, Volcengine and Alibaba Cloud, as services of `plugins/pipecat`
 - [x] The Mac, iPhone and iPad apps: the orb and cards, the assistant button in the header or sidebar, the television bar and the player's controls, the Mac's key held to talk, voice sessions with `AVAudioEngine`'s voice processing, and the client actions on their screens and players
 - [x] Apple TV: the assistant button starting a voice session with a microphone connected to the Apple TV, an iPhone's, an iPad's or a headset's, else opening the system's keyboard for the Siri Remote's dictation; the orb and cards over the pages and the player, Back dismissing them; the client actions on its screens and player
