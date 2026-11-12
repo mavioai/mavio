@@ -2,6 +2,7 @@ import { Code } from "@connectrpc/connect";
 import { FriendService } from "@mavio/proto/mavio/cloud/v1/home_pb";
 import { describe, expect, test } from "vitest";
 
+import { localeOf } from "../src/lib/i18n.ts";
 import { bucketOf } from "../src/server/limits.ts";
 import { resetMail, verificationMail } from "../src/server/mail.ts";
 import { apiURL, baseURL, code, newSite } from "./harness.ts";
@@ -93,12 +94,12 @@ describe("rate limits", () => {
 
 describe("mails", () => {
   test("are written in the request's language, their text escaped in HTML", () => {
-    const m = verificationMail({ email: "a@example.com", name: "<b>Ann</b>" }, "https://mavio.dev/api/auth/verify-email?token=x&callbackURL=/", "en-US");
+    const m = verificationMail({ email: "a@example.com", name: "<b>Ann</b>" }, "https://mavio.dev/api/auth/verify-email?token=x&callbackURL=/", localeOf("en-US"));
     expect(m.subject).toBe("Verify your e-mail address for Mavio");
     expect(m.text).toContain("Hi <b>Ann</b>,");
     expect(m.text).toContain("Verify E-mail Address\nhttps://mavio.dev/api/auth/verify-email?token=x&callbackURL=/");
     expect(m.html).toContain("Hi &lt;b&gt;Ann&lt;/b&gt;,");
     expect(m.html).toContain('href="https://mavio.dev/api/auth/verify-email?token=x&amp;callbackURL=/"');
-    expect(resetMail({ email: "a@example.com", name: "Ann" }, "https://x", "fr, zh-TW;q=0.8").subject).toBe("重设你的 Mavio 密码");
+    expect(resetMail({ email: "a@example.com", name: "Ann" }, "https://x", localeOf("fr, zh-TW;q=0.8")).subject).toBe("重设你的 Mavio 密码");
   });
 });

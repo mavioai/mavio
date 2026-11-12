@@ -5,13 +5,14 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { authClient } from "../lib/auth-client.ts";
 import type { Locale } from "../lib/i18n.ts";
 import { currentLocale, useLocale, useT } from "../lib/locale.tsx";
+import { LanguageSelect } from "../ui.tsx";
 import { hasSession, useSignedIn } from "../lib/session.ts";
 import { Wordmark } from "../logo.tsx";
 import styles from "../styles.css?url";
 import { Avatar, ConfirmProvider, Icon, type IconName } from "../ui.tsx";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  beforeLoad: (): { locale: Locale; session: boolean } => ({ locale: currentLocale(), session: hasSession() }),
+  beforeLoad: (): { locale: Locale; chosen?: Locale; session: boolean } => ({ ...currentLocale(), session: hasSession() }),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -132,7 +133,7 @@ function Visitor() {
   );
 }
 
-/** The foot of the site's pages: the documentation, Mavio Pass, the policies and the way to write to support. */
+/** The foot of the site's pages: the documentation, Mavio Pass, the policies, the way to write to support and the language. */
 function Footer() {
   const t = useT();
   const link = "hover:text-on-background";
@@ -157,6 +158,7 @@ function Footer() {
             {t("site.footer.contact")}
           </a>
         </nav>
+        <LanguageSelect className="ml-auto" />
       </div>
     </footer>
   );

@@ -1,7 +1,7 @@
 // mavio.dev's e-mails (docs/mavio-dev.md §2): verifying an address and
 // resetting a password, each a link, written in the language of the
 // request that asked for it and sent through Cloudflare Email Service.
-import { localeOf, type T, translator } from "../lib/i18n.ts";
+import { type Locale, type T, translator } from "../lib/i18n.ts";
 
 /** Mail is an e-mail to one address, as plain text and HTML. */
 export interface Mail {
@@ -73,8 +73,8 @@ export interface Recipient {
 }
 
 /** verificationMail asks an account to confirm its e-mail address at url. */
-export function verificationMail(user: Recipient, url: string, acceptLanguage?: string | null): Mail {
-  const t = translator(localeOf(acceptLanguage));
+export function verificationMail(user: Recipient, url: string, locale: Locale): Mail {
+  const t = translator(locale);
   return actionMail(user.email, t("mail.verifySubject"), t, {
     greeting: t("mail.greeting", { name: user.name }),
     body: t("mail.verifyBody"),
@@ -85,8 +85,8 @@ export function verificationMail(user: Recipient, url: string, acceptLanguage?: 
 }
 
 /** resetMail gives an account the link to set a new password at url. */
-export function resetMail(user: Recipient, url: string, acceptLanguage?: string | null): Mail {
-  const t = translator(localeOf(acceptLanguage));
+export function resetMail(user: Recipient, url: string, locale: Locale): Mail {
+  const t = translator(locale);
   return actionMail(user.email, t("mail.resetSubject"), t, {
     greeting: t("mail.greeting", { name: user.name }),
     body: t("mail.resetBody"),

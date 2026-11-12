@@ -244,6 +244,8 @@ export type MessageKey =
   | 'site.footer.privacy'
   | 'site.footer.terms'
   | 'site.footer.contact'
+  | 'site.language'
+  | 'site.language.system'
   | 'site.legal.updated'
   | 'site.landing.title'
   | 'site.landing.subtitle'
@@ -548,6 +550,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "site.footer.privacy": "Privacy Policy",
     "site.footer.terms": "Terms of Service",
     "site.footer.contact": "Contact",
+    "site.language": "Language",
+    "site.language.system": "System Language",
     "site.legal.updated": "Last updated {date}",
     "site.landing.title": "Your movies and shows, on every screen.",
     "site.landing.subtitle": "Mavio is a media server you run yourself. It organizes your library and plays it on your TV, phone and computer, at home or away.",
@@ -850,6 +854,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "site.footer.privacy": "隐私政策",
     "site.footer.terms": "服务条款",
     "site.footer.contact": "联系我们",
+    "site.language": "语言",
+    "site.language.system": "跟随系统",
     "site.legal.updated": "最后更新于 {date}",
     "site.landing.title": "你的电影和剧集，在每一块屏幕上。",
     "site.landing.subtitle": "Mavio 是一款由你自己运行的媒体服务器。它整理你的媒体库，并在电视、手机和电脑上播放，无论在家还是在外。",

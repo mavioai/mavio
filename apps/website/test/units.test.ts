@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { claimCodeHash, newClaimCode } from "../src/server/claim-codes.ts";
+import { cookieDomain, requestLocale } from "../src/lib/i18n.ts";
 import { expectedOrigin } from "../src/lib/origins.ts";
 import { base32, serverID } from "../src/server/ids.ts";
 import * as password from "../src/server/password.ts";
@@ -65,5 +66,30 @@ describe("expectedOrigin", () => {
     ["not a url", false],
   ])("%s is %s", (uri, want) => {
     expect(expectedOrigin(uri, id)).toBe(want);
+  });
+});
+
+describe("requestLocale", () => {
+  test.each([
+    { name: "Accept-Language alone", req: { acceptLanguage: "fr, zh-TW;q=0.8" }, want: "zh-Hans" },
+    { name: "the cookie over Accept-Language", req: { cookies: "a=1; mavio-locale=en", acceptLanguage: "zh-CN" }, want: "en" },
+    { name: "ui_locales over the cookie", req: { uiLocales: "fr zh-Hans", cookies: "mavio-locale=en" }, want: "zh-Hans" },
+    { name: "ui_locales the strings lack", req: { uiLocales: "fr", cookies: "mavio-locale=zh-Hans" }, want: "zh-Hans" },
+    { name: "a cookie the strings lack", req: { cookies: "mavio-locale=fr", acceptLanguage: "zh" }, want: "zh-Hans" },
+    { name: "nothing", req: {}, want: "en" },
+  ])("$name", ({ req, want }) => {
+    expect(requestLocale(req)).toBe(want);
+  });
+});
+
+describe("cookieDomain", () => {
+  test.each([
+    ["mavio.dev", "mavio.dev"],
+    ["app.mavio.dev", "mavio.dev"],
+    ["localhost:5173", undefined],
+    ["192.168.2.6:5175", undefined],
+    ["[::1]:5173", undefined],
+  ])("%s", (host, want) => {
+    expect(cookieDomain(host)).toBe(want);
   });
 });

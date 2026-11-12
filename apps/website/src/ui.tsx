@@ -4,7 +4,8 @@
 import { type IconName, iconViewBox, icons } from "@mavio/design/icons";
 import { createContext, type ReactNode, useCallback, useContext, useRef, useState } from "react";
 
-import { useT } from "./lib/locale.tsx";
+import type { Locale } from "./lib/i18n.ts";
+import { localeNames, useChosenLocale, useSetLocale, useT } from "./lib/locale.tsx";
 
 export type { IconName };
 
@@ -117,6 +118,34 @@ export function Select({ label, options, ...props }: React.SelectHTMLAttributes<
         <Icon name="selector" size={16} className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-text-tertiary" />
       </span>
     </label>
+  );
+}
+
+/**
+ * The pages' language, as a compact menu naming each language in itself,
+ * and following the browser's: in the footer and under the cards.
+ */
+export function LanguageSelect({ className = "" }: { className?: string }) {
+  const t = useT();
+  const chosen = useChosenLocale();
+  const setLocale = useSetLocale();
+  return (
+    <span className={`relative inline-flex ${className}`}>
+      <select
+        aria-label={t("site.language")}
+        value={chosen ?? "system"}
+        onChange={(e) => void setLocale(e.target.value === "system" ? undefined : (e.target.value as Locale))}
+        className="h-8 appearance-none rounded-full border border-border bg-transparent pr-8 pl-3 type-footnote text-text-secondary outline-none transition-colors hover:text-on-background focus-visible:border-accent"
+      >
+        <option value="system">{t("site.language.system")}</option>
+        {localeNames.map(({ locale, name }) => (
+          <option key={locale} value={locale} lang={locale}>
+            {name}
+          </option>
+        ))}
+      </select>
+      <Icon name="selector" size={14} className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-text-tertiary" />
+    </span>
   );
 }
 

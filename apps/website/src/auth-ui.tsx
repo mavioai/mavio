@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { authClient } from "./lib/auth-client.ts";
 import { useT } from "./lib/locale.tsx";
 import { Wordmark } from "./logo.tsx";
-import { Avatar, Icon, type IconName } from "./ui.tsx";
+import { Avatar, Icon, type IconName, LanguageSelect } from "./ui.tsx";
 
 /** The colors of the posters, top to bottom: warm, cool and dusk, as films are. */
 const tones = [
@@ -50,7 +50,8 @@ export function PosterWall() {
 
 /**
  * A page of signing in: the card on the wall of posters, with the
- * wordmark, a back link, the title and the line under it above its content.
+ * wordmark and the language, a back link, the title and the line under it
+ * above its content.
  */
 export function AuthScreen({ title, subtitle, onBack, wide = false, children }: { title: ReactNode; subtitle?: ReactNode; onBack?: () => void; wide?: boolean; children: ReactNode }) {
   const t = useT();
@@ -60,9 +61,12 @@ export function AuthScreen({ title, subtitle, onBack, wide = false, children }: 
       <main
         className={`relative flex w-full flex-col gap-[22px] rounded-[26px] border border-(--signin-separator) bg-(--signin-card) px-6 pt-8 pb-7 shadow-(--signin-shadow) backdrop-blur-[40px] backdrop-saturate-150 sm:px-10 sm:pt-10 sm:pb-[34px] ${wide ? "max-w-[520px]" : "max-w-[460px]"}`}
       >
-        <a href="/" className="self-start" aria-label="Mavio">
-          <Wordmark height={26} />
-        </a>
+        <div className="flex items-center justify-between gap-3">
+          <a href="/" aria-label="Mavio">
+            <Wordmark height={26} />
+          </a>
+          <LanguageSelect />
+        </div>
         {onBack && (
           <button type="button" onClick={onBack} className="-ml-1 inline-flex items-center gap-0.5 self-start text-[15px] text-accent-text hover:opacity-80">
             <Icon name="back" size={18} />

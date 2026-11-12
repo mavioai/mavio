@@ -2412,6 +2412,8 @@
   "site.footer.privacy": "隐私政策",
   "site.footer.terms": "服务条款",
   "site.footer.contact": "联系我们",
+  "site.language": "语言",
+  "site.language.system": "跟随系统",
   "site.legal.updated": "最后更新于 {date}",
   "site.landing.title": "你的电影和剧集，在每一块屏幕上。",
   "site.landing.subtitle": "Mavio 是一款由你自己运行的媒体服务器。它整理你的媒体库，并在电视、手机和电脑上播放，无论在家还是在外。",

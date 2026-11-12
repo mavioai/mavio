@@ -11,7 +11,7 @@ import { Suspense, use } from "react";
 
 import { docs, i18n, source } from "../../lib/docs.ts";
 import type { Locale } from "../../lib/i18n.ts";
-import { useLocale, useT } from "../../lib/locale.tsx";
+import { localeNames, useLocale, useSetLocale, useT } from "../../lib/locale.tsx";
 import { Wordmark } from "../../logo.tsx";
 
 export const Route = createFileRoute("/docs/$")({
@@ -44,10 +44,19 @@ const translations = i18n.translations().extend(uiTranslations()).preset("zh-Han
 function Docs() {
   const t = useT();
   const locale = useLocale();
+  const setLocale = useSetLocale();
   const data = useFumadocsLoader(Route.useLoaderData());
+  // fumadocs' language menu switches the site's language, kept as the
+  // other pages keep it, rather than moving to another address.
+  const i18nProps = {
+    ...i18nProvider(translations, locale),
+    locales: localeNames.map(({ locale: l, name }) => ({ locale: l, name })),
+    onLocaleChange: (l: string) => void setLocale(l as Locale),
+  };
   return (
-    <RootProvider theme={{ enabled: false }} i18n={i18nProvider(translations, locale)}>
+    <RootProvider theme={{ enabled: false }} i18n={i18nProps}>
       <DocsLayout
+        i18n
         tree={data.pageTree}
         nav={{ title: <Wordmark height={20} />, url: "/" }}
         links={[

@@ -2413,6 +2413,8 @@
   "site.footer.privacy": { "message": "Privacy Policy", "description": "Link in mavio.dev's footer, and title of its page.", "platforms": ["website"] },
   "site.footer.terms": { "message": "Terms of Service", "description": "Link in mavio.dev's footer, and title of its page.", "platforms": ["website"] },
   "site.footer.contact": { "message": "Contact", "description": "Link in mavio.dev's footer: writing to support.", "platforms": ["website"] },
+  "site.language": { "message": "Language", "description": "Label of mavio.dev's language menu, in its footer and under its cards.", "platforms": ["website"] },
+  "site.language.system": { "message": "System Language", "description": "Option of mavio.dev's language menu following the browser's languages.", "platforms": ["website"] },
   "site.legal.updated": { "message": "Last updated {date}", "description": "Under the title of mavio.dev's privacy policy and terms of service.", "platforms": ["website"] },
   "site.landing.title": { "message": "Your movies and shows, on every screen.", "description": "Headline of mavio.dev's front page for visitors.", "platforms": ["website"] },
   "site.landing.subtitle": { "message": "Mavio is a media server you run yourself. It organizes your library and plays it on your TV, phone and computer, at home or away.", "description": "Line under the headline of mavio.dev's front page.", "platforms": ["website"] },

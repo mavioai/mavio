@@ -11,6 +11,7 @@ import { admin, bearer, jwt, twoFactor, username } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { eq } from "drizzle-orm";
 
+import { requestLocale } from "../lib/i18n.ts";
 import { cancel, type Stripe } from "./billing.ts";
 import { AccountRevoked_Reason, accountChanged, accountOf, accountRevoked } from "./changes.ts";
 import { type Database, schema } from "./db/index.ts";
@@ -19,6 +20,9 @@ import { type Mailer, resetMail, verificationMail } from "./mail.ts";
 import { pass } from "./pass-plugin.ts";
 import * as password from "./password.ts";
 import { staff, staffRole, staffRoles } from "./staff-plugin.ts";
+
+/** The language of the e-mail a request sends: the one chosen on the site, else its Accept-Language. */
+const mailLocale = (h?: Headers) => requestLocale({ cookies: h?.get("cookie"), acceptLanguage: h?.get("accept-language") });
 
 /** Config is the configuration of mavio.dev's accounts. */
 export interface Config {
@@ -57,7 +61,7 @@ export function createAuth(db: Database, config: Config) {
       password: { hash: password.hash, verify: password.verify },
       resetPasswordTokenExpiresIn: mailLinkLifetime,
       sendResetPassword: async ({ user, url }, req) => {
-        await config.mailer.send(resetMail(user, url, req?.headers.get("accept-language")));
+        await config.mailer.send(resetMail(user, url, mailLocale(req?.headers)));
       },
       // A new password ends every session, devices' included.
       revokeSessionsOnPasswordReset: true,
@@ -72,7 +76,7 @@ export function createAuth(db: Database, config: Config) {
       autoSignInAfterVerification: true,
       expiresIn: mailLinkLifetime,
       sendVerificationEmail: async ({ user, url }, req) => {
-        await config.mailer.send(verificationMail(user, url, req?.headers.get("accept-language")));
+        await config.mailer.send(verificationMail(user, url, mailLocale(req?.headers)));
       },
     },
     user: {
