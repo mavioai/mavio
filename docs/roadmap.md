@@ -1078,7 +1078,7 @@ flowchart TD
 - [x] mavio.dev's landing page, privacy policy and terms of service, and its documentation at `/docs` on fumadocs with its ZBSearch search
 - [ ] Writing mavio.dev's documentation: installing a server, adding libraries, the apps, accounts, Homes and Mavio Pass; its pages are placeholders
 - [x] Receiving mail at `support@mavio.dev` through Cloudflare Email Routing
-- [ ] Checking servers' published addresses from mavio.dev with Workers' outbound TCP connections
+- [x] Checking servers' published addresses from mavio.dev with Workers' outbound TCP connections, after `PublishConnections` and when listing finds them six hours old, given to clients as `Server.connection_checks`
 - [ ] Running PostgreSQL on VMs with a streaming replica and its WAL archived to R2, reached through Hyperdrive
 - [x] mavio.dev: friends, Homes, managed accounts and their conversion, switching, Mavio Pass and frozen Homes: `FriendService` and `HomeService`, switching with PINs through Mavio's better-auth plugin, managed accounts' restriction profiles applied by servers, and the pages of the Home and friends
 - [x] Buying and renewing Mavio Pass: Stripe Checkout, the customer portal and the webhooks extending the Pass by each paid period, and `/pass`
@@ -1090,7 +1090,7 @@ flowchart TD
 - [ ] Running `apps/relay` on VMs in Europe, the United States and Singapore, with the relays' A and AAAA records in `apps/dns`'s configuration and `RELAYS` and `RELAY_TICKET_SECRET` in the Worker's
 - [x] The web UI: `/setup` choosing the mode on a new server, opened by the server on first start, where the first Mavio account to sign in claims the server through the authorization request the server pushes to mavio.dev (`AuthService.StartSignIn`, `/authorize?request_uri=…`); one sign-in, a Mavio account's through mavio.dev's authorization code flow with PKCE (`/authorize`, `/auth/callback`, `/api/oauth/token`) into a session of the device key, restricted to the administrator on a server's own web UI and pointing everyone else to app.mavio.dev, or a standalone server's; every server of the account at the first of its published URLs that answers; link codes on televisions; signing out of every session; switching a standalone server's users with PINs; signing in with passkeys and TOTP codes, and managing passkeys, TOTP and PINs
 - [ ] A QR code of the server's address on a new server's television setup, and of mavio.dev/link beside a television's link code, in the web UI and the Apple and Android apps; the desktop app shows one beside its link code
-- [ ] Reaching a Mavio account's servers through the relay when none of their published URLs answers
+- [x] Reaching a Mavio account's servers through the relay when none of their published URLs answers, those found closed tried last, and renewing the relay's ticket before it expires, in `libs/client-ts` and the shared Rust core
 - [ ] Managing the account, its Homes, friends and access records inside the web UI rather than on mavio.dev's pages
 - [x] Deploying app.mavio.dev: the web UI built with `VITE_MAVIO_DEV_URL` on Cloudflare at that address
 - [x] The apps (Apple, Android and desktop) and the shared Rust core: the same as the web UI, Mavio accounts signing in with mavio.dev sessions of their own (bearer sessions and television codes)

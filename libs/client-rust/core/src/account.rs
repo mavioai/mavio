@@ -16,7 +16,9 @@ use http::{Request, Response, Uri};
 use http_body_util::{BodyExt, Full};
 use mavio_api::connect::mavio::cloud::v1::AccountServiceClient;
 use mavio_api::proto::mavio::auth::v1::SignInWithAssertionRequest;
-use mavio_api::proto::mavio::cloud::v1::{CreateAssertionRequest, ListServersRequest};
+use mavio_api::proto::mavio::cloud::v1::{
+    ConnectionCheck, CreateAssertionRequest, CreateRelayTicketRequest, ListServersRequest,
+};
 use serde::{Deserialize, Serialize};
 use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
 use tokio::net::TcpListener;
@@ -38,6 +40,8 @@ const RENEW_MARGIN: Duration = Duration::from_secs(60);
 
 /// How long each of a server's URLs is tried.
 const REACH_TIMEOUT: Duration = Duration::from_secs(4);
+/// How long before its ticket expires a relay's address is renewed.
+const RELAY_MARGIN: Duration = Duration::from_secs(60);
 
 /// How long a call of mavio.dev may take.
 const CALL_TIMEOUT: Duration = Duration::from_secs(20);
@@ -204,6 +208,9 @@ pub(crate) struct MavioDev {
     key: Arc<DeviceKey>,
     renewing: Mutex<()>,
     syncing: Mutex<()>,
+    /// When the tickets of the servers reached through relays stop
+    /// admitting new connections, by server; unknown after a restart.
+    relays: std::sync::Mutex<HashMap<String, SystemTime>>,
 }
 
 impl MavioDev {
@@ -213,6 +220,7 @@ impl MavioDev {
             key,
             renewing: Mutex::default(),
             syncing: Mutex::default(),
+            relays: std::sync::Mutex::default(),
         }
     }
 
@@ -654,11 +662,23 @@ impl Servers {
         }
         for s in listed {
             let id = s.id.unwrap_or_default();
-            if id.is_empty() || self.signed_in(&id) {
+            if id.is_empty() {
+                continue;
+            }
+            let urls = by_checks(&s.connections, &s.connection_checks);
+            if self.signed_in(&id) {
+                // A relay's address is reached again before its ticket expires.
+                if self.relay_due(&id)
+                    && let Some((conn, info, expires)) = reach(&accounts, &id, &urls).await
+                {
+                    self.moved(&id, &conn, &info)?;
+                    self.set_relay(&id, expires);
+                    changed = true;
+                }
                 continue;
             }
             // An unreachable server is tried again with the next sync.
-            let Some((conn, info)) = reach(&id, &s.connections).await else {
+            let Some((conn, info, expires)) = reach(&accounts, &id, &urls).await else {
                 continue;
             };
             let assertion = accounts
@@ -696,9 +716,52 @@ impl Servers {
                 },
                 resp.user.into_option(),
             )?;
+            self.set_relay(&id, expires);
             changed = true;
         }
         Ok(changed)
+    }
+
+    /// Whether a server is reached through a relay whose ticket is about
+    /// to expire, or whose expiry is unknown.
+    fn relay_due(&self, id: &str) -> bool {
+        let Ok(record) = self.get(id) else {
+            return false;
+        };
+        if !is_relay_address(&record.address) {
+            return false;
+        }
+        let relays = self
+            .mavio_dev()
+            .relays
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
+        relays.get(id).is_none_or(|t| {
+            t.duration_since(SystemTime::now()).unwrap_or_default() < RELAY_MARGIN * 2
+        })
+    }
+
+    fn set_relay(&self, id: &str, expires: Option<SystemTime>) {
+        let mut relays = self
+            .mavio_dev()
+            .relays
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
+        match expires {
+            Some(t) => relays.insert(id.to_owned(), t),
+            None => relays.remove(id),
+        };
+    }
+
+    /// When the account is next synced to renew a relay's address before
+    /// its ticket expires; none when no server is reached through a relay.
+    pub fn next_relay_renewal(&self) -> Option<SystemTime> {
+        let relays = self
+            .mavio_dev()
+            .relays
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
+        relays.values().min().map(|t| *t - RELAY_MARGIN)
     }
 
     /// Signs the account out: ends every server's session and the
@@ -717,19 +780,67 @@ impl Servers {
     }
 }
 
-/// The first of a server's URLs that answers as the server with ID id.
-async fn reach(id: &str, urls: &[String]) -> Option<(Connection, crate::servers::ServerInfo)> {
+/// The first of a server's URLs that answers as the server with ID id;
+/// when none does, the server through its relay with a ticket of
+/// mavio.dev's (docs/mavio-dev.md §5), with when the ticket expires.
+async fn reach(
+    accounts: &AccountServiceClient<AccountTransport>,
+    id: &str,
+    urls: &[String],
+) -> Option<(Connection, crate::servers::ServerInfo, Option<SystemTime>)> {
     for url in urls {
-        let Ok(conn) = Connection::new(url) else {
-            continue;
-        };
-        if let Ok(Ok(info)) = tokio::time::timeout(REACH_TIMEOUT, probe(&conn)).await
-            && info.id == id
-        {
-            return Some((conn, info));
+        if let Some((conn, info)) = answers(id, url).await {
+            return Some((conn, info, None));
         }
     }
-    None
+    // No relay, or no Mavio Pass: unreachable for now.
+    let ticket = accounts
+        .create_relay_ticket(CreateRelayTicketRequest {
+            server_id: Some(id.to_owned()),
+            ..Default::default()
+        })
+        .await
+        .ok()?
+        .into_owned();
+    let expires = ticket
+        .expire_time
+        .into_option()
+        .and_then(|t| u64::try_from(t.seconds).ok())
+        .map(|s| UNIX_EPOCH + Duration::from_secs(s));
+    let (conn, info) = answers(id, &format!("https://{}", ticket.host?)).await?;
+    Some((conn, info, expires))
+}
+
+/// The connection to url when it answers as the server with ID id.
+async fn answers(id: &str, url: &str) -> Option<(Connection, crate::servers::ServerInfo)> {
+    let conn = Connection::new(url).ok()?;
+    match tokio::time::timeout(REACH_TIMEOUT, probe(&conn)).await {
+        Ok(Ok(info)) if info.id == id => Some((conn, info)),
+        _ => None,
+    }
+}
+
+/// A server's published URLs as they are tried: those mavio.dev found
+/// closed to the internet last, the others as published.
+fn by_checks(urls: &[String], checks: &[ConnectionCheck]) -> Vec<String> {
+    let closed = |u: &String| {
+        checks
+            .iter()
+            .any(|c| c.url.as_ref() == Some(u) && c.reachable == Some(false))
+    };
+    let (closed, open): (Vec<String>, Vec<String>) = urls.iter().cloned().partition(closed);
+    open.into_iter().chain(closed).collect()
+}
+
+/// Whether an address is a relay's, `relay-<region>-<ticket>.<ID>.<zone>`.
+fn is_relay_address(address: &str) -> bool {
+    let host = address
+        .split_once("://")
+        .map_or(address, |(_, rest)| rest)
+        .split(['/', ':'])
+        .next()
+        .unwrap_or_default();
+    host.starts_with("relay-") && host.split('.').count() >= 4
 }
 
 const CALLBACK_PAGE: &str = "<!doctype html><meta charset=utf-8><title>Mavio</title>\
@@ -1143,6 +1254,47 @@ mod tests {
             SignInState::Account(got),
             "the account stays signed in without servers"
         );
+    }
+
+    #[test]
+    fn closed_urls_are_tried_last() {
+        let check = |url: &str, reachable| ConnectionCheck {
+            url: Some(url.into()),
+            reachable: Some(reachable),
+            ..Default::default()
+        };
+        let urls: Vec<String> = ["https://a", "https://b", "https://c"]
+            .map(Into::into)
+            .into();
+        let tests: [(&[ConnectionCheck], &[&str]); 3] = [
+            (&[], &["https://a", "https://b", "https://c"]),
+            (
+                &[check("https://a", false), check("https://b", true)],
+                &["https://b", "https://c", "https://a"],
+            ),
+            (
+                &[check("https://a", false), check("https://b", false)],
+                &["https://c", "https://a", "https://b"],
+            ),
+        ];
+        for (checks, want) in tests {
+            let got = by_checks(&urls, checks);
+            assert_eq!(got, want, "got = {got:?}, want = {want:?}");
+        }
+    }
+
+    #[test]
+    fn relay_addresses() {
+        for (address, want) in [
+            ("https://relay-hil-abc.0123.s.mavio.fyi", true),
+            ("https://relay-hil-abc.0123.s.mavio.fyi:443/", true),
+            ("https://1-2-3-4.0123.s.mavio.fyi", false),
+            ("https://relay-box.example", false),
+            ("http://192.168.1.2:8096", false),
+        ] {
+            let got = is_relay_address(address);
+            assert_eq!(got, want, "{address}: got = {got}, want = {want}");
+        }
     }
 
     #[tokio::test]

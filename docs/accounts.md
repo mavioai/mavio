@@ -195,7 +195,7 @@ sequenceDiagram
 A client has one **sign-in**: a Mavio account, with the servers the account administers or has access to, or a user of one standalone server, with that server.
 
 * The sign-in is its device-bound sessions (§5.2): a Mavio account's session at mavio.dev and a session on each of its servers, or a standalone server's session. The client keeps no password.
-* A Mavio account's client follows the account's servers: as it opens, it signs in to the servers newly listed, at the first of the addresses each published (§8) that answers, and signs out of those no longer listed. A server answering at none shows as unreachable until it does.
+* A Mavio account's client follows the account's servers: as it opens, it signs in to the servers newly listed, at the first of the addresses each published (§8) that answers, those mavio.dev found closed to the internet tried last, or else through its relay ([mavio.dev §4.3](mavio-dev.md#43-connecting)), and signs out of those no longer listed. A server reachable by neither shows as unreachable until it is.
 * Signing out ends every session of the sign-in; another account or user then signs in afresh.
 * A server's own web UI signs in that server's people only: its administrator in mavio.dev mode, its users in standalone mode. An app, served by no server, reaches a standalone server by address, local discovery or a QR code, and one that turns out to be in mavio.dev mode through a Mavio account.
 

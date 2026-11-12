@@ -441,6 +441,22 @@ impl Servers {
         self.store.order_servers(ids)
     }
 
+    /// Keeps a signed-in server's new address, such as a relay's with a
+    /// new ticket, with its session.
+    pub(crate) fn moved(&self, id: &str, conn: &Connection, info: &ServerInfo) -> Result<()> {
+        let mut record = self.get(id)?;
+        record.address = info.address.clone();
+        let credential = Credential::load(self.tokens.as_ref(), id)
+            .ok_or_else(|| Error::Unauthenticated(format!("signed out of {}", record.name)))?;
+        self.store.put_server(&record)?;
+        let conn = conn.with_session(self.session(conn, id, credential));
+        self.connections
+            .write()
+            .unwrap_or_else(|e| e.into_inner())
+            .insert(id.to_owned(), conn);
+        Ok(())
+    }
+
     pub(crate) fn signed_in_as(
         &self,
         conn: &Connection,

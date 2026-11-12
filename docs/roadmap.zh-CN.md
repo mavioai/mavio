@@ -1078,7 +1078,7 @@ flowchart TD
 - [x] mavio.dev 的首页、隐私政策与服务条款，以及基于 fumadocs 及其 ZBSearch 搜索的 `/docs` 文档
 - [ ] 撰写 mavio.dev 的文档：安装服务端、添加媒体库、应用、账户、Home 与 Mavio Pass；目前页面只是占位
 - [x] 通过 Cloudflare Email Routing 接收发往 `support@mavio.dev` 的邮件
-- [ ] 由 mavio.dev 用 Workers 的出站 TCP 连接检查服务端公布的地址
+- [x] 由 mavio.dev 用 Workers 的出站 TCP 连接检查服务端公布的地址：在 `PublishConnections` 之后以及列出时发现其已超过六小时时检查，以 `Server.connection_checks` 告知客户端
 - [ ] 在虚拟机上运行 PostgreSQL，带一个流复制副本并把 WAL 归档到 R2，经 Hyperdrive 访问
 - [x] mavio.dev：好友、Home、托管账户及其转换、切换、Mavio Pass 与冻结的 Home：`FriendService` 与 `HomeService`，通过 Mavio 的 better-auth 插件以 PIN 切换，服务端应用托管账户的限制配置，以及 Home 与好友的页面
 - [x] 购买与续订 Mavio Pass：Stripe Checkout、客户门户，以及按每个已付周期延长 Pass 的 webhook，和 `/pass`
@@ -1090,7 +1090,7 @@ flowchart TD
 - [ ] 在欧洲、美国和新加坡的虚拟机上运行 `apps/relay`，在 `apps/dns` 的配置中加入各中转的 A 与 AAAA 记录，在 Worker 的配置中加入 `RELAYS` 与 `RELAY_TICKET_SECRET`
 - [x] Web UI：新服务器上由 `/setup` 选择模式（服务端首次启动时打开），第一个登录的 Mavio 账户通过服务端推送给 mavio.dev 的授权请求（`AuthService.StartSignIn`、`/authorize?request_uri=…`）认领服务器；唯一的登录身份：Mavio 账户通过 mavio.dev 带 PKCE 的授权码流程（`/authorize`、`/auth/callback`、`/api/oauth/token`）得到设备密钥的会话，在服务器自身的 Web UI 上仅限管理员并把其他人引导到 app.mavio.dev，或独立服务器的登录；账户的每台服务器使用其发布的 URL 中第一个有应答的地址；电视上的关联代码；退出所有会话；凭 PIN 切换独立服务器的用户；用通行密钥和 TOTP 验证码登录，以及管理通行密钥、TOTP 与 PIN
 - [ ] 新服务器的电视设置页显示服务器地址的二维码，电视关联代码旁显示 mavio.dev/link 的二维码，在 Web UI 与 Apple、Android 应用中；桌面应用已在其关联代码旁显示二维码
-- [ ] Mavio 账户的服务器发布的 URL 均无应答时，经中转访问
+- [x] Mavio 账户的服务器发布的 URL 均无应答时，经中转访问，检查发现不通的 URL 最后尝试，并在中转票据到期前续期，见 `libs/client-ts` 和共享的 Rust 核心
 - [ ] 在 Web UI 中而不是 mavio.dev 的页面上管理账户、其 Home、好友与访问记录
 - [x] 部署 app.mavio.dev：在 Cloudflare 上以该地址部署以 `VITE_MAVIO_DEV_URL` 构建的 Web UI
 - [x] 各应用（Apple、Android 与桌面）和共享的 Rust 核心：与 Web UI 相同，Mavio 账户以它们自己的 mavio.dev 会话登录（Bearer 会话与电视代码）

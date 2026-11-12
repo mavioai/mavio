@@ -445,6 +445,8 @@ pub struct Core {
     downloads: Downloads,
     relay: Arc<Relay>,
     streams: Arc<Streams>,
+    /// Syncs the account again before the tickets of relays expire.
+    renewals: Mutex<Option<JoinHandle<()>>>,
 }
 
 /// The event streams followed, by server.
@@ -549,6 +551,7 @@ impl Core {
             servers,
             reporter,
             streams: Arc::default(),
+            renewals: Mutex::default(),
         }
     }
 
@@ -611,10 +614,28 @@ impl Core {
                 self.servers.clone(),
                 self.relay.clone(),
             );
-            tokio::spawn(async move {
+            let task = tokio::spawn(async move {
                 // A failure leaves the servers for the next start.
                 let _ = sync_account(&streams, &servers, &relay).await;
+                // Servers reached through relays are reached again before
+                // their tickets expire (docs/mavio-dev.md §5).
+                while let Some(at) = servers.next_relay_renewal() {
+                    let wait = at
+                        .duration_since(std::time::SystemTime::now())
+                        .unwrap_or_default()
+                        .max(std::time::Duration::from_secs(10));
+                    tokio::time::sleep(wait).await;
+                    let _ = sync_account(&streams, &servers, &relay).await;
+                }
             });
+            if let Some(old) = self
+                .renewals
+                .lock()
+                .unwrap_or_else(|e| e.into_inner())
+                .replace(task)
+            {
+                old.abort();
+            }
         }
         Ok(())
     }
@@ -622,6 +643,14 @@ impl Core {
     /// Stops the event streams; the app calls it when it goes to the
     /// background.
     pub fn stop(&self) {
+        if let Some(task) = self
+            .renewals
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .take()
+        {
+            task.abort();
+        }
         for (_, task) in self
             .streams
             .lock()
