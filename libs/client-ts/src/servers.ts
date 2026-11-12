@@ -10,7 +10,7 @@ import type { Timestamp } from "@bufbuild/protobuf/wkt";
 import { type Client, Code, ConnectError, createClient, type Transport } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-web";
 import { AccountMode, AuthService, type GetAuthInfoResponse, type SwitchableUser } from "@mavio/proto/mavio/auth/v1/auth_pb";
-import { AccountService } from "@mavio/proto/mavio/cloud/v1/account_pb";
+import { AccountService, type ConnectionCheck } from "@mavio/proto/mavio/cloud/v1/account_pb";
 
 import { assertionMessage, browserDeviceKey, type DeviceKey, refreshMessage, renewalMessage } from "./device-key.ts";
 import { transport } from "./server.ts";
@@ -27,8 +27,17 @@ export interface ServerEntry {
    * the page's own localhost; shareableUrl tells one for others.
    */
   url: string;
-  /** The URLs a Mavio account's server published, best first. */
+  /**
+   * The URLs a Mavio account's server published, best first, those that
+   * mavio.dev found closed to the internet last.
+   */
   urls?: string[];
+  /**
+   * When url is a relay's (docs/mavio-dev.md §5), when its ticket stops
+   * admitting new connections, in milliseconds since the epoch; it is
+   * renewed before then.
+   */
+  relayExpires?: number;
   userId: string;
   userName: string;
   /** How the server signs people in, as it told at sign-in. */
@@ -132,6 +141,17 @@ const refreshMargin = 5 * 60_000;
 const renewMargin = 60_000;
 /** How long a server's address is tried. */
 const reachTimeout = 4000;
+/** How long before its ticket expires a relay's address is renewed. */
+const relayMargin = 60_000;
+
+/**
+ * byChecks orders a server's published URLs as clients try them: those
+ * mavio.dev found closed to the internet last, the others as published.
+ */
+export function byChecks(urls: string[], checks: ConnectionCheck[]): string[] {
+  const closed = new Set(checks.filter((c) => !c.reachable).map((c) => c.url));
+  return [...urls.filter((u) => !closed.has(u)), ...urls.filter((u) => closed.has(u))];
+}
 
 /** The grant type that renews a device's session at mavio.dev. */
 const renewGrant = "urn:mavio:params:oauth:grant-type:device-signature";
@@ -276,6 +296,7 @@ export class Servers {
   private refreshing = new Map<string, Promise<string | undefined>>();
   private renewing: Promise<string | undefined> | undefined;
   private syncing: Promise<void> | undefined;
+  private relayTimer: ReturnType<typeof setTimeout> | undefined;
   private finishing: { key: string; done: Promise<string> } | undefined;
   private key: DeviceKey;
   private language: string | undefined;
@@ -360,7 +381,33 @@ export class Servers {
   private set(list: ServerEntry[]) {
     this.list = list;
     this.storage.setItem(serversKey, JSON.stringify(list));
+    this.scheduleRelays();
     this.emit();
+  }
+
+  /** Renews the relays' addresses shortly before their tickets expire. */
+  private scheduleRelays() {
+    clearTimeout(this.relayTimer);
+    this.relayTimer = undefined;
+    const first = Math.min(...this.list.flatMap((s) => (s.token && s.relayExpires ? [s.relayExpires] : [])));
+    if (!Number.isFinite(first)) return;
+    this.relayTimer = setTimeout(() => void this.renewRelays().catch(() => {}), Math.max(0, first - relayMargin - Date.now()));
+  }
+
+  /**
+   * Reaches again the servers reached through relays whose tickets are
+   * about to expire: at a published URL if one answers now, else through
+   * a new ticket. Connections already open stay as they are.
+   */
+  private async renewRelays() {
+    const due = this.list.filter((s) => s.token && s.relayExpires && s.relayExpires - Date.now() < relayMargin * 2);
+    for (const s of due) {
+      const reached = await this.reach(s);
+      const at = this.list.findIndex((x) => x.id === s.id);
+      if (at < 0) continue;
+      // Unreachable for now: the address stays, tried again with the next sync.
+      this.set(this.list.with(at, reached ? { ...this.list[at], url: reached.url, relayExpires: reached.relayExpires } : this.list[at]));
+    }
   }
 
   private setSession(s: AccountSession | undefined) {
@@ -856,7 +903,8 @@ export class Servers {
         name: s.name,
         version: s.version,
         url: was?.url ?? "",
-        urls: s.connections,
+        urls: byChecks(s.connections, s.connectionChecks),
+        relayExpires: was?.relayExpires,
         userId: was?.userId ?? "",
         userName: was?.userName ?? "",
         mode: "mavioDev",
@@ -874,6 +922,8 @@ export class Servers {
     const gone = this.list.filter((s) => !next.some((n) => n.id === s.id));
     this.set(next.toSorted((a, b) => rank(a) - rank(b)));
     await Promise.all(gone.map((s) => this.logout(s)));
+    // A relay's address whose ticket expired is reached again.
+    if (this.list.some((s) => s.token && s.relayExpires && s.relayExpires - Date.now() < relayMargin * 2)) await this.renewRelays();
     await Promise.all(
       this.list
         .filter((s) => !s.token)
@@ -887,24 +937,39 @@ export class Servers {
     );
   }
 
-  /** The first of a server's URLs that answers as the server, HTTPS only from an HTTPS page. */
-  private async reach(s: ServerEntry): Promise<string | undefined> {
+  /**
+   * The first of a server's URLs that answers as the server, HTTPS only
+   * from an HTTPS page; when none does, the server through its relay, with
+   * a ticket of mavio.dev's (docs/mavio-dev.md §5), when it keeps a relay
+   * connection and the account or the server's administrator has Mavio Pass.
+   */
+  private async reach(s: ServerEntry): Promise<{ url: string; relayExpires?: number } | undefined> {
     const secure = typeof location !== "undefined" && location.protocol === "https:";
     const urls = (s.urls ?? []).filter((u) => !secure || u.startsWith("https:"));
     for (const u of urls) {
       try {
-        if ((await this.probe(u, reachTimeout)).id === s.id) return normalizeUrl(u);
+        if ((await this.probe(u, reachTimeout)).id === s.id) return { url: normalizeUrl(u) };
       } catch {
         // The next one.
       }
     }
-    return undefined;
+    if (!this.session) return undefined;
+    try {
+      const ticket = await this.mavioDev(AccountService).createRelayTicket({ serverId: s.id });
+      const url = `https://${ticket.host}`;
+      if ((await this.probe(url, reachTimeout)).id !== s.id) return undefined;
+      return { url, relayExpires: ticket.expireTime ? timestampDate(ticket.expireTime).getTime() : undefined };
+    } catch {
+      // No relay, or no Mavio Pass.
+      return undefined;
+    }
   }
 
   /** Signs the account in to a server with an assertion of mavio.dev. */
   private async assert(s: ServerEntry): Promise<ServerEntry> {
-    const url = s.url || (await this.reach(s));
-    if (!url) throw new Error(`${s.name} cannot be reached`);
+    const reached = s.url ? { url: s.url, relayExpires: s.relayExpires } : await this.reach(s);
+    if (!reached) throw new Error(`${s.name} cannot be reached`);
+    const { url } = reached;
     const { assertion } = await this.mavioDev(AccountService).createAssertion({ serverId: s.id, deviceKey: await this.key.publicKey() });
     const r = await createClient(AuthService, transport({ url })).signInWithAssertion({
       assertion,
@@ -916,6 +981,7 @@ export class Servers {
     const entry: ServerEntry = {
       ...this.list[at],
       url,
+      relayExpires: reached.relayExpires,
       userId: r.user?.id ?? "",
       userName: r.user?.name ?? "",
       sessionId: r.session?.id,

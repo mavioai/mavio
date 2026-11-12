@@ -181,6 +181,48 @@ test("app.mavio.dev signs in as the app and reaches servers over HTTPS only", as
   expect(servers.snapshot().map((s) => [s.id, s.url, !!s.token])).toEqual([["den", "", false]]);
 });
 
+test("reaches a server through its relay when none of its URLs answers, renewing the ticket", async () => {
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
+  try {
+    vi.setSystemTime(new Date("2026-11-12T00:00:00Z"));
+    let tickets = 0;
+    const calls = world({
+      "oauth/token": () => token(),
+      ListServers: () => ({
+        servers: [
+          {
+            id: "den",
+            name: "Den",
+            connections: ["https://closed.example.com", "https://down.example.com"],
+            connectionChecks: [{ url: "https://closed.example.com", reachable: false }],
+          },
+        ],
+      }),
+      GetAuthInfo: (_, __, url) => (url.includes("relay-") ? den : Response.json({ code: "unavailable" }, { status: 503 })),
+      CreateRelayTicket: (b) => {
+        expect(b).toEqual({ serverId: "den" });
+        tickets++;
+        return { host: `relay-hil-t${tickets}.den.s.mavio.fyi`, expireTime: new Date(Date.now() + 300_000).toISOString() };
+      },
+      CreateAssertion: () => ({ assertion: "a" }),
+      SignInWithAssertion: signedInWithAssertion,
+    });
+    const servers = new Servers(memory(), "https://app.mavio.dev", { mavioDevUrl: api, key: memoryDeviceKey() });
+    const page = new URL(await servers.startSignIn());
+    await servers.finishCallback(new URLSearchParams({ code: "c", state: page.searchParams.get("state")! }));
+    // The URL found closed is tried last.
+    const tried = calls.filter((c) => c.endsWith("GetAuthInfo")).map((c) => c.split(" ")[0]);
+    expect(tried).toEqual(["down.example.com", "closed.example.com", "relay-hil-t1.den.s.mavio.fyi"]);
+    expect(servers.get("den")).toMatchObject({ url: "https://relay-hil-t1.den.s.mavio.fyi", relayExpires: Date.now() + 300_000 });
+
+    // A minute before the ticket expires, a new one.
+    await vi.advanceTimersByTimeAsync(240_000);
+    expect(servers.get("den")).toMatchObject({ url: "https://relay-hil-t2.den.s.mavio.fyi", token: "relay-hil-t1.den.s.mavio.fyi-token" });
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
 test("a television signs in with a link code", async () => {
   let polls = 0;
   world({
