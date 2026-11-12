@@ -30,7 +30,7 @@ import { Link, Navigate, useNavigate, useParams, useSearch } from "@tanstack/rea
 import { type ReactNode, useState } from "react";
 
 import { Tip } from "../controls/tooltip.tsx";
-import { locale, t } from "../i18n.ts";
+import { keepLanguage, locale, sharedLanguage, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { SidebarResizer, sidebarWidth } from "../shell/sidebar.tsx";
 import { type Appearance, qualities, setPrefs, usePrefs, useWidthClass } from "../prefs.ts";
@@ -627,7 +627,7 @@ function AppearanceSection() {
       <Group footer={t("settings.languageNote")}>
         <Row label={t("settings.language")}>
           <Select
-            value={prefs.language}
+            value={sharedLanguage ?? prefs.language}
             label={t("settings.language")}
             options={[
               { value: "system" as const, label: t("settings.systemLanguage") },
@@ -635,7 +635,8 @@ function AppearanceSection() {
             ]}
             onChange={(language) => {
               // The strings and formats are chosen as the page loads.
-              setPrefs({ language });
+              if (sharedLanguage) keepLanguage(language);
+              else setPrefs({ language });
               location.reload();
             }}
           />

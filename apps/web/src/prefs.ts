@@ -6,7 +6,7 @@ import { useSyncExternalStore } from "react";
 
 import type { Locale } from "@mavio/design/strings";
 
-import { prefsKey, t } from "./i18n.ts";
+import { prefsKey, sharedLanguage, t } from "./i18n.ts";
 
 /** The color theme: the system's, or one chosen. */
 export type Appearance = "system" | "light" | "dark";
@@ -34,7 +34,7 @@ export const qualities: { value: Quality; label: () => string }[] = [
 
 export interface Prefs {
   appearance: Appearance;
-  /** The UI's language, or the system's; read by i18n.ts as the page loads. */
+  /** The UI's language, or the system's; read by i18n.ts as the page loads, and not kept on app.mavio.dev, whose cookie holds it. */
   language: Locale | "system";
   /** The television layout, for a computer connected to a TV. */
   tv: boolean;
@@ -84,8 +84,11 @@ export function prefs(): Prefs {
 /** Changes some of this browser's settings. */
 export function setPrefs(change: Partial<Prefs>) {
   current = { ...current, ...change };
+  // On app.mavio.dev the language is kept in the shared cookie instead.
+  const kept: Partial<Prefs> = { ...current };
+  if (sharedLanguage) delete kept.language;
   try {
-    localStorage.setItem(key, JSON.stringify(current));
+    localStorage.setItem(key, JSON.stringify(kept));
   } catch {
     // Kept for this page only.
   }
