@@ -45,9 +45,10 @@ export default defineConfig(({ mode }) => ({
       RELAYS: Object.keys(relays).length > 0 && bindings.json(relays),
       RELAY_TICKET_SECRET: bindings.secret(),
       // Mavio Pass on Stripe Billing: the recurring prices of $4 a month
-      // and $35 a year, the API key and the webhook's signing secret.
-      STRIPE_PRICE_MONTH: bindings.text(""),
-      STRIPE_PRICE_YEAR: bindings.text(""),
+      // and $35 a year, the API key and the webhook's signing secret. These
+      // prices are the Mavio sandbox's, until Stripe is set up live.
+      STRIPE_PRICE_MONTH: bindings.text("price_1Ub04x0BQ5QnX1aYvmHvtp7q"),
+      STRIPE_PRICE_YEAR: bindings.text("price_1Ub04z0BQ5QnX1aYJ58rZQdF"),
       STRIPE_SECRET_KEY: bindings.secret(),
       STRIPE_WEBHOOK_SECRET: bindings.secret(),
     },
