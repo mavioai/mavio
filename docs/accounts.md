@@ -72,14 +72,14 @@ A server's administrator gives another account access with one **library access 
 | Labels | Labels whose items alone are shown, and labels whose items are hidden; an item has the tags of its ancestors too, so labelling a series covers its episodes |
 | Downloads | Whether the account may download items for offline playback |
 
-Granting access to an account sends it an invitation, and the record takes effect when the account accepts it. The administrator edits or revokes a record at any time.
+Granting access to an account sends it an invitation, and the record takes effect when the account accepts it; mavio.dev e-mails a new invitation to the account, naming only who invited it to which server. The administrator edits or revokes a record at any time.
 
 When access is revoked, the server keeps the account's user record and watch history and ends its sessions; access granted again finds them as they were. The administrator can purge an account without access from the server, with its data.
 
 The server publishes its libraries' IDs, names and types to mavio.dev so that access can be edited from anywhere. mavio.dev keeps the records and the server enforces its synchronized copy.
 
 ### 3.4 Friends
-**Friends** are a relationship between two full accounts: one sends a request by user name or e-mail address and the other accepts; either can end it. Friends are where an administrator picks whom to give access, and granting access to an account that is not yet a friend sends a friend request along with the invitation.
+**Friends** are a relationship between two full accounts: one sends a request by user name or e-mail address and the other accepts; either can end it. A new request is e-mailed to the account it is sent to. Friends are where an administrator picks whom to give access, and granting access to an account that is not yet a friend sends a friend request along with the invitation, which is e-mailed alone.
 
 Friendship and library access are independent: an administrator may be friends with someone who has no access to their servers, removing a friend leaves the access records as they are, and revoking access leaves the friendship. Managed accounts have no friends.
 
@@ -92,7 +92,7 @@ A **Home** is a group of up to **15 accounts, its administrator included**, who 
 
 An account belongs to at most one Home. A full member who accepts an invitation to another Home leaves its current one; a Home's administrator has to dissolve the Home before joining another.
 
-Inviting someone into the Home offers, in the same step, access records on each server the Home's administrator administers; access to servers the administrator claims later is granted as to anyone else (§3.3).
+Inviting someone into the Home offers, in the same step, access records on each server the Home's administrator administers; access to servers the administrator claims later is granted as to anyone else (§3.3). A new invitation is e-mailed to the account invited, naming the administrator and the Home but not the access offered.
 
 | Event | Full member | Managed account |
 | :--- | :--- | :--- |
@@ -214,7 +214,7 @@ Switching users within a Home (§3.6) or within a standalone server (§4.4) chan
 
 | mavio.dev holds | mavio.dev never holds |
 | :--- | :--- |
-| Accounts: e-mail addresses, credentials, PIN hashes, Mavio Pass | Standalone servers or their users |
+| Accounts: e-mail addresses, the language they last signed in with, credentials, PIN hashes, Mavio Pass | Standalone servers or their users |
 | Servers in mavio.dev mode: identity keys, administrators, published addresses, library IDs, names and types | Items, watch history, playback state |
 | Library access records and their invitations | What an account did on a server |
 | Friends and Homes | |

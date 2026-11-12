@@ -4,6 +4,7 @@ import { timestampFromDate } from "@bufbuild/protobuf/wkt";
 import { Code, ConnectError, type HandlerContext, type ServiceImpl } from "@connectrpc/connect";
 import {
   AcceptFriendResponseSchema,
+  type AddFriendResponse,
   AddFriendResponseSchema,
   type Friend_State,
   Friend_State as State,
@@ -19,12 +20,19 @@ import { accountOf, managed } from "./changes.ts";
 import { schema } from "./db/index.ts";
 import { signedIn as sessionAccount } from "./device-sessions.ts";
 import { between } from "./home.ts";
-import type { Deps } from "./server-service.ts";
+import { deliver, friendRequestMail, inviterOf, type Mailer, mailTo } from "./mail.ts";
+import { type Deps, siteURL } from "./server-service.ts";
 
 type User = typeof schema.user.$inferSelect;
 
-/** friendService implements FriendService. */
-export function friendService({ db, auth, now = () => new Date() }: Deps & { auth: Auth }): ServiceImpl<typeof FriendService> {
+/** friendService implements FriendService; a new friend request is e-mailed to its addressee by mailer. */
+export function friendService({
+  db,
+  auth,
+  apiURL,
+  mailer,
+  now = () => new Date(),
+}: Deps & { auth: Auth; mailer?: Mailer }): ServiceImpl<typeof FriendService> {
   // signedIn returns the full account of the request's session.
   async function signedIn(ctx: HandlerContext): Promise<User> {
     const u = await sessionAccount(db, auth, ctx.requestHeader, now());
@@ -65,20 +73,24 @@ export function friendService({ db, auth, now = () => new Date() }: Deps & { aut
       if (!other || managed(other)) throw new ConnectError(`no account ${req.name}`, Code.NotFound);
       if (other.id === me.id) throw new ConnectError("you cannot befriend yourself", Code.InvalidArgument);
       const at = now();
-      return db.transaction(async (tx) => {
+      const [res, requested] = await db.transaction(async (tx): Promise<[AddFriendResponse, boolean]> => {
         const existing = await tx.query.friendships.findFirst({ where: between(me.id, other.id) });
-        if (existing?.accepted) return create(AddFriendResponseSchema, { friend: friend(other, State.FRIEND, existing.createdAt) });
+        if (existing?.accepted) return [create(AddFriendResponseSchema, { friend: friend(other, State.FRIEND, existing.createdAt) }), false];
         if (existing?.requesterId === me.id) {
-          return create(AddFriendResponseSchema, { friend: friend(other, State.SENT, existing.createdAt) });
+          return [create(AddFriendResponseSchema, { friend: friend(other, State.SENT, existing.createdAt) }), false];
         }
         if (existing) {
           // The other account asked first: adding it back accepts.
           await tx.update(schema.friendships).set({ accepted: true }).where(between(me.id, other.id));
-          return create(AddFriendResponseSchema, { friend: friend(other, State.FRIEND, existing.createdAt) });
+          return [create(AddFriendResponseSchema, { friend: friend(other, State.FRIEND, existing.createdAt) }), false];
         }
         await tx.insert(schema.friendships).values({ requesterId: me.id, addresseeId: other.id, accepted: false, createdAt: at });
-        return create(AddFriendResponseSchema, { friend: friend(other, State.SENT, at) });
+        return [create(AddFriendResponseSchema, { friend: friend(other, State.SENT, at) }), true];
       });
+      // A new request is e-mailed once; asking again sends nothing.
+      const to = requested && mailTo(other);
+      if (to) await deliver(mailer, friendRequestMail(to.to, inviterOf(me), `${siteURL(apiURL)}/friends`, to.locale));
+      return res;
     },
 
     async acceptFriend(req, ctx) {

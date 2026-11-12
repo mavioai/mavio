@@ -1,7 +1,9 @@
-// mavio.dev's e-mails (docs/mavio-dev.md §2): verifying an address and
-// resetting a password, each a link, written in the language of the
-// request that asked for it and sent through Cloudflare Email Service.
-import { type Locale, type T, translator } from "../lib/i18n.ts";
+// mavio.dev's e-mails (docs/mavio-dev.md §2), each a link sent through
+// Cloudflare Email Service: verifying an address and resetting a password,
+// written in the language of the request that asked for it; and telling an
+// account of another's invitation to a server, friend request or invitation
+// to a Home, written in the language the account last signed in with.
+import { asLocale, type Locale, type T, translator } from "../lib/i18n.ts";
 
 /** Mail is an e-mail to one address, as plain text and HTML. */
 export interface Mail {
@@ -94,4 +96,94 @@ export function resetMail(user: Recipient, url: string, locale: Locale): Mail {
     url,
     ignore: t("mail.resetIgnore"),
   });
+}
+
+/** The account whose request an e-mail tells of: its display name and user name. */
+export interface Inviter {
+  name: string;
+  userName: string;
+}
+
+/** inviterOf returns an account as the e-mails telling of its requests name it. */
+export function inviterOf(u: { name: string; username?: string | null; displayUsername?: string | null }): Inviter {
+  return { name: u.name, userName: u.displayUsername || u.username || "" };
+}
+
+/**
+ * What the e-mails telling of other accounts' requests share: who asked,
+ * the link to answer it, and what to do when the asker is unknown. Names
+ * are other accounts' words, kept on one line in the subject.
+ */
+function requestMail(to: Recipient, t: T, from: Inviter, parts: { subject: string; body: string; action: string; url: string }): Mail {
+  return actionMail(to.email, parts.subject.replace(/\s+/g, " "), t, {
+    greeting: t("mail.greeting", { name: to.name }),
+    body: parts.body,
+    action: parts.action,
+    url: parts.url,
+    ignore: t("mail.requestIgnore", { name: from.name }),
+  });
+}
+
+/** invitationMail tells an account that from invited it to the server named server, answered at url. */
+export function invitationMail(to: Recipient, from: Inviter, server: string, url: string, locale: Locale): Mail {
+  const t = translator(locale);
+  return requestMail(to, t, from, {
+    subject: t("mail.invitationSubject", { name: from.name, server }),
+    body: t("mail.invitationBody", { name: from.name, userName: from.userName, server }),
+    action: t("mail.invitationAction"),
+    url,
+  });
+}
+
+/** friendRequestMail tells an account that from asked to be its friend, answered at url. */
+export function friendRequestMail(to: Recipient, from: Inviter, url: string, locale: Locale): Mail {
+  const t = translator(locale);
+  return requestMail(to, t, from, {
+    subject: t("mail.friendSubject", { name: from.name }),
+    body: t("mail.friendBody", { name: from.name, userName: from.userName }),
+    action: t("mail.friendAction"),
+    url,
+  });
+}
+
+/** homeInvitationMail tells an account that from invited it to the Home named home, answered at url. */
+export function homeInvitationMail(to: Recipient, from: Inviter, home: string, url: string, locale: Locale): Mail {
+  const t = translator(locale);
+  return requestMail(to, t, from, {
+    subject: t("mail.homeSubject", { name: from.name }),
+    body: t("mail.homeBody", { name: from.name, userName: from.userName, home }),
+    action: t("mail.invitationAction"),
+    url,
+  });
+}
+
+/** Addressee is what mavio.dev knows of an account it may e-mail. */
+export interface Addressee extends Recipient {
+  emailVerified: boolean;
+  kind?: string | null;
+  locale?: string | null;
+}
+
+/**
+ * mailTo returns the recipient and language of an e-mail to an account
+ * telling of another account's request, undefined when it has no address
+ * to send to: a managed account, or one whose address is not verified.
+ * The language is the one the account last signed up or in with.
+ */
+export function mailTo(u: Addressee): { to: Recipient; locale: Locale } | undefined {
+  if (u.kind === "managed" || !u.emailVerified) return undefined;
+  return { to: { email: u.email, name: u.name }, locale: asLocale(u.locale ?? undefined) };
+}
+
+/**
+ * deliver sends an e-mail telling of a request that already succeeded:
+ * one that cannot be sent is logged, not failed, as the request stands.
+ */
+export async function deliver(mailer: Mailer | undefined, mail: Mail | undefined): Promise<void> {
+  if (!mailer || !mail) return;
+  try {
+    await mailer.send(mail);
+  } catch (e) {
+    console.error("sending an e-mail failed", { subject: mail.subject, error: e instanceof Error ? e.message : String(e) });
+  }
 }

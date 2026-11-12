@@ -102,6 +102,9 @@ export function createAuth(db: Database, config: Config) {
         kind: { type: "string", required: false, defaultValue: "full", input: false },
         // A managed account's mavio.user.v1.RestrictionProfile.
         restriction: { type: "number", required: false, defaultValue: 0, input: false },
+        // The language of the requests the account last signed up or in
+        // with: the e-mails other accounts' requests send it are written in it.
+        locale: { type: "string", required: false, input: false },
       },
     },
     plugins: [
@@ -121,9 +124,17 @@ export function createAuth(db: Database, config: Config) {
       tanstackStartCookies(),
     ],
     hooks: {
-      // A password hashed with other parameters is hashed again once it signs in.
       after: createAuthMiddleware(async (ctx) => {
         const session = ctx.context.newSession;
+        // Signing in records the language of the request, which the e-mails
+        // other accounts' requests send this one are written in.
+        if (session && ctx.headers) {
+          const locale = mailLocale(ctx.headers);
+          if (session.user.locale !== locale) {
+            await db.update(schema.user).set({ locale }).where(eq(schema.user.id, session.user.id));
+          }
+        }
+        // A password hashed with other parameters is hashed again once it signs in.
         if (ctx.path !== "/sign-in/email" && ctx.path !== "/sign-in/username") return;
         if (!session || typeof ctx.body?.password !== "string") return;
         const account = await ctx.context.internalAdapter.findCredentialAccount(session.user.id);
@@ -134,6 +145,10 @@ export function createAuth(db: Database, config: Config) {
     },
     databaseHooks: {
       user: {
+        // Signing up records the language of the request, as signing in does.
+        create: {
+          before: async (u, ctx) => (ctx?.headers ? { data: { ...u, locale: mailLocale(ctx.headers) } } : undefined),
+        },
         update: {
           after: async (u, ctx) => {
             if (ctx?.path === "/update-user") await accountChanged(db, accountOf(u));

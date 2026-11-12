@@ -50,6 +50,13 @@
       "when": 1793084324450,
       "tag": "0006_staff_and_billing",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794501975934,
+      "tag": "0007_account_locales",
+      "breakpoints": true
     }
   ]
 }

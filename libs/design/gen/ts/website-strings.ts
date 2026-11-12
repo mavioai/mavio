@@ -22,6 +22,15 @@ export type MessageKey =
   | 'mail.resetBody'
   | 'mail.resetAction'
   | 'mail.resetIgnore'
+  | 'mail.invitationSubject'
+  | 'mail.invitationBody'
+  | 'mail.invitationAction'
+  | 'mail.friendSubject'
+  | 'mail.friendBody'
+  | 'mail.friendAction'
+  | 'mail.homeSubject'
+  | 'mail.homeBody'
+  | 'mail.requestIgnore'
   | 'site.nav.servers'
   | 'site.nav.home'
   | 'site.nav.friends'
@@ -328,6 +337,15 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "mail.resetBody": "Someone asked to reset the password of your Mavio account. Choose a new one with the link below, valid for an hour; it signs you out everywhere.",
     "mail.resetAction": "Choose a New Password",
     "mail.resetIgnore": "If you did not ask for this, ignore this e-mail; your password stays as it is.",
+    "mail.invitationSubject": "{name} invited you to {server} on Mavio",
+    "mail.invitationBody": "{name} ({userName}) invited you to their Mavio server, {server}. Accept or decline the invitation on mavio.dev.",
+    "mail.invitationAction": "See the Invitation",
+    "mail.friendSubject": "{name} wants to be your friend on Mavio",
+    "mail.friendBody": "{name} ({userName}) asked to be your friend on Mavio. Friends can share their servers with each other. Accept or decline the request on mavio.dev.",
+    "mail.friendAction": "See the Request",
+    "mail.homeSubject": "{name} invited you to their Home on Mavio",
+    "mail.homeBody": "{name} ({userName}) invited you to join their Home, {home}, on Mavio. Accept or decline the invitation on mavio.dev.",
+    "mail.requestIgnore": "Nothing changes until you accept. If you do not know {name}, you can ignore this e-mail.",
     "site.nav.servers": "Servers",
     "site.nav.home": "Home",
     "site.nav.friends": "Friends",
@@ -632,6 +650,15 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "mail.resetBody": "有人请求重设你的 Mavio 账户密码。请通过下方链接设置新密码，链接一小时内有效；设置后你将在所有设备上退出登录。",
     "mail.resetAction": "设置新密码",
     "mail.resetIgnore": "如果这不是你本人的请求，请忽略这封邮件，你的密码不会改变。",
+    "mail.invitationSubject": "{name} 邀请你使用 Mavio 上的 {server}",
+    "mail.invitationBody": "{name}（{userName}）邀请你使用其 Mavio 服务器 {server}。请在 mavio.dev 上接受或拒绝此邀请。",
+    "mail.invitationAction": "查看邀请",
+    "mail.friendSubject": "{name} 想在 Mavio 上加你为好友",
+    "mail.friendBody": "{name}（{userName}）想在 Mavio 上加你为好友。好友之间可以共享各自的服务器。请在 mavio.dev 上接受或拒绝此请求。",
+    "mail.friendAction": "查看请求",
+    "mail.homeSubject": "{name} 邀请你加入其 Mavio 家庭",
+    "mail.homeBody": "{name}（{userName}）邀请你加入其 Mavio 家庭“{home}”。请在 mavio.dev 上接受或拒绝此邀请。",
+    "mail.requestIgnore": "在你接受之前不会有任何变化。如果你不认识 {name}，可以忽略这封邮件。",
     "site.nav.servers": "服务器",
     "site.nav.home": "家庭",
     "site.nav.friends": "好友",

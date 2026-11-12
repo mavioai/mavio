@@ -18,6 +18,7 @@ import {
   GetAccountResponseSchema,
   GetAuthorizationRequestResponseSchema,
   GetLinkCodeResponseSchema,
+  type GrantAccessResponse,
   GrantAccessResponseSchema,
   InvitationSchema,
   LeaveServerResponseSchema,
@@ -55,8 +56,9 @@ import { type Database, schema, type Tx } from "./db/index.ts";
 import { appClient, appClientID, signedIn as sessionAccount } from "./device-sessions.ts";
 import { between, effectivePass, homeOf, ownPass } from "./home.ts";
 import { userCodeKey } from "./link-codes.ts";
+import { deliver, invitationMail, inviterOf, type Mail, type Mailer, mailTo } from "./mail.ts";
 import { relayHost, relayTicket, ticketLifetime } from "./relay.ts";
-import { available, type Deps, registerServer } from "./server-service.ts";
+import { available, type Deps, registerServer, siteURL } from "./server-service.ts";
 
 type User = typeof schema.user.$inferSelect;
 type Record = typeof schema.accessRecords.$inferSelect;
@@ -121,8 +123,15 @@ async function pendingLink(db: Database | Tx, userCode: string, at: Date) {
   return l;
 }
 
-/** accountService implements AccountService. */
-export function accountService({ db, apiURL, auth, relays, now = () => new Date() }: Deps & { auth: Auth }): ServiceImpl<typeof AccountService> {
+/** accountService implements AccountService; a new invitation to a server is e-mailed to the account invited by mailer. */
+export function accountService({
+  db,
+  apiURL,
+  auth,
+  relays,
+  mailer,
+  now = () => new Date(),
+}: Deps & { auth: Auth; mailer?: Mailer }): ServiceImpl<typeof AccountService> {
   // signedIn returns the account of the request's session.
   const signedIn = (ctx: HandlerContext): Promise<User> => sessionAccount(db, auth, ctx.requestHeader, now());
 
@@ -377,8 +386,8 @@ export function accountService({ db, apiURL, auth, relays, now = () => new Date(
       const me = await signedIn(ctx);
       const a = req.access ?? create(AccessSchema);
       const at = now();
-      return db.transaction(async (tx) => {
-        await administered(tx, me, req.serverId);
+      const [res, mail] = await db.transaction(async (tx): Promise<[GrantAccessResponse, Mail | undefined]> => {
+        const server = await administered(tx, me, req.serverId);
         const u = await tx.query.user.findFirst({ where: eq(schema.user.username, req.userName.toLowerCase()) });
         if (!u) throw new ConnectError(`no account ${req.userName}`, Code.NotFound);
         if (u.id === me.id) throw new ConnectError("the administrator needs no access record", Code.InvalidArgument);
@@ -399,7 +408,7 @@ export function accountService({ db, apiURL, auth, relays, now = () => new Date(
             })
             .returning();
           await granted(tx, req.serverId, u, a, at);
-          return create(GrantAccessResponseSchema, { record: recordToProto(record, u) });
+          return [create(GrantAccessResponseSchema, { record: recordToProto(record, u) }), undefined];
         }
         // Access to an account that is not yet a friend sends a friend request along.
         if (!(await tx.query.friendships.findFirst({ where: between(me.id, u.id) }))) {
@@ -408,6 +417,7 @@ export function accountService({ db, apiURL, auth, relays, now = () => new Date(
         const key = and(eq(schema.accessRecords.serverId, req.serverId), eq(schema.accessRecords.accountId, u.id));
         const existing = await tx.query.accessRecords.findFirst({ where: key });
         let record: Record;
+        let mail: Mail | undefined;
         if (existing) {
           [record] = await tx.update(schema.accessRecords).set({ access: accessJson(a), updatedAt: at }).where(key).returning();
           // A record in effect reaches the server at once; an invitation when accepted.
@@ -417,9 +427,14 @@ export function accountService({ db, apiURL, auth, relays, now = () => new Date(
             .insert(schema.accessRecords)
             .values({ serverId: req.serverId, accountId: u.id, access: accessJson(a), invitation: true, createdAt: at, updatedAt: at })
             .returning();
+          // A new invitation is e-mailed once, the friend request it sent along with it.
+          const to = mailTo(u);
+          if (to) mail = invitationMail(to.to, inviterOf(me), server.name, `${siteURL(apiURL)}/`, to.locale);
         }
-        return create(GrantAccessResponseSchema, { record: recordToProto(record, u) });
+        return [create(GrantAccessResponseSchema, { record: recordToProto(record, u) }), mail];
       });
+      await deliver(mailer, mail);
+      return res;
     },
 
     async revokeAccess(req, ctx) {

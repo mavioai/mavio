@@ -20,6 +20,7 @@ import type { Database } from "./db/index.ts";
 import { friendService } from "./friend-service.ts";
 import { homeService } from "./home-service.ts";
 import { bucketOf, clientOf, type Limit, limited } from "./limits.ts";
+import type { Mailer } from "./mail.ts";
 import { collectNotices } from "./notices.ts";
 import type { Relays } from "./relay.ts";
 import { authenticateServer, type Deps, serverService } from "./server-service.ts";
@@ -45,6 +46,8 @@ export interface ApiOptions {
   limit?: Limit;
   /** stripe sells Mavio Pass and signs the webhooks of its payments. */
   stripe?: Stripe;
+  /** mailer tells accounts of invitations and friend requests; without it nothing is sent. */
+  mailer?: Mailer;
 }
 
 /** noticesPath is where servers open their WebSockets (docs/mavio-dev.md §3). */
@@ -116,9 +119,10 @@ async function route(req: Request, pathname: string, options: ApiOptions, deps: 
 async function serve(req: Request, pathname: string, options: ApiOptions, deps: Deps): Promise<Response> {
   const router: ConnectRouter = createConnectRouter({ interceptors: [createValidateInterceptor()] });
   router.service(ServerService, serverService(deps));
-  router.service(AccountService, accountService({ ...deps, auth: options.auth }));
-  router.service(FriendService, friendService({ ...deps, auth: options.auth }));
-  router.service(HomeService, homeService({ ...deps, auth: options.auth }));
+  const accounts = { ...deps, auth: options.auth, mailer: options.mailer };
+  router.service(AccountService, accountService(accounts));
+  router.service(FriendService, friendService(accounts));
+  router.service(HomeService, homeService(accounts));
   const handler = router.handlers.find((h) => `/api${h.requestPath}` === pathname);
   if (!handler) return new Response("Not Found", { status: 404 });
   return createFetchHandler(handler)(req);

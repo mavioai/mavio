@@ -17,6 +17,7 @@ import {
   HomeMemberSchema,
   HomeSchema,
   type HomeService,
+  type InviteToHomeResponse,
   InviteToHomeResponseSchema,
   LeaveHomeResponseSchema,
   RemoveMemberResponseSchema,
@@ -33,16 +34,23 @@ import { accessJson, accountChanged, accountOf, addChange, managed, reachedServe
 import { type Database, schema, type Tx } from "./db/index.ts";
 import { signedIn as sessionAccount } from "./device-sessions.ts";
 import { frozen, homeOf, maxMembers, removeMember, setPin } from "./home.ts";
+import { deliver, homeInvitationMail, inviterOf, type Mail, type Mailer, mailTo } from "./mail.ts";
 import * as password from "./password.ts";
-import type { Deps } from "./server-service.ts";
+import { type Deps, siteURL } from "./server-service.ts";
 
 type Db = Database | Tx;
 type User = typeof schema.user.$inferSelect;
 type Home = typeof schema.homes.$inferSelect;
 type StoredOffer = { serverId: string; access: unknown };
 
-/** homeService implements HomeService. */
-export function homeService({ db, auth, now = () => new Date() }: Deps & { auth: Auth }): ServiceImpl<typeof HomeService> {
+/** homeService implements HomeService; a new invitation to a Home is e-mailed to the account invited by mailer. */
+export function homeService({
+  db,
+  auth,
+  apiURL,
+  mailer,
+  now = () => new Date(),
+}: Deps & { auth: Auth; mailer?: Mailer }): ServiceImpl<typeof HomeService> {
   async function signedIn(ctx: HandlerContext): Promise<User> {
     return sessionAccount(db, auth, ctx.requestHeader, now());
   }
@@ -229,7 +237,7 @@ export function homeService({ db, auth, now = () => new Date() }: Deps & { auth:
     async inviteToHome(req, ctx) {
       const me = await full(ctx);
       const at = now();
-      return db.transaction(async (tx) => {
+      const [res, mail] = await db.transaction(async (tx): Promise<[InviteToHomeResponse, Mail | undefined]> => {
         const home = await administered(tx, me);
         if (await frozen(tx, home, at)) {
           throw new ConnectError("inviting full accounts needs your Mavio Pass", Code.FailedPrecondition);
@@ -248,8 +256,13 @@ export function homeService({ db, auth, now = () => new Date() }: Deps & { auth:
           .values({ homeId: home.id, accountId: u.id, offers, createdAt: at })
           .onConflictDoUpdate({ target: [schema.homeInvitations.homeId, schema.homeInvitations.accountId], set: { offers } })
           .returning();
-        return create(InviteToHomeResponseSchema, { invitation: await invitationToProto(tx, i, home) });
+        // A new invitation is e-mailed once; changing its offers sends nothing.
+        const to = !existing && mailTo(u);
+        const mail = to ? homeInvitationMail(to.to, inviterOf(me), home.name, `${siteURL(apiURL)}/home`, to.locale) : undefined;
+        return [create(InviteToHomeResponseSchema, { invitation: await invitationToProto(tx, i, home) }), mail];
       });
+      await deliver(mailer, mail);
+      return res;
     },
 
     async cancelHomeInvitation(req, ctx) {

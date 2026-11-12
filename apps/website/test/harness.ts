@@ -17,7 +17,7 @@ import { createAuth } from "../src/server/auth.ts";
 import { type Database, schema } from "../src/server/db/index.ts";
 import { base64url, serverID } from "../src/server/ids.ts";
 import type { Bucket } from "../src/server/limits.ts";
-import type { Mail } from "../src/server/mail.ts";
+import type { Mail, Mailer } from "../src/server/mail.ts";
 
 export const baseURL = "http://localhost:3000";
 export const apiURL = `${baseURL}/api`;
@@ -30,15 +30,23 @@ export async function newSite(options: { stripe?: Stripe } = {}) {
   const db = drizzle(pg, { schema }) as unknown as Database;
   await migrate(drizzle(pg), { migrationsFolder: fileURLToPath(new URL("../drizzle", import.meta.url)) });
   const mails: Mail[] = [];
+  const mailer: Mailer = {
+    send: async (m) => {
+      if (site.mailFails) throw new Error("the mail service is down");
+      mails.push(m);
+    },
+  };
   const auth = createAuth(db, {
     baseURL,
     secret: "a test secret that is long enough to pass",
-    mailer: { send: async (m) => void mails.push(m) },
+    mailer,
     stripe: options.stripe,
   });
   const site = {
     /** The e-mails sent, oldest first. */
     mails,
+    /** Whether sending e-mails fails. */
+    mailFails: false,
     /** The requests each bucket still lets through, by client address; unlimited when a bucket is absent. */
     allowance: new Map<Bucket, number>(),
     db,
@@ -55,6 +63,7 @@ export async function newSite(options: { stripe?: Stripe } = {}) {
         auth,
         baseURL,
         stripe: options.stripe,
+        mailer,
         notify: (cursors) => site.notices.push(cursors),
         connectNotices: async (id) => {
           site.connected.push(id);
@@ -99,14 +108,18 @@ export async function newSite(options: { stripe?: Stripe } = {}) {
       };
       return site.client(ServerService, {}, [sign]);
     },
-    /** signUp creates an account with its address verified, and returns its bearer header. */
-    async signUp(username: string) {
+    /**
+     * signUp creates an account with its address verified, and returns its
+     * bearer header; given headers, it signs up and in with them.
+     */
+    async signUp(username: string, headers?: Record<string, string>) {
       const email = `${username}@example.com`;
       const password = `${username} password`;
-      const { user } = await auth.api.signUpEmail({ body: { email, password, name: username, username } });
+      const h = headers && new Headers(headers);
+      const { user } = await auth.api.signUpEmail({ body: { email, password, name: username, username }, headers: h });
       await db.update(schema.user).set({ emailVerified: true }).where(eq(schema.user.id, user.id));
       mails.length = 0;
-      const res = await auth.api.signInEmail({ body: { email, password } });
+      const res = await auth.api.signInEmail({ body: { email, password }, headers: h });
       return { id: res.user.id, headers: { authorization: `Bearer ${res.token}` } };
     },
   };

@@ -25,10 +25,12 @@ export async function serveApi(req: Request, ctx: ExecutionContext): Promise<Res
   try {
     const db: Database = drizzle(client, { schema });
     const stripe = stripeOf();
-    const auth = createAuth(db, { baseURL: env.BASE_URL, secret: env.BETTER_AUTH_SECRET, mailer: emailService(env.EMAIL), stripe });
+    const mailer = emailService(env.EMAIL);
+    const auth = createAuth(db, { baseURL: env.BASE_URL, secret: env.BETTER_AUTH_SECRET, mailer, stripe });
     const res = await handleApi(req, {
       db,
       auth,
+      mailer,
       baseURL: env.BASE_URL,
       appURL: env.APP_URL,
       notify: (cursors) => ctx.waitUntil(Promise.all([...cursors].map(([id, cursor]) => hub(id).notify(cursor)))),

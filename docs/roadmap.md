@@ -1071,13 +1071,13 @@ flowchart TD
 - [x] Sign-in assertions, access records and revocations on the server: `AuthService.SignInWithAssertion` against mavio.dev's cached key set, the kinds of changes applied to users and sessions, `PublishLibraries`, and the RPCs of the server's own credentials and users refused in mavio.dev mode
 - [x] mavio.dev: accounts, sign-in assertions, code sign-in for televisions, access records, invitations and revocations: `apps/website` on TanStack Start and better-auth with passwords, passkeys, TOTP and device codes, `ServerService` and `AccountService` over PostgreSQL with their changes, and pages for claiming, servers, access records, invitations and the account; tested against PGlite, and end to end with a server claiming and signing in through the Worker in workerd (the server fetches changes once the push exists)
 - [x] mavio.dev's e-mail through Cloudflare Email Service and rate limits: verifying addresses before signing in, resetting passwords, which ends the account's sessions, and the `credentials`, `mail` and `codes` buckets per client address
-- [ ] Telling accounts of invitations, friend requests and Home invitations by e-mail
+- [x] Telling accounts of invitations, friend requests and Home invitations by e-mail
 - [x] Suspending accounts by mavio.dev's staff, which sends the suspension to the account's servers: the `staff` role on better-auth's admin plugin, `/staff` finding, suspending and restoring accounts and setting their Pass
 - [ ] Deploying `apps/website` from CI: the Hyperdrive configuration, the secret and the migrations
 - [x] mavio.dev's pages drawn as the web UI, in English and Simplified Chinese: the `website` platform's strings in `libs/design/strings`, the language of `Accept-Language`, the sign-in card on a wall of posters and the account's pages in groups of rows
 - [x] mavio.dev's landing page, privacy policy and terms of service, and its documentation at `/docs` on fumadocs with its ZBSearch search
 - [ ] Writing mavio.dev's documentation: installing a server, adding libraries, the apps, accounts, Homes and Mavio Pass; its pages are placeholders
-- [ ] Receiving mail at `support@mavio.dev` through Cloudflare Email Routing
+- [x] Receiving mail at `support@mavio.dev` through Cloudflare Email Routing
 - [ ] Checking servers' published addresses from mavio.dev with Workers' outbound TCP connections
 - [ ] Running PostgreSQL on VMs with a streaming replica and its WAL archived to R2, reached through Hyperdrive
 - [x] mavio.dev: friends, Homes, managed accounts and their conversion, switching, Mavio Pass and frozen Homes: `FriendService` and `HomeService`, switching with PINs through Mavio's better-auth plugin, managed accounts' restriction profiles applied by servers, and the pages of the Home and friends
