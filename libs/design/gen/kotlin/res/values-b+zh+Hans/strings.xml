@@ -893,7 +893,7 @@
     <string name="general_base_url_detail">反向代理下的路径</string>
     <string name="general_https_port">HTTPS 端口</string>
     <string name="general_https_port_detail">0 表示不提供 HTTPS</string>
-    <string name="general_https_port_mavio_dev">0 表示不提供 HTTPS；未设置证书时使用服务器的 mavio.site 证书</string>
+    <string name="general_https_port_mavio_dev">0 表示不提供 HTTPS；未设置证书时使用服务器的 s.mavio.fyi 证书</string>
     <string name="general_certificate">证书</string>
     <string name="general_certificate_detail">服务器上 PEM 文件的路径</string>
     <string name="general_key">私钥</string>
@@ -1700,7 +1700,7 @@
     <string name="proxies_for_mavio_dev">mavio.dev</string>
     <string name="proxies_for_mavio_dev_detail">账号、登录与中继</string>
     <string name="proxies_for_acme">证书</string>
-    <string name="proxies_for_acme_detail">申请 mavio.site 证书</string>
+    <string name="proxies_for_acme_detail">申请 s.mavio.fyi 证书</string>
     <string name="proxies_unknown">未知代理</string>
     <string name="requests_title">请求</string>
     <string name="requests_all">全部</string>

@@ -1769,7 +1769,7 @@ pub struct OutboundProxies {
     ///
     /// Field 3: `mavio_dev`
     pub mavio_dev: ::core::option::Option<::buffa::alloc::string::String>,
-    /// The certificate authorities of mavio.site certificates.
+    /// The certificate authorities of s.mavio.fyi certificates.
     ///
     /// Field 4: `acme`
     pub acme: ::core::option::Option<::buffa::alloc::string::String>,

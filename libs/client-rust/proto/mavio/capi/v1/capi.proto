@@ -520,7 +520,7 @@ message ServerRecord {
   string user_id = 5;
   string user_name = 6;
   // Whether its address is on the local network: a loopback, private or
-  // link-local address, a localhost or .local name, or the mavio.site
+  // link-local address, a localhost or .local name, or the s.mavio.fyi
   // name of such an address.
   bool local = 7;
 }

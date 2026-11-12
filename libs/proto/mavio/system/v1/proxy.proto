@@ -159,7 +159,7 @@ message OutboundProxies {
   string images = 2;
   // mavio.dev's API.
   string mavio_dev = 3;
-  // The certificate authorities of mavio.site certificates.
+  // The certificate authorities of s.mavio.fyi certificates.
   string acme = 4;
 }
 

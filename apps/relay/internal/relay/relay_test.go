@@ -35,7 +35,7 @@ type fixture struct {
 
 func newFixture(t *testing.T) *fixture {
 	t.Helper()
-	r := New("eu", "mavio.site", relayURL, vectorSecret, slog.New(slog.DiscardHandler))
+	r := New("eu", "s.mavio.fyi", relayURL, vectorSecret, slog.New(slog.DiscardHandler))
 	r.AcceptTimeout = 2 * time.Second
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -143,14 +143,14 @@ func allZero(b []byte) bool {
 	return true
 }
 
-// wildcard returns a self-signed certificate of *.<id>.mavio.site.
+// wildcard returns a self-signed certificate of *.<id>.s.mavio.fyi.
 func wildcard(t *testing.T, id string) (tls.Certificate, *x509.CertPool) {
 	t.Helper()
 	key, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	tmpl := &x509.Certificate{
 		SerialNumber: big.NewInt(1),
-		Subject:      pkix.Name{CommonName: "*." + id + ".mavio.site"},
-		DNSNames:     []string{"*." + id + ".mavio.site"},
+		Subject:      pkix.Name{CommonName: "*." + id + ".s.mavio.fyi"},
+		DNSNames:     []string{"*." + id + ".s.mavio.fyi"},
 		NotBefore:    time.Now().Add(-time.Hour),
 		NotAfter:     time.Now().Add(time.Hour),
 	}
@@ -185,7 +185,7 @@ func connected(t *testing.T, f *fixture, s *server) (net.Conn, *bufio.Reader) {
 }
 
 func name(s *server, ticket string) string {
-	return "relay-eu-" + ticket + "." + s.id + ".mavio.site"
+	return "relay-eu-" + ticket + "." + s.id + ".s.mavio.fyi"
 }
 
 // dial connects a client to a name through the relay.
@@ -237,9 +237,9 @@ func TestRelayRefuses(t *testing.T) {
 		{"expired", name(s, Ticket(vectorSecret, s.id, "eu", time.Now().Add(-time.Minute))), roots},
 		{"other secret", name(s, Ticket([]byte("another secret, another secret!!"), s.id, "eu", valid)), roots},
 		{"other server's ticket", name(s, Ticket(vectorSecret, absent.id, "eu", valid)), roots},
-		{"other region", "relay-us-" + Ticket(vectorSecret, s.id, "us", valid) + "." + s.id + ".mavio.site", roots},
+		{"other region", "relay-us-" + Ticket(vectorSecret, s.id, "us", valid) + "." + s.id + ".s.mavio.fyi", roots},
 		{"not connected", name(absent, Ticket(vectorSecret, absent.id, "eu", valid)), absentRoots},
-		{"not a relay name", "192-0-2-1." + s.id + ".mavio.site", roots},
+		{"not a relay name", "192-0-2-1." + s.id + ".s.mavio.fyi", roots},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -676,7 +676,7 @@ export const CreateRelayTicketRequestSchema: GenMessage<CreateRelayTicketRequest
  */
 export type CreateRelayTicketResponse = Message<"mavio.cloud.v1.CreateRelayTicketResponse"> & {
   /**
-   * relay-<region>-<ticket>.<ID>.mavio.site, the TLS server name and DNS
+   * relay-<region>-<ticket>.<ID>.s.mavio.fyi, the TLS server name and DNS
    * name of the connection.
    *
    * @generated from field: string host = 1;

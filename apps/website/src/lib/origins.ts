@@ -1,5 +1,5 @@
 // The origins a server's web interface is expected at (docs/accounts.md
-// §6): its own names under mavio.site, and addresses on the local network.
+// §6): its own names under s.mavio.fyi, and addresses on the local network.
 
 /** expectedOrigin reports whether a redirect URI is at one of the server's names or on the local network. */
 export function expectedOrigin(redirectUri: string, serverId: string): boolean {
@@ -9,7 +9,7 @@ export function expectedOrigin(redirectUri: string, serverId: string): boolean {
   } catch {
     return false;
   }
-  if (host === `${serverId}.mavio.site` || host.endsWith(`.${serverId}.mavio.site`)) return true;
+  if (host === `${serverId}.s.mavio.fyi` || host.endsWith(`.${serverId}.s.mavio.fyi`)) return true;
   if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local")) return true;
   const v4 = host.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/)?.slice(1).map(Number);
   if (v4) {

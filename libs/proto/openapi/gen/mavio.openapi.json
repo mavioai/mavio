@@ -22225,7 +22225,7 @@
             "maximum": 65535,
             "minimum": 0,
             "format": "int32",
-            "description": "Serves HTTPS on this port with the PEM certificate and key or,\n without them, in mavio.dev mode with the server's mavio.site\n certificate; 0 serves none."
+            "description": "Serves HTTPS on this port with the PEM certificate and key or,\n without them, in mavio.dev mode with the server's s.mavio.fyi\n certificate; 0 serves none."
           },
           "certificatePath": {
             "type": "string",
@@ -22271,7 +22271,7 @@
           "acme": {
             "type": "string",
             "title": "acme",
-            "description": "The certificate authorities of mavio.site certificates."
+            "description": "The certificate authorities of s.mavio.fyi certificates."
           }
         },
         "title": "OutboundProxies",

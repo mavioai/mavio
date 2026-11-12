@@ -98,7 +98,7 @@ type ServerServiceClient interface {
 	PublishConnections(context.Context, *v1.PublishConnectionsRequest) (*v1.PublishConnectionsResponse, error)
 	// SetAcmeChallenge publishes the TXT values of the server's ACME DNS-01
 	// challenge at <ID>.acme.mavio.dev, the target of
-	// _acme-challenge.<ID>.mavio.site, replacing earlier ones
+	// _acme-challenge.<ID>.s.mavio.fyi, replacing earlier ones
 	// (docs/mavio-dev.md §4.2).
 	SetAcmeChallenge(context.Context, *v1.SetAcmeChallengeRequest) (*v1.SetAcmeChallengeResponse, error)
 	// ClearAcmeChallenge removes the TXT values once the challenge is done.
@@ -334,7 +334,7 @@ type ServerServiceHandler interface {
 	PublishConnections(context.Context, *v1.PublishConnectionsRequest) (*v1.PublishConnectionsResponse, error)
 	// SetAcmeChallenge publishes the TXT values of the server's ACME DNS-01
 	// challenge at <ID>.acme.mavio.dev, the target of
-	// _acme-challenge.<ID>.mavio.site, replacing earlier ones
+	// _acme-challenge.<ID>.s.mavio.fyi, replacing earlier ones
 	// (docs/mavio-dev.md §4.2).
 	SetAcmeChallenge(context.Context, *v1.SetAcmeChallengeRequest) (*v1.SetAcmeChallengeResponse, error)
 	// ClearAcmeChallenge removes the TXT values once the challenge is done.

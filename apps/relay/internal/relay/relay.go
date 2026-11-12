@@ -53,7 +53,7 @@ const (
 // Relay serves one region.
 type Relay struct {
 	// Region is the relay's region, Zone the domain of servers' names,
-	// such as mavio.site.
+	// such as s.mavio.fyi.
 	Region, Zone string
 	// URL is the base URL servers reach the relay at, the audience of
 	// their tokens.

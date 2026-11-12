@@ -3171,7 +3171,7 @@ pub struct NetworkSettingsView<'a> {
     /// Field 2: `base_url`
     pub base_url: ::core::option::Option<&'a str>,
     /// Serves HTTPS on this port with the PEM certificate and key or,
-    /// without them, in mavio.dev mode with the server's mavio.site
+    /// without them, in mavio.dev mode with the server's s.mavio.fyi
     /// certificate; 0 serves none.
     ///
     /// Field 3: `https_port`
@@ -3471,7 +3471,7 @@ impl NetworkSettingsOwnedView {
         self.0.reborrow().base_url
     }
     /// Serves HTTPS on this port with the PEM certificate and key or,
-    /// without them, in mavio.dev mode with the server's mavio.site
+    /// without them, in mavio.dev mode with the server's s.mavio.fyi
     /// certificate; 0 serves none.
     ///
     /// Field 3: `https_port`

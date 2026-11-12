@@ -3075,7 +3075,7 @@ pub struct OutboundProxiesView<'a> {
     ///
     /// Field 3: `mavio_dev`
     pub mavio_dev: ::core::option::Option<&'a str>,
-    /// The certificate authorities of mavio.site certificates.
+    /// The certificate authorities of s.mavio.fyi certificates.
     ///
     /// Field 4: `acme`
     pub acme: ::core::option::Option<&'a str>,
@@ -3325,7 +3325,7 @@ impl OutboundProxiesOwnedView {
     pub fn mavio_dev(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().mavio_dev
     }
-    /// The certificate authorities of mavio.site certificates.
+    /// The certificate authorities of s.mavio.fyi certificates.
     ///
     /// Field 4: `acme`
     #[must_use]

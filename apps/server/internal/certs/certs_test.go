@@ -56,7 +56,7 @@ func TestObtainFallsBackAndBinds(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := cert.Leaf.Verify(x509.VerifyOptions{DNSName: "192-168-1-10." + id + ".mavio.site", Roots: ca.Roots()}); err != nil {
+	if _, err := cert.Leaf.Verify(x509.VerifyOptions{DNSName: "192-168-1-10." + id + ".s.mavio.fyi", Roots: ca.Roots()}); err != nil {
 		t.Errorf("Verify() = %v", err)
 	}
 	if got, want := []int{ch.Set, ch.Cleared, ch.Bindings, ca.Issued, broken.Issued}, []int{2, 2, 1, 1, 0}; !slices.Equal(got, want) {

@@ -1996,7 +1996,7 @@ pub struct NetworkSettings {
     /// Field 2: `base_url`
     pub base_url: ::core::option::Option<::buffa::alloc::string::String>,
     /// Serves HTTPS on this port with the PEM certificate and key or,
-    /// without them, in mavio.dev mode with the server's mavio.site
+    /// without them, in mavio.dev mode with the server's s.mavio.fyi
     /// certificate; 0 serves none.
     ///
     /// Field 3: `https_port`

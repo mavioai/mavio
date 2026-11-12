@@ -298,12 +298,12 @@ func (s *Server) RelayRegion(serverID string) string {
 	return ""
 }
 
-// TXT returns the TXT values at a name of mavio.site, as its name servers
-// answer them through mavio.dev: _acme-challenge.<ID>.mavio.site.
+// TXT returns the TXT values at a name of s.mavio.fyi, as its name servers
+// answer them through mavio.dev: _acme-challenge.<ID>.s.mavio.fyi.
 func (s *Server) TXT(name string) []string {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	id, ok := strings.CutPrefix(strings.TrimSuffix(name, ".mavio.site"), "_acme-challenge.")
+	id, ok := strings.CutPrefix(strings.TrimSuffix(name, ".s.mavio.fyi"), "_acme-challenge.")
 	if srv := s.servers[id]; ok && srv != nil {
 		return srv.txt
 	}

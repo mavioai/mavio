@@ -15848,13 +15848,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "0 serves no HTTPS; without a certificate, the server's mavio.site certificate is used"
+            "value": "0 serves no HTTPS; without a certificate, the server's s.mavio.fyi certificate is used"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "0 表示不提供 HTTPS；未设置证书时使用服务器的 mavio.site 证书"
+            "value": "0 表示不提供 HTTPS；未设置证书时使用服务器的 s.mavio.fyi 证书"
           }
         }
       }
@@ -30302,13 +30302,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Obtaining the mavio.site certificate"
+            "value": "Obtaining the s.mavio.fyi certificate"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "申请 mavio.site 证书"
+            "value": "申请 s.mavio.fyi 证书"
           }
         }
       }

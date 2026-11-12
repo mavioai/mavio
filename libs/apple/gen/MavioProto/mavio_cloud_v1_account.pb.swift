@@ -864,7 +864,7 @@ public nonisolated struct Mavio_Cloud_V1_CreateRelayTicketResponse: Sendable {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// relay-<region>-<ticket>.<ID>.mavio.site, the TLS server name and DNS
+  /// relay-<region>-<ticket>.<ID>.s.mavio.fyi, the TLS server name and DNS
   /// name of the connection.
   public var host: String {
     get {_host ?? String()}

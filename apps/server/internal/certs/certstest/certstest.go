@@ -31,7 +31,7 @@ import (
 type CA struct {
 	*httptest.Server
 	// TXT returns the TXT values of a challenge's name, such as
-	// _acme-challenge.<ID>.mavio.site.
+	// _acme-challenge.<ID>.s.mavio.fyi.
 	TXT func(name string) []string
 	// BindingKeyID, when set, is the key ID of the external account
 	// binding new accounts need.
@@ -398,7 +398,7 @@ func (c *Challenges) AcmeBinding(context.Context) (*acme.ExternalAccountBinding,
 func (c *Challenges) TXT(name string) []string {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if name != "_acme-challenge."+c.ID+".mavio.site" {
+	if name != "_acme-challenge."+c.ID+".s.mavio.fyi" {
 		return nil
 	}
 	return c.values

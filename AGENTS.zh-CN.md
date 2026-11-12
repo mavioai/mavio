@@ -53,7 +53,7 @@ libs/intent/          助手的 Rust 语法：由 libs/client-rust 链接，并�
 apps/web/             Web UI（React + Vite），构建到 apps/server/internal/webui/dist，由服务端内嵌
 apps/website/         mavio.dev：账户、访问记录、Home、向服务端推送（Cloudflare Workers 上的 TanStack Start，自 P28 起）
 apps/relay/           供无法直接访问的服务端使用的中转：按 SNI 透传 TLS（自 P28 起）
-apps/dns/             mavio.site 的名称服务器：由地址计算的名称、ACME 质询（自 P28 起）
+apps/dns/             s.mavio.fyi 的名称服务器：由地址计算的名称、ACME 质询（自 P28 起）
 libs/client-ts/       Web UI 的 Connect 客户端与 TanStack Query hooks
 apps/{ios,tvos,macos}/  Apple 各应用（iPhone、iPad 与 Apple TV 用 SwiftUI，Mac 用 AppKit）；其 Xcode 工程由 libs/apple/scripts/gen-project.py 生成
 libs/apple/           Apple 各应用共享的 Swift 包：MavioKit、MavioPlayer、MavioCommon、MavioUI、MavioScreens、MavioAdmin，Mac 的 MavioAppKit 与 MavioMac* 各 target，以及核心的 XCFramework

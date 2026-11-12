@@ -38,7 +38,7 @@ describe("relay", () => {
     await site.db.insert(schema.passes).values({ accountId: alice.id, expiresAt: new Date(Date.now() + 86_400_000) });
     const before = Date.now();
     const resp = await ticket();
-    const m = /^relay-eu-([a-z2-7]{32})\.([a-z2-7]{32})\.mavio\.site$/.exec(resp.host);
+    const m = /^relay-eu-([a-z2-7]{32})\.([a-z2-7]{32})\.s\.mavio\.fyi$/.exec(resp.host);
     expect(m?.[2]).toBe(server.id);
     const exp = timestampDate(resp.expireTime!).getTime();
     expect(exp).toBeGreaterThan(before + 290_000);

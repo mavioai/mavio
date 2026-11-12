@@ -1054,7 +1054,7 @@ flowchart TD
 - [x] 校对自翻译后时间轴变化的字幕条，按顺序、精确时间或重叠与来源配对；登录（`WatchAiLogin`）、补全（`StreamAi`）与智能体回答（`StreamAgentMessage`）以流式传送；已删除会话的对话在插件下次启动时从 pi-durable 的数据库中清除
 - [ ] 以后：客户端提示订阅登录的风险，交由管理员决定是否接受；在 Windows 上验证该插件
 ### P28 账户
-**范围**：[账户](accounts.zh-CN.md)中的账户设计：首次启动时选择模式；设备密钥与以签名随机数续期的短期访问令牌，签名的媒体 URL，API 密钥；独立模式下的管理员、成员与托管用户，媒体库访问记录，PIN 与在管理员设备上的切换，邀请链接，Quick Connect，从命令行恢复；mavio.dev 模式下的认领、登录断言、从 mavio.dev 同步的访问记录与吊销、电视代码登录、带托管账户与切换的 Home、好友和 Mavio Pass；[mavio.dev](mavio-dev.zh-CN.md) 本身（`apps/website`）及其向服务端的推送、中转（`apps/relay`）、`mavio.site` 的名称服务器（`apps/dns`）和服务端的证书。
+**范围**：[账户](accounts.zh-CN.md)中的账户设计：首次启动时选择模式；设备密钥与以签名随机数续期的短期访问令牌，签名的媒体 URL，API 密钥；独立模式下的管理员、成员与托管用户，媒体库访问记录，PIN 与在管理员设备上的切换，邀请链接，Quick Connect，从命令行恢复；mavio.dev 模式下的认领、登录断言、从 mavio.dev 同步的访问记录与吊销、电视代码登录、带托管账户与切换的 Home、好友和 Mavio Pass；[mavio.dev](mavio-dev.zh-CN.md) 本身（`apps/website`）及其向服务端的推送、中转（`apps/relay`）、`s.mavio.fyi` 的名称服务器（`apps/dns`）和服务端的证书。
 
 **完成标准**：一个经由 API 的端到端测试：独立服务端用密码和通行密钥让管理员和成员登录，用设备密钥续期会话并拒绝重放的随机数，从邀请链接创建成员，隐藏成员访问记录所排除的媒体库和分级，并从管理员切换到带 PIN 的托管用户；由模拟的 mavio.dev 认领的服务端只在账户接受访问后用断言让它登录，在访问被撤销时结束其会话并保留其观看记录，在托管账户被移出 Home 时删除其数据，并在 mavio.dev 停止后继续为已打开的会话续期。
 
@@ -1084,8 +1084,8 @@ flowchart TD
 - [x] 购买与续订 Mavio Pass：Stripe Checkout、客户门户，以及按每个已付周期延长 Pass 的 webhook，和 `/pass`
 - [ ] 为 Mavio Pass 设置 Stripe：产品及其两个价格、webhook 端点、客户门户、税务，以及 Worker 的 Stripe 变量与机密
 - [x] mavio.dev：通过 Durable Object 向服务端推送，按游标取回变更：`NoticeHub` 保持每个服务端可休眠的 WebSocket，在记录变更的请求之后收到通知；在 workerd 中与服务端端到端测试
-- [x] `apps/dns` 与通过 ACME DNS-01 质询获取的服务端证书：用 `miekg/dns` 从名称计算区域应答；基于 Cloudflare DNS API 与 Google Public CA API 的 `ServerService.SetAcmeChallenge`、`ClearAcmeChallenge` 和 `CreateAcmeBinding`；服务端的 `internal/certs` 从 Let's Encrypt 或 Google Trust Services 获取并按 ACME 续期信息续期 `*.<ID>.mavio.site`，并用它提供 HTTPS；以 `certstest` 中模拟的 ACME CA 测试
-- [ ] 在两台虚拟机上运行 `apps/dns`，用胶水记录把 `mavio.site` 委派给它们，并把 `mavio.site` 加入公共后缀列表
+- [x] `apps/dns` 与通过 ACME DNS-01 质询获取的服务端证书：用 `miekg/dns` 从名称计算区域应答；基于 Cloudflare DNS API 与 Google Public CA API 的 `ServerService.SetAcmeChallenge`、`ClearAcmeChallenge` 和 `CreateAcmeBinding`；服务端的 `internal/certs` 从 Let's Encrypt 或 Google Trust Services 获取并按 ACME 续期信息续期 `*.<ID>.s.mavio.fyi`，并用它提供 HTTPS；以 `certstest` 中模拟的 ACME CA 测试
+- [ ] 在两台名称服务器上运行 `apps/dns`，在 `mavio.fyi` 中用 NS 记录把 `s.mavio.fyi` 委派给它们，并把 `s.mavio.fyi` 加入公共后缀列表
 - [x] `apps/relay` 与中转票据：中转按 ClientHello 中的名称把客户端的连接拼接到服务端回连的连接上，服务端以身份密钥认证；`AccountService.CreateRelayTicket`、`ServerService.ListRelays` 与 `SetRelayRegion`；服务端的 `internal/relay` 与最近的中转保持连接，并在中转来的连接上提供 TLS；两侧分别按对方的协议测试，票据以共享的测试向量核对
 - [ ] 在欧洲、美国和新加坡的虚拟机上运行 `apps/relay`，在 `apps/dns` 的配置中加入各中转的 A 与 AAAA 记录，在 Worker 的配置中加入 `RELAYS` 与 `RELAY_TICKET_SECRET`
 - [x] Web UI：新服务器上由 `/setup` 选择模式（服务端首次启动时打开），第一个登录的 Mavio 账户通过服务端推送给 mavio.dev 的授权请求（`AuthService.StartSignIn`、`/authorize?request_uri=…`）认领服务器；唯一的登录身份：Mavio 账户通过 mavio.dev 带 PKCE 的授权码流程（`/authorize`、`/auth/callback`、`/api/oauth/token`）得到设备密钥的会话，在服务器自身的 Web UI 上仅限管理员并把其他人引导到 app.mavio.dev，或独立服务器的登录；账户的每台服务器使用其发布的 URL 中第一个有应答的地址；电视上的关联代码；退出所有会话；凭 PIN 切换独立服务器的用户；用通行密钥和 TOTP 验证码登录，以及管理通行密钥、TOTP 与 PIN

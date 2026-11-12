@@ -405,7 +405,7 @@ export type NetworkSettings = Message<"mavio.system.v1.NetworkSettings"> & {
 
   /**
    * Serves HTTPS on this port with the PEM certificate and key or,
-   * without them, in mavio.dev mode with the server's mavio.site
+   * without them, in mavio.dev mode with the server's s.mavio.fyi
    * certificate; 0 serves none.
    *
    * @generated from field: int32 https_port = 3;

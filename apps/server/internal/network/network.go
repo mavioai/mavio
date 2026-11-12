@@ -67,7 +67,7 @@ type HTTPS struct {
 	// Host is the host listened on; empty means all interfaces.
 	Host string
 	// Managed, when set, is the certificate served when the settings name
-	// none, as soon as it is ready: the server's mavio.site certificate.
+	// none, as soon as it is ready: the server's s.mavio.fyi certificate.
 	Managed Managed
 	Logger  *slog.Logger
 

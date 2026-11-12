@@ -18,8 +18,8 @@ func TestConnections(t *testing.T) {
 	}{
 		{name: "without a certificate", https: 8920, want: []string{"http://192.168.1.10:8686", "http://[2001:db8::1]:8686"}},
 		{name: "with a certificate", certified: true, https: 8920, base: "/mavio", want: []string{
-			"https://192-168-1-10." + id + ".mavio.site:8920/mavio",
-			"https://2001-db8--1." + id + ".mavio.site:8920/mavio",
+			"https://192-168-1-10." + id + ".s.mavio.fyi:8920/mavio",
+			"https://2001-db8--1." + id + ".s.mavio.fyi:8920/mavio",
 			"http://192.168.1.10:8686/mavio",
 			"http://[2001:db8::1]:8686/mavio",
 		}},

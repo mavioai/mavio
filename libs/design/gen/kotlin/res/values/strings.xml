@@ -1775,7 +1775,7 @@
     <!-- Detail of the HTTPS port. -->
     <string name="general_https_port_detail">0 serves no HTTPS</string>
     <!-- Detail of the HTTPS port in mavio.dev mode. -->
-    <string name="general_https_port_mavio_dev">0 serves no HTTPS; without a certificate, the server\'s mavio.site certificate is used</string>
+    <string name="general_https_port_mavio_dev">0 serves no HTTPS; without a certificate, the server\'s s.mavio.fyi certificate is used</string>
     <!-- Path of the PEM certificate for HTTPS. -->
     <string name="general_certificate">Certificate</string>
     <!-- Detail of the certificate and key paths. -->
@@ -3385,7 +3385,7 @@
     <!-- The server's requests to certificate authorities. -->
     <string name="proxies_for_acme">Certificates</string>
     <!-- Explains the requests to certificate authorities. -->
-    <string name="proxies_for_acme_detail">Obtaining the mavio.site certificate</string>
+    <string name="proxies_for_acme_detail">Obtaining the s.mavio.fyi certificate</string>
     <!-- A proxy chosen that the server no longer has. -->
     <string name="proxies_unknown">Unknown proxy</string>
     <!-- Title of the requests screen and the link to it from Discover. -->

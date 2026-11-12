@@ -2915,7 +2915,7 @@ func (x *CreateRelayTicketResponse) ClearExpireTime() {
 type CreateRelayTicketResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// relay-<region>-<ticket>.<ID>.mavio.site, the TLS server name and DNS
+	// relay-<region>-<ticket>.<ID>.s.mavio.fyi, the TLS server name and DNS
 	// name of the connection.
 	Host *string
 	// The ticket admits new connections until then; open ones stay.

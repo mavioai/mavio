@@ -48,10 +48,10 @@ test("claim codes ignore case, spaces and dashes", async () => {
 describe("expectedOrigin", () => {
   const id = "abcdefghijklmnopqrstuvwxyz234567";
   test.each([
-    [`https://relay-eu-ticket.${id}.mavio.site/sign-in`, true],
-    [`https://lan-192-168-1-2.${id}.mavio.site`, true],
-    [`https://evil.example/${id}.mavio.site`, false],
-    [`https://x.other.mavio.site`, false],
+    [`https://relay-eu-ticket.${id}.s.mavio.fyi/sign-in`, true],
+    [`https://lan-192-168-1-2.${id}.s.mavio.fyi`, true],
+    [`https://evil.example/${id}.s.mavio.fyi`, false],
+    [`https://x.other.s.mavio.fyi`, false],
     ["http://localhost:8686", true],
     ["http://nas.local:8686", true],
     ["http://192.168.1.20:8686", true],

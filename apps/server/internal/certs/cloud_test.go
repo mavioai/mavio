@@ -43,10 +43,10 @@ func TestThroughMavioDev(t *testing.T) {
 		t.Fatal("no certificate")
 	}
 	cert, _ := m.Certificate(nil)
-	if _, err := cert.Leaf.Verify(x509.VerifyOptions{DNSName: "10-0-0-2." + key.ID() + ".mavio.site", Roots: ca.Roots()}); err != nil {
+	if _, err := cert.Leaf.Verify(x509.VerifyOptions{DNSName: "10-0-0-2." + key.ID() + ".s.mavio.fyi", Roots: ca.Roots()}); err != nil {
 		t.Errorf("Verify() = %v", err)
 	}
-	if txt := dev.TXT("_acme-challenge." + key.ID() + ".mavio.site"); len(txt) != 0 {
+	if txt := dev.TXT("_acme-challenge." + key.ID() + ".s.mavio.fyi"); len(txt) != 0 {
 		t.Errorf("TXT after the challenge = %q, want none", txt)
 	}
 }

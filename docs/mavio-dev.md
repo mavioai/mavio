@@ -15,7 +15,7 @@ mavio.dev is the OpenID Connect issuer of servers in mavio.dev mode ([Accounts �
 | Application | What it is |
 | :--- | :--- |
 | `apps/website` | The website and its API: accounts, servers, access records, friends, Homes, Mavio Pass, the push to servers and ACME challenges (§2, §3) |
-| `apps/dns` | The name servers of `mavio.site` (§4) |
+| `apps/dns` | The name servers of `s.mavio.fyi` (§4) |
 | `apps/relay` | The relay for servers that cannot be reached directly (§5) |
 
 ## 2. Website and API (`apps/website`)
@@ -52,13 +52,13 @@ mavio.dev is the OpenID Connect issuer of servers in mavio.dev mode ([Accounts �
 ## 4. Certificates and Subdomains
 
 ### 4.1 Names
-* Servers' names are under `mavio.site`, which is on the Public Suffix List, so that browsers keep the cookies and storage of different servers apart.
-* A server in mavio.dev mode has the names `<address>.<ID>.mavio.site`, one for each of its addresses: IPv4 addresses are written with dashes (`192-168-1-10`), IPv6 addresses with dashes for colons (`2001-db8--1`).
-* `apps/dns` is a stateless Go service built on `miekg/dns` that serves `mavio.site` from two VMs, its name servers. It computes A and AAAA answers from the name, answers relay names with their region's relay addresses (§5), and serves a static SOA and NS, the `_psl` TXT record and CAA records allowing Let's Encrypt and Google Trust Services. It answers `_acme-challenge.<ID>.mavio.site` with a CNAME to `<ID>.acme.mavio.dev`.
+* Servers' names are under `s.mavio.fyi`, which is on the Public Suffix List, so that browsers keep the cookies and storage of different servers apart.
+* A server in mavio.dev mode has the names `<address>.<ID>.s.mavio.fyi`, one for each of its addresses: IPv4 addresses are written with dashes (`192-168-1-10`), IPv6 addresses with dashes for colons (`2001-db8--1`).
+* `apps/dns` is a stateless Go service built on `miekg/dns` that serves `s.mavio.fyi` from its two name servers, to which `mavio.fyi` delegates it with NS records. It computes A and AAAA answers from the name, answers relay names with their region's relay addresses (§5), and serves a static SOA and NS, the `_psl` TXT record and CAA records allowing Let's Encrypt and Google Trust Services. It answers `_acme-challenge.<ID>.s.mavio.fyi` with a CNAME to `<ID>.acme.mavio.dev`.
 * An ID is a label of 32 lowercase base32 characters; under it, an address label that is not an IPv4 address with dashes or an IPv6 address with dashes for colons, a relay name of an unknown region, and every other name are answered as not existing, with the SOA. The service listens over UDP and TCP (`--addr`, `:53` by default) and reads its configuration from a JSON file (`--config`): the zone, its name servers with their addresses, the SOA's mailbox and serial, the ACME domain, the `_psl` value, the CAs of the CAA records, the relays' addresses by region and the TTLs, an hour for computed and static records and five minutes for relay names.
 
 ### 4.2 Certificates
-* Each server has one wildcard certificate, `*.<ID>.mavio.site`, from Let's Encrypt through ACME's DNS-01 challenge, which the server runs itself with `golang.org/x/crypto/acme`. The certificate's key is generated on the server and never leaves it.
+* Each server has one wildcard certificate, `*.<ID>.s.mavio.fyi`, from Let's Encrypt through ACME's DNS-01 challenge, which the server runs itself with `golang.org/x/crypto/acme`. The certificate's key is generated on the server and never leaves it.
 * The server sends the challenge's TXT value to mavio.dev in a request signed with its identity key (`ServerService.SetAcmeChallenge`); mavio.dev accepts it for that server's own ID only, writes the TXT record `<ID>.acme.mavio.dev` in its Cloudflare zone through the Cloudflare API, and deletes it once the challenge is done (`ClearAcmeChallenge`). The server waits ten seconds after publishing the value before it asks the CA to check it.
 * The server renews the certificate at two thirds of its lifetime, or earlier at a random time in the window that ACME Renewal Information suggests, and turns to Google Trust Services when Let's Encrypt fails. Google Trust Services requires an external account binding to register the server's ACME account, which mavio.dev mints through Google's Public CA API as a service account of its Google Cloud project (`ServerService.CreateAcmeBinding`). A failed attempt is retried after ten minutes, doubling to six hours.
 * A claimed server keeps the certificate, its key and one ACME account key per CA in `certificate-dir` (`certificates/` in its home), tries the CAs of `acme-directories` in order, and serves HTTPS on the HTTPS port of its network settings, 8920 by default, with the certificate whenever the settings name no certificate files of their own. It serves the certificate through `tls.Config.GetCertificate`, so a renewal takes effect without a restart.
@@ -68,7 +68,7 @@ Browsers reach a server by its names through DNS. Native clients connect to an a
 
 ## 5. Relay (`apps/relay`)
 * A Go service on VMs in Europe, the United States and Singapore, for servers that cannot be reached directly. A server whose relay use is allowed keeps a connection to the relay of its region.
-* A client reaches the server through the relay at `relay-<region>-<ticket>.<ID>.mavio.site`. The ticket is issued by mavio.dev, valid for a few minutes, and only when the viewer or the server's administrator has an effective Mavio Pass ([Accounts §3.7](accounts.md#37-mavio-pass)).
+* A client reaches the server through the relay at `relay-<region>-<ticket>.<ID>.s.mavio.fyi`. The ticket is issued by mavio.dev, valid for a few minutes, and only when the viewer or the server's administrator has an effective Mavio Pass ([Accounts §3.7](accounts.md#37-mavio-pass)).
 * The relay reads the name from the TLS ClientHello, checks the ticket and splices the client's connection to the server's without terminating TLS, so encryption stays end to end and the relay sees only encrypted bytes.
 
 ### 5.1 Tickets
@@ -93,6 +93,6 @@ The Worker is built, run in development and deployed with Cloudflare's `cf` comm
 
 ## 7. Security Notes
 
-* **mavio.dev controls `mavio.site`** and could have certificates issued for a server's names; native clients also check the server's identity key, which mavio.dev does not hold the private half of.
+* **mavio.dev controls `s.mavio.fyi`** and could have certificates issued for a server's names; native clients also check the server's identity key, which mavio.dev does not hold the private half of.
 * **The relay** sees which server a client reaches and how much it transfers, never the content.
 * What a compromised mavio.dev could do to servers is described in [Accounts §10](accounts.md#10-security-notes).

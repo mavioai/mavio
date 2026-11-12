@@ -68,7 +68,7 @@ export async function newSite(options: { stripe?: Stripe } = {}) {
           },
           bindings: { create: async () => ({ keyId: "kid-1", hmacKey: new Uint8Array([1, 2, 3]) }) },
         },
-        relays: { urls: new Map([["eu", "https://relay-eu.test"]]), secret: relaySecret, zone: "mavio.site" },
+        relays: { urls: new Map([["eu", "https://relay-eu.test"]]), secret: relaySecret, zone: "s.mavio.fyi" },
         limit: async (bucket) => {
           const left = site.allowance.get(bucket);
           if (left === undefined) return true;

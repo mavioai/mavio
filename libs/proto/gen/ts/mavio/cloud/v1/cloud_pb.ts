@@ -585,7 +585,7 @@ export const PublishLibrariesResponseSchema: GenMessage<PublishLibrariesResponse
 export type PublishConnectionsRequest = Message<"mavio.cloud.v1.PublishConnectionsRequest"> & {
   /**
    * HTTP and HTTPS base URLs, best first, such as
-   * https://192-168-1-10.<ID>.mavio.site:8920 and http://192.168.1.10:8686.
+   * https://192-168-1-10.<ID>.s.mavio.fyi:8920 and http://192.168.1.10:8686.
    *
    * @generated from field: repeated string urls = 1;
    */
@@ -934,7 +934,7 @@ export const ServerService: GenService<{
   /**
    * SetAcmeChallenge publishes the TXT values of the server's ACME DNS-01
    * challenge at <ID>.acme.mavio.dev, the target of
-   * _acme-challenge.<ID>.mavio.site, replacing earlier ones
+   * _acme-challenge.<ID>.s.mavio.fyi, replacing earlier ones
    * (docs/mavio-dev.md §4.2).
    *
    * @generated from rpc mavio.cloud.v1.ServerService.SetAcmeChallenge

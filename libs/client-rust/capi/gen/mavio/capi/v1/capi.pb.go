@@ -7550,7 +7550,7 @@ type ServerRecord_builder struct {
 	UserId   string
 	UserName string
 	// Whether its address is on the local network: a loopback, private or
-	// link-local address, a localhost or .local name, or the mavio.site
+	// link-local address, a localhost or .local name, or the s.mavio.fyi
 	// name of such an address.
 	Local bool
 }

@@ -4586,7 +4586,7 @@ impl ::buffa::HasMessageView for super::super::PublishLibrariesResponse {
 #[derive(Clone, Debug, Default)]
 pub struct PublishConnectionsRequestView<'a> {
     /// HTTP and HTTPS base URLs, best first, such as
-    /// <https://192-168-1-10.<ID>.mavio.site:8920> and <http://192.168.1.10:8686.>
+    /// <https://192-168-1-10.<ID>.s.mavio.fyi:8920> and <http://192.168.1.10:8686.>
     ///
     /// Field 1: `urls`
     pub urls: ::buffa::RepeatedView<'a, &'a str>,
@@ -4786,7 +4786,7 @@ impl PublishConnectionsRequestOwnedView {
         self.0.into_bytes()
     }
     /// HTTP and HTTPS base URLs, best first, such as
-    /// <https://192-168-1-10.<ID>.mavio.site:8920> and <http://192.168.1.10:8686.>
+    /// <https://192-168-1-10.<ID>.s.mavio.fyi:8920> and <http://192.168.1.10:8686.>
     ///
     /// Field 1: `urls`
     #[must_use]

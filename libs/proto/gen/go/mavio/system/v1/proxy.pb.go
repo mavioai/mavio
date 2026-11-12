@@ -1556,7 +1556,7 @@ type OutboundProxies_builder struct {
 	Images *string
 	// mavio.dev's API.
 	MavioDev *string
-	// The certificate authorities of mavio.site certificates.
+	// The certificate authorities of s.mavio.fyi certificates.
 	Acme *string
 }
 

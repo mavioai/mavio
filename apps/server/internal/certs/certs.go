@@ -36,7 +36,7 @@ const (
 )
 
 // Zone is the domain servers' names are under.
-const Zone = "mavio.site"
+const Zone = "s.mavio.fyi"
 
 // Name returns the certificate name of the server whose ID is id.
 func Name(id string) string { return "*." + id + "." + Zone }

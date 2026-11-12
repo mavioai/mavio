@@ -133,7 +133,7 @@ type Config struct {
 	HTTPSHost string
 	// MavioDevURL is the base URL of mavio.dev's API.
 	MavioDevURL string
-	// CertificateDir holds the *.<ID>.mavio.site certificate a claimed
+	// CertificateDir holds the *.<ID>.s.mavio.fyi certificate a claimed
 	// server obtains; empty obtains none.
 	CertificateDir string
 	// ACMEDirectories are the ACME CAs the certificate is obtained from,
@@ -419,7 +419,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	link := cloud.NewLink(db, mavioDev, log)
 	link.Apply = (&cloud.Applier{Requests: func() core.RequestSettings { return set.Get().Requests }}).Apply
 	assertions := cloud.NewVerifier(cfg.MavioDevURL, serverID, cloud.NewKeySet(cfg.MavioDevURL, mavioDevHTTP))
-	// A claimed server obtains its mavio.site certificate.
+	// A claimed server obtains its s.mavio.fyi certificate.
 	var certificates *certs.Manager
 	if cfg.CertificateDir != "" {
 		certificates = certs.NewManager(cfg.CertificateDir, certs.Name(serverID), mavioDev, func(ctx context.Context) (bool, error) {
@@ -551,7 +551,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		// they come.
 		certificates.Changed = func() {
 			if err := https.Apply(ctx, set.Get().Network); err != nil {
-				log.ErrorContext(ctx, "serve HTTPS with the mavio.site certificate", "err", err)
+				log.ErrorContext(ctx, "serve HTTPS with the s.mavio.fyi certificate", "err", err)
 			}
 			relays.Wake()
 		}
@@ -611,7 +611,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			relays.Run(ctx)
 			return nil
 		})
-		// Relayed connections carry TLS for the mavio.site certificate.
+		// Relayed connections carry TLS for the s.mavio.fyi certificate.
 		g.Go(func() error {
 			cfg := &tls.Config{MinVersion: tls.VersionTLS12, GetCertificate: certificates.Certificate, NextProtos: []string{"http/1.1"}}
 			return httpserver.Serve(ctx, tls.NewListener(relays.Listener(), cfg), prefix)

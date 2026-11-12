@@ -181,7 +181,7 @@ sequenceDiagram
 ```
 
 * **设备在 mavio.dev 的会话。**以 Mavio 账户登录的客户端在 mavio.dev 持有绑定其设备密钥（§5.2）的会话，用它列出账户的服务端并取得各服务端的登录断言。会话的访问令牌由 `/api/oauth/token` 签发，有效十分钟；客户端用设备密钥对会话和当前时间签名来续期，因此被盗的访问令牌无法续期。退出登录会结束每台服务端上的会话，并在 `/api/oauth/revoke` 吊销该会话；报告账户被盗会结束其全部会话。
-* **服务端的 Web 界面**只让服务端的管理员登录，使用带 PKCE（RFC 7636）的授权码流程，以服务端 ID 作为 `client_id`。Web 界面以其重定向 URI、PKCE 质询、设备密钥和状态调用无需登录的 `AuthService.StartSignIn`；服务端仿照 RFC 9126，以用身份密钥签名的请求把它们推送给 mavio.dev，几分钟内有效，浏览器随即前往 `/authorize?request_uri=…`。该页面写明重定向 URI 的源，当它既不是服务端在 `mavio.site` 下的名称、也不在本地网络上时给出警告，并把其他账户引导到 app.mavio.dev；授权码在令牌端点凭来自该源的 PKCE 校验值换取一次，为请求中的设备密钥开启会话。管理员随后看到的与 app.mavio.dev 相同：账户的每台服务端。
+* **服务端的 Web 界面**只让服务端的管理员登录，使用带 PKCE（RFC 7636）的授权码流程，以服务端 ID 作为 `client_id`。Web 界面以其重定向 URI、PKCE 质询、设备密钥和状态调用无需登录的 `AuthService.StartSignIn`；服务端仿照 RFC 9126，以用身份密钥签名的请求把它们推送给 mavio.dev，几分钟内有效，浏览器随即前往 `/authorize?request_uri=…`。该页面写明重定向 URI 的源，当它既不是服务端在 `s.mavio.fyi` 下的名称、也不在本地网络上时给出警告，并把其他账户引导到 app.mavio.dev；授权码在令牌端点凭来自该源的 PKCE 校验值换取一次，为请求中的设备密钥开启会话。管理员随后看到的与 app.mavio.dev 相同：账户的每台服务端。
 * **app.mavio.dev** 是不由服务端提供的 Web 界面，以同样的方式、用 `client_id` `app` 让任意 Mavio 账户登录，没有确认页面，并回到发起登录的页面。
 * **桌面应用**像计算机上的应用那样，通过系统浏览器让任意 Mavio 账户登录（RFC 8252）：它在回环地址上监听，并以其反向 DNS ID 为 `client_id`、以该地址上的重定向 URI、PKCE 质询和设备密钥打开 `/authorize`；页面写明该应用并请账户批准，应用再用收到的授权码换取自己的会话。它也像电视一样提供链接码。
 * **iPhone 与 iPad 应用**以同样方式登录，在 `ASWebAuthenticationSession` 中以其 `client_id` `dev.mavio.ios` 打开 `/authorize`，也提供链接码。
@@ -208,7 +208,7 @@ sequenceDiagram
 * **独立模式的凭据。**密码用 argon2id 哈希（[系统架构 §11](architecture.zh-CN.md#11-api-与认证appsserver)）；TOTP（RFC 6238）用标准库的 HMAC 计算；通行密钥使用 `go-webauthn/webauthn`。通行密钥属于浏览器访问服务端时所用的主机名，即其依赖方，取自请求的来源，来源必须是 HTTPS，或 `localhost` 上的 HTTP；通行密钥只在该主机上可用，IP 地址不能有通行密钥。通行密钥单独即可登录；TOTP 是密码的第二因素。
 * **mavio.dev 模式下的管理。**客户端直接在 mavio.dev 上管理访问、好友和 Home；服务端创建用户、设置凭据、邀请、切换用户或以服务端自己的凭据登录的 RPC 返回 `failed_precondition`。`UserService.UpdateUser` 只修改账户用户在服务端自己的策略，因为其名称、访问、限制档和是否停用都属于 mavio.dev；`DeleteUser` 只清除访问已被撤销的用户。Home 内的用户切换发生在客户端与 mavio.dev 之间，服务端只看到一次带新断言的登录。
 * **服务端信息。**无需登录的 `AuthService.GetAuthInfo` 给出服务端的模式及其 ID 和名称，客户端在登录前就知道该如何登录；在模式选定之前，以及 mavio.dev 模式的服务端未被认领时，它报告需要安装。
-* **与 mavio.dev 的连接。**`internal/cloud` 用身份密钥为服务端发往 mavio.dev 的 `mavio.cloud.v1.ServerService` 的请求签名、认领服务端（§3.2），并为已认领的服务端保持到 mavio.dev 的 WebSocket（[mavio.dev §3](mavio-dev.zh-CN.md#3-向服务端推送)）。账户设置保存管理员的账户和服务端已应用的最后一项变更的游标；服务端用 `ListChanges` 取得其后的变更，并在推进游标的事务中应用它们。访问记录创建或更新账户的用户并启用它；被撤销的记录停用该用户并结束其会话；账户变更为用户改名，并为托管账户的用户设置其限制配置，或把转换后账户的用户变为成员；被删除账户的用户连同其数据被删除，被停用或被盗账户的会话被结束。管理员的用户在任何变更中保持其类型和访问。服务端在连接时、以及媒体库每次变化时，用 `PublishLibraries` 发布其媒体库，并用 `PublishConnections` 按优先顺序发布客户端访问它的 URL：取得证书后先是其地址在 `mavio.site` 下的 HTTPS 名称，然后是其地址上的 HTTP。
+* **与 mavio.dev 的连接。**`internal/cloud` 用身份密钥为服务端发往 mavio.dev 的 `mavio.cloud.v1.ServerService` 的请求签名、认领服务端（§3.2），并为已认领的服务端保持到 mavio.dev 的 WebSocket（[mavio.dev §3](mavio-dev.zh-CN.md#3-向服务端推送)）。账户设置保存管理员的账户和服务端已应用的最后一项变更的游标；服务端用 `ListChanges` 取得其后的变更，并在推进游标的事务中应用它们。访问记录创建或更新账户的用户并启用它；被撤销的记录停用该用户并结束其会话；账户变更为用户改名，并为托管账户的用户设置其限制配置，或把转换后账户的用户变为成员；被删除账户的用户连同其数据被删除，被停用或被盗账户的会话被结束。管理员的用户在任何变更中保持其类型和访问。服务端在连接时、以及媒体库每次变化时，用 `PublishLibraries` 发布其媒体库，并用 `PublishConnections` 按优先顺序发布客户端访问它的 URL：取得证书后先是其地址在 `s.mavio.fyi` 下的 HTTPS 名称，然后是其地址上的 HTTP。
 
 ## 9. mavio.dev
 

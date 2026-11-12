@@ -22,7 +22,7 @@ import (
 func main() {
 	var o options
 	flag.StringVar(&o.region, "region", "", "the relay's region, such as eu")
-	flag.StringVar(&o.zone, "zone", "mavio.site", "the domain of servers' names")
+	flag.StringVar(&o.zone, "zone", "s.mavio.fyi", "the domain of servers' names")
 	flag.StringVar(&o.url, "url", "", "the base URL servers reach the relay at, such as https://eu.relay.mavio.dev")
 	flag.StringVar(&o.secretFile, "ticket-secret-file", "", "file holding the ticket secret shared with mavio.dev")
 	flag.StringVar(&o.addr, "addr", ":443", "address clients connect to")

@@ -9,7 +9,7 @@ export interface Relays {
   urls: Map<string, string>;
   /** The secret shared with the relays. */
   secret: Uint8Array;
-  /** The domain of servers' names, such as mavio.site. */
+  /** The domain of servers' names, such as s.mavio.fyi. */
   zone: string;
 }
 
@@ -17,7 +17,7 @@ export interface Relays {
 export const ticketLifetime = 300;
 
 /** parseRelays reads the RELAYS binding, the base URLs by region. */
-export function parseRelays(byRegion: Record<string, string>, secret: string, zone = "mavio.site"): Relays {
+export function parseRelays(byRegion: Record<string, string>, secret: string, zone = "s.mavio.fyi"): Relays {
   const urls = new Map(Object.entries(byRegion));
   for (const region of urls.keys()) {
     if (!/^[a-z0-9]{1,16}$/.test(region)) throw new Error(`relay region ${region} must be a label without dashes`);

@@ -277,7 +277,7 @@ message CreateRelayTicketRequest {
 }
 
 message CreateRelayTicketResponse {
-  // relay-<region>-<ticket>.<ID>.mavio.site, the TLS server name and DNS
+  // relay-<region>-<ticket>.<ID>.s.mavio.fyi, the TLS server name and DNS
   // name of the connection.
   string host = 1;
   // The ticket admits new connections until then; open ones stay.

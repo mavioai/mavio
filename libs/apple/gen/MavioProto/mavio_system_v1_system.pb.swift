@@ -583,7 +583,7 @@ public nonisolated struct Mavio_System_V1_NetworkSettings: Sendable {
   public mutating func clearBaseURL() {self._baseURL = nil}
 
   /// Serves HTTPS on this port with the PEM certificate and key or,
-  /// without them, in mavio.dev mode with the server's mavio.site
+  /// without them, in mavio.dev mode with the server's s.mavio.fyi
   /// certificate; 0 serves none.
   public var httpsPort: Int32 {
     get {_httpsPort ?? 0}

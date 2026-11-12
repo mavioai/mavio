@@ -353,7 +353,7 @@ export type OutboundProxies = Message<"mavio.system.v1.OutboundProxies"> & {
   mavioDev: string;
 
   /**
-   * The certificate authorities of mavio.site certificates.
+   * The certificate authorities of s.mavio.fyi certificates.
    *
    * @generated from field: string acme = 4;
    */

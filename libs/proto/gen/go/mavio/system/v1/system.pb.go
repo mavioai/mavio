@@ -1794,7 +1794,7 @@ type NetworkSettings_builder struct {
 	// The path a reverse proxy serves the server under, such as "/mavio".
 	BaseUrl *string
 	// Serves HTTPS on this port with the PEM certificate and key or,
-	// without them, in mavio.dev mode with the server's mavio.site
+	// without them, in mavio.dev mode with the server's s.mavio.fyi
 	// certificate; 0 serves none.
 	HttpsPort       *int32
 	CertificatePath *string

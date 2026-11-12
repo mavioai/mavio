@@ -15,7 +15,7 @@ mavio.dev 是 mavio.dev 模式服务端的 OpenID Connect 签发方（[账户 §
 | 应用 | 内容 |
 | :--- | :--- |
 | `apps/website` | 网站及其 API：账户、服务端、访问记录、好友、Home、Mavio Pass、向服务端的推送和 ACME 质询（§2、§3） |
-| `apps/dns` | `mavio.site` 的名称服务器（§4） |
+| `apps/dns` | `s.mavio.fyi` 的名称服务器（§4） |
 | `apps/relay` | 供无法直接访问的服务端使用的中转（§5） |
 
 ## 2. 网站与 API（`apps/website`）
@@ -52,13 +52,13 @@ mavio.dev 是 mavio.dev 模式服务端的 OpenID Connect 签发方（[账户 §
 ## 4. 证书与子域名
 
 ### 4.1 名称
-* 服务端的名称位于 `mavio.site` 下。该域名列入公共后缀列表，使浏览器把不同服务端的 Cookie 和存储隔开。
-* mavio.dev 模式的服务端为它的每个地址拥有一个名称 `<地址>.<ID>.mavio.site`：IPv4 地址用短横线书写（`192-168-1-10`），IPv6 地址用短横线代替冒号（`2001-db8--1`）。
-* `apps/dns` 是基于 `miekg/dns` 的无状态 Go 服务，在两台虚拟机上作为 `mavio.site` 的名称服务器。它从名称计算 A 和 AAAA 应答，用对应区域的中转地址应答中转名称（§5），并提供静态的 SOA 和 NS、`_psl` TXT 记录，以及允许 Let's Encrypt 和 Google Trust Services 的 CAA 记录。对 `_acme-challenge.<ID>.mavio.site`，它应答指向 `<ID>.acme.mavio.dev` 的 CNAME。
+* 服务端的名称位于 `s.mavio.fyi` 下。该域名列入公共后缀列表，使浏览器把不同服务端的 Cookie 和存储隔开。
+* mavio.dev 模式的服务端为它的每个地址拥有一个名称 `<地址>.<ID>.s.mavio.fyi`：IPv4 地址用短横线书写（`192-168-1-10`），IPv6 地址用短横线代替冒号（`2001-db8--1`）。
+* `apps/dns` 是基于 `miekg/dns` 的无状态 Go 服务，作为 `s.mavio.fyi` 的两台名称服务器，`mavio.fyi` 用 NS 记录把它委派给它们。它从名称计算 A 和 AAAA 应答，用对应区域的中转地址应答中转名称（§5），并提供静态的 SOA 和 NS、`_psl` TXT 记录，以及允许 Let's Encrypt 和 Google Trust Services 的 CAA 记录。对 `_acme-challenge.<ID>.s.mavio.fyi`，它应答指向 `<ID>.acme.mavio.dev` 的 CNAME。
 * ID 是由 32 个小写 base32 字符组成的标签；在它之下，既不是用短横线书写的 IPv4 地址、也不是用短横线代替冒号的 IPv6 地址的地址标签，未知区域的中转名称，以及其他所有名称，都应答为不存在，并附上 SOA。该服务通过 UDP 和 TCP 监听（`--addr`，默认 `:53`），从 JSON 文件读取配置（`--config`）：区域、名称服务器及其地址、SOA 的邮箱和序列号、ACME 域名、`_psl` 的值、CAA 记录的 CA、按区域划分的中转地址，以及 TTL：计算出的记录和静态记录为一小时，中转名称为五分钟。
 
 ### 4.2 证书
-* 每台服务端有一张通配符证书 `*.<ID>.mavio.site`，由服务端自己用 `golang.org/x/crypto/acme` 通过 ACME 的 DNS-01 质询从 Let's Encrypt 获取。证书的私钥在服务端上生成，从不离开服务端。
+* 每台服务端有一张通配符证书 `*.<ID>.s.mavio.fyi`，由服务端自己用 `golang.org/x/crypto/acme` 通过 ACME 的 DNS-01 质询从 Let's Encrypt 获取。证书的私钥在服务端上生成，从不离开服务端。
 * 服务端用身份密钥签名的请求把质询的 TXT 值发给 mavio.dev（`ServerService.SetAcmeChallenge`）；mavio.dev 只为该服务端自己的 ID 接受它，通过 Cloudflare API 在自己的 Cloudflare 区域中写入 TXT 记录 `<ID>.acme.mavio.dev`，质询完成后删除（`ClearAcmeChallenge`）。服务端发布该值后等待十秒，再请 CA 检查。
 * 服务端在证书有效期的三分之二时续期，或在 ACME 续期信息（ARI）建议的时间窗口内随机选一个更早的时间续期；Let's Encrypt 失败时改用 Google Trust Services。Google Trust Services 注册服务端的 ACME 账户需要外部账户绑定，由 mavio.dev 以其 Google Cloud 项目的服务账号通过 Google 的 Public CA API 签发（`ServerService.CreateAcmeBinding`）。失败的尝试在十分钟后重试，间隔逐次加倍，最长六小时。
 * 已认领的服务端把证书、证书私钥以及每个 CA 一个的 ACME 账户密钥保存在 `certificate-dir`（其主目录下的 `certificates/`），按顺序尝试 `acme-directories` 中的 CA；当网络设置未指定自己的证书文件时，它在网络设置的 HTTPS 端口（默认 8920）上用该证书提供 HTTPS。证书通过 `tls.Config.GetCertificate` 提供，续期无需重启即生效。
@@ -68,7 +68,7 @@ mavio.dev 是 mavio.dev 模式服务端的 OpenID Connect 签发方（[账户 §
 
 ## 5. 中转（`apps/relay`）
 * 一个运行在虚拟机上的 Go 服务，部署在欧洲、美国和新加坡，供无法直接访问的服务端使用。允许使用中转的服务端与其所在区域的中转保持一条连接。
-* 客户端通过 `relay-<区域>-<票据>.<ID>.mavio.site` 经中转访问服务端。票据由 mavio.dev 签发，几分钟内有效，只在观看者或服务端管理员拥有有效 Mavio Pass（[账户 §3.7](accounts.zh-CN.md#37-mavio-pass)）时签发。
+* 客户端通过 `relay-<区域>-<票据>.<ID>.s.mavio.fyi` 经中转访问服务端。票据由 mavio.dev 签发，几分钟内有效，只在观看者或服务端管理员拥有有效 Mavio Pass（[账户 §3.7](accounts.zh-CN.md#37-mavio-pass)）时签发。
 * 中转从 TLS ClientHello 中读取名称，检查票据，然后在不终止 TLS 的情况下把客户端的连接与服务端的连接拼接起来，因此加密保持端到端，中转只看到加密后的字节。
 
 ### 5.1 票据
@@ -93,6 +93,6 @@ Worker 用 Cloudflare 的 `cf` 命令行（`apps/website` 的开发依赖）构�
 
 ## 7. 安全说明
 
-* **mavio.dev 控制 `mavio.site`**，可以为服务端的名称申请证书；原生客户端还会检查服务端的身份密钥，而 mavio.dev 没有它的私钥。
+* **mavio.dev 控制 `s.mavio.fyi`**，可以为服务端的名称申请证书；原生客户端还会检查服务端的身份密钥，而 mavio.dev 没有它的私钥。
 * **中转**能看到客户端访问哪台服务端以及传输了多少数据，看不到内容。
 * mavio.dev 被攻破时能对服务端做什么，见[账户 §10](accounts.zh-CN.md#10-安全说明)。

@@ -27,7 +27,7 @@ import (
 //	config.toml   settings, optional
 //	mavio.db      the SQLite database
 //	identity.key  the server's identity key, which signs its sessions
-//	certificates/ the *.<ID>.mavio.site certificate of a server in
+//	certificates/ the *.<ID>.s.mavio.fyi certificate of a server in
 //	              mavio.dev mode, with its key and ACME account keys
 //	plugins/      one folder per plugin
 //	metadata/     artwork chosen for items
@@ -92,8 +92,8 @@ var settings = []setting{
 	{key: "discovery-addr", usage: "UDP address answering discovery requests from clients on the local network; empty answers none", def: constant(":7359")},
 	{key: "plugin-catalog", usage: "catalog of the first-party plugins a new server starts with: a URL, or the path of a catalog file, such as the plugins/catalog.json tools/plugindist builds in a checkout; empty starts with none", def: constant(plugins.OfficialCatalog)},
 	{key: "mavio-dev-url", usage: "base URL of mavio.dev's API, which servers in mavio.dev mode are claimed at and connect to", def: constant("https://mavio.dev/api")},
-	{key: "certificate-dir", path: true, usage: "directory of the server's mavio.site certificate in mavio.dev mode; empty obtains none", def: under("certificates")},
-	{key: "acme-directories", usage: "comma-separated ACME directory URLs the mavio.site certificate is obtained from, tried in order", def: constant(certs.LetsEncrypt + "," + certs.GoogleTrustServices)},
+	{key: "certificate-dir", path: true, usage: "directory of the server's s.mavio.fyi certificate in mavio.dev mode; empty obtains none", def: under("certificates")},
+	{key: "acme-directories", usage: "comma-separated ACME directory URLs the s.mavio.fyi certificate is obtained from, tried in order", def: constant(certs.LetsEncrypt + "," + certs.GoogleTrustServices)},
 	{key: "claim-token", usage: "claim code from mavio.dev/claim, which claims an unclaimed server when it starts", def: constant("")},
 	{key: "open-browser", usage: "open the setup in the default browser when a new server starts on a desktop", def: constant("true")},
 	{key: "dev", usage: "serve the development player at /dev/player", def: constant("false")},

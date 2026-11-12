@@ -48,16 +48,16 @@ func TestParseName(t *testing.T) {
 		region, ticket, id string
 		ok                 bool
 	}{
-		{"relay-eu-t1ck3t." + vectorID + ".mavio.site", "eu", "t1ck3t", vectorID, true},
-		{"Relay-EU-T1CK3T." + vectorID + ".mavio.site.", "eu", "t1ck3t", vectorID, true},
-		{"relay-eu." + vectorID + ".mavio.site", "", "", "", false},
+		{"relay-eu-t1ck3t." + vectorID + ".s.mavio.fyi", "eu", "t1ck3t", vectorID, true},
+		{"Relay-EU-T1CK3T." + vectorID + ".s.mavio.fyi.", "eu", "t1ck3t", vectorID, true},
+		{"relay-eu." + vectorID + ".s.mavio.fyi", "", "", "", false},
 		{"relay-eu-t1ck3t." + vectorID + ".example.com", "", "", "", false},
-		{"192-0-2-1." + vectorID + ".mavio.site", "", "", "", false},
-		{"relay-eu-t1ck3t.x." + vectorID + ".mavio.site", "", "", "", false},
-		{"relay--t1ck3t." + vectorID + ".mavio.site", "", "", "", false},
+		{"192-0-2-1." + vectorID + ".s.mavio.fyi", "", "", "", false},
+		{"relay-eu-t1ck3t.x." + vectorID + ".s.mavio.fyi", "", "", "", false},
+		{"relay--t1ck3t." + vectorID + ".s.mavio.fyi", "", "", "", false},
 	}
 	for _, tt := range tests {
-		region, ticket, id, ok := ParseName(tt.name, "mavio.site")
+		region, ticket, id, ok := ParseName(tt.name, "s.mavio.fyi")
 		if ok != tt.ok || ok && (region != tt.region || ticket != tt.ticket || id != tt.id) {
 			t.Errorf("ParseName(%q) = %q, %q, %q, %v, want = %q, %q, %q, %v",
 				tt.name, region, ticket, id, ok, tt.region, tt.ticket, tt.id, tt.ok)

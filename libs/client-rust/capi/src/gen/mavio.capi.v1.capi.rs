@@ -9618,7 +9618,7 @@ pub struct ServerRecord {
     /// Field 6: `user_name`
     pub user_name: ::buffa::alloc::string::String,
     /// Whether its address is on the local network: a loopback, private or
-    /// link-local address, a localhost or .local name, or the mavio.site
+    /// link-local address, a localhost or .local name, or the s.mavio.fyi
     /// name of such an address.
     ///
     /// Field 7: `local`

@@ -3882,7 +3882,7 @@ impl ::buffa::ExtensionSet for CreateRelayTicketRequest {
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct CreateRelayTicketResponse {
-    /// relay-\<region\>-\<ticket\>.\<ID\>.mavio.site, the TLS server name and DNS
+    /// relay-\<region\>-\<ticket\>.\<ID\>.s.mavio.fyi, the TLS server name and DNS
     /// name of the connection.
     ///
     /// Field 1: `host`

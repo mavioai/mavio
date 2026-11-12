@@ -13,7 +13,7 @@ import (
 
 // Config describes the zone.
 type Config struct {
-	// Zone is the domain served, such as mavio.site.
+	// Zone is the domain served, such as s.mavio.fyi.
 	Zone string `json:"zone"`
 	// NameServers are the zone's name servers, under the zone.
 	NameServers []Host `json:"nameServers"`

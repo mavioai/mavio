@@ -494,7 +494,7 @@ public nonisolated struct Mavio_System_V1_OutboundProxies: Sendable {
   /// Clears the value of `mavioDev`. Subsequent reads from it will return its default value.
   public mutating func clearMavioDev() {self._mavioDev = nil}
 
-  /// The certificate authorities of mavio.site certificates.
+  /// The certificate authorities of s.mavio.fyi certificates.
   public var acme: String {
     get {_acme ?? String()}
     set {_acme = newValue}

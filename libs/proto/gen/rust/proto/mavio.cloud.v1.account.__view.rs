@@ -7116,7 +7116,7 @@ impl ::buffa::HasMessageView for super::super::CreateRelayTicketRequest {
 }
 #[derive(Clone, Debug, Default)]
 pub struct CreateRelayTicketResponseView<'a> {
-    /// relay-\<region\>-\<ticket\>.\<ID\>.mavio.site, the TLS server name and DNS
+    /// relay-\<region\>-\<ticket\>.\<ID\>.s.mavio.fyi, the TLS server name and DNS
     /// name of the connection.
     ///
     /// Field 1: `host`
@@ -7364,7 +7364,7 @@ impl CreateRelayTicketResponseOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// relay-\<region\>-\<ticket\>.\<ID\>.mavio.site, the TLS server name and DNS
+    /// relay-\<region\>-\<ticket\>.\<ID\>.s.mavio.fyi, the TLS server name and DNS
     /// name of the connection.
     ///
     /// Field 1: `host`

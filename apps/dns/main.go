@@ -1,4 +1,4 @@
-// Command dns serves the zone mavio.site from its name servers
+// Command dns serves the zone s.mavio.fyi from its name servers
 // (docs/mavio-dev.md §4.1), over UDP and TCP.
 package main
 

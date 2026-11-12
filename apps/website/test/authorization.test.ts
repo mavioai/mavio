@@ -290,9 +290,9 @@ describe("authorization requests that claim the server", () => {
     });
     expect(res.status).toBe(200);
 
-    await api.publishConnections({ urls: ["https://192-168-1-20.x.mavio.site:8920", local] });
+    await api.publishConnections({ urls: ["https://192-168-1-20.x.s.mavio.fyi:8920", local] });
     const { servers } = await asAlice.listServers({});
-    expect(servers[0].connections).toEqual(["https://192-168-1-20.x.mavio.site:8920", local]);
+    expect(servers[0].connections).toEqual(["https://192-168-1-20.x.s.mavio.fyi:8920", local]);
   });
 
   test("declined send the browser back with an error", async () => {

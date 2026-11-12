@@ -13,10 +13,10 @@ const id = "abcdefghijklmnopqrstuvwxyz234567"
 func handler(t *testing.T) *Handler {
 	t.Helper()
 	c := &Config{
-		Zone: "mavio.site", Hostmaster: "hostmaster.mavio.dev", ACME: "acme.mavio.dev", PSL: "https://github.com/publicsuffix/list/pull/1",
+		Zone: "s.mavio.fyi", Hostmaster: "hostmaster.mavio.dev", ACME: "acme.mavio.dev", PSL: "https://github.com/publicsuffix/list/pull/1",
 		NameServers: []Host{
-			{Name: "ns1.mavio.site", Addresses: []netip.Addr{netip.MustParseAddr("198.51.100.1"), netip.MustParseAddr("2001:db8::53")}},
-			{Name: "ns2.mavio.site", Addresses: []netip.Addr{netip.MustParseAddr("198.51.100.2")}},
+			{Name: "ns1.s.mavio.fyi", Addresses: []netip.Addr{netip.MustParseAddr("198.51.100.1"), netip.MustParseAddr("2001:db8::53")}},
+			{Name: "ns2.s.mavio.fyi", Addresses: []netip.Addr{netip.MustParseAddr("198.51.100.2")}},
 		},
 		CAA:    []string{"letsencrypt.org", "pki.goog"},
 		Relays: map[string][]netip.Addr{"eu": {netip.MustParseAddr("203.0.113.7"), netip.MustParseAddr("2001:db8::7")}},
@@ -35,30 +35,30 @@ func TestAnswer(t *testing.T) {
 		rcode int
 		want  []string // the answers' data
 	}{
-		{"192-168-1-10." + id + ".mavio.site.", dns.TypeA, dns.RcodeSuccess, []string{"192.168.1.10"}},
-		{"192-168-1-10." + strings.ToUpper(id) + ".MAVIO.site.", dns.TypeA, dns.RcodeSuccess, []string{"192.168.1.10"}},
-		{"192-168-1-10." + id + ".mavio.site.", dns.TypeAAAA, dns.RcodeSuccess, nil},
-		{"2001-db8--1." + id + ".mavio.site.", dns.TypeAAAA, dns.RcodeSuccess, []string{"2001:db8::1"}},
-		{"2001-db8--1." + id + ".mavio.site.", dns.TypeA, dns.RcodeSuccess, nil},
-		{"--ffff-c000-201." + id + ".mavio.site.", dns.TypeAAAA, dns.RcodeNameError, nil},
-		{"192-168-1-300." + id + ".mavio.site.", dns.TypeA, dns.RcodeNameError, nil},
-		{"192-168-1-10.short.mavio.site.", dns.TypeA, dns.RcodeNameError, nil},
-		{"a.192-168-1-10." + id + ".mavio.site.", dns.TypeA, dns.RcodeNameError, nil},
-		{id + ".mavio.site.", dns.TypeA, dns.RcodeSuccess, nil},
-		{"relay-eu-t1ck3t." + id + ".mavio.site.", dns.TypeA, dns.RcodeSuccess, []string{"203.0.113.7"}},
-		{"relay-eu-t1ck3t." + id + ".mavio.site.", dns.TypeAAAA, dns.RcodeSuccess, []string{"2001:db8::7"}},
-		{"relay-us-t1ck3t." + id + ".mavio.site.", dns.TypeA, dns.RcodeNameError, nil},
-		{"relay-eu." + id + ".mavio.site.", dns.TypeA, dns.RcodeNameError, nil},
-		{"_acme-challenge." + id + ".mavio.site.", dns.TypeTXT, dns.RcodeSuccess, []string{id + ".acme.mavio.dev."}},
-		{"mavio.site.", dns.TypeNS, dns.RcodeSuccess, []string{"ns1.mavio.site.", "ns2.mavio.site."}},
-		{"mavio.site.", dns.TypeSOA, dns.RcodeSuccess, []string{"ns1.mavio.site. hostmaster.mavio.dev. 0 7200 3600 1209600 300"}},
-		{"mavio.site.", dns.TypeCAA, dns.RcodeSuccess, []string{
+		{"192-168-1-10." + id + ".s.mavio.fyi.", dns.TypeA, dns.RcodeSuccess, []string{"192.168.1.10"}},
+		{"192-168-1-10." + strings.ToUpper(id) + ".S.MAVIO.fyi.", dns.TypeA, dns.RcodeSuccess, []string{"192.168.1.10"}},
+		{"192-168-1-10." + id + ".s.mavio.fyi.", dns.TypeAAAA, dns.RcodeSuccess, nil},
+		{"2001-db8--1." + id + ".s.mavio.fyi.", dns.TypeAAAA, dns.RcodeSuccess, []string{"2001:db8::1"}},
+		{"2001-db8--1." + id + ".s.mavio.fyi.", dns.TypeA, dns.RcodeSuccess, nil},
+		{"--ffff-c000-201." + id + ".s.mavio.fyi.", dns.TypeAAAA, dns.RcodeNameError, nil},
+		{"192-168-1-300." + id + ".s.mavio.fyi.", dns.TypeA, dns.RcodeNameError, nil},
+		{"192-168-1-10.short.s.mavio.fyi.", dns.TypeA, dns.RcodeNameError, nil},
+		{"a.192-168-1-10." + id + ".s.mavio.fyi.", dns.TypeA, dns.RcodeNameError, nil},
+		{id + ".s.mavio.fyi.", dns.TypeA, dns.RcodeSuccess, nil},
+		{"relay-eu-t1ck3t." + id + ".s.mavio.fyi.", dns.TypeA, dns.RcodeSuccess, []string{"203.0.113.7"}},
+		{"relay-eu-t1ck3t." + id + ".s.mavio.fyi.", dns.TypeAAAA, dns.RcodeSuccess, []string{"2001:db8::7"}},
+		{"relay-us-t1ck3t." + id + ".s.mavio.fyi.", dns.TypeA, dns.RcodeNameError, nil},
+		{"relay-eu." + id + ".s.mavio.fyi.", dns.TypeA, dns.RcodeNameError, nil},
+		{"_acme-challenge." + id + ".s.mavio.fyi.", dns.TypeTXT, dns.RcodeSuccess, []string{id + ".acme.mavio.dev."}},
+		{"s.mavio.fyi.", dns.TypeNS, dns.RcodeSuccess, []string{"ns1.s.mavio.fyi.", "ns2.s.mavio.fyi."}},
+		{"s.mavio.fyi.", dns.TypeSOA, dns.RcodeSuccess, []string{"ns1.s.mavio.fyi. hostmaster.mavio.dev. 0 7200 3600 1209600 300"}},
+		{"s.mavio.fyi.", dns.TypeCAA, dns.RcodeSuccess, []string{
 			`0 issue "letsencrypt.org"`, `0 issuewild "letsencrypt.org"`, `0 issue "pki.goog"`, `0 issuewild "pki.goog"`,
 		}},
-		{"mavio.site.", dns.TypeA, dns.RcodeSuccess, nil},
-		{"_psl.mavio.site.", dns.TypeTXT, dns.RcodeSuccess, []string{`"https://github.com/publicsuffix/list/pull/1"`}},
-		{"ns1.mavio.site.", dns.TypeAAAA, dns.RcodeSuccess, []string{"2001:db8::53"}},
-		{"www.mavio.site.", dns.TypeA, dns.RcodeNameError, nil},
+		{"s.mavio.fyi.", dns.TypeA, dns.RcodeSuccess, nil},
+		{"_psl.s.mavio.fyi.", dns.TypeTXT, dns.RcodeSuccess, []string{`"https://github.com/publicsuffix/list/pull/1"`}},
+		{"ns1.s.mavio.fyi.", dns.TypeAAAA, dns.RcodeSuccess, []string{"2001:db8::53"}},
+		{"www.s.mavio.fyi.", dns.TypeA, dns.RcodeNameError, nil},
 		{"mavio.dev.", dns.TypeA, dns.RcodeRefused, nil},
 	}
 	for _, tt := range tests {
@@ -86,7 +86,7 @@ func TestAnswer(t *testing.T) {
 func TestGlueAndEDNS(t *testing.T) {
 	h := handler(t)
 	req := new(dns.Msg)
-	req.SetQuestion("mavio.site.", dns.TypeNS)
+	req.SetQuestion("s.mavio.fyi.", dns.TypeNS)
 	req.SetEdns0(4096, false)
 	m := h.Answer(req, "udp")
 	if len(m.Extra) != 4 || m.IsEdns0() == nil {

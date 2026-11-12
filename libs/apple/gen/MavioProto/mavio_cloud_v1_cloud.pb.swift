@@ -798,7 +798,7 @@ public nonisolated struct Mavio_Cloud_V1_PublishConnectionsRequest: Sendable {
   // methods supported on all messages.
 
   /// HTTP and HTTPS base URLs, best first, such as
-  /// https://192-168-1-10.<ID>.mavio.site:8920 and http://192.168.1.10:8686.
+  /// https://192-168-1-10.<ID>.s.mavio.fyi:8920 and http://192.168.1.10:8686.
   public var urls: [String] = []
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()

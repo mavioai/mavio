@@ -11,7 +11,7 @@ import (
 )
 
 // connections returns the URLs clients reach the server at, best first
-// (docs/mavio-dev.md §4.3): the names of its addresses under mavio.site
+// (docs/mavio-dev.md §4.3): the names of its addresses under s.mavio.fyi
 // over HTTPS once it has its certificate, then its addresses over HTTP,
 // each with the base URL.
 func connections(id string, addrs []netip.Addr, httpPort, httpsPort int, certified bool, base string) []string {

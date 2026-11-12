@@ -75,7 +75,7 @@ pub fn parse_address(input: &str) -> Result<Uri> {
 
 /// Whether a server's address is on the local network: a loopback,
 /// private or link-local IP address, a `localhost` or `.local` name, or a
-/// mavio.site name of such an address (`192-168-1-10.<ID>.mavio.site`).
+/// s.mavio.fyi name of such an address (`192-168-1-10.<ID>.s.mavio.fyi`).
 /// Clients send more over it than over the internet, where an upload or a
 /// relay sets the pace.
 pub fn is_local_address(address: &str) -> bool {
@@ -93,9 +93,9 @@ pub fn is_local_address(address: &str) -> bool {
     if let Ok(ip) = host.parse::<IpAddr>() {
         return is_local_ip(ip);
     }
-    // `<address>.<ID>.mavio.site`, the address written with dashes.
+    // `<address>.<ID>.s.mavio.fyi`, the address written with dashes.
     let labels: Vec<&str> = host.split('.').collect();
-    if let [label, _, "mavio", "site"] = labels.as_slice() {
+    if let [label, _, "s", "mavio", "fyi"] = labels.as_slice() {
         let ip = label
             .replace('-', ".")
             .parse::<IpAddr>()
@@ -510,19 +510,19 @@ mod tests {
             ("localhost:8686", true),
             ("media.local", true),
             (
-                "https://192-168-1-10.abcdefghijklmnopqrstuvwxyz234567.mavio.site",
+                "https://192-168-1-10.abcdefghijklmnopqrstuvwxyz234567.s.mavio.fyi",
                 true,
             ),
             (
-                "https://fd12-3456--1.abcdefghijklmnopqrstuvwxyz234567.mavio.site",
+                "https://fd12-3456--1.abcdefghijklmnopqrstuvwxyz234567.s.mavio.fyi",
                 true,
             ),
             (
-                "https://203-0-113-5.abcdefghijklmnopqrstuvwxyz234567.mavio.site",
+                "https://203-0-113-5.abcdefghijklmnopqrstuvwxyz234567.s.mavio.fyi",
                 false,
             ),
             (
-                "https://relay-eu-abc.abcdefghijklmnopqrstuvwxyz234567.mavio.site",
+                "https://relay-eu-abc.abcdefghijklmnopqrstuvwxyz234567.s.mavio.fyi",
                 false,
             ),
             ("https://media.example.com", false),

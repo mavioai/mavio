@@ -137,7 +137,7 @@ type NetworkSettings struct {
 	BaseURL string
 	// HTTPSPort, when set, serves HTTPS on that port with the certificate
 	// and key in CertificatePath and KeyPath (PEM files) or, without them,
-	// in mavio.dev mode with the server's *.<ID>.mavio.site certificate.
+	// in mavio.dev mode with the server's *.<ID>.s.mavio.fyi certificate.
 	HTTPSPort                int
 	CertificatePath, KeyPath string
 	// LocalDiscovery answers discovery requests from clients on the local
@@ -162,7 +162,7 @@ type OutboundProxies struct {
 	Images string
 	// MavioDev reaches mavio.dev's API.
 	MavioDev string
-	// ACME reaches the certificate authorities of mavio.site
+	// ACME reaches the certificate authorities of s.mavio.fyi
 	// certificates.
 	ACME string
 }

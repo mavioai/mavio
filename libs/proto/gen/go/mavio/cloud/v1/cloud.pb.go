@@ -2454,7 +2454,7 @@ type PublishConnectionsRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	// HTTP and HTTPS base URLs, best first, such as
-	// https://192-168-1-10.<ID>.mavio.site:8920 and http://192.168.1.10:8686.
+	// https://192-168-1-10.<ID>.s.mavio.fyi:8920 and http://192.168.1.10:8686.
 	Urls []string
 }
 

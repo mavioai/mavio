@@ -694,7 +694,7 @@ pub trait ServerService: Send + Sync + 'static {
     > + Send;
     /// SetAcmeChallenge publishes the TXT values of the server's ACME DNS-01
     /// challenge at \<ID\>.acme.mavio.dev, the target of
-    /// _acme-challenge.\<ID\>.mavio.site, replacing earlier ones
+    /// _acme-challenge.\<ID\>.s.mavio.fyi, replacing earlier ones
     /// (docs/mavio-dev.md §4.2).
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
