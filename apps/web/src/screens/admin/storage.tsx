@@ -33,6 +33,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
 import { Icon, type IconName } from "../../icon.tsx";
+import { QRCode } from "../../qr.tsx";
 import { Button, Group, Row } from "../../ui.tsx";
 import { NumberField, SuggestField, Switch } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
@@ -242,18 +243,6 @@ function qrOf(help: string): HelpQR | undefined {
   }
   if (dark.length < 21) return undefined;
   return { before: lines.slice(0, start).join("\n").trim(), dark, after: lines.slice(end).join("\n").trim() };
-}
-
-/** A QR code, drawn dark on light whatever the theme, for a phone to scan. */
-function QRCode({ dark }: { dark: boolean[][] }) {
-  const width = Math.max(...dark.map((r) => r.length));
-  const d = dark.flatMap((row, y) => row.flatMap((on, x) => (on ? [`M${x} ${y}h1v1h-1z`] : []))).join("");
-  return (
-    <svg viewBox={`0 0 ${width} ${dark.length}`} role="img" aria-label="QR" className="my-2 w-56 max-w-full rounded-lg" shapeRendering="crispEdges">
-      <rect width={width} height={dark.length} fill="#fff" />
-      <path d={d} fill="#000" />
-    </svg>
-  );
 }
 
 /** The control of an option's value. */
@@ -495,7 +484,7 @@ function QuestionStep({
           ) : qr ? (
             <>
               {qr.before && <p className="type-body whitespace-pre-wrap">{qr.before}</p>}
-              <QRCode dark={qr.dark} />
+              <QRCode dark={qr.dark} className="my-2 w-56 max-w-full rounded-lg" />
               {!cancelled && <p className="type-footnote text-text-secondary">{waiting ? t("storage.waitingScan") : qr.after}</p>}
             </>
           ) : (

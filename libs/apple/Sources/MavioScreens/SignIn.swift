@@ -33,6 +33,9 @@ public struct SignInView: View {
     @Environment(\.colorScheme) private var scheme
     @Environment(\.openURL) private var openURL
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
+    #if os(iOS)
+        @Environment(\.horizontalSizeClass) private var sizeClass
+    #endif
     @State private var step = Step.welcome
     @State private var history: [Step] = []
     /// The server connected to, whose mavio.dev a Mavio account signs in at.
@@ -219,6 +222,10 @@ public struct SignInView: View {
             Text(MavioStrings.authLinkMessage(url: link.verificationUri().replacing(/^https?:\/\//, with: "")))
                 .modifier(BodyText())
             CodeBoxes(code: link.userCode())
+            #if os(iOS)
+                // On an iPad, for a phone to scan; a phone would scan itself.
+                if sizeClass == .regular { LinkQR(text: link.verificationUriComplete()) }
+            #endif
         }
         if let error {
             ErrorLine(error)
@@ -646,6 +653,23 @@ private struct CodeBoxes: View {
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: code))
+    }
+}
+
+/// The QR code of the link page with the code filled in, for a phone to
+/// scan, and the line under it.
+private struct LinkQR: View {
+    let text: String
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        if let modules = QRModules(encoding: text) {
+            VStack(spacing: 10) {
+                QRCodeView(modules, quiet: 12, radius: 12, label: text).frame(width: 168, height: 168)
+                Text(MavioStrings.authScanLinkCode).font(.system(size: 14)).foregroundStyle(theme.colors.textTertiary)
+            }
+            .frame(maxWidth: .infinity)
+        }
     }
 }
 

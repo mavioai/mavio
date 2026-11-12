@@ -1242,52 +1242,6 @@
         }
     }
 
-    /// A QR code, drawn dark on light whatever the theme, for a phone to
-    /// scan, with a quiet zone around it as scanners need.
-    private final class QRCodeView: NSView {
-        private let dark: [[Bool]]
-        private let quiet: CGFloat = 12
-
-        init(dark: [[Bool]]) {
-            self.dark = dark
-            super.init(frame: .zero)
-            translatesAutoresizingMaskIntoConstraints = false
-            let width = CGFloat(dark.map(\.count).max() ?? 0)
-            let height = CGFloat(max(dark.count, 1))
-            let side: CGFloat = 224 - quiet * 2
-            let module = min(side / max(width, 1), side / height)
-            size(width: width * module + quiet * 2, height: height * module + quiet * 2)
-            wantsLayer = true
-            layer?.cornerRadius = 8
-            layer?.masksToBounds = true
-            setAccessibilityElement(true)
-            setAccessibilityRole(.image)
-            setAccessibilityLabel("QR")
-        }
-
-        @available(*, unavailable)
-        required init?(coder: NSCoder) { fatalError() }
-
-        override var isFlipped: Bool { true }
-
-        override func draw(_ dirtyRect: NSRect) {
-            NSColor.white.setFill()
-            bounds.fill()
-            let width = CGFloat(dark.map(\.count).max() ?? 0)
-            let inner = bounds.insetBy(dx: quiet, dy: quiet)
-            let module = min(inner.width / max(width, 1), inner.height / CGFloat(max(dark.count, 1)))
-            NSColor.black.setFill()
-            for (y, row) in dark.enumerated() {
-                for (x, on) in row.enumerated() where on {
-                    CGRect(
-                        x: inner.minX + CGFloat(x) * module, y: inner.minY + CGFloat(y) * module, width: module,
-                        height: module
-                    ).fill()
-                }
-            }
-        }
-    }
-
     /// The questions of a remote's configuration — a yes or no, a choice, a
     /// value, or the token of authorizing a cloud drive — answered until
     /// none is left, shown on the page of the remote in place of its
@@ -1341,7 +1295,7 @@
                     if !qr.before.isEmpty {
                         rows.append(page.note(qr.before))
                     }
-                    let code = QRCodeView(dark: qr.dark)
+                    let code = QRView(QRModules(dark: qr.dark))
                     let holder = NSView()
                     holder.translatesAutoresizingMaskIntoConstraints = false
                     holder.addSubview(code)

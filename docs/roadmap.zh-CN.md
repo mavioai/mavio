@@ -1089,7 +1089,7 @@ flowchart TD
 - [x] `apps/relay` 与中转票据：中转按 ClientHello 中的名称把客户端的连接拼接到服务端回连的连接上，服务端以身份密钥认证；`AccountService.CreateRelayTicket`、`ServerService.ListRelays` 与 `SetRelayRegion`；服务端的 `internal/relay` 与最近的中转保持连接，并在中转来的连接上提供 TLS；两侧分别按对方的协议测试，票据以共享的测试向量核对
 - [ ] 在欧洲、美国和新加坡的虚拟机上运行 `apps/relay`，在 `apps/dns` 的配置中加入各中转的 A 与 AAAA 记录，在 Worker 的配置中加入 `RELAYS` 与 `RELAY_TICKET_SECRET`
 - [x] Web UI：新服务器上由 `/setup` 选择模式（服务端首次启动时打开），第一个登录的 Mavio 账户通过服务端推送给 mavio.dev 的授权请求（`AuthService.StartSignIn`、`/authorize?request_uri=…`）认领服务器；唯一的登录身份：Mavio 账户通过 mavio.dev 带 PKCE 的授权码流程（`/authorize`、`/auth/callback`、`/api/oauth/token`）得到设备密钥的会话，在服务器自身的 Web UI 上仅限管理员并把其他人引导到 app.mavio.dev，或独立服务器的登录；账户的每台服务器使用其发布的 URL 中第一个有应答的地址；电视上的关联代码；退出所有会话；凭 PIN 切换独立服务器的用户；用通行密钥和 TOTP 验证码登录，以及管理通行密钥、TOTP 与 PIN
-- [ ] 新服务器的电视设置页显示服务器地址的二维码，电视关联代码旁显示 mavio.dev/link 的二维码，在 Web UI 与 Apple、Android 应用中；桌面应用已在其关联代码旁显示二维码
+- [x] 新服务器的电视设置页显示服务器地址的二维码，电视关联代码旁显示 mavio.dev/link 的二维码，在 Web UI 与 Apple、Android 应用中；桌面应用已在其关联代码旁显示二维码
 - [x] Mavio 账户的服务器发布的 URL 均无应答时，经中转访问，检查发现不通的 URL 最后尝试，并在中转票据到期前续期，见 `libs/client-ts` 和共享的 Rust 核心
 - [ ] 在 Web UI 中而不是 mavio.dev 的页面上管理账户、其 Home、好友与访问记录
 - [x] 部署 app.mavio.dev：在 Cloudflare 上以该地址部署以 `VITE_MAVIO_DEV_URL` 构建的 Web UI

@@ -203,6 +203,7 @@
                 let url = link.verificationUri().replacing(/^https?:\/\//, with: "")
                 views.append(SignInStyle.text(MavioStrings.authLinkMessage(url: url), theme))
                 views.append(CodeBoxes(link.userCode(), theme: theme))
+                if let scan = SignInStyle.scan(link.verificationUriComplete(), theme) { views.append(scan) }
             }
             if let error {
                 views.append(SignInStyle.error(error, theme))

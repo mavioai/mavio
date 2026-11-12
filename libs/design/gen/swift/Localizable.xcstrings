@@ -10279,6 +10279,24 @@
         }
       }
     },
+    "auth.scanLinkCode": {
+      "comment": "Under a QR code: of the link page with the code filled in, or on a television of a new server's address.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Or scan this code with your phone's camera."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "或用手机相机扫描这个二维码。"
+          }
+        }
+      }
+    },
     "auth.openInBrowser": {
       "comment": "Opens the server's address in the browser to set it up.",
       "extractionState": "manual",

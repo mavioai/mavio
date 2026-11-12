@@ -29,6 +29,7 @@ import { Icon } from "../icon.tsx";
 import { t } from "../i18n.ts";
 import { Wordmark } from "../logo.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
+import { QRCodeOf } from "../qr.tsx";
 import { useSpatialNavigation } from "../shell/spatial.ts";
 import { Spinner } from "../ui.tsx";
 
@@ -79,6 +80,7 @@ const looks = {
     group: "rounded-[12px]",
     rowTitle: "text-[15px] font-semibold",
     digit: "h-[60px] w-12 rounded-[12px] text-[30px]",
+    qr: "w-[168px] rounded-[12px] p-3",
     icon: 18,
   },
   phone: {
@@ -94,6 +96,7 @@ const looks = {
     group: "rounded-[12px]",
     rowTitle: "text-[17px] font-semibold",
     digit: "h-[52px] w-10 rounded-[10px] text-[26px]",
+    qr: "w-[168px] rounded-[12px] p-3",
     icon: 20,
   },
   tv: {
@@ -109,6 +112,7 @@ const looks = {
     group: "",
     rowTitle: "text-[30px] font-semibold",
     digit: "h-[110px] w-[88px] rounded-[22px] text-[56px]",
+    qr: "w-[260px] rounded-[22px] p-[18px]",
     icon: 30,
   },
 } satisfies Record<Layout, Record<string, string | number>>;
@@ -332,7 +336,8 @@ function MavioSignIn({ info }: { info?: ServerInfo }) {
 
 /**
  * A television's sign-in with a Mavio account: a code to approve at
- * mavio.dev/link, polled for until approved, and replaced as it expires.
+ * mavio.dev/link, beside a QR code of the page with the code filled in,
+ * polled for until approved, and replaced as it expires.
  */
 function LinkSignIn({ info }: { info?: ServerInfo }) {
   const servers = useServersStore();
@@ -379,6 +384,7 @@ function LinkSignIn({ info }: { info?: ServerInfo }) {
     <Steps title={t("auth.signInWithMavio")} subtitle={info?.name}>
       {link && <p className={look.body}>{t("auth.linkMessage", { url: where! })}</p>}
       {link && <Code code={link.userCode} />}
+      {link && <Scan text={link.verificationUriComplete} />}
       {error ? (
         <>
           <p className="text-[15px] text-danger">{error}</p>
@@ -423,14 +429,35 @@ function Waiting() {
   );
 }
 
-/** A television's screen of a server not set up yet, which is set up in a browser. */
+/**
+ * A television's screen of a server not set up yet, which is set up in a
+ * browser: its address, and the address's QR code.
+ */
 function SetUpElsewhere({ info }: { info: ServerInfo }) {
   const look = useLook();
   return (
     <Steps eyebrow={t("auth.newServerSetup")} title={t("auth.setUpElsewhere", { server: info.name })}>
       <p className={look.body}>{t("auth.setUpElsewhereMessage")}</p>
       <p className={`font-mono font-semibold [overflow-wrap:anywhere] ${look.title}`}>{info.url.replace(/^https?:\/\//, "")}</p>
+      <Scan text={info.url} />
     </Steps>
+  );
+}
+
+/**
+ * The QR code of an address for a phone to scan, dark on white whatever the
+ * theme, and a line under it: the link page with the code filled in, or a
+ * new server's address.
+ */
+function Scan({ text }: { text: string }) {
+  const look = useLook();
+  return (
+    <div className="flex flex-col items-center gap-2.5">
+      <div className={`bg-white ${look.qr}`}>
+        <QRCodeOf text={text} className="block w-full" />
+      </div>
+      <p className={`text-center ${look.subtitle}`}>{t("auth.scanLinkCode")}</p>
+    </div>
   );
 }
 

@@ -910,33 +910,6 @@ private struct HelpQR: Equatable {
     }
 }
 
-/// A QR code, drawn dark on light whatever the theme, for a phone to scan.
-private struct QRCodeView: View {
-    let dark: [[Bool]]
-
-    var body: some View {
-        let width = dark.map(\.count).max() ?? 0
-        Canvas { context, size in
-            let module = min(size.width / CGFloat(width), size.height / CGFloat(dark.count))
-            context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(.white))
-            var path = Path()
-            for (y, row) in dark.enumerated() {
-                for (x, on) in row.enumerated() where on {
-                    path.addRect(CGRect(x: CGFloat(x) * module, y: CGFloat(y) * module, width: module, height: module))
-                }
-            }
-            context.fill(path, with: .color(.black))
-        }
-        .aspectRatio(CGFloat(width) / CGFloat(max(dark.count, 1)), contentMode: .fit)
-        // A quiet zone around it, as scanners need.
-        .padding(12)
-        .background(.white)
-        .frame(maxWidth: 224)
-        .clipShape(.rect(cornerRadius: 8))
-        .accessibilityLabel("QR")
-    }
-}
-
 /// The questions of a remote's configuration — a yes or no, a choice, a
 /// value, or the token of authorizing a cloud drive — answered until none
 /// is left. A question drawing a QR code, as 115's login asks, is answered
@@ -992,7 +965,7 @@ private struct RemoteQuestionView: View {
                 if let o = option {
                     if let qr {
                         if !qr.before.isEmpty { Text(qr.before) }
-                        QRCodeView(dark: qr.dark).frame(maxWidth: .infinity)
+                        QRCodeView(QRModules(dark: qr.dark)).frame(maxWidth: 224).frame(maxWidth: .infinity)
                         if !cancelled {
                             Text(waiting ? MavioStrings.storageWaitingScan : qr.after)
                                 .type(theme.type.footnote).foregroundStyle(theme.colors.textSecondary)

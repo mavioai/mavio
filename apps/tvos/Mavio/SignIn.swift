@@ -93,6 +93,7 @@ struct SignInView: View {
             Text(MavioStrings.authLinkMessage(url: link.verificationUri().replacing(/^https?:\/\//, with: "")))
                 .type(theme.type.body).foregroundStyle(theme.colors.textSecondary)
             CodeBoxes(code: link.userCode())
+            Scan(text: link.verificationUriComplete())
         }
         if let error {
             ErrorLine(error)
@@ -192,6 +193,7 @@ struct SignInView: View {
             Text(info.address.replacing(/^https?:\/\//, with: ""))
                 .font(.system(size: 48, weight: .semibold, design: .monospaced))
                 .foregroundStyle(theme.colors.textPrimary)
+            Scan(text: info.address)
         }
     }
 
@@ -333,6 +335,22 @@ private struct CodeBoxes: View {
         .foregroundStyle(theme.colors.textPrimary)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: code))
+    }
+}
+
+/// The QR code of an address for a phone to scan, the line beside it: the
+/// link page with the code filled in, or a new server's address.
+private struct Scan: View {
+    let text: String
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        if let modules = QRModules(encoding: text) {
+            HStack(spacing: MavioSpacing.s24) {
+                QRCodeView(modules, quiet: 16, radius: MavioRadius.lg, label: text).frame(width: 240, height: 240)
+                Text(MavioStrings.authScanLinkCode).type(theme.type.body).foregroundStyle(theme.colors.textSecondary)
+            }
+        }
     }
 }
 

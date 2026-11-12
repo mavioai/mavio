@@ -576,6 +576,7 @@ export type MessageKey =
   | 'schema.remove'
   | 'schema.needsContainer'
   | 'schema.item'
+  | 'auth.scanLinkCode'
   | 'schema.onePerLine'
   | 'schema.invalidJson'
   | 'schema.default'
@@ -2835,6 +2836,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "users.restrictionYoungerChild": "Younger child",
     "users.restrictionOlderChild": "Older child",
     "users.restrictionTeen": "Teen",
+    "auth.scanLinkCode": "Or scan this code with your phone's camera.",
     "users.notFound": "This user is no longer on the server.",
     "users.mavioDevNote": "This server uses Mavio accounts: the user's name, access and state are set at mavio.dev.",
     "users.deleteTitle": "Delete {name}?",
@@ -5092,6 +5094,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.read": "读取",
     "overview.write": "写入",
     "overview.diskAvailable": "可用，共 {total}",
+    "auth.scanLinkCode": "或用手机相机扫描这个二维码。",
     "overview.written": "已写入",
     "overview.network": "网络",
     "overview.download": "下载",

@@ -1146,7 +1146,7 @@
     <string name="auth_server_address_message">Enter the address of your Mavio server.</string>
     <!-- Signs a Mavio account in with a code approved on another device. -->
     <string name="auth_use_link_code">Use a Link Code</string>
-    <!-- Under the QR code of the link page with the code filled in. -->
+    <!-- Under a QR code: of the link page with the code filled in, or on a television of a new server's address. -->
     <string name="auth_scan_link_code">Or scan this code with your phone\'s camera.</string>
     <!-- Title while a Mavio account signs in in the browser the app opened. -->
     <string name="auth_continue_in_browser">Continue in Your Browser</string>

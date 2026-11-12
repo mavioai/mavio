@@ -54,6 +54,7 @@ import dev.mavio.design.MavioSpacing
 import dev.mavio.ui.Group
 import dev.mavio.ui.PosterWall
 import dev.mavio.ui.Pressable
+import dev.mavio.ui.QRCodeOf
 import dev.mavio.ui.R
 import dev.mavio.ui.RowDivider
 import dev.mavio.ui.SettingsField
@@ -284,6 +285,7 @@ private fun LinkStep(model: AppModel, server: ServerInfo?, onDone: () -> Unit, o
         val where = it.verificationUri().removePrefix("https://").removePrefix("http://")
         Body(stringResource(R.string.auth_link_message, where))
         Code(it.userCode())
+        Scan(it.verificationUriComplete())
     }
     val failed = error
     val first = remember { FocusRequester() }
@@ -384,6 +386,19 @@ private fun SetUpStep(info: ServerInfo) {
     Heading(stringResource(R.string.auth_set_up_elsewhere, info.name), eyebrow = stringResource(R.string.auth_new_server_setup))
     Body(stringResource(R.string.auth_set_up_elsewhere_message))
     Text(info.address, fontFamily = FontFamily.Monospace, fontSize = 40.sp, fontWeight = FontWeight.SemiBold)
+    Scan(info.address)
+}
+
+/**
+ * The QR code of an address for a phone to scan, the line beside it: the
+ * link page with the code filled in, or a new server's address.
+ */
+@Composable
+private fun Scan(text: String) {
+    Row(horizontalArrangement = Arrangement.spacedBy(24.dp), verticalAlignment = Alignment.CenterVertically) {
+        QRCodeOf(text, Modifier.size(220.dp), quiet = 16.dp, radius = 18.dp)
+        Body(stringResource(R.string.auth_scan_link_code))
+    }
 }
 
 /** A code to enter on another device, a character to a box. */

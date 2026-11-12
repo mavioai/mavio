@@ -78,6 +78,19 @@
             return centered(row)
         }
 
+        /// The QR code of the link page with the code filled in, for a
+        /// phone to scan, and the line under it; nil when it cannot be
+        /// encoded.
+        static func scan(_ text: String, _ theme: Theme) -> NSView? {
+            guard let modules = QRModules(encoding: text) else { return nil }
+            let code = QRView(
+                modules, side: theme.isTV ? 260 : 168, quiet: theme.isTV ? 18 : 12, radius: theme.isTV ? 22 : 12,
+                label: text)
+            let line = NSTextField.label(MavioStrings.authScanLinkCode, small(theme), color: theme.colors.textTertiary)
+            line.alignment = .center
+            return centered(NSStackView.vertical([code, line], spacing: 10, alignment: .centerX))
+        }
+
         /// A view centered in the step's width.
         static func centered(_ view: NSView) -> NSView {
             let holder = NSView()

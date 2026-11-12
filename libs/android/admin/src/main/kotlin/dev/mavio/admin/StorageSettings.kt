@@ -4,13 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.icu.text.NumberFormat
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,8 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
@@ -60,6 +56,7 @@ import dev.mavio.ui.MavioIcon
 import dev.mavio.ui.MavioSwitch
 import dev.mavio.ui.Pressable
 import dev.mavio.ui.PressableBox
+import dev.mavio.ui.QRCode
 import dev.mavio.ui.R
 import dev.mavio.ui.RowDivider
 import dev.mavio.ui.SettingsButton
@@ -829,22 +826,6 @@ private class HelpQR(val before: String, val dark: List<List<Boolean>>, val afte
     }
 }
 
-/** A QR code, drawn dark on light whatever the theme, for a phone to scan. */
-@Composable
-private fun QRCode(dark: List<List<Boolean>>, modifier: Modifier = Modifier) {
-    val width = dark.maxOfOrNull { it.size } ?: 0
-    Box(modifier.widthIn(max = 224.dp).clip(RoundedCornerShape(8.dp)).background(Color.White).padding(12.dp)) {
-        Canvas(Modifier.fillMaxWidth().aspectRatio(width.toFloat() / dark.size.coerceAtLeast(1))) {
-            val module = minOf(size.width / width, size.height / dark.size)
-            dark.forEachIndexed { y, row ->
-                row.forEachIndexed { x, on ->
-                    if (on) drawRect(Color.Black, Offset(x * module, y * module), Size(module + 0.5f, module + 0.5f))
-                }
-            }
-        }
-    }
-}
-
 /**
  * The questions of a remote's configuration — a yes or no, a choice, a
  * value, or the token of authorizing a cloud drive — answered until none
@@ -916,7 +897,7 @@ private fun RemoteQuestions(model: AppModel, serverId: String, name: String, que
                     if (option != null) {
                         if (qr != null) {
                             if (qr.before.isNotEmpty()) Text(qr.before, style = theme.type.body.text)
-                            QRCode(qr.dark, Modifier.align(Alignment.CenterHorizontally))
+                            QRCode(qr.dark, Modifier.align(Alignment.CenterHorizontally).widthIn(max = 224.dp))
                             if (!cancelled) {
                                 Text(
                                     if (waiting) stringResource(R.string.storage_waiting_scan) else qr.after,

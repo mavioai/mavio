@@ -1826,6 +1826,9 @@ public enum MavioStrings {
     /// Signs a Mavio account in with a code approved on another device.
     public static var authUseLinkCode: String { NSLocalizedString("auth.useLinkCode", bundle: .module, comment: "") }
 
+    /// Under a QR code: of the link page with the code filled in, or on a television of a new server's address.
+    public static var authScanLinkCode: String { NSLocalizedString("auth.scanLinkCode", bundle: .module, comment: "") }
+
     /// Opens the server's address in the browser to set it up.
     public static var authOpenInBrowser: String { NSLocalizedString("auth.openInBrowser", bundle: .module, comment: "") }
 
