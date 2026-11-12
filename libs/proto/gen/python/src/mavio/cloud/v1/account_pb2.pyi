@@ -12,7 +12,7 @@ from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class Server(_message.Message):
-    __slots__ = ("id", "public_key", "name", "version", "administrator", "access", "libraries", "claim_time", "connections")
+    __slots__ = ("id", "public_key", "name", "version", "administrator", "access", "libraries", "claim_time", "connections", "connection_checks")
     ID_FIELD_NUMBER: _ClassVar[int]
     PUBLIC_KEY_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
@@ -22,6 +22,7 @@ class Server(_message.Message):
     LIBRARIES_FIELD_NUMBER: _ClassVar[int]
     CLAIM_TIME_FIELD_NUMBER: _ClassVar[int]
     CONNECTIONS_FIELD_NUMBER: _ClassVar[int]
+    CONNECTION_CHECKS_FIELD_NUMBER: _ClassVar[int]
     id: str
     public_key: bytes
     name: str
@@ -31,7 +32,18 @@ class Server(_message.Message):
     libraries: _containers.RepeatedCompositeFieldContainer[_cloud_pb2.Library]
     claim_time: _timestamp_pb2.Timestamp
     connections: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, id: _Optional[str] = ..., public_key: _Optional[bytes] = ..., name: _Optional[str] = ..., version: _Optional[str] = ..., administrator: _Optional[_Union[_cloud_pb2.Account, _Mapping]] = ..., access: _Optional[_Union[_cloud_pb2.Access, _Mapping]] = ..., libraries: _Optional[_Iterable[_Union[_cloud_pb2.Library, _Mapping]]] = ..., claim_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., connections: _Optional[_Iterable[str]] = ...) -> None: ...
+    connection_checks: _containers.RepeatedCompositeFieldContainer[ConnectionCheck]
+    def __init__(self, id: _Optional[str] = ..., public_key: _Optional[bytes] = ..., name: _Optional[str] = ..., version: _Optional[str] = ..., administrator: _Optional[_Union[_cloud_pb2.Account, _Mapping]] = ..., access: _Optional[_Union[_cloud_pb2.Access, _Mapping]] = ..., libraries: _Optional[_Iterable[_Union[_cloud_pb2.Library, _Mapping]]] = ..., claim_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., connections: _Optional[_Iterable[str]] = ..., connection_checks: _Optional[_Iterable[_Union[ConnectionCheck, _Mapping]]] = ...) -> None: ...
+
+class ConnectionCheck(_message.Message):
+    __slots__ = ("url", "reachable", "check_time")
+    URL_FIELD_NUMBER: _ClassVar[int]
+    REACHABLE_FIELD_NUMBER: _ClassVar[int]
+    CHECK_TIME_FIELD_NUMBER: _ClassVar[int]
+    url: str
+    reachable: bool
+    check_time: _timestamp_pb2.Timestamp
+    def __init__(self, url: _Optional[str] = ..., reachable: _Optional[bool] = ..., check_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
 
 class AccessRecord(_message.Message):
     __slots__ = ("account", "access", "invitation", "create_time", "update_time")

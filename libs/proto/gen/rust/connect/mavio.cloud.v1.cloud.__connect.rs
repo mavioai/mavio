@@ -669,7 +669,9 @@ pub trait ServerService: Send + Sync + 'static {
         >,
     > + Send;
     /// PublishConnections replaces the URLs clients reach the server at,
-    /// which mavio.dev gives the accounts that reach it.
+    /// which mavio.dev gives the accounts that reach it, and checks whether
+    /// those at public addresses accept connections from the internet
+    /// (docs/mavio-dev.md §4.3).
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///

@@ -111,11 +111,66 @@ public nonisolated struct Mavio_Cloud_V1_Server: @unchecked Sendable {
     set {_uniqueStorage()._connections = newValue}
   }
 
+  /// What mavio.dev found when it last connected from the internet to the
+  /// published URLs (docs/mavio-dev.md §4.3), one for each URL it checked
+  /// that is still published. URLs of loopback, private and link-local
+  /// addresses are never checked, nor URLs published since the last check;
+  /// clients try the URLs found reachable before those found unreachable.
+  public var connectionChecks: [Mavio_Cloud_V1_ConnectionCheck] {
+    get {_storage._connectionChecks}
+    set {_uniqueStorage()._connectionChecks = newValue}
+  }
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
 
   fileprivate var _storage = _StorageClass.defaultInstance
+}
+
+/// ConnectionCheck is what mavio.dev found connecting to one of a server's
+/// published URLs.
+public nonisolated struct Mavio_Cloud_V1_ConnectionCheck: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The URL, as the server published it.
+  public var url: String {
+    get {_url ?? String()}
+    set {_url = newValue}
+  }
+  /// Returns true if `url` has been explicitly set.
+  public var hasURL: Bool {self._url != nil}
+  /// Clears the value of `url`. Subsequent reads from it will return its default value.
+  public mutating func clearURL() {self._url = nil}
+
+  /// Whether a TCP connection to the URL's host and port opened.
+  public var reachable: Bool {
+    get {_reachable ?? false}
+    set {_reachable = newValue}
+  }
+  /// Returns true if `reachable` has been explicitly set.
+  public var hasReachable: Bool {self._reachable != nil}
+  /// Clears the value of `reachable`. Subsequent reads from it will return its default value.
+  public mutating func clearReachable() {self._reachable = nil}
+
+  public var checkTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_checkTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_checkTime = newValue}
+  }
+  /// Returns true if `checkTime` has been explicitly set.
+  public var hasCheckTime: Bool {self._checkTime != nil}
+  /// Clears the value of `checkTime`. Subsequent reads from it will return its default value.
+  public mutating func clearCheckTime() {self._checkTime = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _url: String? = nil
+  fileprivate var _reachable: Bool? = nil
+  fileprivate var _checkTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 }
 
 /// AccessRecord is an account's library access record on a server.
@@ -1151,7 +1206,7 @@ fileprivate nonisolated let _protobuf_package = "mavio.cloud.v1"
 
 nonisolated extension Mavio_Cloud_V1_Server: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Server"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{3}public_key\0\u{1}name\0\u{1}version\0\u{1}administrator\0\u{1}access\0\u{1}libraries\0\u{3}claim_time\0\u{1}connections\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{3}public_key\0\u{1}name\0\u{1}version\0\u{1}administrator\0\u{1}access\0\u{1}libraries\0\u{3}claim_time\0\u{1}connections\0\u{3}connection_checks\0")
 
   fileprivate class _StorageClass {
     var _id: String? = nil
@@ -1163,6 +1218,7 @@ nonisolated extension Mavio_Cloud_V1_Server: SwiftProtobuf.Message, SwiftProtobu
     var _libraries: [Mavio_Cloud_V1_Library] = []
     var _claimTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
     var _connections: [String] = []
+    var _connectionChecks: [Mavio_Cloud_V1_ConnectionCheck] = []
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -1182,6 +1238,7 @@ nonisolated extension Mavio_Cloud_V1_Server: SwiftProtobuf.Message, SwiftProtobu
       _libraries = source._libraries
       _claimTime = source._claimTime
       _connections = source._connections
+      _connectionChecks = source._connectionChecks
     }
   }
 
@@ -1209,6 +1266,7 @@ nonisolated extension Mavio_Cloud_V1_Server: SwiftProtobuf.Message, SwiftProtobu
         case 7: try { try decoder.decodeRepeatedMessageField(value: &_storage._libraries) }()
         case 8: try { try decoder.decodeSingularMessageField(value: &_storage._claimTime) }()
         case 9: try { try decoder.decodeRepeatedStringField(value: &_storage._connections) }()
+        case 10: try { try decoder.decodeRepeatedMessageField(value: &_storage._connectionChecks) }()
         default: break
         }
       }
@@ -1248,6 +1306,9 @@ nonisolated extension Mavio_Cloud_V1_Server: SwiftProtobuf.Message, SwiftProtobu
       if !_storage._connections.isEmpty {
         try visitor.visitRepeatedStringField(value: _storage._connections, fieldNumber: 9)
       }
+      if !_storage._connectionChecks.isEmpty {
+        try visitor.visitRepeatedMessageField(value: _storage._connectionChecks, fieldNumber: 10)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1266,10 +1327,55 @@ nonisolated extension Mavio_Cloud_V1_Server: SwiftProtobuf.Message, SwiftProtobu
         if _storage._libraries != rhs_storage._libraries {return false}
         if _storage._claimTime != rhs_storage._claimTime {return false}
         if _storage._connections != rhs_storage._connections {return false}
+        if _storage._connectionChecks != rhs_storage._connectionChecks {return false}
         return true
       }
       if !storagesAreEqual {return false}
     }
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Cloud_V1_ConnectionCheck: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ConnectionCheck"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}url\0\u{1}reachable\0\u{3}check_time\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._url) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self._reachable) }()
+      case 3: try { try decoder.decodeSingularMessageField(value: &self._checkTime) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._url {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._reachable {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 2)
+    } }()
+    try { if let v = self._checkTime {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Cloud_V1_ConnectionCheck, rhs: Mavio_Cloud_V1_ConnectionCheck) -> Bool {
+    if lhs._url != rhs._url {return false}
+    if lhs._reachable != rhs._reachable {return false}
+    if lhs._checkTime != rhs._checkTime {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

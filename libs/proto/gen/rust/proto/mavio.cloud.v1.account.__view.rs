@@ -42,6 +42,17 @@ pub struct ServerView<'a> {
     ///
     /// Field 9: `connections`
     pub connections: ::buffa::RepeatedView<'a, &'a str>,
+    /// What mavio.dev found when it last connected from the internet to the
+    /// published URLs (docs/mavio-dev.md §4.3), one for each URL it checked
+    /// that is still published. URLs of loopback, private and link-local
+    /// addresses are never checked, nor URLs published since the last check;
+    /// clients try the URLs found reachable before those found unreachable.
+    ///
+    /// Field 10: `connection_checks`
+    pub connection_checks: ::buffa::RepeatedView<
+        'a,
+        super::super::__buffa::view::ConnectionCheckView<'a>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ServerView<'a> {
@@ -194,6 +205,26 @@ impl<'a> ::buffa::MessageView<'a> for ServerView<'a> {
                 )?;
                 view.connections.push(__elem);
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                ctx.register_element_memory(
+                    ::core::mem::size_of::<
+                        super::super::__buffa::view::ConnectionCheckView,
+                    >(),
+                )?;
+                view.connection_checks
+                    .push(
+                        <super::super::__buffa::view::ConnectionCheckView as ::buffa::MessageView>::decode_view_ctx(
+                            sub,
+                            __sub_ctx,
+                        )?,
+                    );
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -253,6 +284,11 @@ impl<'a> ::buffa::MessageView<'a> for ServerView<'a> {
                 None => ::buffa::MessageField::none(),
             },
             connections: self.connections.iter().map(|s| s.to_string()).collect(),
+            connection_checks: self
+                .connection_checks
+                .iter()
+                .map(|v| v.to_owned_from_source(__buffa_src))
+                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -311,6 +347,14 @@ impl<'a> ::buffa::ViewEncode<'a> for ServerView<'a> {
         for v in &self.connections {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        for v in &self.connection_checks {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -368,6 +412,14 @@ impl<'a> ::buffa::ViewEncode<'a> for ServerView<'a> {
         }
         for v in &self.connections {
             ::buffa::types::put_string_field(9u32, v, buf);
+        }
+        for v in &self.connection_checks {
+            ::buffa::types::put_len_delimited_header(
+                10u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -524,6 +576,22 @@ impl ServerOwnedView {
     pub fn connections(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
         &self.0.reborrow().connections
     }
+    /// What mavio.dev found when it last connected from the internet to the
+    /// published URLs (docs/mavio-dev.md §4.3), one for each URL it checked
+    /// that is still published. URLs of loopback, private and link-local
+    /// addresses are never checked, nor URLs published since the last check;
+    /// clients try the URLs found reachable before those found unreachable.
+    ///
+    /// Field 10: `connection_checks`
+    #[must_use]
+    pub fn connection_checks(
+        &self,
+    ) -> &::buffa::RepeatedView<
+        '_,
+        super::super::__buffa::view::ConnectionCheckView<'_>,
+    > {
+        &self.0.reborrow().connection_checks
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<ServerView<'static>>> for ServerOwnedView {
     fn from(inner: ::buffa::OwnedView<ServerView<'static>>) -> Self {
@@ -544,6 +612,311 @@ for ServerOwnedView {
 impl ::buffa::HasMessageView for super::super::Server {
     type View<'a> = ServerView<'a>;
     type ViewHandle = ServerOwnedView;
+}
+/// ConnectionCheck is what mavio.dev found connecting to one of a server's
+/// published URLs.
+#[derive(Clone, Debug, Default)]
+pub struct ConnectionCheckView<'a> {
+    /// The URL, as the server published it.
+    ///
+    /// Field 1: `url`
+    pub url: ::core::option::Option<&'a str>,
+    /// Whether a TCP connection to the URL's host and port opened.
+    ///
+    /// Field 2: `reachable`
+    pub reachable: ::core::option::Option<bool>,
+    /// Field 3: `check_time`
+    pub check_time: ::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'a>,
+    >,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for ConnectionCheckView<'a> {
+    type Owned = super::super::ConnectionCheck;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.url = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.reachable = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.check_time.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.check_time = ::buffa::MessageFieldView::set(
+                            <::buffa_types::google::protobuf::__buffa::view::TimestampView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::ConnectionCheck, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::ConnectionCheck, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::ConnectionCheck {
+            url: self.url.map(|s| s.to_string()),
+            reachable: self.reachable,
+            check_time: match self.check_time.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        ::buffa_types::google::protobuf::Timestamp,
+                        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for ConnectionCheckView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.url {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.reachable.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.check_time.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.check_time.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.url {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(v) = self.reachable {
+            ::buffa::types::put_bool_field(2u32, v, buf);
+        }
+        if self.check_time.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.check_time.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for ConnectionCheckView<'a> {
+    const PACKAGE: &'static str = "mavio.cloud.v1";
+    const NAME: &'static str = "ConnectionCheck";
+    const FULL_NAME: &'static str = "mavio.cloud.v1.ConnectionCheck";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.cloud.v1.ConnectionCheck";
+}
+::buffa::impl_default_view_instance!(ConnectionCheckView);
+::buffa::impl_view_reborrow!(ConnectionCheckView);
+/** Self-contained, `'static` owned view of a `ConnectionCheck` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`ConnectionCheckView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ConnectionCheckView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct ConnectionCheckOwnedView(::buffa::OwnedView<ConnectionCheckView<'static>>);
+impl ConnectionCheckOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ConnectionCheckOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ConnectionCheckOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::ConnectionCheck,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ConnectionCheckOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`ConnectionCheckView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &ConnectionCheckView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::ConnectionCheck {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// The URL, as the server published it.
+    ///
+    /// Field 1: `url`
+    #[must_use]
+    pub fn url(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().url
+    }
+    /// Whether a TCP connection to the URL's host and port opened.
+    ///
+    /// Field 2: `reachable`
+    #[must_use]
+    pub fn reachable(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().reachable
+    }
+    /// Field 3: `check_time`
+    #[must_use]
+    pub fn check_time(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'_>,
+    > {
+        &self.0.reborrow().check_time
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<ConnectionCheckView<'static>>>
+for ConnectionCheckOwnedView {
+    fn from(inner: ::buffa::OwnedView<ConnectionCheckView<'static>>) -> Self {
+        ConnectionCheckOwnedView(inner)
+    }
+}
+impl ::core::convert::From<ConnectionCheckOwnedView>
+for ::buffa::OwnedView<ConnectionCheckView<'static>> {
+    fn from(wrapper: ConnectionCheckOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<ConnectionCheckView<'static>>>
+for ConnectionCheckOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<ConnectionCheckView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::ConnectionCheck {
+    type View<'a> = ConnectionCheckView<'a>;
+    type ViewHandle = ConnectionCheckOwnedView;
 }
 /// AccessRecord is an account's library access record on a server.
 #[derive(Clone, Debug, Default)]

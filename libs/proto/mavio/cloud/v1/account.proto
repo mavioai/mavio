@@ -117,6 +117,22 @@ message Server {
   google.protobuf.Timestamp claim_time = 8;
   // The URLs the server published, best first.
   repeated string connections = 9;
+  // What mavio.dev found when it last connected from the internet to the
+  // published URLs (docs/mavio-dev.md §4.3), one for each URL it checked
+  // that is still published. URLs of loopback, private and link-local
+  // addresses are never checked, nor URLs published since the last check;
+  // clients try the URLs found reachable before those found unreachable.
+  repeated ConnectionCheck connection_checks = 10;
+}
+
+// ConnectionCheck is what mavio.dev found connecting to one of a server's
+// published URLs.
+message ConnectionCheck {
+  // The URL, as the server published it.
+  string url = 1;
+  // Whether a TCP connection to the URL's host and port opened.
+  bool reachable = 2;
+  google.protobuf.Timestamp check_time = 3;
 }
 
 // AccessRecord is an account's library access record on a server.

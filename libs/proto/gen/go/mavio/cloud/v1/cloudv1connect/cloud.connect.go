@@ -94,7 +94,9 @@ type ServerServiceClient interface {
 	// from anywhere.
 	PublishLibraries(context.Context, *v1.PublishLibrariesRequest) (*v1.PublishLibrariesResponse, error)
 	// PublishConnections replaces the URLs clients reach the server at,
-	// which mavio.dev gives the accounts that reach it.
+	// which mavio.dev gives the accounts that reach it, and checks whether
+	// those at public addresses accept connections from the internet
+	// (docs/mavio-dev.md §4.3).
 	PublishConnections(context.Context, *v1.PublishConnectionsRequest) (*v1.PublishConnectionsResponse, error)
 	// SetAcmeChallenge publishes the TXT values of the server's ACME DNS-01
 	// challenge at <ID>.acme.mavio.dev, the target of
@@ -330,7 +332,9 @@ type ServerServiceHandler interface {
 	// from anywhere.
 	PublishLibraries(context.Context, *v1.PublishLibrariesRequest) (*v1.PublishLibrariesResponse, error)
 	// PublishConnections replaces the URLs clients reach the server at,
-	// which mavio.dev gives the accounts that reach it.
+	// which mavio.dev gives the accounts that reach it, and checks whether
+	// those at public addresses accept connections from the internet
+	// (docs/mavio-dev.md §4.3).
 	PublishConnections(context.Context, *v1.PublishConnectionsRequest) (*v1.PublishConnectionsResponse, error)
 	// SetAcmeChallenge publishes the TXT values of the server's ACME DNS-01
 	// challenge at <ID>.acme.mavio.dev, the target of

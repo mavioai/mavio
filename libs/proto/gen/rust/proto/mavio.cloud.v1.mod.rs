@@ -156,6 +156,10 @@ pub use self::__buffa::view::ServerView;
 #[doc(inline)]
 pub use self::__buffa::view::ServerOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ConnectionCheckView;
+#[doc(inline)]
+pub use self::__buffa::view::ConnectionCheckOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::AccessRecordView;
 #[doc(inline)]
 pub use self::__buffa::view::AccessRecordOwnedView;

@@ -46,7 +46,9 @@ service ServerService {
     option idempotency_level = IDEMPOTENT;
   }
   // PublishConnections replaces the URLs clients reach the server at,
-  // which mavio.dev gives the accounts that reach it.
+  // which mavio.dev gives the accounts that reach it, and checks whether
+  // those at public addresses accept connections from the internet
+  // (docs/mavio-dev.md §4.3).
   rpc PublishConnections(PublishConnectionsRequest) returns (PublishConnectionsResponse) {
     option idempotency_level = IDEMPOTENT;
   }

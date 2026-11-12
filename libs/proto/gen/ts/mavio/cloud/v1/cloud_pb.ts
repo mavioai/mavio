@@ -922,7 +922,9 @@ export const ServerService: GenService<{
   },
   /**
    * PublishConnections replaces the URLs clients reach the server at,
-   * which mavio.dev gives the accounts that reach it.
+   * which mavio.dev gives the accounts that reach it, and checks whether
+   * those at public addresses accept connections from the internet
+   * (docs/mavio-dev.md §4.3).
    *
    * @generated from rpc mavio.cloud.v1.ServerService.PublishConnections
    */
