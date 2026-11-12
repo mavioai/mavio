@@ -6,9 +6,9 @@ import * as entrypoint from "./src/server.ts" with { type: "cf-worker" };
 
 const name = "mavio-website";
 
-// The relays' base URLs by region, each the --url of its relay, such as
-// { eu: "https://relay-eu.mavio.dev" }; without them there are no relays.
-const relays: Record<string, string> = {};
+// The relays' base URLs by region, each the --url of its relay; without
+// them there are no relays.
+const relays: Record<string, string> = { hil: "https://relay-hil.mavio.dev" };
 
 export default defineConfig(({ mode }) => ({
   worker: {
@@ -24,7 +24,9 @@ export default defineConfig(({ mode }) => ({
       APP_URL: bindings.text("https://app.mavio.dev"),
       ACME_DOMAIN: bindings.text("acme.mavio.dev"),
       HYPERDRIVE: bindings.hyperdrive({
-        id: "mavio-website",
+        // "mavio": pg-cluster's mavio database, reached at
+        // db.mavio.dev through a Cloudflare Tunnel behind Access.
+        id: "8861c3aaafbf4907a3f1dd25b27cf07c",
         dev: { connectionString: "postgres://mavio:mavio@localhost:5432/mavio" },
       }),
       NOTICES: bindings.durableObject({ worker: name, exportName: "NoticeHub" }),
