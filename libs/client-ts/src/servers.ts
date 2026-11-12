@@ -644,7 +644,8 @@ export class Servers {
    * mavio.dev page to go to, which comes back to callbackUri, where
    * finishCallback completes it and returns returnTo. The serving server
    * pushes its web UI's request to mavio.dev, and signing in to a server
-   * not claimed yet claims it; app.mavio.dev sends its own.
+   * not claimed yet claims it; app.mavio.dev sends its own. Either asks for
+   * mavio.dev's pages in the UI's language (OpenID Connect's ui_locales).
    */
   async startSignIn(returnTo = "/"): Promise<string> {
     const { api, clientId } = await this.mavioClient();
@@ -656,7 +657,7 @@ export class Servers {
         deviceKey: await this.key.publicKey(),
         state: p.state,
       });
-      return r.url;
+      return this.inLanguage(r.url);
     }
     const u = new URL(`${siteOf(api)}/authorize`);
     u.search = new URLSearchParams({
@@ -667,6 +668,14 @@ export class Servers {
       code_challenge_method: "S256",
       device_key: base64url(await this.key.publicKey()),
     }).toString();
+    return this.inLanguage(u.toString());
+  }
+
+  /** inLanguage adds the UI's language to an address of mavio.dev's pages, as their ui_locales. */
+  private inLanguage(url: string): string {
+    if (!this.language) return url;
+    const u = new URL(url);
+    u.searchParams.set("ui_locales", this.language);
     return u.toString();
   }
 

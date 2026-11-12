@@ -128,9 +128,9 @@ test("signs a Mavio account in through mavio.dev to each of its servers", async 
     CreateAssertion: (b) => ({ assertion: `assertion-for-${(b as { serverId: string }).serverId}` }),
     SignInWithAssertion: (b, init, url) => (signed.push(b as (typeof signed)[0]), signedInWithAssertion(b, init, url)),
   });
-  const servers = new Servers(memory(), "http://den:8686", { key });
+  const servers = new Servers(memory(), "http://den:8686", { key, language: "en" });
   // The serving server pushes the request to mavio.dev.
-  expect(await servers.startSignIn("/library")).toBe("https://mavio.dev/authorize?request_uri=r1");
+  expect(await servers.startSignIn("/library")).toBe("https://mavio.dev/authorize?request_uri=r1&ui_locales=en");
   expect(started[0]).toMatchObject({ redirectUri: "http://den:8686/auth/callback" });
   expect(calls).toContain("den:8686 StartSignIn");
 
@@ -171,10 +171,11 @@ test("app.mavio.dev signs in as the app and reaches servers over HTTPS only", as
     "oauth/token": (b) => ((client = (b as { client_id: string }).client_id), token()),
     ListServers: () => ({ servers: [{ id: "den", name: "Den", connections: ["http://192.168.1.2:8686"] }] }),
   });
-  const servers = new Servers(memory(), "https://app.mavio.dev", { mavioDevUrl: api, key: memoryDeviceKey() });
+  const servers = new Servers(memory(), "https://app.mavio.dev", { mavioDevUrl: api, key: memoryDeviceKey(), language: "zh-Hans" });
   expect(servers.app).toBe(true);
   const page = new URL(await servers.startSignIn());
   expect(page.searchParams.get("client_id")).toBe("app");
+  expect(page.searchParams.get("ui_locales")).toBe("zh-Hans");
   await servers.finishCallback(new URLSearchParams({ code: "c", state: page.searchParams.get("state")! }));
   expect(client).toBe("app");
   expect(servers.snapshot().map((s) => [s.id, s.url, !!s.token])).toEqual([["den", "", false]]);
