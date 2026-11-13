@@ -4,7 +4,7 @@ go 1.27.1
 
 require (
 	connectrpc.com/connect v1.21.0
-	github.com/mavioai/mavio/libs/proto v0.0.0
+	github.com/mavioai/mavio/libs/proto v0.1.0
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
 	github.com/tetratelabs/wazero v1.12.0
 	golang.org/x/text v0.41.0
