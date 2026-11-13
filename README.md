@@ -33,12 +33,20 @@ pnpm nx run plugindist:catalog
 cd apps/server && go run ./cmd/mavio --dev --dev-library ../../.fixtures/dev-library --plugin-catalog ../../plugins/catalog.json
 ```
 
-Or as a container, with media mounted under `/media`:
+Or as a container, with media mounted under `/media`, from the released image:
+
+```bash
+docker run -p 8686:8686 -v mavio:/home/mavio/.mavio -v /path/to/media:/media:ro ghcr.io/mavioai/mavio
+```
+
+or built from the checkout:
 
 ```bash
 docker buildx build -f apps/server/Dockerfile -t mavio --load .
 docker run -p 8686:8686 -v mavio:/home/mavio/.mavio -v /path/to/media:/media:ro mavio
 ```
+
+The binaries of every release, for Linux, macOS and Windows, are on [GitHub's releases](https://github.com/mavioai/mavio/releases).
 
 ## License
 

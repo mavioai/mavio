@@ -33,12 +33,20 @@ pnpm nx run plugindist:catalog
 cd apps/server && go run ./cmd/mavio --dev --dev-library ../../.fixtures/dev-library --plugin-catalog ../../plugins/catalog.json
 ```
 
-或以容器运行，把媒体挂载在 `/media` 下：
+或以容器运行，把媒体挂载在 `/media` 下，使用发布的镜像：
+
+```bash
+docker run -p 8686:8686 -v mavio:/home/mavio/.mavio -v /path/to/media:/media:ro ghcr.io/mavioai/mavio
+```
+
+或从检出的源码构建：
 
 ```bash
 docker buildx build -f apps/server/Dockerfile -t mavio --load .
 docker run -p 8686:8686 -v mavio:/home/mavio/.mavio -v /path/to/media:/media:ro mavio
 ```
+
+每个发布版本的 Linux、macOS 与 Windows 二进制见 [GitHub 的发布页](https://github.com/mavioai/mavio/releases)。
 
 ## 许可证
 
