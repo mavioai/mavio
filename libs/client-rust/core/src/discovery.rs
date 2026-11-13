@@ -2,6 +2,7 @@
 //! broadcast to port 7359, which every server with local discovery on
 //! answers with who it is and where.
 
+use std::io::ErrorKind;
 use std::net::{Ipv4Addr, SocketAddr};
 use std::time::Duration;
 
@@ -45,7 +46,20 @@ async fn discover_at(to: SocketAddr, wait: Duration) -> Result<Vec<FoundServer>>
         .await
         .map_err(io)?;
     socket.set_broadcast(true).map_err(io)?;
-    socket.send_to(REQUEST, to).await.map_err(io)?;
+    match socket.send_to(REQUEST, to).await {
+        Ok(_) => {}
+        // No network the broadcast can go out on, such as a device offline:
+        // no server is found, rather than discovery failing.
+        Err(e)
+            if matches!(
+                e.kind(),
+                ErrorKind::HostUnreachable | ErrorKind::NetworkUnreachable
+            ) =>
+        {
+            return Ok(Vec::new());
+        }
+        Err(e) => return Err(io(e)),
+    }
 
     let mut found: Vec<FoundServer> = Vec::new();
     let mut buf = [0u8; 2048];
