@@ -6,7 +6,7 @@ require (
 	buf.build/go/protovalidate v1.4.0
 	connectrpc.com/connect v1.21.0
 	github.com/mavioai/mavio/libs/plugin v0.0.0-00010101000000-000000000000
-	github.com/mavioai/mavio/libs/proto v0.0.0
+	github.com/mavioai/mavio/libs/proto v0.1.0
 	golang.org/x/net v0.61.0
 	golang.org/x/sync v0.24.0
 	google.golang.org/protobuf v1.36.12

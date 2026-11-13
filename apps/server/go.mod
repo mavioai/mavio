@@ -17,7 +17,7 @@ require (
 	github.com/mavioai/mavio/libs/metadata v0.0.0
 	github.com/mavioai/mavio/libs/naming v0.0.0
 	github.com/mavioai/mavio/libs/plugin v0.0.0
-	github.com/mavioai/mavio/libs/proto v0.0.0
+	github.com/mavioai/mavio/libs/proto v0.1.0
 	github.com/mavioai/mavio/libs/rclone v0.0.0
 	github.com/mavioai/mavio/libs/release v0.0.0
 	github.com/mavioai/mavio/libs/store v0.0.0

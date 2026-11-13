@@ -7,7 +7,7 @@ require (
 	github.com/andybalholm/cascadia v1.3.4
 	github.com/bodgit/sevenzip v1.6.5
 	github.com/mavioai/mavio/libs/plugin v0.0.0
-	github.com/mavioai/mavio/libs/proto v0.0.0
+	github.com/mavioai/mavio/libs/proto v0.1.0
 	github.com/mavioai/mavio/libs/release v0.0.0
 	github.com/nwaples/rardecode/v2 v2.4.5
 	github.com/ulikunitz/xz v0.5.15
