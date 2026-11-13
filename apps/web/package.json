@@ -42,6 +42,13 @@
     "name": "web",
     "targets": {
       "build": {
+        "inputs": [
+          "default",
+          "^default",
+          {
+            "env": "MAVIO_VERSION"
+          }
+        ],
         "outputs": [
           "{workspaceRoot}/apps/server/internal/webui/dist"
         ],

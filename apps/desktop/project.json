@@ -20,7 +20,7 @@
     "app": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "go run .",
+        "command": "go run -buildvcs=true -ldflags \"-X main.version=$MAVIO_VERSION\" .",
         "cwd": "{projectRoot}"
       },
       "dependsOn": ["resources"],

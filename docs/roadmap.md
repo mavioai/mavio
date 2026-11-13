@@ -126,7 +126,7 @@ flowchart TD
 | P20 | Discovery and requests | ✅ Done |
 | P21 | Clients and ecosystem | In progress |
 | P22 | Real-device acceptance | Not started |
-| P23 | Packaging and release | Not started |
+| P23 | Packaging and release | ✅ Done |
 | P24 | Storage I/O efficiency | ✅ Done |
 | P25 | Storage backends and rclone | In progress |
 | P26 | Subtitle acquisition | ✅ Done |
@@ -927,7 +927,7 @@ flowchart TD
 **Progress**:
 - [x] Tag `libs/proto` and `libs/plugin` releases: `libs/proto/v0.1.0`, then `libs/plugin/v0.1.0` requiring it
 - [x] Publish the server's release binaries and container images: the Release workflow on a `v*` tag, first v0.1.0, with the image at `ghcr.io/mavioai/mavio`
-- [ ] The client's and the core's versions as the server's ([Development §7](development.md#7-releases-and-versioning)) in the web UI and the desktop app, which the Android apps, the Apple apps and the core already follow, and About in the settings of the web UI and the desktop app as the Android apps'
+- [x] The client's and the core's versions as the server's ([Development §7](development.md#7-releases-and-versioning)) in the web UI and the desktop app, which the Android apps, the Apple apps and the core already follow, and About in the settings of the web UI and the desktop app as the Android apps'
 - [x] The Apple apps' versions as the server's, set in their built `Info.plist` by the projects' Version phase, and About in their settings as the Android apps': the iPhone and iPad app's in an About group after the Server group, as Apple TV's and the Mac's — the app's name as the servers know it, its version and build, the core's version and the license, and the device's name and ID, maker, model, system and architecture
 - [x] Package the first-party plugins and their catalog (`tools/plugindist`); `plugin-catalog` defaults to the `catalog.json` of mavioai/plugins' latest release
 - [x] Publish the official plugin catalog: the mavioai/plugins repository, whose Release workflow, run by hand, takes the source of a Mavio release, runs `plugindist:dist` and publishes the packages and `catalog.json` as a release, first v0.1.0

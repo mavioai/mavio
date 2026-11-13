@@ -31,13 +31,16 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
 
 # The web UI, which the server embeds.
 FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-trixie-slim AS web
+# The release's version, which the web UI shows as its own; without it, dev,
+# as the build context has no .git.
+ARG VERSION
 WORKDIR /src
 COPY . .
 COPY --from=intent /out/intent.wasm libs/intent/dist/intent.wasm
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
 	npm install -g "$(node -p 'require("./package.json").packageManager')" \
 	&& pnpm install --frozen-lockfile --filter @mavio/web... \
-	&& pnpm --filter @mavio/web build
+	&& MAVIO_VERSION="$VERSION" pnpm --filter @mavio/web build
 
 # The agent plugin, a TypeScript process plugin compiled by Bun for the target platform.
 FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-trixie-slim AS agent

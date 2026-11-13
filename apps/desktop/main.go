@@ -103,7 +103,7 @@ func run() error {
 		Id:            device,
 		Name:          strings.TrimSuffix(host, ".local"),
 		Client:        "Mavio for " + platforms[runtime.GOOS],
-		ClientVersion: mygo.App.Version(),
+		ClientVersion: appVersion(),
 	}.Build()
 	client, err := lib.Open(ctx, capiv1.Open_builder{
 		DatabasePath: filepath.Join(data, "core.db"),

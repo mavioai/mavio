@@ -29,7 +29,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm nx run server:dist --skip-nx-cache --output-style=static
         env:
+          # The server's, and the web UI's it embeds.
           VERSION: ${{ github.ref_name }}
+          MAVIO_VERSION: ${{ github.ref_name }}
       - name: Publish the release
         working-directory: apps/server/dist
         env:
