@@ -38,11 +38,7 @@ func (o *origin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("ETag", etag)
-	cw := &countWriter{ResponseWriter: w}
-	http.ServeContent(cw, r, "", time.Time{}, bytes.NewReader(data))
-	o.mu.Lock()
-	o.served += cw.n
-	o.mu.Unlock()
+	http.ServeContent(&countWriter{ResponseWriter: w, o: o}, r, "", time.Time{}, bytes.NewReader(data))
 }
 
 func (o *origin) stats() (reqs int, served int64) {
@@ -51,15 +47,24 @@ func (o *origin) stats() (reqs int, served int64) {
 	return o.reqs, o.served
 }
 
+// countWriter counts the bytes served before writing them, so that the
+// count is whole once the client has read them all.
 type countWriter struct {
 	http.ResponseWriter
-	n int64
+	o *origin
 }
 
 func (w *countWriter) Write(p []byte) (int, error) {
+	w.o.add(int64(len(p)))
 	n, err := w.ResponseWriter.Write(p)
-	w.n += int64(n)
+	w.o.add(int64(n - len(p)))
 	return n, err
+}
+
+func (o *origin) add(n int64) {
+	o.mu.Lock()
+	o.served += n
+	o.mu.Unlock()
 }
 
 // newOrigin serves size random bytes; the cache returned reads them.

@@ -160,7 +160,7 @@ func TestManifestContainers(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if cmd := c.GetCommand(); len(cmd) != 4 || cmd[3] != string(script) {
+		if cmd := c.GetCommand(); len(cmd) != 4 || cmd[3] != strings.ReplaceAll(string(script), "\r\n", "\n") {
 			t.Errorf("container %s: command does not run containers/%s.py as it is; copy it into manifest.json", name, name)
 		}
 	}

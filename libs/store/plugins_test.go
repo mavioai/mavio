@@ -2,6 +2,7 @@ package store_test
 
 import (
 	"errors"
+	"path/filepath"
 	"testing"
 
 	"github.com/mavioai/mavio/libs/core"
@@ -59,12 +60,13 @@ func TestPluginContainers(t *testing.T) {
 		ctx := t.Context()
 		r := s.PluginContainers()
 		const id = "dev.mavio.voice"
+		downloads := filepath.ToSlash(t.TempDir())
 		if got, err := r.List(ctx, id); err != nil || len(got) != 0 {
 			t.Errorf("List before Put = %+v, %v, want none", got, err)
 		}
 		puts := []core.PluginContainer{
 			{PluginID: id, Name: "whisper", Mode: core.ContainerUnset, Secrets: map[string]string{"api-key": "s3cret"}},
-			{PluginID: id, Name: "tts", Mode: core.ContainerManaged, UseGPU: true, Proxy: core.SystemProxyID, Folders: map[string]string{"downloads": "/srv/downloads"}, PeerPort: 6881},
+			{PluginID: id, Name: "tts", Mode: core.ContainerManaged, UseGPU: true, Proxy: core.SystemProxyID, Folders: map[string]string{"downloads": downloads}, PeerPort: 6881},
 			{PluginID: "org.example.other", Name: "whisper", Mode: core.ContainerUnset},
 		}
 		for i := range puts {
@@ -85,7 +87,7 @@ func TestPluginContainers(t *testing.T) {
 			t.Fatalf("List = %+v, want tts and whisper", got)
 		}
 		if g := got[0]; g.Mode != core.ContainerManaged || !g.UseGPU || g.Proxy != core.SystemProxyID || g.Address != "" || len(g.Secrets) != 0 || g.UpdatedAt.IsZero() ||
-			g.Folders["downloads"] != "/srv/downloads" || g.PeerPort != 6881 {
+			g.Folders["downloads"] != downloads || g.PeerPort != 6881 {
 			t.Errorf("tts = %+v, want managed with a GPU", g)
 		}
 		if g := got[1]; g.Mode != core.ContainerExternal || g.Address != ext.Address || g.Secrets["api-key"] != "s3cret" || g.UseGPU {
