@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
-	"strconv"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -716,7 +715,7 @@ func TestSetFolders(t *testing.T) {
 		return running
 	})
 	spec, _, _ := engine.Spec("mavio-voice-qbittorrent")
-	uid, gid := strconv.Itoa(os.Getuid()), strconv.Itoa(os.Getgid())
+	uid, gid := dependencies.ServerUser()
 	pw := d.Kept.Secrets["password"]
 	if len(spec.Binds) != 1 || spec.Binds[0] != (containers.Bind{Source: folder, Target: "/downloads"}) || spec.PeerPort != 51000 ||
 		!slices.Equal(spec.Entrypoint, []string{"/bin/sh"}) || !slices.Equal(spec.Cmd, []string{"-c", "echo " + pw + " 51000; exec /init"}) ||
