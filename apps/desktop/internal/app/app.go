@@ -10,6 +10,7 @@ import (
 	goruntime "runtime"
 	"slices"
 	"strings"
+	"sync/atomic"
 
 	"github.com/egoist/mygo/ui"
 
@@ -145,8 +146,11 @@ type preferences struct {
 
 // App is the app's state, owned by the main thread.
 type App struct {
-	ctx    context.Context
-	opts   Options
+	ctx  context.Context
+	opts Options
+	// loads counts the tasks loading whose result has not reached the
+	// main thread yet.
+	loads  atomic.Int64
 	prefs  preferences
 	router *ui.Router
 	// inSettings is whether the last frame showed the settings' layout;

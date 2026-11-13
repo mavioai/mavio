@@ -407,6 +407,7 @@ type harness struct {
 	app     *App
 	core    *fakeCore
 	tt      *ui.Tester
+	images  *images.Loader
 	updates chan func()
 	// video is the player's latest video.
 	video *fakeVideo
@@ -420,10 +421,15 @@ func newHarness(t testing.TB, signedIn bool, width, height int) *harness {
 	h := &harness{t: t, core: newFakeCore(s, srv.URL, signedIn), updates: make(chan func(), 256)}
 	update := func(fn func()) { h.updates <- fn }
 	ctx, cancel := context.WithCancel(context.Background())
-	t.Cleanup(cancel)
+	h.images = images.New(ctx, srv.Client(), t.TempDir(), 200, update)
+	// The images stop writing to their folder before it is removed.
+	t.Cleanup(func() {
+		cancel()
+		h.images.Wait()
+	})
 	h.app = New(ctx, Options{
 		Core:   h.core,
-		Images: images.New(ctx, srv.Client(), t.TempDir(), 200, update),
+		Images: h.images,
 		Update: update,
 		OpenURL: func(url string) error {
 			h.opened = append(h.opened, url)
@@ -442,12 +448,16 @@ func newHarness(t testing.TB, signedIn bool, width, height int) *harness {
 }
 
 // settle runs what the goroutines sent the main thread until they send no
-// more for a while, drawing frames between. It draws one first, so that
-// what a change since the last starts loading, as a page pushed, loads
-// within the wait.
+// more for a while and nothing loads, drawing frames between. It draws one
+// first, so that what a change since the last starts loading, as a page
+// pushed, loads within the wait. Waiting for the loads keeps a slow
+// machine's late results from changing the page between a test's steps.
 func (h *harness) settle() {
 	h.t.Helper()
 	h.tt.Frame()
+	// Loads that never end, as those a test holds, are waited for no
+	// longer than this.
+	deadline := time.Now().Add(10 * time.Second)
 	for {
 		select {
 		case fn := <-h.updates:
@@ -461,6 +471,9 @@ func (h *harness) settle() {
 				h.tt.Frame()
 				continue
 			default:
+			}
+			if (h.app.loads.Load() > 0 || h.images.Pending() > 0) && time.Now().Before(deadline) {
+				continue
 			}
 			// Let the animations end.
 			h.tt.Advance(time.Second)

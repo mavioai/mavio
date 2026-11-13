@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/egoist/mygo/ui"
 )
@@ -30,6 +31,10 @@ type Loader struct {
 	update func(func())
 	slots  chan struct{}
 	limit  int
+	// loads are the loads started, and pending those whose result has
+	// not been given to update yet.
+	loads   sync.WaitGroup
+	pending atomic.Int64
 
 	// Owned by the main thread.
 	entries map[string]*list.Element
@@ -78,9 +83,21 @@ func (l *Loader) Get(url string, width, scale float32) *ui.Bitmap {
 		l.order.Remove(last)
 		delete(l.entries, last.Value.(*entry).key)
 	}
-	go l.load(e)
+	l.pending.Add(1)
+	l.loads.Go(func() {
+		defer l.pending.Add(-1)
+		l.load(e)
+	})
 	return nil
 }
+
+// Pending reports how many images are loading, whose result has not
+// been given to update yet.
+func (l *Loader) Pending() int { return int(l.pending.Load()) }
+
+// Wait waits for the loads started to end, as they do soon after ctx
+// ends.
+func (l *Loader) Wait() { l.loads.Wait() }
 
 // Failed reports whether the image at url, sized as Get sizes it, failed
 // to load.

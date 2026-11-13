@@ -25,7 +25,9 @@ func load[T any](a *App, t *task[T], key string, fn func(ctx context.Context) (T
 		return t
 	}
 	t.key, t.loading, t.started = key, true, time.Now()
+	a.loads.Add(1)
 	go func() {
+		defer a.loads.Add(-1)
 		v, err := fn(a.ctx)
 		if err != nil {
 			slog.WarnContext(a.ctx, "load failed", "key", key, "err", err)
