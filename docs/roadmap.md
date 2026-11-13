@@ -925,12 +925,12 @@ flowchart TD
 **Done when**: a plugin outside the repository builds against the tagged `libs/proto` and `libs/plugin` with `GOWORK=off` and no `replace`; the release binaries and images of a version are published and the images start.
 
 **Progress**:
-- [ ] Tag `libs/proto` and `libs/plugin` releases
-- [ ] Publish the server's release binaries and container images
+- [x] Tag `libs/proto` and `libs/plugin` releases: `libs/proto/v0.1.0`, then `libs/plugin/v0.1.0` requiring it
+- [x] Publish the server's release binaries and container images: the Release workflow on a `v*` tag, first v0.1.0, with the image at `ghcr.io/mavioai/mavio`
 - [ ] The client's and the core's versions as the server's ([Development §7](development.md#7-releases-and-versioning)) in the web UI and the desktop app, which the Android apps, the Apple apps and the core already follow, and About in the settings of the web UI and the desktop app as the Android apps'
 - [x] The Apple apps' versions as the server's, set in their built `Info.plist` by the projects' Version phase, and About in their settings as the Android apps': the iPhone and iPad app's in an About group after the Server group, as Apple TV's and the Mac's — the app's name as the servers know it, its version and build, the core's version and the license, and the device's name and ID, maker, model, system and architecture
 - [x] Package the first-party plugins and their catalog (`tools/plugindist`); `plugin-catalog` defaults to the `catalog.json` of mavioai/plugins' latest release
-- [ ] Publish the official plugin catalog: create the mavioai/plugins repository, whose workflow takes the source of Mavio's latest release, runs `plugindist:dist` and publishes the packages and `catalog.json` as a release
+- [x] Publish the official plugin catalog: the mavioai/plugins repository, whose Release workflow, run by hand, takes the source of a Mavio release, runs `plugindist:dist` and publishes the packages and `catalog.json` as a release, first v0.1.0
 
 ### P24 Storage I/O Efficiency
 **Scope**: what the server reads of media on its own, by the cost of reading it ([Optimization §2](optimization.md#2-storage-access-by-storage-class)): storage classes of library paths, keyframes from container indexes, trickplay from keyframes, embedded subtitles cached once on local storage and read while playing on cloud storage.

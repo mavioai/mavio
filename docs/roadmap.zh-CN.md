@@ -925,12 +925,12 @@ flowchart TD
 **完成标准**：仓库外的插件以 `GOWORK=off`、不用 `replace` 基于打了标签的 `libs/proto` 与 `libs/plugin` 构建成功；某个版本的二进制与镜像已发布，且镜像能启动。
 
 **进度**：
-- [ ] 为 `libs/proto` 与 `libs/plugin` 打发布标签
-- [ ] 发布服务端的版本二进制与容器镜像
+- [x] 为 `libs/proto` 与 `libs/plugin` 打发布标签：`libs/proto/v0.1.0`，以及依赖它的 `libs/plugin/v0.1.0`
+- [x] 发布服务端的版本二进制与容器镜像：推送 `v*` 标签时由 Release 工作流发布，首个版本为 v0.1.0，镜像位于 `ghcr.io/mavioai/mavio`
 - [ ] Web UI 与桌面应用的客户端版本与 Core 版本采用与服务端一致的规则（[开发 §7](development.zh-CN.md#7-发布与版本)），Android 应用、Apple 应用与核心已采用；并在 Web UI 与桌面应用的设置中加入与 Android 应用一致的“关于”
 - [x] Apple 应用的版本采用与服务端一致的规则，由工程的 Version 构建阶段写入构建出的 `Info.plist`；其设置中与 Android 应用一致的“关于”：iPhone 与 iPad 应用的位于“服务器”分组之后的“关于”分组中，与 Apple TV 和 Mac 一致——服务器所知的应用名称、版本与构建号、Core 版本与许可证，以及设备的名称与 ID、制造商、型号、系统与架构
 - [x] 第一方插件及其目录的打包（`tools/plugindist`）；`plugin-catalog` 默认是 mavioai/plugins 最新发布版本的 `catalog.json`
-- [ ] 发布官方插件目录：创建 mavioai/plugins 仓库，其工作流取得 Mavio 最新发布版本的源码，运行 `plugindist:dist`，并把各插件的包与 `catalog.json` 作为一个发布版本发布
+- [x] 发布官方插件目录：mavioai/plugins 仓库的 Release 工作流手动运行，取得 Mavio 某个发布版本的源码，运行 `plugindist:dist`，并把各插件的包与 `catalog.json` 作为一个发布版本发布，首个版本为 v0.1.0
 
 ### P24 存储 I/O 效率
 **范围**：按读取的代价决定服务端自行读取多少媒体（[优化 §2](optimization.zh-CN.md#2-按存储类别访问存储storage-access-by-storage-class)）：媒体库路径的存储类别；从容器索引读取关键帧；只用关键帧生成 trickplay；本地存储上的内嵌字幕一次提取并缓存，云存储上边播边读。
