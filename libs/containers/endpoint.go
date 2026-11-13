@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -53,7 +54,8 @@ func ParseEndpoint(s string) (Endpoint, error) {
 	}
 	switch network {
 	case Unix:
-		if !strings.HasPrefix(address, "/") {
+		// Windows has Unix sockets too, at paths such as C:/Users/….
+		if !strings.HasPrefix(address, "/") && !filepath.IsAbs(filepath.FromSlash(address)) {
 			return Endpoint{}, fmt.Errorf("container endpoint %q: want an absolute socket path: %w", s, core.ErrInvalid)
 		}
 		return Endpoint{Network: Unix, Address: path.Clean(address)}, nil
