@@ -118,14 +118,22 @@ func (s *Service) askRun(ctx context.Context, p auth.Principal, set core.Assista
 		r.mu.Unlock()
 		cause := context.Cause(attempt)
 		cancel(nil)
+		// An abort closes stopped before it cancels the attempt, so a held
+		// call can fail on it and end the turn before the cancel lands.
+		aborted := errors.Is(cause, errAborted)
+		select {
+		case <-r.stopped:
+			aborted = true
+		default:
+		}
 		switch {
-		case errors.Is(cause, errSteered):
-			continue
-		case errors.Is(cause, errAborted):
+		case aborted:
 			t.done = assistantv1.Done_builder{Cancelled: new(true), Language: &t.lang}.Build()
 			t.d.mu.Lock()
 			t.done.SetConversationId(t.d.conversation)
 			t.d.mu.Unlock()
+		case errors.Is(cause, errSteered):
+			continue
 		case ctx.Err() != nil:
 			// The session went away: the model's run is aborted too.
 			s.abortAI(context.WithoutCancel(ctx), t)
