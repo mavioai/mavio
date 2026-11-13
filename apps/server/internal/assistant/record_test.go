@@ -17,6 +17,7 @@ func TestRecorderKeepsSpeechWithItsAnswer(t *testing.T) {
 	dir := t.TempDir()
 	// Without ffmpeg, speech is kept as WAV.
 	r := newRecorder(dir, "", slog.New(slog.DiscardHandler))
+	t.Cleanup(func() { _ = r.close() })
 	const answer = "天气预报我可管不着啦。现在是凌晨 1 点多。"
 	pcm := bytes.Repeat([]byte{1, 0}, 2400)
 	if err := r.keepPCM(t.Context(), "52", answer, pcm, 24000); err != nil {
@@ -63,6 +64,7 @@ func TestRecorderEncodesOpus(t *testing.T) {
 		t.Skip("ffmpeg is not installed")
 	}
 	r := newRecorder(t.TempDir(), ffmpeg, slog.New(slog.DiscardHandler))
+	t.Cleanup(func() { _ = r.close() })
 	if err := r.keepPCM(t.Context(), "52", "answer", make([]byte, 48000), 24000); err != nil {
 		t.Fatal(err)
 	}
@@ -73,6 +75,7 @@ func TestRecorderEncodesOpus(t *testing.T) {
 
 func TestRecorderRefuses(t *testing.T) {
 	r := newRecorder(t.TempDir(), "", slog.New(slog.DiscardHandler))
+	t.Cleanup(func() { _ = r.close() })
 	if err := r.keepPCM(t.Context(), "../up", "answer", []byte{0, 0}, 24000); err != nil || r.has("../up", "answer") {
 		t.Errorf("keepPCM outside the folder = %v, kept %v; want refused", err, r.has("../up", "answer"))
 	}
@@ -85,6 +88,7 @@ func TestRecorderRefuses(t *testing.T) {
 		}
 	}
 	none := newRecorder("", "", slog.New(slog.DiscardHandler))
+	t.Cleanup(func() { _ = none.close() })
 	if err := none.keepPCM(t.Context(), "52", "a", []byte{0, 0}, 24000); err != nil || none.has("52", "a") {
 		t.Error("a recorder without a folder keeps speech")
 	}
@@ -93,6 +97,7 @@ func TestRecorderRefuses(t *testing.T) {
 func TestRecorderPrunes(t *testing.T) {
 	dir := t.TempDir()
 	r := newRecorder(dir, "", slog.New(slog.DiscardHandler))
+	t.Cleanup(func() { _ = r.close() })
 	now := time.Now()
 	for _, conv := range []string{"1", "2", "3"} {
 		if err := r.keepPCM(t.Context(), conv, "answer", []byte{0, 0}, 24000); err != nil {

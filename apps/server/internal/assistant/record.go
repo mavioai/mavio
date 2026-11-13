@@ -60,6 +60,14 @@ func newRecorder(dir, ffmpeg string, log *slog.Logger) *recorder {
 	return r
 }
 
+// close closes the folder speech is kept in.
+func (r *recorder) close() error {
+	if r.root == nil {
+		return nil
+	}
+	return r.root.Close()
+}
+
 // answerKey names an answer's files after its text.
 func answerKey(text string) string {
 	sum := sha256.Sum256([]byte(strings.TrimSpace(text)))

@@ -521,6 +521,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		},
 		ServerName: serverName, SpeechDir: cfg.SpeechDir, FFmpeg: ffmpegPath(cfg.FFmpeg), Activity: activityLog, Logger: log,
 	})
+	defer func() { _ = helper.Close() }()
 	h, err := httpserver.Handler(httpserver.Options{
 		Assistant: helper,
 		Version:   cfg.Version, Store: db, Identity: key, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,

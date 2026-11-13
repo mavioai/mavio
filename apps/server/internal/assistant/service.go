@@ -143,6 +143,13 @@ func (s *Service) Run(ctx context.Context) {
 	}
 }
 
+// Close waits for the answers' speech being kept and closes the folder
+// it is kept in; the Service serves nothing after.
+func (s *Service) Close() error {
+	s.keeping.Wait()
+	return s.rec.close()
+}
+
 // caller returns the request's principal, refusing a disabled assistant.
 func (s *Service) caller(ctx context.Context) (auth.Principal, core.AssistantSettings, error) {
 	p, ok := auth.FromContext(ctx)

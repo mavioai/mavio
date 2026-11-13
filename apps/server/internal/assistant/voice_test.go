@@ -122,6 +122,7 @@ func newVoiceService(t *testing.T, f *fakeVoicePlugin) (*Service, *httptest.Serv
 			return f.plugin(), true
 		},
 	})
+	t.Cleanup(func() { _ = s.Close() })
 	mux := http.NewServeMux()
 	mux.Handle("GET "+VoicePath, s.VoiceHandler())
 	return s, httptest.NewServer(mux)
