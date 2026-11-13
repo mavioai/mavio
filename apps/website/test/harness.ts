@@ -24,11 +24,27 @@ export const apiURL = `${baseURL}/api`;
 /** The relays' ticket secret, that of apps/relay's ticket test vector. */
 export const relaySecret = new TextEncoder().encode("0123456789abcdef0123456789abcdef");
 
+let migrated: Promise<Blob> | undefined;
+
+/**
+ * emptyDatabase returns the data directory of an empty database, migrated once for the test file: starting PGlite
+ * from it is several times faster than starting it empty and migrating, which slow machines need.
+ */
+function emptyDatabase() {
+  migrated ??= (async () => {
+    const pg = new PGlite();
+    await migrate(drizzle(pg), { migrationsFolder: fileURLToPath(new URL("../drizzle", import.meta.url)) });
+    const dir = await pg.dumpDataDir("none");
+    await pg.close();
+    return dir;
+  })();
+  return migrated;
+}
+
 /** newSite returns a mavio.dev over an empty database, selling Mavio Pass through stripe when given. */
 export async function newSite(options: { stripe?: Stripe } = {}) {
-  const pg = new PGlite();
+  const pg = new PGlite({ loadDataDir: await emptyDatabase() });
   const db = drizzle(pg, { schema }) as unknown as Database;
-  await migrate(drizzle(pg), { migrationsFolder: fileURLToPath(new URL("../drizzle", import.meta.url)) });
   const mails: Mail[] = [];
   const mailer: Mailer = {
     send: async (m) => {
