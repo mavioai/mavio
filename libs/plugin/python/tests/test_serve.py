@@ -12,7 +12,7 @@ import pytest
 
 from mavio.plugin.v1 import plugin_pb2
 from mavio_plugin import ENV_SOCKET, ENV_TOKEN, serve
-from mavio_plugin.serve import Receive, Scope, Send
+from mavio_plugin.serve import Receive, Scope, Send, loopback
 
 TOKEN = "secret-token"
 
@@ -40,7 +40,8 @@ class _Running:
 @pytest.fixture
 async def plugin(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[_Running]:
     # Unix socket paths are short: macOS's temporary folder is too deep.
-    folder = Path(tempfile.mkdtemp(prefix="mp-", dir="/tmp"))
+    # On Windows the plugin serves on loopback TCP instead.
+    folder = Path(tempfile.mkdtemp(prefix="mp-", dir=None if loopback() else "/tmp"))
     sock = str(folder / "plugin.sock")
     monkeypatch.setenv(ENV_SOCKET, sock)
     monkeypatch.setenv(ENV_TOKEN, TOKEN)
@@ -67,9 +68,13 @@ async def plugin(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[_Running]:
         if stdout.getvalue():
             break
         await asyncio.sleep(0.01)
-    client = httpx.AsyncClient(
-        transport=httpx.AsyncHTTPTransport(uds=sock), base_url="http://plugin"
-    )
+    address = json.loads(stdout.getvalue()).get("address")
+    if address:
+        client = httpx.AsyncClient(base_url=f"http://{address}", trust_env=False)
+    else:
+        client = httpx.AsyncClient(
+            transport=httpx.AsyncHTTPTransport(uds=sock), base_url="http://plugin"
+        )
     running = _Running(task, stdout, client)
     running.configured = configured
     try:
@@ -89,6 +94,8 @@ def _auth(token: str = TOKEN) -> dict[str, str]:
 
 async def test_handshake(plugin: _Running) -> None:
     line = json.loads(plugin.stdout.getvalue())
+    if loopback():
+        assert line.pop("address").startswith("127.0.0.1:")
     assert line == {"mavio_plugin": 1, "plugin_id": "org.example.py"}
 
 
