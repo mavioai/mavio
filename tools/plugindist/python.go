@@ -139,16 +139,22 @@ func BuildPython(ctx context.Context, dir, goos, arch, folder string) error {
 	version := strings.TrimSpace(string(versionData))
 	minor := strings.Join(strings.SplitN(version, ".", 3)[:2], ".")
 
-	tmp, err := os.MkdirTemp("", "plugindist-python-")
+	if err := os.MkdirAll(folder, 0o755); err != nil {
+		return err
+	}
+	// The interpreter is installed beside the folder, so that it moves in
+	// on the same volume: Windows renames across none.
+	tmp, err := os.MkdirTemp(filepath.Dir(folder), ".python-")
 	if err != nil {
 		return err
 	}
 	defer os.RemoveAll(tmp)
-	key := "cpython-" + version + "-" + target.python
-	if err := run(ctx, root, nil, "uv", "python", "install", key, "--install-dir", filepath.Join(tmp, "python"), "--no-bin"); err != nil {
+	// uv runs in the workspace's root.
+	if tmp, err = filepath.Abs(tmp); err != nil {
 		return err
 	}
-	if err := os.MkdirAll(folder, 0o755); err != nil {
+	key := "cpython-" + version + "-" + target.python
+	if err := run(ctx, root, nil, "uv", "python", "install", key, "--install-dir", filepath.Join(tmp, "python"), "--no-bin"); err != nil {
 		return err
 	}
 	python := filepath.Join(folder, "python")
