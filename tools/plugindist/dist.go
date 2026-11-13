@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -312,6 +313,16 @@ func devLauncher(dir, exe string) error {
 	return os.WriteFile(exe, []byte(launcher), 0o755)
 }
 
+// executable reports whether the file name of a package is executable:
+// the plugin's executable, the files of a bin directory (the interpreter
+// of python-build-standalone), and what the host marks executable. Windows
+// marks nothing, so the first two keep the executables of packages for
+// Unix built there executable.
+func executable(name string, mode fs.FileMode) bool {
+	return mode&0o111 != 0 || slices.Contains([]string{"plugin", "plugin.exe", "plugin.wasm"}, name) ||
+		path.Base(path.Dir(name)) == "bin"
+}
+
 // zipFolder zips the plugin's manifest and translations, and what was
 // built into folder: the plugin's executable, and the files beside it,
 // whose executables stay executable.
@@ -350,7 +361,7 @@ func zipFolder(w io.Writer, src, folder string, modified time.Time) error {
 			return err
 		}
 		mode := fs.FileMode(0o644)
-		if info.Mode()&0o111 != 0 || slices.Contains([]string{"plugin", "plugin.exe", "plugin.wasm"}, name) {
+		if executable(name, info.Mode()) {
 			mode = 0o755
 		}
 		files = append(files, file{p, name, mode})
