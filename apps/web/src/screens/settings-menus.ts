@@ -1,7 +1,8 @@
 // The menus of a server's settings: a second level holding the sections of
 // one concern, apart from the settings themselves, which load as they are
-// first opened, for the television's Back to find a section's menu; and the
-// advanced tools, which the app's sidebar lists once pinned.
+// first opened, for the television's Back to find a section's menu; the
+// pages of sections the address names; and the advanced tools, which the
+// app's sidebar lists once pinned.
 import { t } from "../i18n.ts";
 import type { IconName } from "../icon.tsx";
 
@@ -22,6 +23,25 @@ export function isMenu(s: string | undefined): s is MenuId {
 /** The menu holding a section, if any. */
 export function menuOf(section: string): MenuId | undefined {
   return (Object.keys(menuSections) as MenuId[]).find((m) => menuSections[m].includes(section));
+}
+
+/**
+ * The pages of the sections kept in the address under the section's own
+ * key, as ?acquisition=qualities: those of Acquisition and of Subtitles.
+ */
+export const sectionPages: Readonly<Record<"acquisition" | "subtitles", readonly string[]>> = {
+  acquisition: ["profile", "qualities", "formats", "format", "delays", "releases", "client", "options", "requests", "blocklist"],
+  subtitles: ["profile", "settings", "sync", "translation"],
+};
+
+/**
+ * Whether the address names a page of a section that does not exist, as
+ * ?acquisition=nothing: the address names only pages that do.
+ */
+export function namesNoPage(section: string, search: { acquisition?: string; subtitles?: string }): boolean {
+  if (section !== "acquisition" && section !== "subtitles") return false;
+  const page = search[section];
+  return page !== undefined && !sectionPages[section].includes(page);
 }
 
 /**

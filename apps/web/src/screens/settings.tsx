@@ -231,43 +231,66 @@ export function SettingsScreen() {
       <Navigate to="/settings" search={{ server: search.server }} replace />
     );
   }
+  // A wide window shows a section beside the sidebar, Appearance where the
+  // address names none, which the address names, for the section to stay
+  // as the window narrows to the phone's layout.
+  if (!compact && section === undefined) {
+    return <Navigate to="/settings/$section" params={{ section: "appearance" }} search={search} replace />;
+  }
   // A phone and a television show the list of sections, then a section in
   // its place; the television without a sidebar (docs/tv.md §6.6).
-  if (compact) {
-    return section ? <CompactSection id={section} menu={shownMenuOf(groups, section)} chosen={chosen} /> : <ProfileList groups={groups} />;
-  }
+  if (compact && section === undefined) return <ProfileList groups={groups} />;
   const id = section ?? "appearance";
+  const tv = prefs.tv;
+  // The section stays where it is in the tree in both layouts, keeping
+  // what it holds as the window crosses between them: the sidebar comes
+  // and goes beside it, and where none shows, the section's page shows the
+  // trail up and its title names the server chosen, as the sidebar would.
+  const choice = compact && chosen && !deviceSections.includes(id) ? <ServerChoice chosen={chosen} section={id} place="title" /> : null;
   return (
-    <div className="flex min-h-screen">
-      <aside className="sticky top-0 h-screen shrink-0" style={{ width: sidebarWidth }}>
-        <div className="flex h-full flex-col gap-4 overflow-y-auto border-r border-border bg-sidebar px-4 py-5">
-          {/* Home, as on a phone: the settings' own pages lie between. */}
-          <Link to="/" className="inline-flex items-center gap-1 self-start type-body text-accent-text">
-            <Icon name="back" size={18} />
-            {t("nav.home")}
-          </Link>
-          {/* The section's own title names the page, once it shows. */}
-          <h1 data-title-later className="px-1 type-title1">{t("nav.settings")}</h1>
-          <AccountCard active={id === "account"} />
-          {groups.map((g, i) => (
-            <nav key={i} aria-label={g.title?.()} className="flex flex-col gap-0.5">
-              {g.title && <div className="px-2 pb-1 type-caption font-semibold text-text-tertiary">{g.title()}</div>}
-              {g.server && chosen && <ServerChoice chosen={chosen} section={id} />}
-              {g.entries.map((e) =>
-                isMenu(e) ? (
-                  <SidebarMenu key={e} menu={e} ids={menuItems(e, chosen)} current={id} />
-                ) : (
-                  <SidebarLink key={e} id={e} current={id} />
-                ),
-              )}
-            </nav>
-          ))}
-        </div>
-        <SidebarResizer />
-      </aside>
-      <main className="min-w-0 flex-1 px-14 py-10">
-        <div className="mx-auto max-w-[900px]">
-          <SectionView id={id} chosen={chosen} />
+    <div
+      className={
+        compact
+          ? `mx-auto flex flex-col gap-4 px-margin pb-12 ${tv ? "max-w-3xl pt-16" : "max-w-xl pt-[calc(env(safe-area-inset-top)+12px)]"}`
+          : "flex min-h-screen"
+      }
+    >
+      {!compact && (
+        <aside className="sticky top-0 h-screen shrink-0" style={{ width: sidebarWidth }}>
+          <div className="flex h-full flex-col gap-4 overflow-y-auto border-r border-border bg-sidebar px-4 py-5">
+            {/* Home, as on a phone: the settings' own pages lie between. */}
+            <Link to="/" className="inline-flex items-center gap-1 self-start type-body text-accent-text">
+              <Icon name="back" size={18} />
+              {t("nav.home")}
+            </Link>
+            {/* The section's own title names the page, once it shows. */}
+            <h1 data-title-later className="px-1 type-title1">{t("nav.settings")}</h1>
+            <AccountCard active={id === "account"} />
+            {groups.map((g, i) => (
+              <nav key={i} aria-label={g.title?.()} className="flex flex-col gap-0.5">
+                {g.title && <div className="px-2 pb-1 type-caption font-semibold text-text-tertiary">{g.title()}</div>}
+                {g.server && chosen && <ServerChoice chosen={chosen} section={id} />}
+                {g.entries.map((e) =>
+                  isMenu(e) ? (
+                    <SidebarMenu key={e} menu={e} ids={menuItems(e, chosen)} current={id} />
+                  ) : (
+                    <SidebarLink key={e} id={e} current={id} />
+                  ),
+                )}
+              </nav>
+            ))}
+          </div>
+          <SidebarResizer />
+        </aside>
+      )}
+      <main className={compact ? "contents" : "min-w-0 flex-1 px-14 py-10"}>
+        <div className={compact ? "contents" : "mx-auto max-w-[900px]"}>
+          {/* The section's page shows the trail up, unless it names its own. */}
+          <SectionTrail value={compact && !tv ? <Trail menu={shownMenuOf(groups, id)} /> : null}>
+            <TitleAccessory value={choice}>
+              <SectionView id={id} chosen={chosen} />
+            </TitleAccessory>
+          </SectionTrail>
         </div>
       </main>
     </div>
@@ -513,26 +536,6 @@ function MenuList({ menu, ids, chosen }: { menu: MenuId; ids: SectionId[]; chose
           <EntryRow key={s} id={s} />
         ))}
       </Group>
-    </div>
-  );
-}
-
-/**
- * A section on a phone, below a link back to its menu or the list; on a
- * television, whose Back returns there, alone.
- */
-function CompactSection({ id, menu, chosen }: { id: SectionId; menu: MenuId | undefined; chosen: Chosen | undefined }) {
-  const tv = usePrefs().tv;
-  // A server's section names the server chosen, as the sidebar would.
-  const choice = chosen && !deviceSections.includes(id) && <ServerChoice chosen={chosen} section={id} place="title" />;
-  return (
-    <div className={`mx-auto flex flex-col gap-4 px-margin pb-12 ${tv ? "max-w-3xl pt-16" : "max-w-xl pt-[calc(env(safe-area-inset-top)+12px)]"}`}>
-      {/* The section's page shows the trail up, unless it names its own. */}
-      <SectionTrail value={!tv && <Trail menu={menu} />}>
-        <TitleAccessory value={choice}>
-          <SectionView id={id} chosen={chosen} />
-        </TitleAccessory>
-      </SectionTrail>
     </div>
   );
 }

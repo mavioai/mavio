@@ -25,6 +25,7 @@ import {
   redirectOf,
   signInSteps,
 } from "./screens/sign-in.tsx";
+import { namesNoPage } from "./screens/settings-menus.ts";
 import { searchText, settingsSearch } from "./search-params.ts";
 import { Loading, NotFoundView } from "./ui.tsx";
 
@@ -80,6 +81,10 @@ const settingsSection = createRoute({
   getParentRoute: () => root,
   path: "/settings/$section",
   validateSearch: settingsSearch,
+  // A page of Acquisition or Subtitles that does not exist is their list.
+  beforeLoad: ({ params, search }) => {
+    if (namesNoPage(params.section, search)) throw redirect({ to: "/settings/$section", params, search: { server: search.server }, replace: true });
+  },
   component: SettingsScreen,
 });
 
