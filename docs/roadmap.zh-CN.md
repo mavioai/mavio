@@ -771,7 +771,7 @@ flowchart TD
     - [ ] 电视网与分级筛选：提供者无法搜索电视网，只能按其 ID 选择；分级需要某个国家的分级体系
     - [x] 请求（`apps/web/src/screens/requests.tsx`、`libs/client-ts/src/requests.ts`）：用户的请求及其状态与配额，管理员则可看所有人的请求，按状态筛选；批准、拒绝、重试、更改季与删除请求（`RequestService`）
     - [x] 黑名单：在作品或合集页面屏蔽它们，以及在“获取”的“已屏蔽的作品”中列出已屏蔽的作品以解除屏蔽（`apps/web/src/screens/admin/blocklist.tsx`，`libs/client-ts/src/requests.ts` 中的 `useBlockedTitles`），可按名称与屏蔽方式查找（`BlockTitle`、`ListBlockedTitles`、`UnblockTitle`、`BlockCollection`）
-    - [ ] 管理员代其他用户请求或不计入配额（`CreateRequest` 的 `user_id` 与 `ignore_quota`）
+    - [x] 管理员代其他用户请求或不计入配额（`CreateRequest` 的 `user_id` 与 `ignore_quota`）：请求对话框（`apps/web/src/screens/discover.tsx` 中的 `RequestDialog`，电影也有）中的“代为请求”与“不计入配额”，并显示所选用户配额的剩余（`GetQuota` 的 `user_id`）
     - [ ] 发现页的各页面加入 Web UI 的快照测试
   - [x] Web UI 的获取：想要的电影与剧集，按季或按集添加与监控，搜索与 RSS 同步（`WantedService`）；作品在索引器中的发布，带其质量、自定义格式与拒绝原因，可抓取（`SearchReleases`、`GrabRelease`）；以及下载的队列、历史、黑名单与手动导入（`DownloadService`）
     - [x] 设置中的“想要”与“下载”（`apps/web/src/screens/admin/wanted.tsx`、`apps/web/src/screens/admin/downloads.tsx`、`libs/client-ts/src/acquisition.ts`）：缺失与未达截止质量的电影与分集，可搜索、取消监控与 RSS 同步；队列、历史、黑名单与文件夹的手动导入

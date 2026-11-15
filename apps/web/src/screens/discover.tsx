@@ -16,6 +16,8 @@ import {
   useIssues,
   useItem,
   useQueue,
+  useQuota,
+  type RequestOptions,
   useRequestActions,
   useRequestTitle,
   useSeason,
@@ -36,15 +38,16 @@ import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { FiltersDialog, parseFilters } from "./discover-filters.tsx";
-import { Artwork, Button, CardPlaceholder, Grid, Group, Loading, LoadMore, minutesText, NotFoundView, ScreenTitle, Shelf, Spinner, StatusView } from "../ui.tsx";
+import { Artwork, Button, CardPlaceholder, Grid, Group, Loading, LoadMore, minutesText, NotFoundView, Row, ScreenTitle, Shelf, Spinner, StatusView } from "../ui.tsx";
 import { CastShelf, isCast, titleCredits } from "./credits.tsx";
 import { GenreLinks, TitleOverview } from "./discover-overview.tsx";
 import { dayText } from "./facts.tsx";
 import { Modal } from "../controls/dialog.tsx";
-import { Checkbox } from "../controls/inputs.tsx";
+import { Checkbox, Switch } from "../controls/inputs.tsx";
+import { Select } from "../controls/select.tsx";
 import { QueueRow } from "./admin/downloads.tsx";
 import { IssueDialog, IssueRow, ReportDialog, useMayReport } from "./issues.tsx";
-import { RequestRow } from "./requests.tsx";
+import { quotaText, RequestRow } from "./requests.tsx";
 import { AddWantedDialog } from "./discover-wanted.tsx";
 
 /** A title's kind in addresses. */
@@ -339,7 +342,8 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
   ].filter(Boolean);
   if (title.genres.length > 0) facts.push(<GenreLinks key="genres" server={server} title={title} />);
   const status = statusLabel(title.status);
-  const onRequest = () => (series ? setAsking(true) : request.mutate({ mediaKind: title.mediaKind, tmdbId: title.tmdbId }));
+  // Administrators choose whom a movie is requested for, and the quota, in the dialog too.
+  const onRequest = () => (series || admin ? setAsking(true) : request.mutate({ mediaKind: title.mediaKind, tmdbId: title.tmdbId }));
   const primary = `inline-flex cursor-default items-center justify-center gap-2 rounded-[10px] font-semibold type-headline ${
     tv ? "h-16 bg-white/20 px-10 text-white backdrop-blur-xl" : phone ? "h-12 bg-white px-5 text-black" : "h-11 bg-white px-6 text-black hover:bg-white/90"
   }`;
@@ -504,10 +508,11 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
       {asking && (
         <RequestDialog
           title={title}
+          admin={admin ? server : undefined}
           busy={request.isPending}
           onCancel={() => setAsking(false)}
-          onRequest={(seasons) =>
-            request.mutate({ mediaKind: title.mediaKind, tmdbId: title.tmdbId, seasons }, { onSettled: () => setAsking(false) })
+          onRequest={(seasons, options) =>
+            request.mutate({ mediaKind: title.mediaKind, tmdbId: title.tmdbId, seasons, ...options }, { onSettled: () => setAsking(false) })
           }
         />
       )}
@@ -677,24 +682,31 @@ function SeasonEpisodes({ server, tmdbId, seasonNumber }: { server: ServerEntry;
 /**
  * The dialog choosing the seasons of a series to request: all those not
  * requested yet, or some; or, given a pending request's seasons, changing
- * them.
+ * them. For administrators, as Seerr's advanced options, a movie or series
+ * is requested for another user too, with what is left of their quotas,
+ * and outside their quota.
  */
 export function RequestDialog({
   title,
   requested,
+  admin,
   busy,
   onCancel,
   onRequest,
 }: {
   title: Title;
   requested?: number[];
+  /** The server an administrator requests on. */
+  admin?: ServerEntry;
   busy: boolean;
   onCancel: () => void;
-  onRequest: (seasons?: number[]) => void;
+  onRequest: (seasons?: number[], options?: RequestOptions) => void;
 }) {
+  const series = title.mediaKind === MediaKind.SERIES;
   const choosable = (s: SeasonStatus) => s.requestable || !!requested?.includes(s.seasonNumber);
   const open = title.seasons.filter(choosable);
   const [chosen, setChosen] = useState<Set<number>>(() => new Set(requested ?? open.map((s) => s.seasonNumber)));
+  const [options, setOptions] = useState<RequestOptions>({});
   const all = chosen.size === open.length;
   const toggle = (n: number) =>
     setChosen((c) => {
@@ -704,8 +716,10 @@ export function RequestDialog({
       return next;
     });
   const row = "min-h-12 rounded-lg px-3 hover:bg-fill";
+  const editing = !!requested;
   return (
-    <Modal title={requested ? t("requests.editTitle", { name: title.name }) : t("discover.requestTitle", { name: title.name })} onClose={onCancel}>
+    <Modal title={editing ? t("requests.editTitle", { name: title.name }) : t("discover.requestTitle", { name: title.name })} onClose={onCancel}>
+      {series && (
         <div className="-mx-3 flex min-h-0 flex-col overflow-y-auto">
           <Checkbox checked={all} onChange={(on) => setChosen(on ? new Set(open.map((s) => s.seasonNumber)) : new Set())} className={row}>
             <span className="type-headline">{t("discover.allSeasons")}</span>
@@ -727,17 +741,60 @@ export function RequestDialog({
             );
           })}
         </div>
-        <div className="flex justify-end gap-2 pt-2">
-          <Button variant="secondary" onClick={onCancel}>
-            {t("action.cancel")}
-          </Button>
+      )}
+      {admin && !editing && <RequestOptionsGroup server={admin} series={series} value={options} onChange={setOptions} />}
+      <div className="flex justify-end gap-2 pt-2">
+        <Button variant="secondary" onClick={onCancel}>
+          {t("action.cancel")}
+        </Button>
+        {series ? (
           <Button
             disabled={busy || chosen.size === 0}
-            onClick={() => onRequest(all && !requested ? undefined : [...chosen].sort((a, b) => a - b))}
+            onClick={() => onRequest(all && !editing ? undefined : [...chosen].sort((a, b) => a - b), options)}
           >
-            {requested ? t("action.save") : t("discover.requestSeasons", { count: chosen.size })}
+            {editing ? t("action.save") : t("discover.requestSeasons", { count: chosen.size })}
           </Button>
-        </div>
+        ) : (
+          <Button disabled={busy} onClick={() => onRequest(undefined, options)}>
+            {t("discover.request")}
+          </Button>
+        )}
+      </div>
     </Modal>
+  );
+}
+
+/** Whom an administrator requests for, with what is left of their quota of the kind, and whether outside it. */
+function RequestOptionsGroup({
+  server,
+  series,
+  value,
+  onChange,
+}: {
+  server: ServerEntry;
+  series: boolean;
+  value: RequestOptions;
+  onChange: (v: RequestOptions) => void;
+}) {
+  const users = useUsers(server);
+  const quota = useQuota(server, value.userId ?? "");
+  const me = users.data?.find((u) => u.id === server.userId);
+  const others = (users.data ?? []).filter((u) => u.id !== server.userId).toSorted((a, b) => a.name.localeCompare(b.name));
+  const limited = quotaText(series ? quota.data?.series : quota.data?.movie, !series);
+  return (
+    <Group footer={quota.isSuccess ? (limited ?? t("requests.unlimited")) : undefined}>
+      <Row label={t("requests.requestFor")}>
+        <Select
+          value={value.userId ?? ""}
+          label={t("requests.requestFor")}
+          className="w-56"
+          options={[{ value: "", label: t("requests.forSelf", { name: me?.name ?? server.userName }) }, ...others.map((u) => ({ value: u.id, label: u.name }))]}
+          onChange={(userId) => onChange({ ...value, userId: userId || undefined })}
+        />
+      </Row>
+      <Row label={t("requests.ignoreQuota")} detail={t("requests.ignoreQuotaDetail")} wrap>
+        <Switch on={!!value.ignoreQuota} label={t("requests.ignoreQuota")} onChange={(ignoreQuota) => onChange({ ...value, ignoreQuota })} />
+      </Row>
+    </Group>
   );
 }

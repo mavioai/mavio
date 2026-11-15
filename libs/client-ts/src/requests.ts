@@ -26,12 +26,12 @@ export function useRequests(server: ServerEntry | undefined, statuses: RequestSt
   });
 }
 
-/** How much of their quotas the user has used. */
-export function useQuota(server: ServerEntry | undefined) {
+/** How much of their quotas the user has used, or, for administrators, another user. */
+export function useQuota(server: ServerEntry | undefined, userId = "") {
   const servers = useServersStore();
   return useQuery({
-    queryKey: serverKey(server?.id ?? "", "requests", "quota"),
-    queryFn: () => servers.client(RequestService, server!).getQuota({}),
+    queryKey: serverKey(server?.id ?? "", "requests", "quota", userId),
+    queryFn: () => servers.client(RequestService, server!).getQuota({ userId: userId || undefined }),
     enabled: !!server,
   });
 }

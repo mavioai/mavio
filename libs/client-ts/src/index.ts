@@ -29,6 +29,7 @@ export {
   discoverRequestOf,
   filterCount,
   type NamedValue,
+  type RequestOptions,
   rowsOf,
   titlesOf,
   useCatalog,

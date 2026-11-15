@@ -5495,6 +5495,23 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("requests.editTitle", bundle: .module, comment: ""), name)
     }
 
+    /// Choice of the request dialog, for administrators: the user the title is requested for.
+    public static var requestsRequestFor: String { NSLocalizedString("requests.requestFor", bundle: .module, comment: "") }
+
+    /// The administrator themselves among the users of Request For; name is theirs.
+    public static func requestsForSelf(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("requests.forSelf", bundle: .module, comment: ""), name)
+    }
+
+    /// Toggle of the request dialog, for administrators: leave the request out of the user's quota.
+    public static var requestsIgnoreQuota: String { NSLocalizedString("requests.ignoreQuota", bundle: .module, comment: "") }
+
+    /// Detail of Ignore Quota.
+    public static var requestsIgnoreQuotaDetail: String { NSLocalizedString("requests.ignoreQuotaDetail", bundle: .module, comment: "") }
+
+    /// Shown in the request dialog when the chosen user has no quota.
+    public static var requestsUnlimited: String { NSLocalizedString("requests.unlimited", bundle: .module, comment: "") }
+
     /// Deletes a request.
     public static var requestsRemove: String { NSLocalizedString("requests.remove", bundle: .module, comment: "") }
 

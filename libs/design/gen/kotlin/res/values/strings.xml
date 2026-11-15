@@ -3507,6 +3507,16 @@
     <string name="requests_edit_seasons">Change Seasons</string>
     <!-- Title of the dialog changing the seasons of a request. -->
     <string name="requests_edit_title">Seasons of %s</string>
+    <!-- Choice of the request dialog, for administrators: the user the title is requested for. -->
+    <string name="requests_request_for">Request For</string>
+    <!-- The administrator themselves among the users of Request For; name is theirs. -->
+    <string name="requests_for_self">%s (You)</string>
+    <!-- Toggle of the request dialog, for administrators: leave the request out of the user's quota. -->
+    <string name="requests_ignore_quota">Ignore Quota</string>
+    <!-- Detail of Ignore Quota. -->
+    <string name="requests_ignore_quota_detail">Leave this request out of the user\'s quota</string>
+    <!-- Shown in the request dialog when the chosen user has no quota. -->
+    <string name="requests_unlimited">No quota limits this user\'s requests.</string>
     <!-- Deletes a request. -->
     <string name="requests_remove">Delete</string>
     <!-- Asks before deleting a request. -->

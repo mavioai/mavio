@@ -1762,6 +1762,11 @@
     <string name="requests_retry">重试</string>
     <string name="requests_edit_seasons">更改季</string>
     <string name="requests_edit_title">%s 的季</string>
+    <string name="requests_request_for">代为请求</string>
+    <string name="requests_for_self">%s（你）</string>
+    <string name="requests_ignore_quota">不计入配额</string>
+    <string name="requests_ignore_quota_detail">此请求不计入该用户的配额</string>
+    <string name="requests_unlimited">此用户的请求不受配额限制。</string>
     <string name="requests_remove">删除</string>
     <string name="requests_remove_title">删除此请求？</string>
     <string name="wanted_message">受监控但没有文件，或文件未达到质量配置截止质量的电影与剧集。</string>

@@ -1744,6 +1744,11 @@ export type MessageKey =
   | 'requests.retry'
   | 'requests.editSeasons'
   | 'requests.editTitle'
+  | 'requests.requestFor'
+  | 'requests.forSelf'
+  | 'requests.ignoreQuota'
+  | 'requests.ignoreQuotaDetail'
+  | 'requests.unlimited'
   | 'requests.remove'
   | 'requests.removeTitle'
   | 'wanted.message'
@@ -4053,6 +4058,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "requests.retry": "Retry",
     "requests.editSeasons": "Change Seasons",
     "requests.editTitle": "Seasons of {name}",
+    "requests.requestFor": "Request For",
+    "requests.forSelf": "{name} (You)",
+    "requests.ignoreQuota": "Ignore Quota",
+    "requests.ignoreQuotaDetail": "Leave this request out of the user's quota",
+    "requests.unlimited": "No quota limits this user's requests.",
     "requests.remove": "Delete",
     "requests.removeTitle": "Delete this request?",
     "wanted.message": "Monitored movies and episodes without a file, or whose file is below their quality profile's cutoff.",
@@ -6360,6 +6370,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "requests.retry": "重试",
     "requests.editSeasons": "更改季",
     "requests.editTitle": "{name} 的季",
+    "requests.requestFor": "代为请求",
+    "requests.forSelf": "{name}（你）",
+    "requests.ignoreQuota": "不计入配额",
+    "requests.ignoreQuotaDetail": "此请求不计入该用户的配额",
+    "requests.unlimited": "此用户的请求不受配额限制。",
     "requests.remove": "删除",
     "requests.removeTitle": "删除此请求？",
     "wanted.message": "受监控但没有文件，或文件未达到质量配置截止质量的电影与剧集。",

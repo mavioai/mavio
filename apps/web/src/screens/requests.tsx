@@ -96,7 +96,8 @@ export function RequestsScreen() {
   );
 }
 
-function quotaText(q: Quota | undefined, movies: boolean): string | undefined {
+/** What is left of a quota of movies or seasons, when it limits. */
+export function quotaText(q: Quota | undefined, movies: boolean): string | undefined {
   if (!q || q.limit === 0) return undefined;
   const args = { remaining: q.remaining, limit: q.limit, days: q.days };
   if (movies) return q.days > 0 ? t("requests.movieQuotaDays", args) : t("requests.movieQuota", args);

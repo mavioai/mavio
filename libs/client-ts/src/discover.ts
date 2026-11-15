@@ -292,21 +292,38 @@ export function useCollection(server: ServerEntry | undefined, tmdbCollectionId:
   });
 }
 
+/** What an administrator's request may say besides its title. */
+export interface RequestOptions {
+  /** The user requesting; unset for the caller. */
+  userId?: string;
+  /** Leaves the request out of the user's quota. */
+  ignoreQuota?: boolean;
+}
+
 /**
  * Requests a movie, or seasons of a series (all those not requested yet
- * when seasons is unset), refreshing what discovery shows of it.
+ * when seasons is unset), for administrators also for another user or
+ * outside the quota, refreshing what discovery shows of it.
  */
 export function useRequestTitle(server: ServerEntry) {
   const servers = useServersStore();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ mediaKind, tmdbId, seasons }: { mediaKind: MediaKind; tmdbId: number; seasons?: number[] }): Promise<Request | undefined> =>
+    mutationFn: async ({
+      mediaKind,
+      tmdbId,
+      seasons,
+      userId,
+      ignoreQuota,
+    }: { mediaKind: MediaKind; tmdbId: number; seasons?: number[] } & RequestOptions): Promise<Request | undefined> =>
       (
         await servers.client(RequestService, server).createRequest({
           mediaKind,
           tmdbId,
           seasons: seasons ?? [],
           allSeasons: mediaKind === MediaKind.SERIES && seasons === undefined,
+          userId: userId || undefined,
+          ignoreQuota: ignoreQuota ?? false,
         })
       ).request,
     onSettled: () =>

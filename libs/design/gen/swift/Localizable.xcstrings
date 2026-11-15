@@ -31411,6 +31411,96 @@
         }
       }
     },
+    "requests.requestFor": {
+      "comment": "Choice of the request dialog, for administrators: the user the title is requested for.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Request For"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "代为请求"
+          }
+        }
+      }
+    },
+    "requests.forSelf": {
+      "comment": "The administrator themselves among the users of Request For; name is theirs.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (You)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@（你）"
+          }
+        }
+      }
+    },
+    "requests.ignoreQuota": {
+      "comment": "Toggle of the request dialog, for administrators: leave the request out of the user's quota.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignore Quota"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不计入配额"
+          }
+        }
+      }
+    },
+    "requests.ignoreQuotaDetail": {
+      "comment": "Detail of Ignore Quota.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave this request out of the user's quota"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此请求不计入该用户的配额"
+          }
+        }
+      }
+    },
+    "requests.unlimited": {
+      "comment": "Shown in the request dialog when the chosen user has no quota.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No quota limits this user's requests."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此用户的请求不受配额限制。"
+          }
+        }
+      }
+    },
     "requests.remove": {
       "comment": "Deletes a request.",
       "extractionState": "manual",
