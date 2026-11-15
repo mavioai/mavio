@@ -5,7 +5,7 @@
 import { readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 
-import { create, type DescMessage, type DescService, type MessageInitShape, toJsonString } from "@bufbuild/protobuf";
+import { create, type DescMessage, type DescService, fromJson, type JsonValue, type MessageInitShape, type MessageShape, toJsonString } from "@bufbuild/protobuf";
 import type { Page, Route } from "@playwright/test";
 
 /** The origin the web UI is served from and every server call goes to. */
@@ -24,7 +24,7 @@ const types: Record<string, string> = {
   ".json": "application/json",
 };
 
-type Answer = (request: unknown) => MessageInitShape<DescMessage>;
+type Answer = (request: MessageShape<DescMessage>) => MessageInitShape<DescMessage>;
 
 /** The answers of a fake server, by service and method. */
 export class Fixtures {
@@ -35,19 +35,22 @@ export class Fixtures {
     service: S,
     method: M,
     answer: (
-      request: S["method"][M] extends { input: infer I extends DescMessage } ? MessageInitShape<I> : never,
+      request: S["method"][M] extends { input: infer I extends DescMessage } ? MessageShape<I> : never,
     ) => S["method"][M] extends { output: infer O extends DescMessage } ? MessageInitShape<O> : never,
   ): this {
     const m = service.method[method] as { name: string };
-    this.answers.set(`${service.typeName}/${m.name}`, answer as Answer);
+    this.answers.set(`${service.typeName}/${m.name}`, answer as unknown as Answer);
     return this;
   }
 
-  /** The JSON of the answer to a call; an empty message for those without one. */
-  answer(service: DescService, method: string, request: unknown): string {
+  /** The JSON of the answer to a call, whose request is JSON; an empty message for those without one. */
+  answer(service: DescService, method: string, request: JsonValue): string {
     const desc = service.methods.find((m) => m.name === method);
     if (!desc) throw new Error(`no method ${service.typeName}/${method}`);
-    const init = this.answers.get(`${service.typeName}/${method}`)?.(request) ?? {};
+    const answer = this.answers.get(`${service.typeName}/${method}`);
+    // MAVIO_SNAPSHOT_TRACE lists the calls a screen makes, those without an answer marked.
+    if (process.env.MAVIO_SNAPSHOT_TRACE) console.log(`${answer ? " " : "?"} ${service.typeName}/${method} ${JSON.stringify(request)}`);
+    const init = answer?.(fromJson(desc.input, request ?? {}, { ignoreUnknownFields: true })) ?? {};
     return toJsonString(desc.output, create(desc.output, init));
   }
 }
@@ -65,6 +68,11 @@ export async function serve(page: Page, services: Services, fixtures: Fixtures) 
     const url = new URL(route.request().url());
     const [, service, method] = url.pathname.split("/");
     const svc = services[service];
+    if (!svc && service?.startsWith("mavio.") && method) {
+      // A service the tests do not know is not implemented, as an older server's.
+      if (process.env.MAVIO_SNAPSHOT_TRACE) console.log(`! ${service}/${method}`);
+      return route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ code: "unimplemented" }) });
+    }
     if (svc && method) {
       const desc = svc.methods.find((m) => m.name === method);
       if (desc?.methodKind === "server_streaming") {
@@ -73,7 +81,7 @@ export async function serve(page: Page, services: Services, fixtures: Fixtures) 
         const head = Buffer.from([2, 0, 0, 0, end.length]);
         return route.fulfill({ contentType: "application/connect+json", body: Buffer.concat([head, end]) });
       }
-      const request = route.request().postDataJSON() as unknown;
+      const request = route.request().postDataJSON() as JsonValue;
       return route.fulfill({ contentType: "application/json", body: fixtures.answer(svc, method, request) });
     }
     if (url.pathname.startsWith("/images/")) {
@@ -89,12 +97,17 @@ export async function serve(page: Page, services: Services, fixtures: Fixtures) 
   });
 }
 
-/** An image of an ID: a gradient whose hues follow from the ID. */
+/**
+ * An image of an ID: a gradient whose hues follow from the ID, as wide as a
+ * backdrop or a thumbnail, square for a person, else a poster, so that an
+ * image sized by its own shape takes the artwork's.
+ */
 function artwork(id: string): string {
   let h = 0;
   for (const c of id) h = (h * 31 + c.charCodeAt(0)) % 360;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 3" preserveAspectRatio="none">
+  const [w, ht] = /backdrop|thumb/.test(id) ? [16, 9] : id.startsWith("person-") ? [1, 1] : [2, 3];
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w * 60}" height="${ht * 60}" viewBox="0 0 ${w} ${ht}" preserveAspectRatio="none">
 <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
 <stop offset="0" stop-color="hsl(${h} 55% 45%)"/><stop offset="1" stop-color="hsl(${(h + 60) % 360} 55% 25%)"/>
-</linearGradient></defs><rect width="2" height="3" fill="url(#g)"/></svg>`;
+</linearGradient></defs><rect width="${w}" height="${ht}" fill="url(#g)"/></svg>`;
 }

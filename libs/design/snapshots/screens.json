@@ -9,9 +9,25 @@
   },
   "screens": {
     "sign-in": { "description": "Sign-in with no server added yet." },
-    "home": { "description": "Home of one server: Continue Watching, then the hubs of its two libraries." }
+    "home": { "description": "Home of one server: Continue Watching, then the hubs of its two libraries." },
+    "library": { "description": "The Movies library's All tab: a grid of its posters." },
+    "details": { "description": "A movie's details, partly watched: the header with its actions, versions and the rows below it." },
+    "details-series": { "description": "A series' details: its seasons as pills and the episodes of the season to watch next." },
+    "player": { "description": "The player's controls over a paused movie, part of the way in." },
+    "search": { "description": "Search's results for a query matching movies, a series and an episode." },
+    "search-popular": { "description": "The television's search before anything is typed: the server's popular searches." },
+    "settings": { "description": "The settings: Playback on phones, the settings' first section elsewhere." },
+    "plugins-available": { "description": "Settings' Plugins section, Available tab: the catalog's plugins, installed or not." },
+    "plugins-installed": { "description": "Settings' Plugins section, Installed tab: the server's plugins and their states." },
+    "discover": { "description": "Discover: the rows of the discovery provider's catalogs." },
+    "discover-catalog": { "description": "A catalog's page of movies, filtered by a genre." },
+    "discover-filters": { "description": "A catalog's filters dialog, a genre chosen." },
+    "discover-title": { "description": "A discovered movie the server does not have, to request: its header, cast and recommendations." },
+    "requests": { "description": "Requests as an administrator sees them: everyone's, in their states, with the quotas." },
+    "watch-together": { "description": "Watch Together's dialog in a group: its members and its queue, the first entry playing." }
   },
-  "server": { "id": "4f6c2a7e-0d1b-4c8e-9a35-2b7d1e8f6a01", "name": "Living Room", "version": "0.1.0", "userId": "8a1d4c2e-5b3f-4e6a-9c7d-0f2b4a6c8e10", "userName": "Ada" },
+  "server": { "id": "4f6c2a7e-0d1b-4c8e-9a35-2b7d1e8f6a01", "name": "Living Room", "version": "0.1.0", "userId": "8a1d4c2e-5b3f-4e6a-9c7d-0f2b4a6c8e10", "userName": "Ada", "admin": true },
+  "users": [{ "id": "8a1d4c2e-5b3f-4e6a-9c7d-0f2b4a6c8e10", "name": "Ada", "admin": true }, { "id": "3c9e7b10-2f4d-4a6b-8e1c-5d7f9a2b4c60", "name": "Ben" }],
   "libraries": [
     { "id": "lib-movies", "name": "Movies", "kind": "movies" },
     { "id": "lib-shows", "name": "Shows", "kind": "shows" }
@@ -27,11 +43,173 @@
     "fernwood": { "kind": "series", "name": "Fernwood", "year": 2024, "library": "lib-shows" },
     "signal": { "kind": "series", "name": "Signal & Noise", "year": 2025, "library": "lib-shows" },
     "meridian": { "kind": "series", "name": "Meridian", "year": 2022, "library": "lib-shows" },
-    "atlas-s2e3": { "kind": "episode", "name": "Dead Reckoning", "series": "atlas", "season": 2, "episode": 3, "runtimeMinutes": 52, "library": "lib-shows" }
+    "atlas-s2e1": { "kind": "episode", "name": "Blue Shift", "series": "atlas", "season": 2, "episode": 1, "runtimeMinutes": 55, "library": "lib-shows" },
+    "atlas-s2e2": { "kind": "episode", "name": "Ballast", "series": "atlas", "season": 2, "episode": 2, "runtimeMinutes": 49, "library": "lib-shows" },
+    "atlas-s2e3": { "kind": "episode", "name": "Dead Reckoning", "series": "atlas", "season": 2, "episode": 3, "runtimeMinutes": 52, "library": "lib-shows" },
+    "atlas-s2e4": { "kind": "episode", "name": "Thermocline", "series": "atlas", "season": 2, "episode": 4, "runtimeMinutes": 51, "library": "lib-shows" },
+    "atlas-s2e5": { "kind": "episode", "name": "The Far Side", "series": "atlas", "season": 2, "episode": 5, "runtimeMinutes": 58, "library": "lib-shows" }
   },
+  "seasons": { "atlas-s1": { "series": "atlas", "season": 1, "name": "Season 1", "library": "lib-shows" }, "atlas-s2": { "series": "atlas", "season": 2, "name": "Season 2", "library": "lib-shows" } },
   "home": [
     { "kind": "continueWatching", "items": [{ "id": "orbit", "progressMinutes": 47 }, { "id": "atlas-s2e3", "progressMinutes": 12 }, { "id": "harbor", "progressMinutes": 81 }] },
     { "kind": "recentlyAdded", "library": "lib-movies", "items": [{ "id": "lantern" }, { "id": "glass" }, { "id": "summit", "played": true }, { "id": "tide" }] },
     { "kind": "recentlyAdded", "library": "lib-shows", "items": [{ "id": "signal" }, { "id": "fernwood" }, { "id": "meridian" }, { "id": "atlas" }] }
-  ]
+  ],
+  "played": ["atlas-s2e1", "atlas-s2e2"],
+  "popularSearches": ["Atlas Station", "The Long Orbit", "Fernwood", "harbor"],
+  "search": { "query": "er" },
+  "syncPlay": {
+    "group": {
+      "id": "7d2e4b6a-1c3f-4e5d-8a9b-0c1d2e3f4a5b",
+      "name": "Movie Night",
+      "state": "paused",
+      "positionMinutes": 47,
+      "members": [{ "userName": "Ada", "deviceName": "Chrome on macOS" }, { "userName": "Ben", "deviceName": "Living Room TV" }],
+      "queue": ["orbit", "harbor", "glass"],
+      "current": 0
+    }
+  },
+  "plugins": {
+    "catalog": [
+      {
+        "id": "scraper-tmdb",
+        "name": "TMDB",
+        "category": "metadata",
+        "description": "Movies, series and people from The Movie Database, and Discover's catalogs.",
+        "author": "Mavio",
+        "versions": ["1.5.0", "1.4.0"],
+        "installed": "1.4.0"
+      },
+      {
+        "id": "subtitles-opensubtitles",
+        "name": "OpenSubtitles",
+        "category": "subtitles",
+        "description": "Subtitles searched and downloaded from OpenSubtitles.com.",
+        "author": "Mavio",
+        "versions": ["2.1.0"],
+        "installed": "2.1.0"
+      },
+      {
+        "id": "downloads-qbittorrent",
+        "name": "qBittorrent",
+        "category": "downloads",
+        "description": "Sends releases to qBittorrent and follows their downloads.",
+        "author": "Mavio",
+        "versions": ["1.2.0"]
+      },
+      { "id": "notify-ntfy", "name": "ntfy", "category": "notifications", "description": "Notifications of requests and new media pushed to ntfy topics.", "author": "Mavio", "versions": ["0.9.0"] },
+      { "id": "auth-oidc", "name": "OpenID Connect", "category": "authentication", "description": "Signs users in with an OpenID Connect provider.", "author": "Mavio", "versions": ["1.0.3"] },
+      { "id": "dlna", "name": "DLNA", "category": "devices", "description": "Serves the libraries to DLNA renderers on the network.", "author": "Mavio", "versions": ["1.1.0"], "installed": "1.1.0" }
+    ],
+    "installed": [
+      { "id": "scraper-tmdb", "state": "ready" },
+      { "id": "subtitles-opensubtitles", "state": "unconfigured" },
+      { "id": "dlna", "state": "disabled" },
+      {
+        "id": "agent",
+        "name": "AI Gateway",
+        "category": "ai",
+        "version": "0.4.0",
+        "description": "The models of AI providers, for the assistant and subtitle translation.",
+        "author": "Mavio",
+        "state": "ready"
+      }
+    ]
+  },
+  "discover": {
+    "plugin": "scraper-tmdb",
+    "genres": [
+      { "id": "878", "name": "Science Fiction" },
+      { "id": "18", "name": "Drama" },
+      { "id": "53", "name": "Thriller" },
+      { "id": "35", "name": "Comedy" },
+      { "id": "9648", "name": "Mystery" },
+      { "id": "12", "name": "Adventure" }
+    ],
+    "catalogs": [
+      {
+        "id": "scraper-tmdb/trending",
+        "name": "Trending",
+        "kind": "trending",
+        "mediaKinds": ["movie", "series"],
+        "mixed": true,
+        "titles": ["comet", "northbound", "drift", "orbit", "quiet", "ember", "lighthouse", "paper"]
+      },
+      {
+        "id": "scraper-tmdb/popular",
+        "name": "Popular",
+        "kind": "popular",
+        "mediaKinds": ["movie", "series"],
+        "filters": ["genre", "releaseDate", "rating"],
+        "sorts": ["popularity", "releaseDate", "rating"],
+        "titles": ["drift", "comet", "paper", "orbit", "ember", "glacier", "atlas", "northbound", "quiet", "lighthouse", "static"]
+      },
+      { "id": "scraper-tmdb/upcoming", "name": "Upcoming", "kind": "upcoming", "mediaKinds": ["movie"], "titles": ["ember", "glacier", "comet"] },
+      { "id": "scraper-tmdb/recommendations", "name": "Recommendations", "kind": "recommendations", "mediaKinds": ["movie", "series"], "titles": ["paper", "drift", "glacier", "orbit"] }
+    ],
+    "titles": {
+      "comet": {
+        "kind": "movie",
+        "tmdb": 1101,
+        "name": "Comet Season",
+        "year": 2026,
+        "premiere": "2026-03-13",
+        "rating": 7.8,
+        "votes": 2140,
+        "genres": ["Science Fiction", "Drama"],
+        "runtimeMinutes": 124,
+        "tagline": "Every seventy years, the sky remembers.",
+        "overview": "When a long-period comet returns to the night sky, an astronomer and her estranged brother drive across three states to see it from the field where their father first showed it to them.",
+        "studios": ["Northlight Pictures"],
+        "keywords": ["comet", "road trip", "siblings"],
+        "credits": [
+          { "name": "Mara Ellison", "role": "Ivy Hart", "kind": "actor" },
+          { "name": "Theo Brandt", "role": "Sam Hart", "kind": "actor" },
+          { "name": "Lena Oduya", "role": "Dr. Ruth Kale", "kind": "actor" },
+          { "name": "Jonah Pike", "role": "Walt Hart", "kind": "actor" },
+          { "name": "Iris Calder", "role": "Director", "kind": "director" },
+          { "name": "Felix Moreau", "role": "Screenplay", "kind": "writer" }
+        ]
+      },
+      "drift": { "kind": "movie", "tmdb": 1102, "name": "The Drift", "year": 2025, "premiere": "2025-09-05", "rating": 6.9, "votes": 980, "genres": ["Thriller"], "status": "requested" },
+      "ember": { "kind": "movie", "tmdb": 1103, "name": "Ember & Ash", "year": 2026, "premiere": "2026-12-18", "rating": 0, "votes": 0, "genres": ["Adventure", "Drama"] },
+      "paper": { "kind": "movie", "tmdb": 1104, "name": "Paper Moons", "year": 2024, "premiere": "2024-05-24", "rating": 7.2, "votes": 3310, "genres": ["Comedy", "Drama"] },
+      "glacier": { "kind": "movie", "tmdb": 1105, "name": "Glacier Line", "year": 2026, "premiere": "2026-11-06", "rating": 0, "votes": 0, "genres": ["Science Fiction", "Thriller"], "status": "wanted" },
+      "orbit": {
+        "kind": "movie",
+        "tmdb": 1106,
+        "name": "The Long Orbit",
+        "year": 2024,
+        "premiere": "2024-02-16",
+        "rating": 8.1,
+        "votes": 5820,
+        "genres": ["Science Fiction"],
+        "status": "available",
+        "item": "orbit"
+      },
+      "northbound": { "kind": "series", "tmdb": 2201, "name": "Northbound", "year": 2025, "premiere": "2025-01-09", "rating": 8.3, "votes": 1250, "genres": ["Drama", "Mystery"], "status": "partiallyAvailable" },
+      "quiet": { "kind": "series", "tmdb": 2202, "name": "The Quiet Hours", "year": 2026, "premiere": "2026-04-02", "rating": 7.5, "votes": 640, "genres": ["Mystery"] },
+      "lighthouse": { "kind": "series", "tmdb": 2203, "name": "Lighthouse Row", "year": 2024, "premiere": "2024-10-11", "rating": 7.0, "votes": 410, "genres": ["Comedy"] },
+      "static": { "kind": "series", "tmdb": 2204, "name": "Static Bloom", "year": 2025, "premiere": "2025-06-20", "rating": 6.6, "votes": 230, "genres": ["Science Fiction"] },
+      "atlas": {
+        "kind": "series",
+        "tmdb": 2205,
+        "name": "Atlas Station",
+        "year": 2023,
+        "premiere": "2023-03-03",
+        "rating": 8.0,
+        "votes": 4120,
+        "genres": ["Science Fiction", "Drama"],
+        "status": "available",
+        "item": "atlas"
+      }
+    },
+    "requests": [
+      { "id": "5a1b2c3d-0000-4000-8000-000000000001", "title": "drift", "status": "pending", "by": "Ben", "created": "2026-09-30T18:20:00Z" },
+      { "id": "5a1b2c3d-0000-4000-8000-000000000002", "title": "northbound", "seasons": [1, 2], "status": "approved", "by": "Ada", "created": "2026-09-28T09:05:00Z" },
+      { "id": "5a1b2c3d-0000-4000-8000-000000000003", "title": "glacier", "status": "approved", "by": "Ben", "created": "2026-09-21T20:41:00Z" },
+      { "id": "5a1b2c3d-0000-4000-8000-000000000004", "title": "orbit", "status": "completed", "by": "Ada", "created": "2026-08-14T11:12:00Z" }
+    ],
+    "quota": { "movie": { "limit": 5, "days": 7, "used": 2 }, "series": { "limit": 2, "days": 7, "used": 1 } }
+  }
 }

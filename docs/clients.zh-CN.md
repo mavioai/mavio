@@ -389,7 +389,7 @@ flowchart LR
 * **组件画廊**：每个平台以固定数据浏览所有组件的所有状态——Web 用 Storybook，Apple 平台用 SwiftUI 预览，Android 用 Compose 预览，桌面应用用一个画廊窗口。
 * **快照测试**：每个客户端在快照测试中以固定数据渲染同一组页面——Web 用 Playwright，Apple 平台用 swift-snapshot-testing，Android 用 Roborazzi，桌面应用用 MyGo 的测试器（`ui.NewTester`，在内存中绘制帧）。手动触发的 Snapshots 工作流将其与入库的参考图比对，并生成一个把每个页面的各平台并排展示的页面，修改 UI 的 PR 附上该页面的链接以供评审。
   * `libs/design/snapshots/screens.json` 列出各页面、各形态（手机、平板、桌面、电视）的尺寸，以及绘制它们所用的固定数据——一个虚构的媒体库；每个客户端把数据映射到自己的模型，快照命名为 `<screen>-<size>.png`。
-  * Web UI 的测试（`apps/web/snapshots`）在 `http://mavio.test` 向浏览器提供构建好的 UI、由固定数据生成的服务端应答以及生成的图片，固定时钟，Inter 字体随 UI 一同发布，因此不依赖网络与本机字体。浏览器运行在 Playwright 的容器镜像中，在每台机器上都相同，测试连接到它；参考图位于 `apps/web/snapshots/references`。
+  * Web UI 的测试（`apps/web/snapshots`）在 `http://mavio.test` 向浏览器提供构建好的 UI、由固定数据生成的服务端应答以及生成的图片，固定时钟，Inter 字体随 UI 一同发布，因此不依赖网络与本机字体。浏览器运行在 Playwright 的容器镜像中，在每台机器上都相同，测试连接到它；参考图位于 `apps/web/snapshots/references`。Web UI 以手机、平板与桌面尺寸绘制列表中的每个页面——登录、首页、媒体库的网格、电影与剧集的详情、播放器的控件、搜索、设置及插件分区的两个标签页、发现页及其目录、筛选与作品页、请求，以及一起看的队列——并以电视模式绘制电视上画法不同的页面：登录、首页、剧集详情、播放器、搜索的热门搜索，以及发现页与作品页。假服务端按浏览器发出的样子解析每个请求，并应答这些页面调用的服务；调用其他服务会失败，因此缺少数据的页面会显现出来。
   * Apple 的测试（`libs/apple/Tests/MavioUITests`）在 iOS 模拟器上以英文用 `MavioUI` 绘制各页面，在 Mac 上跳过；参考图位于 `libs/apple/snapshots`。
   * Android 的测试是 `libs/android/ui` 的单元测试，在 JVM 上由 Robolectric 的原生图形绘制，无需模拟器；参考图位于 `libs/android/ui/snapshots`。
   * 每个客户端的 `snapshot` 目标负责比对，`snapshot-record` 录制参考图。UI 变动期间参考图保持不变：除非另有要求，在推送之前统一录制、比对并提交一次。`design:gallery` 把参考图汇集到 `dist/snapshots/gallery`，即把各平台并排展示的页面。

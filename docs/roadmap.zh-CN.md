@@ -675,7 +675,7 @@ flowchart TD
   - [x] 借助 JASSUB 保留样式的 ASS 字幕：`capabilities(…, styled)` 按原格式请求 ASS 与 SSA 文件，由 `apps/web/src/screens/styled-subtitles.ts` 用 JASSUB 绘制在视频上方，字体用条目附带的字体与 Liberation Sans 或 Noto Sans SC，均从构建中按需加载；JASSUB 失败时回退到服务器的交付方式
   - [x] 离线保存查询缓存：首页、媒体库与条目详情的查询存于 IndexedDB，每个登录一项，另一版本与退出登录时丢弃（`libs/client-ts/src/persist.ts`，使用 `@tanstack/query-persist-client-core` 与 idb-keyval，在 `apps/web/src/main.tsx` 中首次绘制前恢复）
   - [ ] 组件的 Storybook
-  - [ ] 登录与首页以外页面的快照测试
+  - [x] 登录与首页以外页面的快照测试（`apps/web/snapshots`）：媒体库的网格、电影与剧集的详情、播放器的控件、搜索与电视的热门搜索、设置以及一起看的队列，由一个解析每个请求并应答其所调用服务的假服务端，以 `libs/design/snapshots/screens.json` 的固定数据绘制
   - [x] 热门搜索：各服务器记录并排名的搜索词（打开结果时调用 `ItemService.RecordSearch`，`ListPopularSearches`，`core.SearchRecord` 存于 `search_records`，由每日清理修剪），电视的搜索在未输入时以合并各服务器的药丸按钮显示它们，没有时显示首页的各行（`apps/web/src/screens/search.tsx`、`libs/client-ts/src/popular.ts`）
   - [x] 播放器的进度条按 [客户端 §6.5](clients.zh-CN.md)：章节标记，指针所在时间上方显示 trickplay 拼图的缩略图与章节名，上方放不下时放到进度条下方；拖动时暂停，松开后继续播放
   - [x] 播放器在静音旁加音量，以及音量、倍速与跳转的简短提示，立即出现、一秒后消失；滚轮与触控板横向跳转、纵向调音量，轴向在手势开始时确定
@@ -735,7 +735,7 @@ flowchart TD
   - [ ] Web UI 的管理功能：设置中用户管理的服务器，及其媒体库、用户与任务
     - [x] 插件（`apps/web/src/screens/plugins.tsx`、`libs/client-ts/src/plugins.ts`）：已安装的插件及其状态，可启用、停用（`PluginManagementService.SetPluginEnabled`）、更新与卸载；插件目录提供的插件，可安装；以卡片展示于“可用”与“已安装”选项卡，可按分类筛选，点击进入其详情与版本页；以及增删插件目录的插件目录页；位于设置的“服务器”分组，mavio.dev 模式下可选择服务器
     - [x] 插件的配置，按其清单的 schema 或其自己的页面（`GetPluginConfig`、`SetPluginConfig`）
-    - [ ] 插件分区加入 Web UI 的快照测试
+    - [x] 插件分区加入 Web UI 的快照测试：其“可用”与“已安装”标签页，目录中的插件有已安装、待更新、需要配置与已停用的
     - [x] 概览（`apps/web/src/screens/admin/overview.tsx`）：服务器的版本与健康状况、正在播放的会话与最近的活动（`GetSystemInfo`、`GetHealth`、`SessionService.ListSessions`、`ListActivities`）
     - [x] 常规（`apps/web/src/screens/admin/general.tsx`）：服务器名称、元数据的语言与国家以及其他通用设置（`UpdateGeneralSettings`、`LocalizationService`）
     - [x] 转码（`apps/web/src/screens/admin/transcoding.tsx`）：硬件加速、编码器、色调映射、去隔行、缩混与转码文件夹（`TranscodingSettings`）
@@ -772,7 +772,7 @@ flowchart TD
     - [x] 请求（`apps/web/src/screens/requests.tsx`、`libs/client-ts/src/requests.ts`）：用户的请求及其状态与配额，管理员则可看所有人的请求，按状态筛选；批准、拒绝、重试、更改季与删除请求（`RequestService`）
     - [x] 黑名单：在作品或合集页面屏蔽它们，以及在“获取”的“已屏蔽的作品”中列出已屏蔽的作品以解除屏蔽（`apps/web/src/screens/admin/blocklist.tsx`，`libs/client-ts/src/requests.ts` 中的 `useBlockedTitles`），可按名称与屏蔽方式查找（`BlockTitle`、`ListBlockedTitles`、`UnblockTitle`、`BlockCollection`）
     - [x] 管理员代其他用户请求或不计入配额（`CreateRequest` 的 `user_id` 与 `ignore_quota`）：请求对话框（`apps/web/src/screens/discover.tsx` 中的 `RequestDialog`，电影也有）中的“代为请求”与“不计入配额”，并显示所选用户配额的剩余（`GetQuota` 的 `user_id`）
-    - [ ] 发现页的各页面加入 Web UI 的快照测试
+    - [x] 发现页的各页面加入 Web UI 的快照测试：各目录的行、按类型筛选的目录、其筛选条件、作品页及其推荐，以及处于各状态的请求与配额
   - [x] Web UI 的获取：想要的电影与剧集，按季或按集添加与监控，搜索与 RSS 同步（`WantedService`）；作品在索引器中的发布，带其质量、自定义格式与拒绝原因，可抓取（`SearchReleases`、`GrabRelease`）；以及下载的队列、历史、黑名单与手动导入（`DownloadService`）
     - [x] 设置中的“想要”与“下载”（`apps/web/src/screens/admin/wanted.tsx`、`apps/web/src/screens/admin/downloads.tsx`、`libs/client-ts/src/acquisition.ts`）：缺失与未达截止质量的电影与分集，可搜索、取消监控与 RSS 同步；队列、历史、黑名单与文件夹的手动导入
     - [x] 详情中条目的获取（`apps/web/src/screens/acquire.tsx`）：监控、质量配置、自动与交互式搜索及抓取，以及该条目的下载与历史
