@@ -80,7 +80,7 @@ WANTED_KIND_MOVIE: WantedKind
 WANTED_KIND_EPISODE: WantedKind
 
 class Wanted(_message.Message):
-    __slots__ = ("item_id", "monitored", "quality_profile_id", "minimum_availability", "tags", "add_time", "last_search_time", "monitor_new_items", "season_folder")
+    __slots__ = ("item_id", "monitored", "quality_profile_id", "minimum_availability", "tags", "add_time", "last_search_time", "monitor_new_items", "season_folder", "series_type")
     ITEM_ID_FIELD_NUMBER: _ClassVar[int]
     MONITORED_FIELD_NUMBER: _ClassVar[int]
     QUALITY_PROFILE_ID_FIELD_NUMBER: _ClassVar[int]
@@ -90,6 +90,7 @@ class Wanted(_message.Message):
     LAST_SEARCH_TIME_FIELD_NUMBER: _ClassVar[int]
     MONITOR_NEW_ITEMS_FIELD_NUMBER: _ClassVar[int]
     SEASON_FOLDER_FIELD_NUMBER: _ClassVar[int]
+    SERIES_TYPE_FIELD_NUMBER: _ClassVar[int]
     item_id: str
     monitored: bool
     quality_profile_id: str
@@ -99,7 +100,8 @@ class Wanted(_message.Message):
     last_search_time: _timestamp_pb2.Timestamp
     monitor_new_items: NewItemMonitor
     season_folder: bool
-    def __init__(self, item_id: _Optional[str] = ..., monitored: _Optional[bool] = ..., quality_profile_id: _Optional[str] = ..., minimum_availability: _Optional[_Union[MinimumAvailability, str]] = ..., tags: _Optional[_Iterable[str]] = ..., add_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., last_search_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., monitor_new_items: _Optional[_Union[NewItemMonitor, str]] = ..., season_folder: _Optional[bool] = ...) -> None: ...
+    series_type: _item_pb2.SeriesType
+    def __init__(self, item_id: _Optional[str] = ..., monitored: _Optional[bool] = ..., quality_profile_id: _Optional[str] = ..., minimum_availability: _Optional[_Union[MinimumAvailability, str]] = ..., tags: _Optional[_Iterable[str]] = ..., add_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., last_search_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., monitor_new_items: _Optional[_Union[NewItemMonitor, str]] = ..., season_folder: _Optional[bool] = ..., series_type: _Optional[_Union[_item_pb2.SeriesType, str]] = ...) -> None: ...
 
 class AddMovieRequest(_message.Message):
     __slots__ = ("library_id", "tmdb_id", "quality_profile_id", "minimum_availability", "tags", "search")

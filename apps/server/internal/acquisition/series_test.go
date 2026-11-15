@@ -348,6 +348,43 @@ func TestAddSeries(t *testing.T) {
 	}
 }
 
+// TestUpdateWantedSeries checks a series' wanted settings change with its
+// type, as Sonarr's series editor, and a type left unset stays.
+func TestUpdateWantedSeries(t *testing.T) {
+	e := newSeriesEnv(t)
+	it := e.addSeries(81189, core.SeriesStandard)
+	got, err := e.rt.GetWanted(e.ctx, it.ID)
+	if err != nil || got.SeriesType == nil || *got.SeriesType != core.SeriesStandard || !got.SeasonFolder {
+		t.Fatalf("GetWanted = %+v, %v, want = standard with season folders", got, err)
+	}
+	u, err := e.rt.UpdateWanted(e.ctx, WantedItem{
+		Wanted: core.Wanted{
+			ItemID: it.ID, QualityProfileID: e.seriesProfile, Tags: []string{"anime"}, MonitorNewItems: core.NewItemsNone,
+		},
+		Monitored: true, SeriesType: new(core.SeriesAnime),
+	})
+	if err != nil || u.SeriesType == nil || *u.SeriesType != core.SeriesAnime || u.SeasonFolder || u.MonitorNewItems != core.NewItemsNone ||
+		!slices.Equal(u.Tags, []string{"anime"}) || !u.Monitored {
+		t.Fatalf("UpdateWanted = %+v, %v, want = anime without season folders, new items none", u, err)
+	}
+	if got := e.item(it.ID); got.SeriesType != core.SeriesAnime || !got.Monitored {
+		t.Errorf("series = %q monitored %v, want = anime, monitored", got.SeriesType, got.Monitored)
+	}
+	// A type left unset stays.
+	u, err = e.rt.UpdateWanted(e.ctx, WantedItem{Wanted: core.Wanted{ItemID: it.ID, QualityProfileID: e.seriesProfile, SeasonFolder: true}, Monitored: true})
+	if err != nil || *u.SeriesType != core.SeriesAnime || !u.SeasonFolder || u.MonitorNewItems != core.NewItemsAll {
+		t.Errorf("UpdateWanted without a type = %+v, %v, want = still anime, new items all", u, err)
+	}
+	if _, err := e.rt.UpdateWanted(e.ctx, WantedItem{
+		Wanted: core.Wanted{ItemID: it.ID, QualityProfileID: e.seriesProfile}, SeriesType: new(core.SeriesType("weekly")),
+	}); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("UpdateWanted with an unknown type: err = %v, want = invalid", err)
+	}
+	if _, err := e.rt.UpdateWanted(e.ctx, WantedItem{Wanted: core.Wanted{ItemID: it.ID, QualityProfileID: e.profile}}); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("UpdateWanted with a movie profile: err = %v, want = invalid", err)
+	}
+}
+
 func TestDailyFromSceneProviders(t *testing.T) {
 	e := newSeriesEnv(t)
 	e.scene.mappings = nil

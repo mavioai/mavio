@@ -215,6 +215,7 @@ export { useRevokeSession, useSendCommand, useSessions } from "./remote.ts";
 export { useExternalIdKinds, useMetadataActions, useRemoteImages, useRemoteSearch } from "./metadata.ts";
 export { useCollectionActions, useCollections, usePlaylistActions, usePlaylistEntries, usePlaylists } from "./lists.ts";
 export {
+  parseTags,
   useAddWanted,
   useBlocklist,
   useDownloadActions,

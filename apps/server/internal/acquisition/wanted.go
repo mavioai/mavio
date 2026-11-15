@@ -108,10 +108,23 @@ func (r *Runtime) checkProfile(ctx context.Context, id core.ID, kind core.ItemKi
 	return nil
 }
 
-// WantedItem is a wanted movie or series with its item's monitored flag.
+// WantedItem is a wanted movie or series with its item's monitored flag
+// and a series' type.
 type WantedItem struct {
 	core.Wanted
 	Monitored bool
+	// SeriesType is a series' type; nil for movies, and in UpdateWanted to
+	// leave it as it is.
+	SeriesType *core.SeriesType
+}
+
+// wantedItem returns the wanted state of an item.
+func wantedItem(w core.Wanted, it core.Item) WantedItem {
+	out := WantedItem{Wanted: w, Monitored: it.Monitored}
+	if it.Kind == core.KindSeries {
+		out.SeriesType = new(it.SeriesType)
+	}
+	return out
 }
 
 // GetWanted returns how a movie is acquired.
@@ -124,13 +137,13 @@ func (r *Runtime) GetWanted(ctx context.Context, itemID core.ID) (WantedItem, er
 	if err != nil {
 		return WantedItem{}, err
 	}
-	return WantedItem{Wanted: w, Monitored: it.Monitored}, nil
+	return wantedItem(w, it), nil
 }
 
 // UpdateWanted changes how a movie or series is acquired: its profile and
 // tags, a movie's minimum availability, a series' monitoring of new
-// items and season folders, and its item's monitored flag. The times are
-// the server's.
+// items, season folders and type, and its item's monitored flag. The
+// times are the server's.
 func (r *Runtime) UpdateWanted(ctx context.Context, u WantedItem) (WantedItem, error) {
 	w, err := r.Store.Wanted().Get(ctx, u.ItemID)
 	if err != nil {
@@ -146,21 +159,28 @@ func (r *Runtime) UpdateWanted(ctx context.Context, u WantedItem) (WantedItem, e
 		}
 	}
 	w.QualityProfileID, w.Tags = u.QualityProfileID, u.Tags
+	changed := it.Monitored != u.Monitored
 	if it.Kind == core.KindSeries {
 		w.MonitorNewItems, w.SeasonFolder = cmp.Or(u.MonitorNewItems, core.NewItemsAll), u.SeasonFolder
+		if u.SeriesType != nil && *u.SeriesType != it.SeriesType {
+			if !u.SeriesType.Valid() {
+				return WantedItem{}, fmt.Errorf("%w: unknown series type %q", core.ErrInvalid, *u.SeriesType)
+			}
+			it.SeriesType, changed = *u.SeriesType, true
+		}
 	} else {
 		w.MinimumAvailability = cmp.Or(u.MinimumAvailability, core.AvailabilityReleased)
 	}
 	if err := r.Store.Wanted().Put(ctx, &w); err != nil {
 		return WantedItem{}, err
 	}
-	if it.Monitored != u.Monitored {
+	if changed {
 		it.Monitored = u.Monitored
 		if err := r.Store.Items().Upsert(ctx, it); err != nil {
 			return WantedItem{}, err
 		}
 	}
-	return WantedItem{Wanted: w, Monitored: it.Monitored}, nil
+	return wantedItem(w, it), nil
 }
 
 // profileKind returns the kind of the quality profiles of an item kind.

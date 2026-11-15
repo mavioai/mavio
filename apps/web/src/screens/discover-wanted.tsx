@@ -2,8 +2,9 @@
 // administrators, as Radarr's and Sonarr's Add New: a movie by its TMDB ID
 // or a series by its TVDB ID, to a library of its kind with a quality
 // profile, a movie's minimum availability or a series' monitoring, type,
-// new seasons and season folders, and whether to search for it at once.
-import { errorMessage, type ServerEntry, useAddWanted, useQualityProfiles, useRequestSettings, useServerLibraries, wantedTarget } from "@mavio/client-ts";
+// new seasons and season folders, its tags, and whether to search for it
+// at once. Its rows are those an item's acquisition edits too.
+import { errorMessage, parseTags, type ServerEntry, useAddWanted, useQualityProfiles, useRequestSettings, useServerLibraries, wantedTarget } from "@mavio/client-ts";
 import type { Title } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { MinimumAvailability, NewItemMonitor, SeriesMonitor } from "@mavio/proto/mavio/acquisition/v1/wanted_pb";
@@ -16,6 +17,7 @@ import { Button, Group, Loading, Row } from "../ui.tsx";
 import { Modal } from "../controls/dialog.tsx";
 import { Switch } from "../controls/inputs.tsx";
 import { Select } from "../controls/select.tsx";
+import { input } from "../controls/styles.ts";
 
 /** The choices of the dialog, once the server's settings, libraries and profiles have come. */
 export function AddWantedDialog({ server, title, onClose }: { server: ServerEntry; title: Title; onClose: () => void }) {
@@ -65,11 +67,12 @@ function AddWantedForm({
   const add = useAddWanted(server);
   const series = title.mediaKind === MediaKind.SERIES;
   const [target, setTarget] = useState(() => wantedTarget(title.mediaKind, title.anime, settings, libraries, profiles));
-  const [availability, setAvailability] = useState(settings?.minimumAvailability || MinimumAvailability.RELEASED);
-  const [monitor, setMonitor] = useState(SeriesMonitor.ALL);
-  const [type, setType] = useState(title.anime ? SeriesType.ANIME : SeriesType.UNSPECIFIED);
-  const [newItems, setNewItems] = useState(settings?.monitorNewItems || NewItemMonitor.ALL);
+  const [availability, setAvailability] = useState<MinimumAvailability>(settings?.minimumAvailability || MinimumAvailability.RELEASED);
+  const [monitor, setMonitor] = useState<SeriesMonitor>(SeriesMonitor.ALL);
+  const [type, setType] = useState<SeriesType>(title.anime ? SeriesType.ANIME : SeriesType.UNSPECIFIED);
+  const [newItems, setNewItems] = useState<NewItemMonitor>(settings?.monitorNewItems || NewItemMonitor.ALL);
   const [seasonFolder, setSeasonFolder] = useState(settings?.seasonFolder ?? true);
+  const [tags, setTags] = useState("");
   const [search, setSearch] = useState(true);
   const mutation = series ? add.series : add.movie;
 
@@ -97,31 +100,16 @@ function AddWantedForm({
             seasonFolder,
             monitor,
             monitorNewItems: newItems,
+            tags: parseTags(tags),
             search,
           },
           { onSuccess: opened },
         )
       : add.movie.mutate(
-          { libraryId: target.libraryId, tmdbId: title.tmdbId, qualityProfileId: target.qualityProfileId, minimumAvailability: availability, search },
+          { libraryId: target.libraryId, tmdbId: title.tmdbId, qualityProfileId: target.qualityProfileId, minimumAvailability: availability, tags: parseTags(tags), search },
           { onSuccess: opened },
         );
 
-  const choice = <T extends number>(label: string, value: T, options: [T, string][], onChange: (v: T) => void, detail?: string) => (
-    <Row label={label} detail={detail}>
-      <Select value={String(value)} label={label} className="w-56" options={options.map(([v, l]) => ({ value: String(v), label: l }))} onChange={(v) => onChange(Number(v) as T)} />
-    </Row>
-  );
-  const monitors: [SeriesMonitor, string][] = [
-    [SeriesMonitor.ALL, t("discover.monitorAll")],
-    [SeriesMonitor.FUTURE, t("discover.monitorFuture")],
-    [SeriesMonitor.MISSING, t("discover.monitorMissing")],
-    [SeriesMonitor.EXISTING, t("discover.monitorExisting")],
-    [SeriesMonitor.RECENT, t("discover.monitorRecent")],
-    [SeriesMonitor.PILOT, t("discover.monitorPilot")],
-    [SeriesMonitor.FIRST_SEASON, t("discover.monitorFirstSeason")],
-    [SeriesMonitor.LAST_SEASON, t("discover.monitorLastSeason")],
-    [SeriesMonitor.NONE, t("discover.monitorNone")],
-  ];
   return (
     <div className="-mx-6 flex min-h-0 flex-col gap-4 overflow-y-auto px-6 pb-1">
       {missing ? (
@@ -142,44 +130,15 @@ function AddWantedForm({
           </Row>
           {series ? (
             <>
-              {choice(t("discover.monitor"), monitor, monitors, setMonitor)}
-              {choice(
-                t("requestsettings.monitorNew"),
-                newItems,
-                [
-                  [NewItemMonitor.ALL, t("requestsettings.monitorAll")],
-                  [NewItemMonitor.NONE, t("requestsettings.monitorNone")],
-                ],
-                setNewItems,
-                t("requestsettings.monitorNewDetail"),
-              )}
-              {choice(
-                t("discover.seriesType"),
-                type,
-                [
-                  [SeriesType.UNSPECIFIED, t("discover.seriesTypeAuto")],
-                  [SeriesType.STANDARD, t("discover.seriesTypeStandard")],
-                  [SeriesType.DAILY, t("discover.seriesTypeDaily")],
-                  [SeriesType.ANIME, t("discover.seriesTypeAnime")],
-                ],
-                setType,
-              )}
-              <Row label={t("requestsettings.seasonFolder")} detail={t("requestsettings.seasonFolderDetail")}>
-                <Switch on={seasonFolder} label={t("requestsettings.seasonFolder")} onChange={setSeasonFolder} />
-              </Row>
+              <ChoiceRow label={t("discover.monitor")} value={monitor} options={seriesMonitorOptions()} onChange={setMonitor} />
+              <NewItemsRow value={newItems} onChange={setNewItems} />
+              <SeriesTypeRow value={type} auto onChange={setType} />
+              <SeasonFolderRow on={seasonFolder} onChange={setSeasonFolder} />
             </>
           ) : (
-            choice(
-              t("requestsettings.minimumAvailability"),
-              availability,
-              [
-                [MinimumAvailability.ANNOUNCED, t("requestsettings.announced")],
-                [MinimumAvailability.IN_CINEMAS, t("requestsettings.inCinemas")],
-                [MinimumAvailability.RELEASED, t("requestsettings.released")],
-              ],
-              setAvailability,
-            )
+            <AvailabilityRow value={availability} onChange={setAvailability} />
           )}
+          <TagsRow value={tags} onChange={setTags} />
           <Row label={t("discover.searchNow")} detail={series ? t("discover.searchNowSeriesDetail") : t("discover.searchNowMovieDetail")} wrap>
             <Switch on={search} label={t("discover.searchNow")} onChange={setSearch} />
           </Row>
@@ -195,5 +154,108 @@ function AddWantedForm({
         </Button>
       </div>
     </div>
+  );
+}
+
+/** A row choosing one of an enumeration's values. */
+export function ChoiceRow<T extends number>({
+  label,
+  value,
+  options,
+  onChange,
+  detail,
+}: {
+  label: string;
+  value: T;
+  options: [T, string][];
+  onChange: (v: T) => void;
+  detail?: string;
+}) {
+  return (
+    <Row label={label} detail={detail}>
+      <Select value={String(value)} label={label} className="w-56" options={options.map(([v, l]) => ({ value: String(v), label: l }))} onChange={(v) => onChange(Number(v) as T)} />
+    </Row>
+  );
+}
+
+/** Which episodes of a series to monitor, as Sonarr's; with specials, also those changing only the specials. */
+export function seriesMonitorOptions(specials = false): [SeriesMonitor, string][] {
+  return [
+    [SeriesMonitor.ALL, t("discover.monitorAll")],
+    [SeriesMonitor.FUTURE, t("discover.monitorFuture")],
+    [SeriesMonitor.MISSING, t("discover.monitorMissing")],
+    [SeriesMonitor.EXISTING, t("discover.monitorExisting")],
+    [SeriesMonitor.RECENT, t("discover.monitorRecent")],
+    [SeriesMonitor.PILOT, t("discover.monitorPilot")],
+    [SeriesMonitor.FIRST_SEASON, t("discover.monitorFirstSeason")],
+    [SeriesMonitor.LAST_SEASON, t("discover.monitorLastSeason")],
+    ...(specials
+      ? ([
+          [SeriesMonitor.MONITOR_SPECIALS, t("acquire.monitorSpecials")],
+          [SeriesMonitor.UNMONITOR_SPECIALS, t("acquire.unmonitorSpecials")],
+        ] as [SeriesMonitor, string][])
+      : []),
+    [SeriesMonitor.NONE, t("discover.monitorNone")],
+  ];
+}
+
+/** Whether a series monitors the seasons added later. */
+export function NewItemsRow({ value, onChange }: { value: NewItemMonitor; onChange: (v: NewItemMonitor) => void }) {
+  return (
+    <ChoiceRow
+      label={t("requestsettings.monitorNew")}
+      value={value}
+      options={[
+        [NewItemMonitor.ALL, t("requestsettings.monitorAll")],
+        [NewItemMonitor.NONE, t("requestsettings.monitorNone")],
+      ]}
+      onChange={onChange}
+      detail={t("requestsettings.monitorNewDetail")}
+    />
+  );
+}
+
+/** How a series numbers its episodes; with auto, also the server's choice. */
+export function SeriesTypeRow({ value, auto = false, onChange }: { value: SeriesType; auto?: boolean; onChange: (v: SeriesType) => void }) {
+  const options: [SeriesType, string][] = [
+    [SeriesType.STANDARD, t("discover.seriesTypeStandard")],
+    [SeriesType.DAILY, t("discover.seriesTypeDaily")],
+    [SeriesType.ANIME, t("discover.seriesTypeAnime")],
+  ];
+  if (auto) options.unshift([SeriesType.UNSPECIFIED, t("discover.seriesTypeAuto")]);
+  return <ChoiceRow label={t("discover.seriesType")} value={value} options={options} onChange={onChange} />;
+}
+
+/** Whether a series' episodes go into season folders. */
+export function SeasonFolderRow({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {
+  return (
+    <Row label={t("requestsettings.seasonFolder")} detail={t("requestsettings.seasonFolderDetail")}>
+      <Switch on={on} label={t("requestsettings.seasonFolder")} onChange={onChange} />
+    </Row>
+  );
+}
+
+/** When a movie starts to be searched for. */
+export function AvailabilityRow({ value, onChange }: { value: MinimumAvailability; onChange: (v: MinimumAvailability) => void }) {
+  return (
+    <ChoiceRow
+      label={t("requestsettings.minimumAvailability")}
+      value={value}
+      options={[
+        [MinimumAvailability.ANNOUNCED, t("requestsettings.announced")],
+        [MinimumAvailability.IN_CINEMAS, t("requestsettings.inCinemas")],
+        [MinimumAvailability.RELEASED, t("requestsettings.released")],
+      ]}
+      onChange={onChange}
+    />
+  );
+}
+
+/** The tags of a wanted movie or series as typed, separated by commas. */
+export function TagsRow({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <Row label={t("rules.tags")} detail={t("acquire.tagsDetail")} wrap>
+      <input className={`${input} sm:w-56`} aria-label={t("rules.tags")} value={value} onChange={(e) => onChange(e.target.value)} />
+    </Row>
   );
 }

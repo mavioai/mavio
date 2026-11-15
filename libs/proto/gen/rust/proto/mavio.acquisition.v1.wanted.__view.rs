@@ -42,6 +42,13 @@ pub struct WantedView<'a> {
     ///
     /// Field 9: `season_folder`
     pub season_folder: ::core::option::Option<bool>,
+    /// Of series: how its episodes are numbered in release names, its
+    /// item's; unspecified in UpdateWanted to leave it as it is.
+    ///
+    /// Field 10: `series_type`
+    pub series_type: ::core::option::Option<
+        ::buffa::EnumValue<super::super::super::super::library::v1::SeriesType>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for WantedView<'a> {
@@ -162,6 +169,15 @@ impl<'a> ::buffa::MessageView<'a> for WantedView<'a> {
                 )?;
                 view.season_folder = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.series_type = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
             5u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -220,6 +236,7 @@ impl<'a> ::buffa::MessageView<'a> for WantedView<'a> {
             },
             monitor_new_items: self.monitor_new_items,
             season_folder: self.season_folder,
+            series_type: self.series_type,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -268,6 +285,9 @@ impl<'a> ::buffa::ViewEncode<'a> for WantedView<'a> {
         if self.season_folder.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.series_type {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -315,6 +335,9 @@ impl<'a> ::buffa::ViewEncode<'a> for WantedView<'a> {
         }
         if let Some(v) = self.season_folder {
             ::buffa::types::put_bool_field(9u32, v, buf);
+        }
+        if let Some(ref v) = self.series_type {
+            ::buffa::types::put_int32_field(10u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -471,6 +494,18 @@ impl WantedOwnedView {
     #[must_use]
     pub fn season_folder(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().season_folder
+    }
+    /// Of series: how its episodes are numbered in release names, its
+    /// item's; unspecified in UpdateWanted to leave it as it is.
+    ///
+    /// Field 10: `series_type`
+    #[must_use]
+    pub fn series_type(
+        &self,
+    ) -> ::core::option::Option<
+        ::buffa::EnumValue<super::super::super::super::library::v1::SeriesType>,
+    > {
+        self.0.reborrow().series_type
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<WantedView<'static>>> for WantedOwnedView {

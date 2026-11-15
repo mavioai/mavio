@@ -104,6 +104,15 @@ func wantedToProto(w core.Wanted, monitored bool) *acquisitionv1.Wanted {
 	return b.Build()
 }
 
+// wantedItemToProto converts a wanted item with a series' type.
+func wantedItemToProto(w acquisition.WantedItem) *acquisitionv1.Wanted {
+	pw := wantedToProto(w.Wanted, w.Monitored)
+	if w.SeriesType != nil {
+		pw.SetSeriesType(seriesTypes[*w.SeriesType])
+	}
+	return pw
+}
+
 func parseIDs(ctx context.Context, ids []string) ([]core.ID, error) {
 	out := make([]core.ID, len(ids))
 	for i, s := range ids {
@@ -212,7 +221,7 @@ func (s *WantedService) SetMonitored(ctx context.Context, req *acquisitionv1.Set
 	return &acquisitionv1.SetMonitoredResponse{}, nil
 }
 
-// GetWanted returns how a movie is acquired.
+// GetWanted returns how a movie or series is acquired.
 func (s *WantedService) GetWanted(ctx context.Context, req *acquisitionv1.GetWantedRequest) (*acquisitionv1.GetWantedResponse, error) {
 	if _, err := admin(ctx); err != nil {
 		return nil, err
@@ -225,10 +234,10 @@ func (s *WantedService) GetWanted(ctx context.Context, req *acquisitionv1.GetWan
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return acquisitionv1.GetWantedResponse_builder{Wanted: wantedToProto(w.Wanted, w.Monitored)}.Build(), nil
+	return acquisitionv1.GetWantedResponse_builder{Wanted: wantedItemToProto(w)}.Build(), nil
 }
 
-// UpdateWanted changes how a movie is acquired.
+// UpdateWanted changes how a movie or series is acquired.
 func (s *WantedService) UpdateWanted(ctx context.Context, req *acquisitionv1.UpdateWantedRequest) (*acquisitionv1.UpdateWantedResponse, error) {
 	if _, err := admin(ctx); err != nil {
 		return nil, err
@@ -246,17 +255,25 @@ func (s *WantedService) UpdateWanted(ctx context.Context, req *acquisitionv1.Upd
 	if err != nil {
 		return nil, err
 	}
-	w, err := s.rt.UpdateWanted(ctx, acquisition.WantedItem{
+	u := acquisition.WantedItem{
 		Wanted: core.Wanted{
 			ItemID: ids[0], QualityProfileID: ids[1], MinimumAvailability: availability, Tags: pw.GetTags(),
 			MonitorNewItems: newItems, SeasonFolder: pw.GetSeasonFolder(),
 		},
 		Monitored: pw.GetMonitored(),
-	})
+	}
+	if t := pw.GetSeriesType(); t != libraryv1.SeriesType_SERIES_TYPE_UNSPECIFIED {
+		st, ok := seriesTypesFromProto[t]
+		if !ok {
+			return nil, invalid(fmt.Errorf("unknown series type %v", t))
+		}
+		u.SeriesType = &st
+	}
+	w, err := s.rt.UpdateWanted(ctx, u)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return acquisitionv1.UpdateWantedResponse_builder{Wanted: wantedToProto(w.Wanted, w.Monitored)}.Build(), nil
+	return acquisitionv1.UpdateWantedResponse_builder{Wanted: wantedItemToProto(w)}.Build(), nil
 }
 
 func wantedFilter(f acquisitionv1.WantedFilter) acquisition.WantedFilter {

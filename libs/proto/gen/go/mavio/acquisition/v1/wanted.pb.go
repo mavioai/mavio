@@ -309,6 +309,7 @@ type Wanted struct {
 	xxx_hidden_LastSearchTime      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=last_search_time,json=lastSearchTime"`
 	xxx_hidden_MonitorNewItems     NewItemMonitor         `protobuf:"varint,8,opt,name=monitor_new_items,json=monitorNewItems,enum=mavio.acquisition.v1.NewItemMonitor"`
 	xxx_hidden_SeasonFolder        bool                   `protobuf:"varint,9,opt,name=season_folder,json=seasonFolder"`
+	xxx_hidden_SeriesType          v1.SeriesType          `protobuf:"varint,10,opt,name=series_type,json=seriesType,enum=mavio.library.v1.SeriesType"`
 	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
 	XXX_presence                   [1]uint32
 	unknownFields                  protoimpl.UnknownFields
@@ -413,24 +414,33 @@ func (x *Wanted) GetSeasonFolder() bool {
 	return false
 }
 
+func (x *Wanted) GetSeriesType() v1.SeriesType {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 9) {
+			return x.xxx_hidden_SeriesType
+		}
+	}
+	return v1.SeriesType(0)
+}
+
 func (x *Wanted) SetItemId(v string) {
 	x.xxx_hidden_ItemId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
 }
 
 func (x *Wanted) SetMonitored(v bool) {
 	x.xxx_hidden_Monitored = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
 }
 
 func (x *Wanted) SetQualityProfileId(v string) {
 	x.xxx_hidden_QualityProfileId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
 }
 
 func (x *Wanted) SetMinimumAvailability(v MinimumAvailability) {
 	x.xxx_hidden_MinimumAvailability = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
 }
 
 func (x *Wanted) SetTags(v []string) {
@@ -447,12 +457,17 @@ func (x *Wanted) SetLastSearchTime(v *timestamppb.Timestamp) {
 
 func (x *Wanted) SetMonitorNewItems(v NewItemMonitor) {
 	x.xxx_hidden_MonitorNewItems = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 10)
 }
 
 func (x *Wanted) SetSeasonFolder(v bool) {
 	x.xxx_hidden_SeasonFolder = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 10)
+}
+
+func (x *Wanted) SetSeriesType(v v1.SeriesType) {
+	x.xxx_hidden_SeriesType = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 10)
 }
 
 func (x *Wanted) HasItemId() bool {
@@ -511,6 +526,13 @@ func (x *Wanted) HasSeasonFolder() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
 }
 
+func (x *Wanted) HasSeriesType() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
+}
+
 func (x *Wanted) ClearItemId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_ItemId = nil
@@ -549,6 +571,11 @@ func (x *Wanted) ClearSeasonFolder() {
 	x.xxx_hidden_SeasonFolder = false
 }
 
+func (x *Wanted) ClearSeriesType() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
+	x.xxx_hidden_SeriesType = v1.SeriesType_SERIES_TYPE_UNSPECIFIED
+}
+
 type Wanted_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -567,6 +594,9 @@ type Wanted_builder struct {
 	MonitorNewItems *NewItemMonitor
 	// Of series: whether episodes are imported into season folders.
 	SeasonFolder *bool
+	// Of series: how its episodes are numbered in release names, its
+	// item's; unspecified in UpdateWanted to leave it as it is.
+	SeriesType *v1.SeriesType
 }
 
 func (b0 Wanted_builder) Build() *Wanted {
@@ -574,31 +604,35 @@ func (b0 Wanted_builder) Build() *Wanted {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.ItemId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
 		x.xxx_hidden_ItemId = b.ItemId
 	}
 	if b.Monitored != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
 		x.xxx_hidden_Monitored = *b.Monitored
 	}
 	if b.QualityProfileId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
 		x.xxx_hidden_QualityProfileId = b.QualityProfileId
 	}
 	if b.MinimumAvailability != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
 		x.xxx_hidden_MinimumAvailability = *b.MinimumAvailability
 	}
 	x.xxx_hidden_Tags = b.Tags
 	x.xxx_hidden_AddTime = b.AddTime
 	x.xxx_hidden_LastSearchTime = b.LastSearchTime
 	if b.MonitorNewItems != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 10)
 		x.xxx_hidden_MonitorNewItems = *b.MonitorNewItems
 	}
 	if b.SeasonFolder != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 10)
 		x.xxx_hidden_SeasonFolder = *b.SeasonFolder
+	}
+	if b.SeriesType != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 10)
+		x.xxx_hidden_SeriesType = *b.SeriesType
 	}
 	return m0
 }
@@ -3213,7 +3247,7 @@ var File_mavio_acquisition_v1_wanted_proto protoreflect.FileDescriptor
 
 const file_mavio_acquisition_v1_wanted_proto_rawDesc = "" +
 	"\n" +
-	"!mavio/acquisition/v1/wanted.proto\x12\x14mavio.acquisition.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bmavio/library/v1/item.proto\"\x8b\x04\n" +
+	"!mavio/acquisition/v1/wanted.proto\x12\x14mavio.acquisition.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bmavio/library/v1/item.proto\"\xd4\x04\n" +
 	"\x06Wanted\x12!\n" +
 	"\aitem_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06itemId\x12\x1c\n" +
 	"\tmonitored\x18\x02 \x01(\bR\tmonitored\x126\n" +
@@ -3223,7 +3257,10 @@ const file_mavio_acquisition_v1_wanted_proto_rawDesc = "" +
 	"\badd_time\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\aaddTime\x12D\n" +
 	"\x10last_search_time\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\x0elastSearchTime\x12Z\n" +
 	"\x11monitor_new_items\x18\b \x01(\x0e2$.mavio.acquisition.v1.NewItemMonitorB\b\xbaH\x05\x82\x01\x02\x10\x01R\x0fmonitorNewItems\x12#\n" +
-	"\rseason_folder\x18\t \x01(\bR\fseasonFolder\"\xb8\x02\n" +
+	"\rseason_folder\x18\t \x01(\bR\fseasonFolder\x12G\n" +
+	"\vseries_type\x18\n" +
+	" \x01(\x0e2\x1c.mavio.library.v1.SeriesTypeB\b\xbaH\x05\x82\x01\x02\x10\x01R\n" +
+	"seriesType\"\xb8\x02\n" +
 	"\x0fAddMovieRequest\x12'\n" +
 	"\n" +
 	"library_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\tlibraryId\x12 \n" +
@@ -3393,49 +3430,50 @@ var file_mavio_acquisition_v1_wanted_proto_depIdxs = []int32{
 	26, // 1: mavio.acquisition.v1.Wanted.add_time:type_name -> google.protobuf.Timestamp
 	26, // 2: mavio.acquisition.v1.Wanted.last_search_time:type_name -> google.protobuf.Timestamp
 	1,  // 3: mavio.acquisition.v1.Wanted.monitor_new_items:type_name -> mavio.acquisition.v1.NewItemMonitor
-	0,  // 4: mavio.acquisition.v1.AddMovieRequest.minimum_availability:type_name -> mavio.acquisition.v1.MinimumAvailability
-	5,  // 5: mavio.acquisition.v1.AddMovieResponse.wanted:type_name -> mavio.acquisition.v1.Wanted
-	27, // 6: mavio.acquisition.v1.AddSeriesRequest.series_type:type_name -> mavio.library.v1.SeriesType
-	2,  // 7: mavio.acquisition.v1.AddSeriesRequest.monitor:type_name -> mavio.acquisition.v1.SeriesMonitor
-	1,  // 8: mavio.acquisition.v1.AddSeriesRequest.monitor_new_items:type_name -> mavio.acquisition.v1.NewItemMonitor
-	5,  // 9: mavio.acquisition.v1.AddSeriesResponse.wanted:type_name -> mavio.acquisition.v1.Wanted
-	11, // 10: mavio.acquisition.v1.SetMonitoredRequest.items:type_name -> mavio.acquisition.v1.MonitoredItems
-	12, // 11: mavio.acquisition.v1.SetMonitoredRequest.series:type_name -> mavio.acquisition.v1.SeriesMonitoring
-	2,  // 12: mavio.acquisition.v1.SeriesMonitoring.monitor:type_name -> mavio.acquisition.v1.SeriesMonitor
-	1,  // 13: mavio.acquisition.v1.SeriesMonitoring.monitor_new_items:type_name -> mavio.acquisition.v1.NewItemMonitor
-	5,  // 14: mavio.acquisition.v1.GetWantedResponse.wanted:type_name -> mavio.acquisition.v1.Wanted
-	5,  // 15: mavio.acquisition.v1.UpdateWantedRequest.wanted:type_name -> mavio.acquisition.v1.Wanted
-	5,  // 16: mavio.acquisition.v1.UpdateWantedResponse.wanted:type_name -> mavio.acquisition.v1.Wanted
-	3,  // 17: mavio.acquisition.v1.ListWantedRequest.filter:type_name -> mavio.acquisition.v1.WantedFilter
-	4,  // 18: mavio.acquisition.v1.ListWantedRequest.kind:type_name -> mavio.acquisition.v1.WantedKind
-	26, // 19: mavio.acquisition.v1.WantedEpisode.air_time:type_name -> google.protobuf.Timestamp
-	5,  // 20: mavio.acquisition.v1.WantedEpisode.wanted:type_name -> mavio.acquisition.v1.Wanted
-	5,  // 21: mavio.acquisition.v1.WantedMovie.wanted:type_name -> mavio.acquisition.v1.Wanted
-	20, // 22: mavio.acquisition.v1.ListWantedResponse.movies:type_name -> mavio.acquisition.v1.WantedMovie
-	19, // 23: mavio.acquisition.v1.ListWantedResponse.episodes:type_name -> mavio.acquisition.v1.WantedEpisode
-	3,  // 24: mavio.acquisition.v1.SearchWantedRequest.filter:type_name -> mavio.acquisition.v1.WantedFilter
-	4,  // 25: mavio.acquisition.v1.SearchWantedRequest.kind:type_name -> mavio.acquisition.v1.WantedKind
-	6,  // 26: mavio.acquisition.v1.WantedService.AddMovie:input_type -> mavio.acquisition.v1.AddMovieRequest
-	8,  // 27: mavio.acquisition.v1.WantedService.AddSeries:input_type -> mavio.acquisition.v1.AddSeriesRequest
-	10, // 28: mavio.acquisition.v1.WantedService.SetMonitored:input_type -> mavio.acquisition.v1.SetMonitoredRequest
-	14, // 29: mavio.acquisition.v1.WantedService.GetWanted:input_type -> mavio.acquisition.v1.GetWantedRequest
-	16, // 30: mavio.acquisition.v1.WantedService.UpdateWanted:input_type -> mavio.acquisition.v1.UpdateWantedRequest
-	18, // 31: mavio.acquisition.v1.WantedService.ListWanted:input_type -> mavio.acquisition.v1.ListWantedRequest
-	22, // 32: mavio.acquisition.v1.WantedService.SearchWanted:input_type -> mavio.acquisition.v1.SearchWantedRequest
-	24, // 33: mavio.acquisition.v1.WantedService.SyncRSS:input_type -> mavio.acquisition.v1.SyncRSSRequest
-	7,  // 34: mavio.acquisition.v1.WantedService.AddMovie:output_type -> mavio.acquisition.v1.AddMovieResponse
-	9,  // 35: mavio.acquisition.v1.WantedService.AddSeries:output_type -> mavio.acquisition.v1.AddSeriesResponse
-	13, // 36: mavio.acquisition.v1.WantedService.SetMonitored:output_type -> mavio.acquisition.v1.SetMonitoredResponse
-	15, // 37: mavio.acquisition.v1.WantedService.GetWanted:output_type -> mavio.acquisition.v1.GetWantedResponse
-	17, // 38: mavio.acquisition.v1.WantedService.UpdateWanted:output_type -> mavio.acquisition.v1.UpdateWantedResponse
-	21, // 39: mavio.acquisition.v1.WantedService.ListWanted:output_type -> mavio.acquisition.v1.ListWantedResponse
-	23, // 40: mavio.acquisition.v1.WantedService.SearchWanted:output_type -> mavio.acquisition.v1.SearchWantedResponse
-	25, // 41: mavio.acquisition.v1.WantedService.SyncRSS:output_type -> mavio.acquisition.v1.SyncRSSResponse
-	34, // [34:42] is the sub-list for method output_type
-	26, // [26:34] is the sub-list for method input_type
-	26, // [26:26] is the sub-list for extension type_name
-	26, // [26:26] is the sub-list for extension extendee
-	0,  // [0:26] is the sub-list for field type_name
+	27, // 4: mavio.acquisition.v1.Wanted.series_type:type_name -> mavio.library.v1.SeriesType
+	0,  // 5: mavio.acquisition.v1.AddMovieRequest.minimum_availability:type_name -> mavio.acquisition.v1.MinimumAvailability
+	5,  // 6: mavio.acquisition.v1.AddMovieResponse.wanted:type_name -> mavio.acquisition.v1.Wanted
+	27, // 7: mavio.acquisition.v1.AddSeriesRequest.series_type:type_name -> mavio.library.v1.SeriesType
+	2,  // 8: mavio.acquisition.v1.AddSeriesRequest.monitor:type_name -> mavio.acquisition.v1.SeriesMonitor
+	1,  // 9: mavio.acquisition.v1.AddSeriesRequest.monitor_new_items:type_name -> mavio.acquisition.v1.NewItemMonitor
+	5,  // 10: mavio.acquisition.v1.AddSeriesResponse.wanted:type_name -> mavio.acquisition.v1.Wanted
+	11, // 11: mavio.acquisition.v1.SetMonitoredRequest.items:type_name -> mavio.acquisition.v1.MonitoredItems
+	12, // 12: mavio.acquisition.v1.SetMonitoredRequest.series:type_name -> mavio.acquisition.v1.SeriesMonitoring
+	2,  // 13: mavio.acquisition.v1.SeriesMonitoring.monitor:type_name -> mavio.acquisition.v1.SeriesMonitor
+	1,  // 14: mavio.acquisition.v1.SeriesMonitoring.monitor_new_items:type_name -> mavio.acquisition.v1.NewItemMonitor
+	5,  // 15: mavio.acquisition.v1.GetWantedResponse.wanted:type_name -> mavio.acquisition.v1.Wanted
+	5,  // 16: mavio.acquisition.v1.UpdateWantedRequest.wanted:type_name -> mavio.acquisition.v1.Wanted
+	5,  // 17: mavio.acquisition.v1.UpdateWantedResponse.wanted:type_name -> mavio.acquisition.v1.Wanted
+	3,  // 18: mavio.acquisition.v1.ListWantedRequest.filter:type_name -> mavio.acquisition.v1.WantedFilter
+	4,  // 19: mavio.acquisition.v1.ListWantedRequest.kind:type_name -> mavio.acquisition.v1.WantedKind
+	26, // 20: mavio.acquisition.v1.WantedEpisode.air_time:type_name -> google.protobuf.Timestamp
+	5,  // 21: mavio.acquisition.v1.WantedEpisode.wanted:type_name -> mavio.acquisition.v1.Wanted
+	5,  // 22: mavio.acquisition.v1.WantedMovie.wanted:type_name -> mavio.acquisition.v1.Wanted
+	20, // 23: mavio.acquisition.v1.ListWantedResponse.movies:type_name -> mavio.acquisition.v1.WantedMovie
+	19, // 24: mavio.acquisition.v1.ListWantedResponse.episodes:type_name -> mavio.acquisition.v1.WantedEpisode
+	3,  // 25: mavio.acquisition.v1.SearchWantedRequest.filter:type_name -> mavio.acquisition.v1.WantedFilter
+	4,  // 26: mavio.acquisition.v1.SearchWantedRequest.kind:type_name -> mavio.acquisition.v1.WantedKind
+	6,  // 27: mavio.acquisition.v1.WantedService.AddMovie:input_type -> mavio.acquisition.v1.AddMovieRequest
+	8,  // 28: mavio.acquisition.v1.WantedService.AddSeries:input_type -> mavio.acquisition.v1.AddSeriesRequest
+	10, // 29: mavio.acquisition.v1.WantedService.SetMonitored:input_type -> mavio.acquisition.v1.SetMonitoredRequest
+	14, // 30: mavio.acquisition.v1.WantedService.GetWanted:input_type -> mavio.acquisition.v1.GetWantedRequest
+	16, // 31: mavio.acquisition.v1.WantedService.UpdateWanted:input_type -> mavio.acquisition.v1.UpdateWantedRequest
+	18, // 32: mavio.acquisition.v1.WantedService.ListWanted:input_type -> mavio.acquisition.v1.ListWantedRequest
+	22, // 33: mavio.acquisition.v1.WantedService.SearchWanted:input_type -> mavio.acquisition.v1.SearchWantedRequest
+	24, // 34: mavio.acquisition.v1.WantedService.SyncRSS:input_type -> mavio.acquisition.v1.SyncRSSRequest
+	7,  // 35: mavio.acquisition.v1.WantedService.AddMovie:output_type -> mavio.acquisition.v1.AddMovieResponse
+	9,  // 36: mavio.acquisition.v1.WantedService.AddSeries:output_type -> mavio.acquisition.v1.AddSeriesResponse
+	13, // 37: mavio.acquisition.v1.WantedService.SetMonitored:output_type -> mavio.acquisition.v1.SetMonitoredResponse
+	15, // 38: mavio.acquisition.v1.WantedService.GetWanted:output_type -> mavio.acquisition.v1.GetWantedResponse
+	17, // 39: mavio.acquisition.v1.WantedService.UpdateWanted:output_type -> mavio.acquisition.v1.UpdateWantedResponse
+	21, // 40: mavio.acquisition.v1.WantedService.ListWanted:output_type -> mavio.acquisition.v1.ListWantedResponse
+	23, // 41: mavio.acquisition.v1.WantedService.SearchWanted:output_type -> mavio.acquisition.v1.SearchWantedResponse
+	25, // 42: mavio.acquisition.v1.WantedService.SyncRSS:output_type -> mavio.acquisition.v1.SyncRSSResponse
+	35, // [35:43] is the sub-list for method output_type
+	27, // [27:35] is the sub-list for method input_type
+	27, // [27:27] is the sub-list for extension type_name
+	27, // [27:27] is the sub-list for extension extendee
+	0,  // [0:27] is the sub-list for field type_name
 }
 
 func init() { file_mavio_acquisition_v1_wanted_proto_init() }

@@ -1864,6 +1864,14 @@
     <string name="acquire_usenet">Usenet</string>
     <string name="acquire_score">分数 %s</string>
     <string name="acquire_grab">抓取</string>
+    <string name="acquire_edit">编辑</string>
+    <string name="acquire_edit_title">编辑%s</string>
+    <string name="acquire_edit_series_footer">保存后，监控选项会改变哪些剧集被监控；之后新增的季遵循“监控新季”。</string>
+    <string name="acquire_monitor_episodes">监控剧集</string>
+    <string name="acquire_monitor_keep">保持不变</string>
+    <string name="acquire_monitor_specials">监控特别篇</string>
+    <string name="acquire_unmonitor_specials">取消监控特别篇</string>
+    <string name="acquire_tags_detail">以逗号分隔；用于选择延迟配置、发布配置和下载客户端</string>
     <string name="person_movies">电影</string>
     <string name="person_series">剧集</string>
     <string name="person_episodes">分集</string>

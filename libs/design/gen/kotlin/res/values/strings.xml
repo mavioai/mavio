@@ -3707,6 +3707,22 @@
     <string name="acquire_score">Score %s</string>
     <!-- Sends a release to a download client. -->
     <string name="acquire_grab">Grab</string>
+    <!-- Opens a wanted movie's or series' settings. -->
+    <string name="acquire_edit">Edit</string>
+    <!-- Title of the dialog of a wanted movie's or series' settings. -->
+    <string name="acquire_edit_title">Edit %s</string>
+    <!-- Footer of a series' wanted settings. -->
+    <string name="acquire_edit_series_footer">A monitoring choice changes which episodes are monitored once saved; seasons added later follow Monitor New Seasons.</string>
+    <!-- Which episodes of a wanted series to monitor, applied when saved. -->
+    <string name="acquire_monitor_episodes">Monitor Episodes</string>
+    <!-- Monitoring choice leaving a series' episodes as they are. -->
+    <string name="acquire_monitor_keep">Leave as They Are</string>
+    <!-- Monitoring choice monitoring the specials, leaving the other episodes as they are. -->
+    <string name="acquire_monitor_specials">Monitor Specials</string>
+    <!-- Monitoring choice unmonitoring the specials, leaving the other episodes as they are. -->
+    <string name="acquire_unmonitor_specials">Unmonitor Specials</string>
+    <!-- Detail of a wanted item's tags. -->
+    <string name="acquire_tags_detail">Separated by commas; they choose the delay and release profiles and download clients</string>
     <!-- Section of a person's page with the movies crediting them. -->
     <string name="person_movies">Movies</string>
     <!-- Section of a person's page with the series crediting them. -->

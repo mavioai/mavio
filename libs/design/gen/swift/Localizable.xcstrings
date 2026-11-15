@@ -33175,6 +33175,150 @@
         }
       }
     },
+    "acquire.edit": {
+      "comment": "Opens a wanted movie's or series' settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑"
+          }
+        }
+      }
+    },
+    "acquire.editTitle": {
+      "comment": "Title of the dialog of a wanted movie's or series' settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑%@"
+          }
+        }
+      }
+    },
+    "acquire.editSeriesFooter": {
+      "comment": "Footer of a series' wanted settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A monitoring choice changes which episodes are monitored once saved; seasons added later follow Monitor New Seasons."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存后，监控选项会改变哪些剧集被监控；之后新增的季遵循“监控新季”。"
+          }
+        }
+      }
+    },
+    "acquire.monitorEpisodes": {
+      "comment": "Which episodes of a wanted series to monitor, applied when saved.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitor Episodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "监控剧集"
+          }
+        }
+      }
+    },
+    "acquire.monitorKeep": {
+      "comment": "Monitoring choice leaving a series' episodes as they are.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave as They Are"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保持不变"
+          }
+        }
+      }
+    },
+    "acquire.monitorSpecials": {
+      "comment": "Monitoring choice monitoring the specials, leaving the other episodes as they are.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitor Specials"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "监控特别篇"
+          }
+        }
+      }
+    },
+    "acquire.unmonitorSpecials": {
+      "comment": "Monitoring choice unmonitoring the specials, leaving the other episodes as they are.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unmonitor Specials"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消监控特别篇"
+          }
+        }
+      }
+    },
+    "acquire.tagsDetail": {
+      "comment": "Detail of a wanted item's tags.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Separated by commas; they choose the delay and release profiles and download clients"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以逗号分隔；用于选择延迟配置、发布配置和下载客户端"
+          }
+        }
+      }
+    },
     "person.movies": {
       "comment": "Section of a person's page with the movies crediting them.",
       "extractionState": "manual",

@@ -29,7 +29,9 @@ service WantedService {
   rpc GetWanted(GetWantedRequest) returns (GetWantedResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
-  // UpdateWanted changes how a movie or series is acquired.
+  // UpdateWanted changes how a movie or series is acquired: its
+  // monitoring, quality profile and tags, a movie's minimum availability,
+  // and a series' monitoring of new items, season folders and type.
   rpc UpdateWanted(UpdateWantedRequest) returns (UpdateWantedResponse) {
     option idempotency_level = IDEMPOTENT;
   }
@@ -110,6 +112,9 @@ message Wanted {
   NewItemMonitor monitor_new_items = 8 [(buf.validate.field).enum.defined_only = true];
   // Of series: whether episodes are imported into season folders.
   bool season_folder = 9;
+  // Of series: how its episodes are numbered in release names, its
+  // item's; unspecified in UpdateWanted to leave it as it is.
+  mavio.library.v1.SeriesType series_type = 10 [(buf.validate.field).enum.defined_only = true];
 }
 
 message AddMovieRequest {

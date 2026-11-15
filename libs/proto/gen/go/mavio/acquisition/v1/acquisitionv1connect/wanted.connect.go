@@ -73,7 +73,9 @@ type WantedServiceClient interface {
 	SetMonitored(context.Context, *v1.SetMonitoredRequest) (*v1.SetMonitoredResponse, error)
 	// GetWanted returns how a movie or series is acquired.
 	GetWanted(context.Context, *v1.GetWantedRequest) (*v1.GetWantedResponse, error)
-	// UpdateWanted changes how a movie or series is acquired.
+	// UpdateWanted changes how a movie or series is acquired: its
+	// monitoring, quality profile and tags, a movie's minimum availability,
+	// and a series' monitoring of new items, season folders and type.
 	UpdateWanted(context.Context, *v1.UpdateWantedRequest) (*v1.UpdateWantedResponse, error)
 	// ListWanted lists the monitored movies or episodes that lack a file,
 	// or whose file has not met their profile's cutoff.
@@ -254,7 +256,9 @@ type WantedServiceHandler interface {
 	SetMonitored(context.Context, *v1.SetMonitoredRequest) (*v1.SetMonitoredResponse, error)
 	// GetWanted returns how a movie or series is acquired.
 	GetWanted(context.Context, *v1.GetWantedRequest) (*v1.GetWantedResponse, error)
-	// UpdateWanted changes how a movie or series is acquired.
+	// UpdateWanted changes how a movie or series is acquired: its
+	// monitoring, quality profile and tags, a movie's minimum availability,
+	// and a series' monitoring of new items, season folders and type.
 	UpdateWanted(context.Context, *v1.UpdateWantedRequest) (*v1.UpdateWantedResponse, error)
 	// ListWanted lists the monitored movies or episodes that lack a file,
 	// or whose file has not met their profile's cutoff.

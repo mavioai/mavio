@@ -1838,6 +1838,14 @@ export type MessageKey =
   | 'acquire.usenet'
   | 'acquire.score'
   | 'acquire.grab'
+  | 'acquire.edit'
+  | 'acquire.editTitle'
+  | 'acquire.editSeriesFooter'
+  | 'acquire.monitorEpisodes'
+  | 'acquire.monitorKeep'
+  | 'acquire.monitorSpecials'
+  | 'acquire.unmonitorSpecials'
+  | 'acquire.tagsDetail'
   | 'person.movies'
   | 'person.series'
   | 'person.episodes'
@@ -4156,6 +4164,14 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "acquire.usenet": "Usenet",
     "acquire.score": "Score {score}",
     "acquire.grab": "Grab",
+    "acquire.edit": "Edit",
+    "acquire.editTitle": "Edit {name}",
+    "acquire.editSeriesFooter": "A monitoring choice changes which episodes are monitored once saved; seasons added later follow Monitor New Seasons.",
+    "acquire.monitorEpisodes": "Monitor Episodes",
+    "acquire.monitorKeep": "Leave as They Are",
+    "acquire.monitorSpecials": "Monitor Specials",
+    "acquire.unmonitorSpecials": "Unmonitor Specials",
+    "acquire.tagsDetail": "Separated by commas; they choose the delay and release profiles and download clients",
     "person.movies": "Movies",
     "person.series": "TV Shows",
     "person.episodes": "Episodes",
@@ -6472,6 +6488,14 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "acquire.usenet": "Usenet",
     "acquire.score": "分数 {score}",
     "acquire.grab": "抓取",
+    "acquire.edit": "编辑",
+    "acquire.editTitle": "编辑{name}",
+    "acquire.editSeriesFooter": "保存后，监控选项会改变哪些剧集被监控；之后新增的季遵循“监控新季”。",
+    "acquire.monitorEpisodes": "监控剧集",
+    "acquire.monitorKeep": "保持不变",
+    "acquire.monitorSpecials": "监控特别篇",
+    "acquire.unmonitorSpecials": "取消监控特别篇",
+    "acquire.tagsDetail": "以逗号分隔；用于选择延迟配置、发布配置和下载客户端",
     "person.movies": "电影",
     "person.series": "剧集",
     "person.episodes": "分集",

@@ -4,7 +4,7 @@ import { RequestSettingsSchema } from "@mavio/proto/mavio/acquisition/v1/request
 import { LibraryKind } from "@mavio/proto/mavio/library/v1/library_pb";
 import { expect, test } from "vitest";
 
-import { wantedTarget } from "./acquisition.ts";
+import { parseTags, wantedTarget } from "./acquisition.ts";
 
 const libraries = [
   { id: "movies", kind: LibraryKind.MOVIES },
@@ -56,4 +56,12 @@ test.each([
 
 test("wantedTarget: nothing of the kind", () => {
   expect(wantedTarget(MediaKind.SERIES, false, undefined, libraries.slice(0, 2), profiles.slice(0, 2))).toEqual({ libraryId: "", qualityProfileId: "" });
+});
+
+test.each([
+  { typed: "", want: [] },
+  { typed: " 4k , anime,, ", want: ["4k", "anime"] },
+  { typed: "anime, anime,kids", want: ["anime", "kids"] },
+])("parseTags($typed)", ({ typed, want }) => {
+  expect(parseTags(typed)).toEqual(want);
 });

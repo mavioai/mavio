@@ -1,11 +1,14 @@
 // An item's acquisition on its details, for administrators (docs/clients.md
 // §6.3.18): whether a movie, series, season or episode is monitored, a
-// movie's or series' quality profile, an automatic search, the releases the
-// indexers have of it to grab, and its downloads and history.
+// movie's or series' quality profile and its other wanted settings — tags,
+// a movie's minimum availability, a series' monitoring choice, new seasons,
+// type and season folders — an automatic search, the releases the indexers
+// have of it to grab, and its downloads and history.
 import { clone } from "@bufbuild/protobuf";
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import {
   errorMessage,
+  parseTags,
   type ServerEntry,
   useAdminServers,
   useGrab,
@@ -20,17 +23,18 @@ import {
 } from "@mavio/client-ts";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { DownloadProtocol, type Release } from "@mavio/proto/mavio/acquisition/v1/release_pb";
-import { type Wanted, WantedSchema } from "@mavio/proto/mavio/acquisition/v1/wanted_pb";
-import { type Item, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
+import { MinimumAvailability, NewItemMonitor, SeriesMonitor, type Wanted, WantedSchema } from "@mavio/proto/mavio/acquisition/v1/wanted_pb";
+import { type Item, ItemKind, SeriesType } from "@mavio/proto/mavio/library/v1/item_pb";
 import { useState } from "react";
 
 import { discoverLanguage, t } from "../i18n.ts";
-import { Button, Group } from "../ui.tsx";
-import { Sheet } from "../controls/dialog.tsx";
+import { Button, Group, Row } from "../ui.tsx";
+import { Modal, Sheet } from "../controls/dialog.tsx";
 import { Switch } from "../controls/inputs.tsx";
 import { Select } from "../controls/select.tsx";
 import { fromNow, sizeOf } from "./admin/common.tsx";
 import { HistoryRow, QueueRow } from "./admin/downloads.tsx";
+import { AvailabilityRow, ChoiceRow, NewItemsRow, SeasonFolderRow, seriesMonitorOptions, SeriesTypeRow, TagsRow } from "./discover-wanted.tsx";
 import { RequestRow } from "./requests.tsx";
 
 const acquirable = new Set([ItemKind.MOVIE, ItemKind.SERIES, ItemKind.SEASON, ItemKind.EPISODE]);
@@ -66,6 +70,7 @@ function AcquisitionPanel({ server, item }: { server: ServerEntry; item: Item })
   const history = useHistory(server, item.id);
   const [searched, setSearched] = useState(false);
   const [releases, setReleases] = useState(false);
+  const [editing, setEditing] = useState(false);
   const downloads = queue.data?.pages.flatMap((p) => p.items) ?? [];
   const events = history.data?.pages[0]?.events.slice(0, 10) ?? [];
   const monitored = whole ? !!wanted.data?.monitored : item.monitored;
@@ -96,6 +101,11 @@ function AcquisitionPanel({ server, item }: { server: ServerEntry; item: Item })
               <Switch on={monitored} onChange={setMonitored} label={t("acquire.monitored")} />
             </div>
             {whole && wanted.data && <ProfileRow server={server} wanted={wanted.data} kind={item.kind === ItemKind.MOVIE ? MediaKind.MOVIE : MediaKind.SERIES} />}
+            {whole && wanted.data && wanted.data.tags.length > 0 && (
+              <Row label={t("rules.tags")}>
+                <span className="type-callout text-text-secondary">{wanted.data.tags.join(", ")}</span>
+              </Row>
+            )}
             {whole && wanted.data?.lastSearchTime && (
               <div className="flex min-h-12 items-center justify-between gap-3 px-4 py-2">
                 <span className="type-body">{t("acquire.lastSearch")}</span>
@@ -113,6 +123,11 @@ function AcquisitionPanel({ server, item }: { server: ServerEntry; item: Item })
               <Button variant="secondary" onClick={() => setReleases(true)}>
                 {t("acquire.interactive")}
               </Button>
+              {whole && wanted.data && (
+                <Button variant="secondary" onClick={() => setEditing(true)}>
+                  {t("acquire.edit")}
+                </Button>
+              )}
             </div>
             {error && <p className="px-4 py-3 type-callout break-words text-danger">{errorMessage(error)}</p>}
             {wanted.isError && <p className="px-4 py-3 type-callout break-words text-danger">{errorMessage(wanted.error)}</p>}
@@ -135,6 +150,7 @@ function AcquisitionPanel({ server, item }: { server: ServerEntry; item: Item })
         )}
       </div>
       {releases && <ReleasesDialog server={server} item={item} onClose={() => setReleases(false)} />}
+      {editing && wanted.data && <WantedDialog server={server} item={item} wanted={wanted.data} onClose={() => setEditing(false)} />}
     </section>
   );
 }
@@ -152,6 +168,68 @@ function ProfileRow({ server, wanted, kind }: { server: ServerEntry; wanted: Wan
       <span className="type-body">{t("acquire.profile")}</span>
       <Select value={wanted.qualityProfileId} label={t("acquire.profile")} options={profiles.map((p) => ({ value: p.id, label: p.name }))} onChange={choose} />
     </div>
+  );
+}
+
+/**
+ * A movie's or series' wanted settings, as Radarr's and Sonarr's editors:
+ * its tags, a movie's minimum availability, and a series' monitoring of new
+ * seasons, type and season folders, with a monitoring choice applied to its
+ * episodes as Sonarr's season pass, left as they are unless one is chosen.
+ */
+function WantedDialog({ server, item, wanted, onClose }: { server: ServerEntry; item: Item; wanted: Wanted; onClose: () => void }) {
+  const { save } = useWantedActions(server);
+  const series = item.kind === ItemKind.SERIES;
+  const [tags, setTags] = useState(wanted.tags.join(", "));
+  const [availability, setAvailability] = useState<MinimumAvailability>(wanted.minimumAvailability || MinimumAvailability.RELEASED);
+  const [monitor, setMonitor] = useState<SeriesMonitor>(SeriesMonitor.UNSPECIFIED);
+  const [newItems, setNewItems] = useState<NewItemMonitor>(wanted.monitorNewItems || NewItemMonitor.ALL);
+  const [type, setType] = useState<SeriesType>(wanted.seriesType || SeriesType.STANDARD);
+  const [seasonFolder, setSeasonFolder] = useState(wanted.seasonFolder);
+  const submit = () => {
+    const next = clone(WantedSchema, wanted);
+    next.tags = parseTags(tags);
+    if (series) {
+      next.monitorNewItems = newItems;
+      next.seriesType = type;
+      next.seasonFolder = seasonFolder;
+    } else {
+      next.minimumAvailability = availability;
+    }
+    save.mutate({ wanted: next, monitor: series ? monitor : undefined }, { onSuccess: onClose });
+  };
+  return (
+    <Modal title={t("acquire.editTitle", { name: item.name })} onClose={onClose}>
+      <div className="-mx-6 flex min-h-0 flex-col gap-4 overflow-y-auto px-6 pb-1">
+        <Group footer={series ? t("acquire.editSeriesFooter") : undefined}>
+          {series ? (
+            <>
+              <ChoiceRow
+                label={t("acquire.monitorEpisodes")}
+                value={monitor}
+                options={[[SeriesMonitor.UNSPECIFIED, t("acquire.monitorKeep")], ...seriesMonitorOptions(true)]}
+                onChange={setMonitor}
+              />
+              <NewItemsRow value={newItems} onChange={setNewItems} />
+              <SeriesTypeRow value={type} onChange={setType} />
+              <SeasonFolderRow on={seasonFolder} onChange={setSeasonFolder} />
+            </>
+          ) : (
+            <AvailabilityRow value={availability} onChange={setAvailability} />
+          )}
+          <TagsRow value={tags} onChange={setTags} />
+        </Group>
+        {save.isError && <p className="type-callout break-words text-danger">{errorMessage(save.error)}</p>}
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" onClick={onClose}>
+            {t("action.cancel")}
+          </Button>
+          <Button disabled={save.isPending} onClick={submit}>
+            {save.isPending ? "…" : t("action.save")}
+          </Button>
+        </div>
+      </div>
+    </Modal>
   );
 }
 

@@ -5801,6 +5801,32 @@ public enum MavioStrings {
     /// Sends a release to a download client.
     public static var acquireGrab: String { NSLocalizedString("acquire.grab", bundle: .module, comment: "") }
 
+    /// Opens a wanted movie's or series' settings.
+    public static var acquireEdit: String { NSLocalizedString("acquire.edit", bundle: .module, comment: "") }
+
+    /// Title of the dialog of a wanted movie's or series' settings.
+    public static func acquireEditTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("acquire.editTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Footer of a series' wanted settings.
+    public static var acquireEditSeriesFooter: String { NSLocalizedString("acquire.editSeriesFooter", bundle: .module, comment: "") }
+
+    /// Which episodes of a wanted series to monitor, applied when saved.
+    public static var acquireMonitorEpisodes: String { NSLocalizedString("acquire.monitorEpisodes", bundle: .module, comment: "") }
+
+    /// Monitoring choice leaving a series' episodes as they are.
+    public static var acquireMonitorKeep: String { NSLocalizedString("acquire.monitorKeep", bundle: .module, comment: "") }
+
+    /// Monitoring choice monitoring the specials, leaving the other episodes as they are.
+    public static var acquireMonitorSpecials: String { NSLocalizedString("acquire.monitorSpecials", bundle: .module, comment: "") }
+
+    /// Monitoring choice unmonitoring the specials, leaving the other episodes as they are.
+    public static var acquireUnmonitorSpecials: String { NSLocalizedString("acquire.unmonitorSpecials", bundle: .module, comment: "") }
+
+    /// Detail of a wanted item's tags.
+    public static var acquireTagsDetail: String { NSLocalizedString("acquire.tagsDetail", bundle: .module, comment: "") }
+
     /// Section of a person's page with the movies crediting them.
     public static var personMovies: String { NSLocalizedString("person.movies", bundle: .module, comment: "") }
 

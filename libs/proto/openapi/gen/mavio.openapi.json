@@ -8708,6 +8708,15 @@
             "type": "boolean",
             "title": "season_folder",
             "description": "Of series: whether episodes are imported into season folders."
+          },
+          "seriesType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.SeriesType"
+              }
+            ],
+            "title": "series_type",
+            "description": "Of series: how its episodes are numbered in release names, its\n item's; unspecified in UpdateWanted to leave it as it is.\nenum.defined_only = true\n"
           }
         },
         "title": "Wanted",
@@ -31420,7 +31429,7 @@
           "WantedService"
         ],
         "summary": "UpdateWanted",
-        "description": "UpdateWanted changes how a movie or series is acquired.",
+        "description": "UpdateWanted changes how a movie or series is acquired: its\n monitoring, quality profile and tags, a movie's minimum availability,\n and a series' monitoring of new items, season folders and type.",
         "operationId": "mavio.acquisition.v1.WantedService.UpdateWanted",
         "parameters": [
           {

@@ -91,6 +91,15 @@ export function useWantedActions(server: ServerEntry) {
       onSuccess,
      }),
     update: useMutation({ mutationFn: async (wanted: Wanted) => (await c().updateWanted({ wanted })).wanted, onSuccess }),
+    // A movie's or series' wanted settings, and a series' monitoring choice applied to its episodes, as Sonarr's series editor.
+    save: useMutation({
+      mutationFn: async (v: { wanted: Wanted; monitor?: SeriesMonitor }) => {
+        const saved = (await c().updateWanted({ wanted: v.wanted })).wanted;
+        if (v.monitor) await c().setMonitored({ change: { case: "series", value: { itemIds: [v.wanted.itemId], monitor: v.monitor } } });
+        return saved;
+      },
+      onSuccess,
+    }),
     // Movies and series are monitored through their wanted; seasons and episodes by setMonitored.
     setWantedMonitored: useMutation({
       mutationFn: async (v: { itemId: string; monitored: boolean }) => {
@@ -103,6 +112,11 @@ export function useWantedActions(server: ServerEntry) {
       onSuccess,
     }),
   };
+}
+
+/** The tags typed for a wanted movie or series, separated by commas: trimmed, without empty or repeated ones. */
+export function parseTags(typed: string): string[] {
+  return [...new Set(typed.split(",").map((s) => s.trim()).filter(Boolean))];
 }
 
 /** The library and quality profile a title is added to the wanted with. */

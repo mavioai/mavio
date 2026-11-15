@@ -565,4 +565,21 @@ func TestSeriesAcquisition(t *testing.T) {
 	if len(missing) != 13 {
 		t.Errorf("missing episodes = %q, want = the 12 of Sky Courier's first season and Nightly News Hour's first", missing)
 	}
+
+	// A series' wanted settings carry its type, changed with them.
+	gw, err := wanted.GetWanted(ctx, acquisitionv1.GetWantedRequest_builder{ItemId: new(news.GetId())}.Build())
+	if err != nil || gw.GetWanted().GetSeriesType() != libraryv1.SeriesType_SERIES_TYPE_DAILY {
+		t.Fatalf("GetWanted = %v, %v, want = daily", gw, err)
+	}
+	w := gw.GetWanted()
+	w.SetSeriesType(libraryv1.SeriesType_SERIES_TYPE_STANDARD)
+	w.SetTags([]string{"news"})
+	upd, err := wanted.UpdateWanted(ctx, acquisitionv1.UpdateWantedRequest_builder{Wanted: w}.Build())
+	if err != nil || upd.GetWanted().GetSeriesType() != libraryv1.SeriesType_SERIES_TYPE_STANDARD || !slices.Equal(upd.GetWanted().GetTags(), []string{"news"}) {
+		t.Errorf("UpdateWanted = %v, %v, want = standard, tagged news", upd, err)
+	}
+	if it, err := items.GetItem(ctx, libraryv1.GetItemRequest_builder{Id: new(news.GetId())}.Build()); err != nil ||
+		it.GetItem().GetSeriesType() != libraryv1.SeriesType_SERIES_TYPE_STANDARD {
+		t.Errorf("series = %v, %v, want = standard", it.GetItem().GetSeriesType(), err)
+	}
 }

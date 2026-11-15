@@ -500,6 +500,13 @@ pub struct Wanted {
     ///
     /// Field 9: `season_folder`
     pub season_folder: ::core::option::Option<bool>,
+    /// Of series: how its episodes are numbered in release names, its
+    /// item's; unspecified in UpdateWanted to leave it as it is.
+    ///
+    /// Field 10: `series_type`
+    pub series_type: ::core::option::Option<
+        ::buffa::EnumValue<super::super::library::v1::SeriesType>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -515,6 +522,7 @@ impl ::core::fmt::Debug for Wanted {
             .field("last_search_time", &self.last_search_time)
             .field("monitor_new_items", &self.monitor_new_items)
             .field("season_folder", &self.season_folder)
+            .field("series_type", &self.series_type)
             .finish()
     }
 }
@@ -580,6 +588,16 @@ impl Wanted {
         self.season_folder = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::series_type`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_series_type(
+        mut self,
+        value: impl Into<::buffa::EnumValue<super::super::library::v1::SeriesType>>,
+    ) -> Self {
+        self.series_type = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(Wanted);
 impl ::buffa::MessageName for Wanted {
@@ -638,6 +656,9 @@ impl ::buffa::Message for Wanted {
         if self.season_folder.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.series_type {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -684,6 +705,9 @@ impl ::buffa::Message for Wanted {
         }
         if let Some(v) = self.season_folder {
             ::buffa::types::put_bool_field(9u32, v, buf);
+        }
+        if let Some(ref v) = self.series_type {
+            ::buffa::types::put_int32_field(10u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -789,6 +813,15 @@ impl ::buffa::Message for Wanted {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.series_type = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -806,6 +839,7 @@ impl ::buffa::Message for Wanted {
         self.last_search_time = ::buffa::MessageField::none();
         self.monitor_new_items = ::core::option::Option::None;
         self.season_folder = ::core::option::Option::None;
+        self.series_type = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

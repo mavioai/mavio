@@ -374,6 +374,17 @@ public nonisolated struct Mavio_Acquisition_V1_Wanted: Sendable {
   /// Clears the value of `seasonFolder`. Subsequent reads from it will return its default value.
   public mutating func clearSeasonFolder() {self._seasonFolder = nil}
 
+  /// Of series: how its episodes are numbered in release names, its
+  /// item's; unspecified in UpdateWanted to leave it as it is.
+  public var seriesType: Mavio_Library_V1_SeriesType {
+    get {_seriesType ?? .unspecified}
+    set {_seriesType = newValue}
+  }
+  /// Returns true if `seriesType` has been explicitly set.
+  public var hasSeriesType: Bool {self._seriesType != nil}
+  /// Clears the value of `seriesType`. Subsequent reads from it will return its default value.
+  public mutating func clearSeriesType() {self._seriesType = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -386,6 +397,7 @@ public nonisolated struct Mavio_Acquisition_V1_Wanted: Sendable {
   fileprivate var _lastSearchTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
   fileprivate var _monitorNewItems: Mavio_Acquisition_V1_NewItemMonitor? = nil
   fileprivate var _seasonFolder: Bool? = nil
+  fileprivate var _seriesType: Mavio_Library_V1_SeriesType? = nil
 }
 
 public nonisolated struct Mavio_Acquisition_V1_AddMovieRequest: Sendable {
@@ -960,77 +972,72 @@ public nonisolated struct Mavio_Acquisition_V1_WantedEpisode: @unchecked Sendabl
 }
 
 /// WantedMovie is a monitored movie ListWanted lists.
-public nonisolated struct Mavio_Acquisition_V1_WantedMovie: Sendable {
+public nonisolated struct Mavio_Acquisition_V1_WantedMovie: @unchecked Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   public var itemID: String {
-    get {_itemID ?? String()}
-    set {_itemID = newValue}
+    get {_storage._itemID ?? String()}
+    set {_uniqueStorage()._itemID = newValue}
   }
   /// Returns true if `itemID` has been explicitly set.
-  public var hasItemID: Bool {self._itemID != nil}
+  public var hasItemID: Bool {_storage._itemID != nil}
   /// Clears the value of `itemID`. Subsequent reads from it will return its default value.
-  public mutating func clearItemID() {self._itemID = nil}
+  public mutating func clearItemID() {_uniqueStorage()._itemID = nil}
 
   public var name: String {
-    get {_name ?? String()}
-    set {_name = newValue}
+    get {_storage._name ?? String()}
+    set {_uniqueStorage()._name = newValue}
   }
   /// Returns true if `name` has been explicitly set.
-  public var hasName: Bool {self._name != nil}
+  public var hasName: Bool {_storage._name != nil}
   /// Clears the value of `name`. Subsequent reads from it will return its default value.
-  public mutating func clearName() {self._name = nil}
+  public mutating func clearName() {_uniqueStorage()._name = nil}
 
   public var year: Int32 {
-    get {_year ?? 0}
-    set {_year = newValue}
+    get {_storage._year ?? 0}
+    set {_uniqueStorage()._year = newValue}
   }
   /// Returns true if `year` has been explicitly set.
-  public var hasYear: Bool {self._year != nil}
+  public var hasYear: Bool {_storage._year != nil}
   /// Clears the value of `year`. Subsequent reads from it will return its default value.
-  public mutating func clearYear() {self._year = nil}
+  public mutating func clearYear() {_uniqueStorage()._year = nil}
 
   public var wanted: Mavio_Acquisition_V1_Wanted {
-    get {_wanted ?? Mavio_Acquisition_V1_Wanted()}
-    set {_wanted = newValue}
+    get {_storage._wanted ?? Mavio_Acquisition_V1_Wanted()}
+    set {_uniqueStorage()._wanted = newValue}
   }
   /// Returns true if `wanted` has been explicitly set.
-  public var hasWanted: Bool {self._wanted != nil}
+  public var hasWanted: Bool {_storage._wanted != nil}
   /// Clears the value of `wanted`. Subsequent reads from it will return its default value.
-  public mutating func clearWanted() {self._wanted = nil}
+  public mutating func clearWanted() {_uniqueStorage()._wanted = nil}
 
   /// The quality of its file, by Radarr's name; empty without a file.
   public var quality: String {
-    get {_quality ?? String()}
-    set {_quality = newValue}
+    get {_storage._quality ?? String()}
+    set {_uniqueStorage()._quality = newValue}
   }
   /// Returns true if `quality` has been explicitly set.
-  public var hasQuality: Bool {self._quality != nil}
+  public var hasQuality: Bool {_storage._quality != nil}
   /// Clears the value of `quality`. Subsequent reads from it will return its default value.
-  public mutating func clearQuality() {self._quality = nil}
+  public mutating func clearQuality() {_uniqueStorage()._quality = nil}
 
   /// Whether the movie is available by its minimum availability.
   public var available: Bool {
-    get {_available ?? false}
-    set {_available = newValue}
+    get {_storage._available ?? false}
+    set {_uniqueStorage()._available = newValue}
   }
   /// Returns true if `available` has been explicitly set.
-  public var hasAvailable: Bool {self._available != nil}
+  public var hasAvailable: Bool {_storage._available != nil}
   /// Clears the value of `available`. Subsequent reads from it will return its default value.
-  public mutating func clearAvailable() {self._available = nil}
+  public mutating func clearAvailable() {_uniqueStorage()._available = nil}
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
 
-  fileprivate var _itemID: String? = nil
-  fileprivate var _name: String? = nil
-  fileprivate var _year: Int32? = nil
-  fileprivate var _wanted: Mavio_Acquisition_V1_Wanted? = nil
-  fileprivate var _quality: String? = nil
-  fileprivate var _available: Bool? = nil
+  fileprivate var _storage = _StorageClass.defaultInstance
 }
 
 public nonisolated struct Mavio_Acquisition_V1_ListWantedResponse: Sendable {
@@ -1164,7 +1171,7 @@ nonisolated extension Mavio_Acquisition_V1_WantedKind: SwiftProtobuf._ProtoNameP
 
 nonisolated extension Mavio_Acquisition_V1_Wanted: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Wanted"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}item_id\0\u{1}monitored\0\u{3}quality_profile_id\0\u{3}minimum_availability\0\u{1}tags\0\u{3}add_time\0\u{3}last_search_time\0\u{3}monitor_new_items\0\u{3}season_folder\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}item_id\0\u{1}monitored\0\u{3}quality_profile_id\0\u{3}minimum_availability\0\u{1}tags\0\u{3}add_time\0\u{3}last_search_time\0\u{3}monitor_new_items\0\u{3}season_folder\0\u{3}series_type\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1181,6 +1188,7 @@ nonisolated extension Mavio_Acquisition_V1_Wanted: SwiftProtobuf.Message, SwiftP
       case 7: try { try decoder.decodeSingularMessageField(value: &self._lastSearchTime) }()
       case 8: try { try decoder.decodeSingularEnumField(value: &self._monitorNewItems) }()
       case 9: try { try decoder.decodeSingularBoolField(value: &self._seasonFolder) }()
+      case 10: try { try decoder.decodeSingularEnumField(value: &self._seriesType) }()
       default: break
       }
     }
@@ -1218,6 +1226,9 @@ nonisolated extension Mavio_Acquisition_V1_Wanted: SwiftProtobuf.Message, SwiftP
     try { if let v = self._seasonFolder {
       try visitor.visitSingularBoolField(value: v, fieldNumber: 9)
     } }()
+    try { if let v = self._seriesType {
+      try visitor.visitSingularEnumField(value: v, fieldNumber: 10)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1231,6 +1242,7 @@ nonisolated extension Mavio_Acquisition_V1_Wanted: SwiftProtobuf.Message, SwiftP
     if lhs._lastSearchTime != rhs._lastSearchTime {return false}
     if lhs._monitorNewItems != rhs._monitorNewItems {return false}
     if lhs._seasonFolder != rhs._seasonFolder {return false}
+    if lhs._seriesType != rhs._seriesType {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1938,56 +1950,102 @@ nonisolated extension Mavio_Acquisition_V1_WantedMovie: SwiftProtobuf.Message, S
   public static let protoMessageName: String = _protobuf_package + ".WantedMovie"
   public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}item_id\0\u{1}name\0\u{1}year\0\u{1}wanted\0\u{1}quality\0\u{1}available\0")
 
+  fileprivate class _StorageClass {
+    var _itemID: String? = nil
+    var _name: String? = nil
+    var _year: Int32? = nil
+    var _wanted: Mavio_Acquisition_V1_Wanted? = nil
+    var _quality: String? = nil
+    var _available: Bool? = nil
+
+      // This property is used as the initial default value for new instances of the type.
+      // The type itself is protecting the reference to its storage via CoW semantics.
+      // This will force a copy to be made of this reference when the first mutation occurs;
+      // hence, it is safe to mark this as `nonisolated(unsafe)`.
+      static nonisolated(unsafe) let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _itemID = source._itemID
+      _name = source._name
+      _year = source._year
+      _wanted = source._wanted
+      _quality = source._quality
+      _available = source._available
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self._itemID) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self._name) }()
-      case 3: try { try decoder.decodeSingularInt32Field(value: &self._year) }()
-      case 4: try { try decoder.decodeSingularMessageField(value: &self._wanted) }()
-      case 5: try { try decoder.decodeSingularStringField(value: &self._quality) }()
-      case 6: try { try decoder.decodeSingularBoolField(value: &self._available) }()
-      default: break
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularStringField(value: &_storage._itemID) }()
+        case 2: try { try decoder.decodeSingularStringField(value: &_storage._name) }()
+        case 3: try { try decoder.decodeSingularInt32Field(value: &_storage._year) }()
+        case 4: try { try decoder.decodeSingularMessageField(value: &_storage._wanted) }()
+        case 5: try { try decoder.decodeSingularStringField(value: &_storage._quality) }()
+        case 6: try { try decoder.decodeSingularBoolField(value: &_storage._available) }()
+        default: break
+        }
       }
     }
   }
 
   public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._itemID {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
-    } }()
-    try { if let v = self._name {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
-    } }()
-    try { if let v = self._year {
-      try visitor.visitSingularInt32Field(value: v, fieldNumber: 3)
-    } }()
-    try { if let v = self._wanted {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
-    } }()
-    try { if let v = self._quality {
-      try visitor.visitSingularStringField(value: v, fieldNumber: 5)
-    } }()
-    try { if let v = self._available {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 6)
-    } }()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      try { if let v = _storage._itemID {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+      } }()
+      try { if let v = _storage._name {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+      } }()
+      try { if let v = _storage._year {
+        try visitor.visitSingularInt32Field(value: v, fieldNumber: 3)
+      } }()
+      try { if let v = _storage._wanted {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+      } }()
+      try { if let v = _storage._quality {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 5)
+      } }()
+      try { if let v = _storage._available {
+        try visitor.visitSingularBoolField(value: v, fieldNumber: 6)
+      } }()
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: Mavio_Acquisition_V1_WantedMovie, rhs: Mavio_Acquisition_V1_WantedMovie) -> Bool {
-    if lhs._itemID != rhs._itemID {return false}
-    if lhs._name != rhs._name {return false}
-    if lhs._year != rhs._year {return false}
-    if lhs._wanted != rhs._wanted {return false}
-    if lhs._quality != rhs._quality {return false}
-    if lhs._available != rhs._available {return false}
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._itemID != rhs_storage._itemID {return false}
+        if _storage._name != rhs_storage._name {return false}
+        if _storage._year != rhs_storage._year {return false}
+        if _storage._wanted != rhs_storage._wanted {return false}
+        if _storage._quality != rhs_storage._quality {return false}
+        if _storage._available != rhs_storage._available {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

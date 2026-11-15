@@ -548,7 +548,9 @@ pub trait WantedService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// UpdateWanted changes how a movie or series is acquired.
+    /// UpdateWanted changes how a movie or series is acquired: its
+    /// monitoring, quality profile and tags, a movie's minimum availability,
+    /// and a series' monitoring of new items, season folders and type.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
