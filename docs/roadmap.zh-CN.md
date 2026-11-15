@@ -674,7 +674,7 @@ flowchart TD
   - [x] 一集结束时播放下一集
   - [x] 借助 JASSUB 保留样式的 ASS 字幕：`capabilities(…, styled)` 按原格式请求 ASS 与 SSA 文件，由 `apps/web/src/screens/styled-subtitles.ts` 用 JASSUB 绘制在视频上方，字体用条目附带的字体与 Liberation Sans 或 Noto Sans SC，均从构建中按需加载；JASSUB 失败时回退到服务器的交付方式
   - [x] 离线保存查询缓存：首页、媒体库与条目详情的查询存于 IndexedDB，每个登录一项，另一版本与退出登录时丢弃（`libs/client-ts/src/persist.ts`，使用 `@tanstack/query-persist-client-core` 与 idb-keyval，在 `apps/web/src/main.tsx` 中首次绘制前恢复）
-  - [ ] 组件的 Storybook
+  - [x] 组件的 Storybook（`apps/web/.storybook`、`nx run web:storybook`、`web:build-storybook`）：核心组件与各控件，以深色与浅色主题、以快照测试的各形态绘制，电视形态以电视模式绘制，用 UI 的 Vite 配置构建
   - [x] 登录与首页以外页面的快照测试（`apps/web/snapshots`）：媒体库的网格、电影与剧集的详情、播放器的控件、搜索与电视的热门搜索、设置以及一起看的队列，由一个解析每个请求并应答其所调用服务的假服务端，以 `libs/design/snapshots/screens.json` 的固定数据绘制
   - [x] 热门搜索：各服务器记录并排名的搜索词（打开结果时调用 `ItemService.RecordSearch`，`ListPopularSearches`，`core.SearchRecord` 存于 `search_records`，由每日清理修剪），电视的搜索在未输入时以合并各服务器的药丸按钮显示它们，没有时显示首页的各行（`apps/web/src/screens/search.tsx`、`libs/client-ts/src/popular.ts`）
   - [x] 播放器的进度条按 [客户端 §6.5](clients.zh-CN.md)：章节标记，指针所在时间上方显示 trickplay 拼图的缩略图与章节名，上方放不下时放到进度条下方；拖动时暂停，松开后继续播放

@@ -30,12 +30,14 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "2.0.0-beta.sha-8c6014f9a",
     "@playwright/test": "1.63.0",
+    "@storybook/react-vite": "10.6.5",
     "@tailwindcss/vite": "4.3.3",
     "@types/node": "26.6.3",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
     "cf": "1.0.0-beta.16",
+    "storybook": "10.6.5",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2",
     "vite": "8.3.4"
@@ -77,6 +79,33 @@
           "build"
         ],
         "cache": false
+      },
+      "storybook": {
+        "command": "storybook dev --port 6006 --no-open",
+        "options": {
+          "cwd": "{projectRoot}"
+        },
+        "dependsOn": [
+          "^build"
+        ],
+        "continuous": true,
+        "cache": false
+      },
+      "build-storybook": {
+        "command": "storybook build --output-dir ../../dist/storybook/web --quiet",
+        "options": {
+          "cwd": "{projectRoot}"
+        },
+        "inputs": [
+          "default",
+          "^default"
+        ],
+        "outputs": [
+          "{workspaceRoot}/dist/storybook/web"
+        ],
+        "dependsOn": [
+          "^build"
+        ]
       }
     }
   }
