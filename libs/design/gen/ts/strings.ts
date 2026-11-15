@@ -1355,6 +1355,12 @@ export type MessageKey =
   | 'acquisition.profileQualitiesFooter'
   | 'acquisition.moveUp'
   | 'acquisition.moveDown'
+  | 'acquisition.groupQualities'
+  | 'acquisition.groupHint'
+  | 'acquisition.groupName'
+  | 'acquisition.createGroup'
+  | 'acquisition.ungroup'
+  | 'acquisition.removeFromGroup'
   | 'acquisition.formatScores'
   | 'acquisition.formatScoresFooter'
   | 'acquisition.noFormats'
@@ -3737,6 +3743,12 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "acquisition.profileQualitiesFooter": "Best first. Releases of qualities that are off are rejected.",
     "acquisition.moveUp": "Move Up",
     "acquisition.moveDown": "Move Down",
+    "acquisition.groupQualities": "Group Qualities",
+    "acquisition.groupHint": "Choose two or more qualities or groups to rank as one, and name the group.",
+    "acquisition.groupName": "Group Name",
+    "acquisition.createGroup": "Create Group",
+    "acquisition.ungroup": "Ungroup",
+    "acquisition.removeFromGroup": "Remove from Group",
     "acquisition.formatScores": "Custom Format Scores",
     "acquisition.formatScoresFooter": "A release scores the sum of its formats' scores.",
     "acquisition.noFormats": "No custom formats.",
@@ -6117,6 +6129,12 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "acquisition.profileQualitiesFooter": "越靠上越好。未启用质量的发布会被拒绝。",
     "acquisition.moveUp": "上移",
     "acquisition.moveDown": "下移",
+    "acquisition.groupQualities": "质量分组",
+    "acquisition.groupHint": "选择两个或更多质量或分组，作为同一等级，并为分组命名。",
+    "acquisition.groupName": "分组名称",
+    "acquisition.createGroup": "创建分组",
+    "acquisition.ungroup": "取消分组",
+    "acquisition.removeFromGroup": "移出分组",
     "acquisition.formatScores": "自定义格式分数",
     "acquisition.formatScoresFooter": "发布的分数是其所匹配格式分数之和。",
     "acquisition.noFormats": "没有自定义格式。",

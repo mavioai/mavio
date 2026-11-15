@@ -2717,6 +2717,18 @@
     <string name="acquisition_move_up">Move Up</string>
     <!-- Moves an entry down -->
     <string name="acquisition_move_down">Move Down</string>
+    <!-- Starts choosing qualities of a profile to merge into a group ranked as one. -->
+    <string name="acquisition_group_qualities">Group Qualities</string>
+    <!-- Shown while choosing qualities to group. -->
+    <string name="acquisition_group_hint">Choose two or more qualities or groups to rank as one, and name the group.</string>
+    <!-- Label of the name of a group of qualities. -->
+    <string name="acquisition_group_name">Group Name</string>
+    <!-- Merges the chosen qualities into a group. -->
+    <string name="acquisition_create_group">Create Group</string>
+    <!-- Parts a group of qualities into its qualities. -->
+    <string name="acquisition_ungroup">Ungroup</string>
+    <!-- Takes a quality out of its group. -->
+    <string name="acquisition_remove_from_group">Remove from Group</string>
     <!-- Title of a profile's format scores -->
     <string name="acquisition_format_scores">Custom Format Scores</string>
     <!-- Footer of the format scores -->

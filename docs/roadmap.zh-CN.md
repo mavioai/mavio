@@ -751,7 +751,7 @@ flowchart TD
     - [x] 存储（`apps/web/src/screens/admin/storage.tsx`、`libs/client-ts/src/storage.ts`）：rclone 远端及其授权步骤，以及离线客户端（`StorageService`）；在目录选择器中浏览 rclone 远端的文件夹
     - [x] 用户（`apps/web/src/screens/admin/users.tsx`、`sign-in.tsx` 中的 `InviteScreen`）：添加、编辑与删除用户，其登录方式，邀请链接及位于 `/invite` 的邀请页面，用户的媒体库与家长分级（`UserService`、`ListRatings`、`AuthService.GetInvitation`、`AcceptInvitation`）
     - [x] 获取（`apps/web/src/screens/admin/{acquisition,quality,formats,rules}.tsx`、`libs/client-ts/src/profiles.ts`）：质量定义与质量配置、自定义格式、延迟配置与发布配置、远程路径映射，以及索引器与下载客户端（`ProfileService`、`ListIndexers`、`ListDownloadClients`）
-      - [ ] 在质量配置中将质量编组与取消编组；目前配置中的质量只能启用、停用与排序
+      - [x] 在质量配置中将质量编组与取消编组（`apps/web/src/screens/admin/quality.tsx`，`libs/client-ts/src/profiles.ts` 中的 `groupQualities`、`ungroupQualities`、`removeFromGroup`、`renameGroup` 与 `moveInGroup`）：选择质量或分组，在其中最好者的位置合并为命名的分组；分组可重命名、拆分，其中的质量可重新排序或移出，截止质量随之调整
     - [x] 获取的选项（`apps/web/src/screens/admin/options.tsx`）：命名、导入、下载客户端、发布与回收站（`ProfileService.UpdateAcquisitionSettings`）
     - [x] 获取的请求（`apps/web/src/screens/admin/requestsettings.tsx`），如 Seerr：通过的电影、剧集与动画的去处、新用户的权限与配额，以及屏蔽标签（`RequestService.UpdateRequestSettings`）
     - [x] Apple 应用（`MavioAdmin`、`MavioMac*`）与 Android 应用（`libs/android/admin`）改用按领域划分的设置 RPC（`GetGeneralSettings`、`GetTranscodingSettings`、`GetPluginCatalogs`、`GetOutboundProxies`、`GetAcquisitionSettings`、`GetRequestSettings`），它们取代了 `GetServerSettings` 与 `UpdateServerSettings`

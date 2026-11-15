@@ -1,9 +1,22 @@
 // Acquisition's qualities (docs/clients.md §6.3.11): the sizes of each
 // kind's qualities, and a quality profile — the qualities it allows, best
-// first, where upgrades stop, the language of movies, and the scores of
+// first, merged into groups ranked as one and parted again, where upgrades
+// stop, the language of movies, and the scores of
 // custom formats.
 import { clone, create } from "@bufbuild/protobuf";
-import { errorMessage, type ServerEntry, useCustomFormats, useQualityDefinitions, useQualityProfiles } from "@mavio/client-ts";
+import {
+  errorMessage,
+  groupQualities,
+  moveInGroup,
+  profileItemId,
+  removeFromGroup,
+  renameGroup,
+  type ServerEntry,
+  ungroupQualities,
+  useCustomFormats,
+  useQualityDefinitions,
+  useQualityProfiles,
+} from "@mavio/client-ts";
 import {
   FormatScoreSchema,
   MediaKind,
@@ -20,11 +33,11 @@ import { useState } from "react";
 import { locale, t } from "../../i18n.ts";
 import { Icon } from "../../icon.tsx";
 import { Button, Group, Row } from "../../ui.tsx";
-import { NumberField, Switch } from "../../controls/inputs.tsx";
+import { Checkbox, NumberField, Switch } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
 import { mediaKinds } from "./acquisition.tsx";
-import { BackLink, Page, patched, useChoice } from "./common.tsx";
+import { AddRow, BackLink, Page, patched, useChoice } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
 import { useUnsavedGuard } from "../../controls/unsaved.tsx";
@@ -135,8 +148,7 @@ function Definitions({ server, kind }: { server: ServerEntry; kind: MediaKind })
   );
 }
 
-/** The ID an item is ranked by: a group's, else its quality's. */
-const itemId = (it: QualityProfileItem) => (it.id || it.quality);
+const itemId = profileItemId;
 
 /** Acquisition's page of a quality profile; "new-movie" or "new-series" for one to add. */
 export function QualityProfilePage({ server, id }: { server: ServerEntry; id: string }) {
@@ -177,6 +189,9 @@ function ProfileForm({ server, profile, titles }: { server: ServerEntry; profile
   const [draft, setDraft] = useState(() => clone(QualityProfileSchema, profile));
   const [notice, setNotice] = useState<string>();
   const [removing, setRemoving] = useState(false);
+  // The items chosen to merge into a group, while choosing them.
+  const [grouping, setGrouping] = useState<number[]>();
+  const [groupName, setGroupName] = useState("");
   const isNew = !profile.id;
   const set = (patch: Partial<QualityProfile>) => (setDraft((d) => patched(QualityProfileSchema, d, patch)), setNotice(undefined));
   const changed = JSON.stringify(draft) !== JSON.stringify(profile);
@@ -191,6 +206,15 @@ function ProfileForm({ server, profile, titles }: { server: ServerEntry; profile
     set({ items, cutoff: cutoffAllowed || !top ? draft.cutoff : itemId(top) });
   };
   const toggle = (i: number) => setItems(draft.items.map((it, j) => (j === i ? patched(QualityProfileItemSchema, it, { allowed: !it.allowed, items: it.items.map((q) => patched(QualityProfileItemSchema, q, { allowed: !it.allowed })) }) : it)));
+  /** Takes the items and cutoff of a profile changed from the draft. */
+  const apply = (p: QualityProfile) => set({ items: p.items, cutoff: p.cutoff });
+  const groupedCount = draft.items.filter((it) => grouping?.includes(itemId(it))).flatMap((it) => (it.id ? it.items : [it])).length;
+  const createGroup = () => {
+    apply(groupQualities(draft, grouping ?? [], groupName));
+    setGrouping(undefined);
+    setGroupName("");
+  };
+  const unnamed = draft.items.some((it) => it.id > 0 && !it.name.trim());
   const move = (i: number, by: number) => {
     const items = [...draft.items];
     const [it] = items.splice(i, 1);
@@ -253,25 +277,96 @@ function ProfileForm({ server, profile, titles }: { server: ServerEntry; profile
           </Row>
         )}
       </Group>
-      <Group title={t("acquisition.profileQualities")} footer={t("acquisition.profileQualitiesFooter")}>
+      <Group title={t("acquisition.profileQualities")} footer={grouping ? t("acquisition.groupHint") : t("acquisition.profileQualitiesFooter")}>
         {best.map((it) => {
           const i = draft.items.indexOf(it);
+          const key = itemId(it);
+          const group = it.id > 0;
+          const arrow = (label: string, disabled: boolean, onClick: () => void, rotate: string) => (
+            <button type="button" aria-label={label} title={label} disabled={disabled} onClick={onClick} className="rounded-md p-1.5 text-text-secondary hover:bg-fill disabled:opacity-30">
+              <Icon name="back" size={16} className={rotate} />
+            </button>
+          );
           return (
-            <div key={itemId(it)} className="flex min-h-11 items-center gap-3 px-4 py-1.5">
-              <Switch on={it.allowed} label={nameOf(it)} onChange={() => toggle(i)} />
-              <div className="min-w-0 flex-1">
-                <div className={`type-body ${it.allowed ? "" : "text-text-secondary"}`}>{nameOf(it)}</div>
-                {it.id > 0 && <div className="type-footnote text-text-secondary">{it.items.map(nameOf).join(", ")}</div>}
+            <div key={key} className="flex flex-col">
+              <div className="flex min-h-11 items-center gap-3 px-4 py-1.5">
+                {grouping ? (
+                  <Checkbox
+                    checked={grouping.includes(key)}
+                    label={nameOf(it)}
+                    onChange={(on) => setGrouping(on ? [...grouping, key] : grouping.filter((k) => k !== key))}
+                  />
+                ) : (
+                  <Switch on={it.allowed} label={nameOf(it)} onChange={() => toggle(i)} />
+                )}
+                <div className="min-w-0 flex-1">
+                  {group && !grouping ? (
+                    <input
+                      className={`${input} w-full sm:w-64`}
+                      aria-label={t("acquisition.groupName")}
+                      value={it.name}
+                      onChange={(e) => apply(renameGroup(draft, it.id, e.target.value))}
+                    />
+                  ) : (
+                    <div className={`type-body ${it.allowed ? "" : "text-text-secondary"}`}>{nameOf(it)}</div>
+                  )}
+                  {group && grouping && <div className="type-footnote text-text-secondary">{it.items.toReversed().map(nameOf).join(", ")}</div>}
+                </div>
+                {!grouping && (
+                  <>
+                    {group && (
+                      <Button variant="plain" onClick={() => apply(ungroupQualities(draft, it.id))}>
+                        {t("acquisition.ungroup")}
+                      </Button>
+                    )}
+                    {arrow(t("acquisition.moveUp"), i === draft.items.length - 1, () => move(i, 1), "rotate-90")}
+                    {arrow(t("acquisition.moveDown"), i === 0, () => move(i, -1), "-rotate-90")}
+                  </>
+                )}
               </div>
-              <button type="button" aria-label={t("acquisition.moveUp")} disabled={i === draft.items.length - 1} onClick={() => move(i, 1)} className="rounded-md p-1.5 text-text-secondary hover:bg-fill disabled:opacity-30">
-                <Icon name="back" size={16} className="rotate-90" />
-              </button>
-              <button type="button" aria-label={t("acquisition.moveDown")} disabled={i === 0} onClick={() => move(i, -1)} className="rounded-md p-1.5 text-text-secondary hover:bg-fill disabled:opacity-30">
-                <Icon name="back" size={16} className="-rotate-90" />
-              </button>
+              {group &&
+                !grouping &&
+                it.items.toReversed().map((g) => {
+                  const gi = it.items.indexOf(g);
+                  return (
+                    <div key={g.quality} className="flex min-h-10 items-center gap-3 py-1 pr-4 pl-20 desk:pl-16">
+                      <span className={`min-w-0 flex-1 truncate type-callout ${it.allowed ? "" : "text-text-secondary"}`}>{nameOf(g)}</span>
+                      <button
+                        type="button"
+                        aria-label={t("acquisition.removeFromGroup")}
+                        title={t("acquisition.removeFromGroup")}
+                        onClick={() => apply(removeFromGroup(draft, it.id, g.quality))}
+                        className="rounded-md p-1.5 text-text-secondary hover:bg-fill hover:text-danger"
+                      >
+                        <Icon name="close" size={16} />
+                      </button>
+                      {arrow(t("acquisition.moveUp"), gi === it.items.length - 1, () => apply(moveInGroup(draft, it.id, gi, 1)), "rotate-90")}
+                      {arrow(t("acquisition.moveDown"), gi === 0, () => apply(moveInGroup(draft, it.id, gi, -1)), "-rotate-90")}
+                    </div>
+                  );
+                })}
             </div>
           );
         })}
+        {grouping ? (
+          <form className="flex min-h-13 flex-wrap items-center gap-3 px-4 py-2.5" onSubmit={(e) => (e.preventDefault(), createGroup())}>
+            <input
+              className={`${input} flex-1 basis-48`}
+              aria-label={t("acquisition.groupName")}
+              placeholder={t("acquisition.groupName")}
+              value={groupName}
+              onChange={(e) => setGroupName(e.target.value)}
+            />
+            <Button type="submit" disabled={groupedCount < 2 || !groupName.trim()}>
+              {t("acquisition.createGroup")}
+            </Button>
+            <Button variant="secondary" onClick={() => (setGrouping(undefined), setGroupName(""))}>
+              {t("action.cancel")}
+            </Button>
+          </form>
+        ) : (
+          <AddRow label={t("acquisition.groupQualities")} onClick={() => setGrouping([])} />
+        )}
       </Group>
       <Group title={t("acquisition.formatScores")} footer={t("acquisition.formatScoresFooter")}>
         {(formats.list.data ?? []).map((f) => (
@@ -295,7 +390,7 @@ function ProfileForm({ server, profile, titles }: { server: ServerEntry; profile
         )}
       </Group>
       <div className="flex flex-wrap items-center gap-3">
-        <Button disabled={!changed || !draft.name.trim() || allowed.length === 0 || pending} onClick={save}>
+        <Button disabled={!changed || !draft.name.trim() || allowed.length === 0 || unnamed || grouping !== undefined || pending} onClick={save}>
           {pending ? "…" : isNew ? t("acquisition.create") : t("action.save")}
         </Button>
         {notice && !changed && <span className="type-callout text-text-secondary">{notice}</span>}

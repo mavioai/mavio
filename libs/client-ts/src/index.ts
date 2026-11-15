@@ -174,6 +174,12 @@ export {
   useUpdateOfflineDownloads,
 } from "./storage.ts";
 export {
+  groupQualities,
+  moveInGroup,
+  profileItemId,
+  removeFromGroup,
+  renameGroup,
+  ungroupQualities,
   useCustomFormats,
   useDelayProfiles,
   useDownloadClientPaths,

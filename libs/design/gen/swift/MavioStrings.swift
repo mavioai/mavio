@@ -4258,6 +4258,24 @@ public enum MavioStrings {
     /// Moves an entry down
     public static var acquisitionMoveDown: String { NSLocalizedString("acquisition.moveDown", bundle: .module, comment: "") }
 
+    /// Starts choosing qualities of a profile to merge into a group ranked as one.
+    public static var acquisitionGroupQualities: String { NSLocalizedString("acquisition.groupQualities", bundle: .module, comment: "") }
+
+    /// Shown while choosing qualities to group.
+    public static var acquisitionGroupHint: String { NSLocalizedString("acquisition.groupHint", bundle: .module, comment: "") }
+
+    /// Label of the name of a group of qualities.
+    public static var acquisitionGroupName: String { NSLocalizedString("acquisition.groupName", bundle: .module, comment: "") }
+
+    /// Merges the chosen qualities into a group.
+    public static var acquisitionCreateGroup: String { NSLocalizedString("acquisition.createGroup", bundle: .module, comment: "") }
+
+    /// Parts a group of qualities into its qualities.
+    public static var acquisitionUngroup: String { NSLocalizedString("acquisition.ungroup", bundle: .module, comment: "") }
+
+    /// Takes a quality out of its group.
+    public static var acquisitionRemoveFromGroup: String { NSLocalizedString("acquisition.removeFromGroup", bundle: .module, comment: "") }
+
     /// Title of a profile's format scores
     public static var acquisitionFormatScores: String { NSLocalizedString("acquisition.formatScores", bundle: .module, comment: "") }
 
