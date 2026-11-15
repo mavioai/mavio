@@ -1976,6 +1976,13 @@ export type MessageKey =
   | 'syncplay.paused'
   | 'syncplay.waitingFor'
   | 'syncplay.chip'
+  | 'syncplay.queue'
+  | 'syncplay.emptyQueue'
+  | 'syncplay.nowPlaying'
+  | 'syncplay.playEntry'
+  | 'syncplay.playNext'
+  | 'syncplay.addToQueue'
+  | 'syncplay.addToGroupQueue'
   | 'issues.report'
   | 'issues.reportTitle'
   | 'issues.type'
@@ -4239,6 +4246,13 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "syncplay.paused": "Paused: {name}",
     "syncplay.waitingFor": "Waiting for {names}",
     "syncplay.chip": "{name} · {count}",
+    "syncplay.queue": "Queue",
+    "syncplay.emptyQueue": "Nothing is queued.",
+    "syncplay.nowPlaying": "Now Playing",
+    "syncplay.playEntry": "Play “{name}” in the Group",
+    "syncplay.playNext": "Play Next",
+    "syncplay.addToQueue": "Add to Queue",
+    "syncplay.addToGroupQueue": "Add to Watch Together Queue",
     "issues.report": "Report a Problem…",
     "issues.reportTitle": "Report a Problem with {name}",
     "issues.type": "Problem",
@@ -6500,6 +6514,13 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "syncplay.paused": "已暂停：{name}",
     "syncplay.waitingFor": "正在等待 {names}",
     "syncplay.chip": "{name} · {count}",
+    "syncplay.queue": "队列",
+    "syncplay.emptyQueue": "队列中没有内容。",
+    "syncplay.nowPlaying": "正在播放",
+    "syncplay.playEntry": "在小组中播放“{name}”",
+    "syncplay.playNext": "下一个播放",
+    "syncplay.addToQueue": "添加到队列",
+    "syncplay.addToGroupQueue": "添加到一起看的队列",
     "issues.report": "报告问题…",
     "issues.reportTitle": "报告“{name}”的问题",
     "issues.type": "问题类型",

@@ -788,11 +788,11 @@ flowchart TD
     - [ ] Subtitles searched and downloaded from the player's subtitle panel
     - [x] A track's lyrics in the player, synced ones following the song word by word (§6.3.27)
     - [ ] Lyrics searched and downloaded by administrators (`SearchRemoteLyrics`, `DownloadRemoteLyrics`)
-  - [ ] The web UI together: SyncPlay groups (`SyncPlayService`), controlling the other sessions (`SessionService.SendCommand`), and issues reported on a title and handled by administrators (`IssueService`)
+  - [x] The web UI together: SyncPlay groups (`SyncPlayService`), controlling the other sessions (`SessionService.SendCommand`), and issues reported on a title and handled by administrators (`IssueService`)
     - [x] Controlling the user's other devices: Play On from an item's More menu and the control from the Devices settings; the browser carries out the commands sent to it (§6.3.23)
     - [x] A Play command's items after the one it starts with, queued in the player, whose next and previous commands move through the queue (`apps/web/src/screens/remote.tsx`, `apps/web/src/queue.ts`)
     - [x] SyncPlay groups: created, joined and left from Watch Together, the player following the group with its clock kept in step (§6.3.24)
-    - [ ] Editing a SyncPlay group's queue: adding items, moving and removing them (needs requests of `SyncPlayService`)
+    - [x] Editing a SyncPlay group's queue: Watch Together's queue, whose entries are played, moved and removed, and an item added next or last, also from the More menu's Add to Watch Together Queue (`SyncPlayService.AddToQueue`, `RemoveFromQueue`, `MoveQueueEntry`, `SetCurrentEntry`; `apps/web/src/screens/syncplay.tsx`, §6.3.24)
     - [x] Issues: reported from an item's More menu, an item's open issues on its details, and the settings' Issues with an issue's comments, resolving, reopening and deleting (§6.3.25)
   - [x] The web UI's AI agent sessions (`AgentSessionService`): the settings' AI Conversations for administrators, the answers streamed (§6.3.26)
     - [ ] Conversations for users other than administrators, each user's own (needs an owner of `AgentSessionService`'s sessions)

@@ -788,11 +788,11 @@ flowchart TD
     - [ ] 在播放器的字幕面板中搜索与下载字幕
     - [x] 播放器中曲目的歌词，同步歌词逐字跟随歌曲（§6.3.27）
     - [ ] 由管理员搜索与下载歌词（`SearchRemoteLyrics`、`DownloadRemoteLyrics`）
-  - [ ] Web UI 的共同观看：同步播放组（`SyncPlayService`）、控制其他会话（`SessionService.SendCommand`），以及对作品报告问题并由管理员处理（`IssueService`）
+  - [x] Web UI 的共同观看：同步播放组（`SyncPlayService`）、控制其他会话（`SessionService.SendCommand`），以及对作品报告问题并由管理员处理（`IssueService`）
     - [x] 控制用户的其他设备：条目“更多”菜单中的“在…上播放”和“设备”设置中的控制；浏览器执行发给它的命令（§6.3.23）
     - [x] “播放”命令中起始条目之后的条目，在播放器中排队，播放器的下一个与上一个命令在队列中移动（`apps/web/src/screens/remote.tsx`、`apps/web/src/queue.ts`）
     - [x] 同步播放组：从“一起看”创建、加入和离开，播放器跟随小组并保持时钟同步（§6.3.24）
-    - [ ] 编辑同步播放组的队列：添加、移动和移除条目（需要 `SyncPlayService` 的新请求）
+    - [x] 编辑同步播放组的队列：“一起看”中的队列，其条目可播放、移动和移除，条目可添加为下一个或添加到末尾，也可从“更多”菜单的“添加到一起看的队列”添加（`SyncPlayService.AddToQueue`、`RemoveFromQueue`、`MoveQueueEntry`、`SetCurrentEntry`；`apps/web/src/screens/syncplay.tsx`，§6.3.24）
     - [x] 问题：从条目的“更多”菜单报告，条目详情中的未解决问题，以及设置中的“问题”及其评论、标记为已解决、重新打开和删除（§6.3.25）
   - [x] Web UI 的 AI 助手会话（`AgentSessionService`）：设置中供管理员使用的“AI 对话”，回答以流式传送（§6.3.26）
     - [ ] 管理员以外用户的对话，各自独立（需要 `AgentSessionService` 会话的所有者）

@@ -1,9 +1,10 @@
 // SyncPlay (docs/clients.md §6.3.24): the dialog creating, joining and
-// leaving a group and playing an item in it, the chip of the player
-// following a group, and the indicator the screens show while in one.
-import { errorMessage, groupPositionAt, type ServerEntry, useItem, useServersStore, useSyncPlayGroups } from "@mavio/client-ts";
+// leaving a group, playing an item in it or adding it to its queue, and
+// editing the group's queue; the chip of the player following a group, and
+// the indicator the screens show while in one.
+import { errorMessage, groupPositionAt, type ServerEntry, thumbOf, useItem, useServersStore, useSyncPlayGroups } from "@mavio/client-ts";
 import type { Item } from "@mavio/proto/mavio/library/v1/item_pb";
-import { type SyncPlayGroup, SyncPlayService, SyncPlayState } from "@mavio/proto/mavio/session/v1/syncplay_pb";
+import { type SyncPlayGroup, type SyncPlayQueueEntry, SyncPlayService, SyncPlayState } from "@mavio/proto/mavio/session/v1/syncplay_pb";
 import { Link, useLocation } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -12,7 +13,8 @@ import { Icon } from "../icon.tsx";
 import { useWidthClass } from "../prefs.ts";
 import { isTabPlace } from "../shell/places.ts";
 import { useSyncPlay } from "../syncplay.tsx";
-import { Button } from "../ui.tsx";
+import { Artwork, Button, runtimeOf, subtitleOf } from "../ui.tsx";
+import { Tip } from "../controls/tooltip.tsx";
 import { field } from "../controls/styles.ts";
 import { Modal } from "../controls/dialog.tsx";
 
@@ -39,10 +41,11 @@ function GroupState({ server, group }: { server: ServerEntry; group: SyncPlayGro
 
 /**
  * The browser's group, or the server's groups to join and a new one; in a
- * group on the item's server, the item plays in it from its resume
- * position.
+ * group, its queue, whose entries are played, moved and removed, and on the
+ * item's server the item played in it from its resume position, or added to
+ * its queue next or last. error is what an earlier request answered.
  */
-export function SyncPlayDialog({ server, item, onClose }: { server: ServerEntry; item?: Item; onClose: () => void }) {
+export function SyncPlayDialog({ server, item, error: earlier, onClose }: { server: ServerEntry; item?: Item; error?: string; onClose: () => void }) {
   const servers = useServersStore();
   const sp = useSyncPlay();
   const { pathname } = useLocation();
@@ -50,7 +53,7 @@ export function SyncPlayDialog({ server, item, onClose }: { server: ServerEntry;
   const groups = useSyncPlayGroups(server, !joined);
   const [name, setName] = useState(() => t("syncplay.defaultName", { name: server.userName }));
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState(earlier);
   if (!sp) return null;
   const rpc = (s: ServerEntry) => servers.client(SyncPlayService, s);
   const run = async (f: () => Promise<unknown>) => {
@@ -87,6 +90,17 @@ export function SyncPlayDialog({ server, item, onClose }: { server: ServerEntry;
             </li>
           ))}
         </ul>
+        <GroupQueue server={at} group={group} busy={busy} run={run} onPlay={onClose} />
+        {item && at.id === server.id && (
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" disabled={busy} onClick={() => void run(() => rpc(at).addToQueue({ itemIds: [item.id], next: true }))}>
+              {t("syncplay.playNext")}
+            </Button>
+            <Button variant="secondary" disabled={busy} onClick={() => void run(() => rpc(at).addToQueue({ itemIds: [item.id] }))}>
+              {t("syncplay.addToQueue")}
+            </Button>
+          </div>
+        )}
         {error && <p className="type-footnote break-words text-danger">{error}</p>}
         <div className="flex flex-wrap justify-end gap-2">
           <Button variant="plain" className="text-danger" disabled={busy} onClick={() => void run(async () => (await sp.leave(), onClose()))}>
@@ -168,6 +182,114 @@ export function SyncPlayDialog({ server, item, onClose }: { server: ServerEntry;
         </Button>
       </div>
     </Modal>
+  );
+}
+
+/**
+ * The group's queue: each entry played in the group from its start, moved
+ * up or down and removed; the entry being played marked.
+ */
+function GroupQueue({
+  server,
+  group,
+  busy,
+  run,
+  onPlay,
+}: {
+  server: ServerEntry;
+  group: SyncPlayGroup;
+  busy: boolean;
+  run: (f: () => Promise<unknown>) => Promise<void>;
+  /** An entry was played: the browser follows the group to it. */
+  onPlay: () => void;
+}) {
+  const servers = useServersStore();
+  const rpc = servers.client(SyncPlayService, server);
+  return (
+    <section className="flex min-h-0 flex-col gap-1" aria-label={t("syncplay.queue")}>
+      <h3 className="type-headline">{t("syncplay.queue")}</h3>
+      {group.queue.length === 0 ? (
+        <p className="type-callout text-text-secondary">{t("syncplay.emptyQueue")}</p>
+      ) : (
+        <ol className="-mx-3 flex max-h-[40vh] min-h-0 flex-col overflow-y-auto">
+          {group.queue.map((e, i) => (
+            <QueueRow
+              key={e.id}
+              server={server}
+              entry={e}
+              index={i}
+              last={i === group.queue.length - 1}
+              current={i === group.currentIndex}
+              busy={busy}
+              play={() => void run(async () => (await rpc.setCurrentEntry({ entryId: e.id }), onPlay()))}
+              move={(index) => void run(() => rpc.moveQueueEntry({ entryId: e.id, index }))}
+              remove={() => void run(() => rpc.removeFromQueue({ entryIds: [e.id] }))}
+            />
+          ))}
+        </ol>
+      )}
+    </section>
+  );
+}
+
+function QueueRow({
+  server,
+  entry,
+  index,
+  last,
+  current,
+  busy,
+  play,
+  move,
+  remove,
+}: {
+  server: ServerEntry;
+  entry: SyncPlayQueueEntry;
+  index: number;
+  last: boolean;
+  current: boolean;
+  busy: boolean;
+  play: () => void;
+  move: (index: number) => void;
+  remove: () => void;
+}) {
+  const item = useItem(server, entry.itemId).data?.item;
+  const name = item?.name ?? "…";
+  const small = "inline-flex size-9 shrink-0 items-center justify-center rounded-full text-text-secondary hover:bg-fill disabled:opacity-30";
+  return (
+    <li className={`flex items-center gap-3 rounded-md px-3 py-1.5 hover:tint ${current ? "bg-fill" : ""}`} aria-current={current || undefined}>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={play}
+        aria-label={t("syncplay.playEntry", { name })}
+        className="flex min-w-0 flex-1 cursor-default items-center gap-3 text-left"
+      >
+        <span className="w-5 shrink-0 text-right type-callout text-text-tertiary tabular-nums">{index + 1}</span>
+        <Artwork src={item ? thumbOf(server, item, 240)?.url : undefined} alt="" className="aspect-video w-16 shrink-0 rounded-md" />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate type-body">{name}</span>
+          <span className="block truncate type-footnote text-text-secondary">
+            {current ? t("syncplay.nowPlaying") : item ? [subtitleOf(item), runtimeOf(item)].filter(Boolean).join(" · ") : ""}
+          </span>
+        </span>
+      </button>
+      <Tip label={t("lists.moveUp")}>
+        <button type="button" aria-label={t("lists.moveUp")} disabled={busy || index === 0} onClick={() => move(index - 1)} className={small}>
+          <Icon name="expand" size={16} className="rotate-180" />
+        </button>
+      </Tip>
+      <Tip label={t("lists.moveDown")}>
+        <button type="button" aria-label={t("lists.moveDown")} disabled={busy || last} onClick={() => move(index + 1)} className={small}>
+          <Icon name="expand" size={16} />
+        </button>
+      </Tip>
+      <Tip label={t("lists.remove")}>
+        <button type="button" aria-label={t("lists.remove")} disabled={busy} onClick={remove} className={small}>
+          <Icon name="close" size={16} />
+        </button>
+      </Tip>
+    </li>
   );
 }
 

@@ -53,6 +53,18 @@ class SyncPlayService(Protocol):
     async def previous_item(self, request: mavio_dot_session_dot_v1_dot_syncplay__pb2.PreviousItemRequest, ctx: RequestContext) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.PreviousItemResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def add_to_queue(self, request: mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueRequest, ctx: RequestContext) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def remove_from_queue(self, request: mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueRequest, ctx: RequestContext) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def move_queue_entry(self, request: mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryRequest, ctx: RequestContext) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def set_current_entry(self, request: mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryRequest, ctx: RequestContext) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
     async def report_state(self, request: mavio_dot_session_dot_v1_dot_syncplay__pb2.ReportStateRequest, ctx: RequestContext) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.ReportStateResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
@@ -184,6 +196,46 @@ class SyncPlayServiceASGIApplication(ConnectASGIApplication[SyncPlayService]):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=svc.previous_item,
+                ),
+                "/mavio.session.v1.SyncPlayService/AddToQueue": Endpoint.unary(
+                    method=MethodInfo(
+                        name="AddToQueue",
+                        service_name="mavio.session.v1.SyncPlayService",
+                        input=mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueRequest,
+                        output=mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.add_to_queue,
+                ),
+                "/mavio.session.v1.SyncPlayService/RemoveFromQueue": Endpoint.unary(
+                    method=MethodInfo(
+                        name="RemoveFromQueue",
+                        service_name="mavio.session.v1.SyncPlayService",
+                        input=mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueRequest,
+                        output=mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.remove_from_queue,
+                ),
+                "/mavio.session.v1.SyncPlayService/MoveQueueEntry": Endpoint.unary(
+                    method=MethodInfo(
+                        name="MoveQueueEntry",
+                        service_name="mavio.session.v1.SyncPlayService",
+                        input=mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryRequest,
+                        output=mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.move_queue_entry,
+                ),
+                "/mavio.session.v1.SyncPlayService/SetCurrentEntry": Endpoint.unary(
+                    method=MethodInfo(
+                        name="SetCurrentEntry",
+                        service_name="mavio.session.v1.SyncPlayService",
+                        input=mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryRequest,
+                        output=mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.set_current_entry,
                 ),
                 "/mavio.session.v1.SyncPlayService/ReportState": Endpoint.unary(
                     method=MethodInfo(
@@ -462,6 +514,86 @@ class SyncPlayServiceClient(ConnectClient):
             timeout_ms=timeout_ms,
         )
 
+    async def add_to_queue(
+        self,
+        request: mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="AddToQueue",
+                service_name="mavio.session.v1.SyncPlayService",
+                input=mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueRequest,
+                output=mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def remove_from_queue(
+        self,
+        request: mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="RemoveFromQueue",
+                service_name="mavio.session.v1.SyncPlayService",
+                input=mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueRequest,
+                output=mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def move_queue_entry(
+        self,
+        request: mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="MoveQueueEntry",
+                service_name="mavio.session.v1.SyncPlayService",
+                input=mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryRequest,
+                output=mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def set_current_entry(
+        self,
+        request: mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SetCurrentEntry",
+                service_name="mavio.session.v1.SyncPlayService",
+                input=mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryRequest,
+                output=mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
     async def report_state(
         self,
         request: mavio_dot_session_dot_v1_dot_syncplay__pb2.ReportStateRequest,
@@ -527,6 +659,14 @@ class SyncPlayServiceSync(Protocol):
     def next_item(self, request: mavio_dot_session_dot_v1_dot_syncplay__pb2.NextItemRequest, ctx: RequestContext) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.NextItemResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def previous_item(self, request: mavio_dot_session_dot_v1_dot_syncplay__pb2.PreviousItemRequest, ctx: RequestContext) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.PreviousItemResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def add_to_queue(self, request: mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueRequest, ctx: RequestContext) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def remove_from_queue(self, request: mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueRequest, ctx: RequestContext) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def move_queue_entry(self, request: mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryRequest, ctx: RequestContext) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def set_current_entry(self, request: mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryRequest, ctx: RequestContext) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def report_state(self, request: mavio_dot_session_dot_v1_dot_syncplay__pb2.ReportStateRequest, ctx: RequestContext) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.ReportStateResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
@@ -657,6 +797,46 @@ class SyncPlayServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=service.previous_item,
+                ),
+                "/mavio.session.v1.SyncPlayService/AddToQueue": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="AddToQueue",
+                        service_name="mavio.session.v1.SyncPlayService",
+                        input=mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueRequest,
+                        output=mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.add_to_queue,
+                ),
+                "/mavio.session.v1.SyncPlayService/RemoveFromQueue": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="RemoveFromQueue",
+                        service_name="mavio.session.v1.SyncPlayService",
+                        input=mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueRequest,
+                        output=mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.remove_from_queue,
+                ),
+                "/mavio.session.v1.SyncPlayService/MoveQueueEntry": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="MoveQueueEntry",
+                        service_name="mavio.session.v1.SyncPlayService",
+                        input=mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryRequest,
+                        output=mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.move_queue_entry,
+                ),
+                "/mavio.session.v1.SyncPlayService/SetCurrentEntry": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="SetCurrentEntry",
+                        service_name="mavio.session.v1.SyncPlayService",
+                        input=mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryRequest,
+                        output=mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.set_current_entry,
                 ),
                 "/mavio.session.v1.SyncPlayService/ReportState": EndpointSync.unary(
                     method=MethodInfo(
@@ -929,6 +1109,86 @@ class SyncPlayServiceClientSync(ConnectClientSync):
                 service_name="mavio.session.v1.SyncPlayService",
                 input=mavio_dot_session_dot_v1_dot_syncplay__pb2.PreviousItemRequest,
                 output=mavio_dot_session_dot_v1_dot_syncplay__pb2.PreviousItemResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def add_to_queue(
+        self,
+        request: mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="AddToQueue",
+                service_name="mavio.session.v1.SyncPlayService",
+                input=mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueRequest,
+                output=mavio_dot_session_dot_v1_dot_syncplay__pb2.AddToQueueResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def remove_from_queue(
+        self,
+        request: mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="RemoveFromQueue",
+                service_name="mavio.session.v1.SyncPlayService",
+                input=mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueRequest,
+                output=mavio_dot_session_dot_v1_dot_syncplay__pb2.RemoveFromQueueResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def move_queue_entry(
+        self,
+        request: mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="MoveQueueEntry",
+                service_name="mavio.session.v1.SyncPlayService",
+                input=mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryRequest,
+                output=mavio_dot_session_dot_v1_dot_syncplay__pb2.MoveQueueEntryResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def set_current_entry(
+        self,
+        request: mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SetCurrentEntry",
+                service_name="mavio.session.v1.SyncPlayService",
+                input=mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryRequest,
+                output=mavio_dot_session_dot_v1_dot_syncplay__pb2.SetCurrentEntryResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,

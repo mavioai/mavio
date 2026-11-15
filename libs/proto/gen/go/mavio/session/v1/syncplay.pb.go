@@ -2244,6 +2244,514 @@ func (b0 PreviousItemResponse_builder) Build() *PreviousItemResponse {
 	return m0
 }
 
+type AddToQueueRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ItemIds     []string               `protobuf:"bytes,1,rep,name=item_ids,json=itemIds"`
+	xxx_hidden_Next        bool                   `protobuf:"varint,2,opt,name=next"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *AddToQueueRequest) Reset() {
+	*x = AddToQueueRequest{}
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddToQueueRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddToQueueRequest) ProtoMessage() {}
+
+func (x *AddToQueueRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *AddToQueueRequest) GetItemIds() []string {
+	if x != nil {
+		return x.xxx_hidden_ItemIds
+	}
+	return nil
+}
+
+func (x *AddToQueueRequest) GetNext() bool {
+	if x != nil {
+		return x.xxx_hidden_Next
+	}
+	return false
+}
+
+func (x *AddToQueueRequest) SetItemIds(v []string) {
+	x.xxx_hidden_ItemIds = v
+}
+
+func (x *AddToQueueRequest) SetNext(v bool) {
+	x.xxx_hidden_Next = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *AddToQueueRequest) HasNext() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *AddToQueueRequest) ClearNext() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Next = false
+}
+
+type AddToQueueRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	ItemIds []string
+	// The items go right after the entry being played instead of at the end
+	// of the queue.
+	Next *bool
+}
+
+func (b0 AddToQueueRequest_builder) Build() *AddToQueueRequest {
+	m0 := &AddToQueueRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_ItemIds = b.ItemIds
+	if b.Next != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Next = *b.Next
+	}
+	return m0
+}
+
+type AddToQueueResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddToQueueResponse) Reset() {
+	*x = AddToQueueResponse{}
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddToQueueResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddToQueueResponse) ProtoMessage() {}
+
+func (x *AddToQueueResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type AddToQueueResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 AddToQueueResponse_builder) Build() *AddToQueueResponse {
+	m0 := &AddToQueueResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type RemoveFromQueueRequest struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_EntryIds []string               `protobuf:"bytes,1,rep,name=entry_ids,json=entryIds"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *RemoveFromQueueRequest) Reset() {
+	*x = RemoveFromQueueRequest{}
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveFromQueueRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveFromQueueRequest) ProtoMessage() {}
+
+func (x *RemoveFromQueueRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *RemoveFromQueueRequest) GetEntryIds() []string {
+	if x != nil {
+		return x.xxx_hidden_EntryIds
+	}
+	return nil
+}
+
+func (x *RemoveFromQueueRequest) SetEntryIds(v []string) {
+	x.xxx_hidden_EntryIds = v
+}
+
+type RemoveFromQueueRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Entries no longer in the queue are ignored.
+	EntryIds []string
+}
+
+func (b0 RemoveFromQueueRequest_builder) Build() *RemoveFromQueueRequest {
+	m0 := &RemoveFromQueueRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_EntryIds = b.EntryIds
+	return m0
+}
+
+type RemoveFromQueueResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveFromQueueResponse) Reset() {
+	*x = RemoveFromQueueResponse{}
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveFromQueueResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveFromQueueResponse) ProtoMessage() {}
+
+func (x *RemoveFromQueueResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type RemoveFromQueueResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 RemoveFromQueueResponse_builder) Build() *RemoveFromQueueResponse {
+	m0 := &RemoveFromQueueResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type MoveQueueEntryRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_EntryId     *string                `protobuf:"bytes,1,opt,name=entry_id,json=entryId"`
+	xxx_hidden_Index       int32                  `protobuf:"varint,2,opt,name=index"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *MoveQueueEntryRequest) Reset() {
+	*x = MoveQueueEntryRequest{}
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MoveQueueEntryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MoveQueueEntryRequest) ProtoMessage() {}
+
+func (x *MoveQueueEntryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *MoveQueueEntryRequest) GetEntryId() string {
+	if x != nil {
+		if x.xxx_hidden_EntryId != nil {
+			return *x.xxx_hidden_EntryId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *MoveQueueEntryRequest) GetIndex() int32 {
+	if x != nil {
+		return x.xxx_hidden_Index
+	}
+	return 0
+}
+
+func (x *MoveQueueEntryRequest) SetEntryId(v string) {
+	x.xxx_hidden_EntryId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *MoveQueueEntryRequest) SetIndex(v int32) {
+	x.xxx_hidden_Index = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *MoveQueueEntryRequest) HasEntryId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *MoveQueueEntryRequest) HasIndex() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *MoveQueueEntryRequest) ClearEntryId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_EntryId = nil
+}
+
+func (x *MoveQueueEntryRequest) ClearIndex() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Index = 0
+}
+
+type MoveQueueEntryRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	EntryId *string
+	// The entry's new index; past the end moves it to the end.
+	Index *int32
+}
+
+func (b0 MoveQueueEntryRequest_builder) Build() *MoveQueueEntryRequest {
+	m0 := &MoveQueueEntryRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.EntryId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_EntryId = b.EntryId
+	}
+	if b.Index != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Index = *b.Index
+	}
+	return m0
+}
+
+type MoveQueueEntryResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MoveQueueEntryResponse) Reset() {
+	*x = MoveQueueEntryResponse{}
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MoveQueueEntryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MoveQueueEntryResponse) ProtoMessage() {}
+
+func (x *MoveQueueEntryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type MoveQueueEntryResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 MoveQueueEntryResponse_builder) Build() *MoveQueueEntryResponse {
+	m0 := &MoveQueueEntryResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type SetCurrentEntryRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_EntryId     *string                `protobuf:"bytes,1,opt,name=entry_id,json=entryId"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *SetCurrentEntryRequest) Reset() {
+	*x = SetCurrentEntryRequest{}
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetCurrentEntryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetCurrentEntryRequest) ProtoMessage() {}
+
+func (x *SetCurrentEntryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SetCurrentEntryRequest) GetEntryId() string {
+	if x != nil {
+		if x.xxx_hidden_EntryId != nil {
+			return *x.xxx_hidden_EntryId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SetCurrentEntryRequest) SetEntryId(v string) {
+	x.xxx_hidden_EntryId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *SetCurrentEntryRequest) HasEntryId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SetCurrentEntryRequest) ClearEntryId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_EntryId = nil
+}
+
+type SetCurrentEntryRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	EntryId *string
+}
+
+func (b0 SetCurrentEntryRequest_builder) Build() *SetCurrentEntryRequest {
+	m0 := &SetCurrentEntryRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.EntryId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_EntryId = b.EntryId
+	}
+	return m0
+}
+
+type SetCurrentEntryResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetCurrentEntryResponse) Reset() {
+	*x = SetCurrentEntryResponse{}
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetCurrentEntryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetCurrentEntryResponse) ProtoMessage() {}
+
+func (x *SetCurrentEntryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type SetCurrentEntryResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 SetCurrentEntryResponse_builder) Build() *SetCurrentEntryResponse {
+	m0 := &SetCurrentEntryResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
 type ReportStateRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_EntryId     *string                `protobuf:"bytes,1,opt,name=entry_id,json=entryId"`
@@ -2259,7 +2767,7 @@ type ReportStateRequest struct {
 
 func (x *ReportStateRequest) Reset() {
 	*x = ReportStateRequest{}
-	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[29]
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2271,7 +2779,7 @@ func (x *ReportStateRequest) String() string {
 func (*ReportStateRequest) ProtoMessage() {}
 
 func (x *ReportStateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[29]
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2444,7 +2952,7 @@ type ReportStateResponse struct {
 
 func (x *ReportStateResponse) Reset() {
 	*x = ReportStateResponse{}
-	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[30]
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2456,7 +2964,7 @@ func (x *ReportStateResponse) String() string {
 func (*ReportStateResponse) ProtoMessage() {}
 
 func (x *ReportStateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[30]
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2488,7 +2996,7 @@ type ReportPingRequest struct {
 
 func (x *ReportPingRequest) Reset() {
 	*x = ReportPingRequest{}
-	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[31]
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2500,7 +3008,7 @@ func (x *ReportPingRequest) String() string {
 func (*ReportPingRequest) ProtoMessage() {}
 
 func (x *ReportPingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[31]
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2555,7 +3063,7 @@ type ReportPingResponse struct {
 
 func (x *ReportPingResponse) Reset() {
 	*x = ReportPingResponse{}
-	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[32]
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2567,7 +3075,7 @@ func (x *ReportPingResponse) String() string {
 func (*ReportPingResponse) ProtoMessage() {}
 
 func (x *ReportPingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[32]
+	mi := &file_mavio_session_v1_syncplay_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2658,7 +3166,21 @@ const file_mavio_session_v1_syncplay_proto_rawDesc = "" +
 	"\x0fNextItemRequest\"\x12\n" +
 	"\x10NextItemResponse\"\x15\n" +
 	"\x13PreviousItemRequest\"\x16\n" +
-	"\x14PreviousItemResponse\"\xe8\x01\n" +
+	"\x14PreviousItemResponse\"V\n" +
+	"\x11AddToQueueRequest\x12-\n" +
+	"\bitem_ids\x18\x01 \x03(\tB\x12\xbaH\x0f\x92\x01\f\b\x01\x10\xe8\a\"\x05r\x03\xb0\x01\x01R\aitemIds\x12\x12\n" +
+	"\x04next\x18\x02 \x01(\bR\x04next\"\x14\n" +
+	"\x12AddToQueueResponse\"I\n" +
+	"\x16RemoveFromQueueRequest\x12/\n" +
+	"\tentry_ids\x18\x01 \x03(\tB\x12\xbaH\x0f\x92\x01\f\b\x01\x10\xe8\a\"\x05r\x03\xb0\x01\x01R\bentryIds\"\x19\n" +
+	"\x17RemoveFromQueueResponse\"^\n" +
+	"\x15MoveQueueEntryRequest\x12&\n" +
+	"\bentry_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\aentryId\x12\x1d\n" +
+	"\x05index\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x05index\"\x18\n" +
+	"\x16MoveQueueEntryResponse\"@\n" +
+	"\x16SetCurrentEntryRequest\x12&\n" +
+	"\bentry_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\aentryId\"\x19\n" +
+	"\x17SetCurrentEntryResponse\"\xe8\x01\n" +
 	"\x12ReportStateRequest\x12&\n" +
 	"\bentry_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\aentryId\x12B\n" +
 	"\bposition\x18\x02 \x01(\v2\x19.google.protobuf.DurationB\v\xbaH\b\xc8\x01\x01\xaa\x01\x022\x00R\bposition\x126\n" +
@@ -2680,7 +3202,7 @@ const file_mavio_session_v1_syncplay_proto_rawDesc = "" +
 	"\x1eSYNC_PLAY_COMMAND_KIND_UNPAUSE\x10\x01\x12 \n" +
 	"\x1cSYNC_PLAY_COMMAND_KIND_PAUSE\x10\x02\x12\x1f\n" +
 	"\x1bSYNC_PLAY_COMMAND_KIND_SEEK\x10\x03\x12\x1f\n" +
-	"\x1bSYNC_PLAY_COMMAND_KIND_STOP\x10\x042\xb1\t\n" +
+	"\x1bSYNC_PLAY_COMMAND_KIND_STOP\x10\x042\xbf\f\n" +
 	"\x0fSyncPlayService\x12S\n" +
 	"\aGetTime\x12 .mavio.session.v1.GetTimeRequest\x1a!.mavio.session.v1.GetTimeResponse\"\x03\x90\x02\x01\x12\\\n" +
 	"\n" +
@@ -2695,74 +3217,87 @@ const file_mavio_session_v1_syncplay_proto_rawDesc = "" +
 	"\x04Seek\x12\x1d.mavio.session.v1.SeekRequest\x1a\x1e.mavio.session.v1.SeekResponse\x12E\n" +
 	"\x04Stop\x12\x1d.mavio.session.v1.StopRequest\x1a\x1e.mavio.session.v1.StopResponse\x12Q\n" +
 	"\bNextItem\x12!.mavio.session.v1.NextItemRequest\x1a\".mavio.session.v1.NextItemResponse\x12]\n" +
-	"\fPreviousItem\x12%.mavio.session.v1.PreviousItemRequest\x1a&.mavio.session.v1.PreviousItemResponse\x12Z\n" +
+	"\fPreviousItem\x12%.mavio.session.v1.PreviousItemRequest\x1a&.mavio.session.v1.PreviousItemResponse\x12W\n" +
+	"\n" +
+	"AddToQueue\x12#.mavio.session.v1.AddToQueueRequest\x1a$.mavio.session.v1.AddToQueueResponse\x12f\n" +
+	"\x0fRemoveFromQueue\x12(.mavio.session.v1.RemoveFromQueueRequest\x1a).mavio.session.v1.RemoveFromQueueResponse\x12c\n" +
+	"\x0eMoveQueueEntry\x12'.mavio.session.v1.MoveQueueEntryRequest\x1a(.mavio.session.v1.MoveQueueEntryResponse\x12f\n" +
+	"\x0fSetCurrentEntry\x12(.mavio.session.v1.SetCurrentEntryRequest\x1a).mavio.session.v1.SetCurrentEntryResponse\x12Z\n" +
 	"\vReportState\x12$.mavio.session.v1.ReportStateRequest\x1a%.mavio.session.v1.ReportStateResponse\x12W\n" +
 	"\n" +
 	"ReportPing\x12#.mavio.session.v1.ReportPingRequest\x1a$.mavio.session.v1.ReportPingResponseB\xce\x01\n" +
 	"\x14com.mavio.session.v1B\rSyncplayProtoP\x01ZEgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1;sessionv1\xa2\x02\x03MSX\xaa\x02\x10Mavio.Session.V1\xca\x02\x10Mavio\\Session\\V1\xe2\x02\x1cMavio\\Session\\V1\\GPBMetadata\xea\x02\x12Mavio::Session::V1b\beditionsp\xe8\a"
 
 var file_mavio_session_v1_syncplay_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_mavio_session_v1_syncplay_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
+var file_mavio_session_v1_syncplay_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
 var file_mavio_session_v1_syncplay_proto_goTypes = []any{
-	(SyncPlayState)(0),            // 0: mavio.session.v1.SyncPlayState
-	(SyncPlayCommandKind)(0),      // 1: mavio.session.v1.SyncPlayCommandKind
-	(*SyncPlayGroup)(nil),         // 2: mavio.session.v1.SyncPlayGroup
-	(*SyncPlayMember)(nil),        // 3: mavio.session.v1.SyncPlayMember
-	(*SyncPlayQueueEntry)(nil),    // 4: mavio.session.v1.SyncPlayQueueEntry
-	(*SyncPlayCommand)(nil),       // 5: mavio.session.v1.SyncPlayCommand
-	(*SyncPlayUpdate)(nil),        // 6: mavio.session.v1.SyncPlayUpdate
-	(*GetTimeRequest)(nil),        // 7: mavio.session.v1.GetTimeRequest
-	(*GetTimeResponse)(nil),       // 8: mavio.session.v1.GetTimeResponse
-	(*ListGroupsRequest)(nil),     // 9: mavio.session.v1.ListGroupsRequest
-	(*ListGroupsResponse)(nil),    // 10: mavio.session.v1.ListGroupsResponse
-	(*CreateGroupRequest)(nil),    // 11: mavio.session.v1.CreateGroupRequest
-	(*CreateGroupResponse)(nil),   // 12: mavio.session.v1.CreateGroupResponse
-	(*JoinGroupRequest)(nil),      // 13: mavio.session.v1.JoinGroupRequest
-	(*JoinGroupResponse)(nil),     // 14: mavio.session.v1.JoinGroupResponse
-	(*LeaveGroupRequest)(nil),     // 15: mavio.session.v1.LeaveGroupRequest
-	(*LeaveGroupResponse)(nil),    // 16: mavio.session.v1.LeaveGroupResponse
-	(*SetQueueRequest)(nil),       // 17: mavio.session.v1.SetQueueRequest
-	(*SetQueueResponse)(nil),      // 18: mavio.session.v1.SetQueueResponse
-	(*PauseRequest)(nil),          // 19: mavio.session.v1.PauseRequest
-	(*PauseResponse)(nil),         // 20: mavio.session.v1.PauseResponse
-	(*UnpauseRequest)(nil),        // 21: mavio.session.v1.UnpauseRequest
-	(*UnpauseResponse)(nil),       // 22: mavio.session.v1.UnpauseResponse
-	(*SeekRequest)(nil),           // 23: mavio.session.v1.SeekRequest
-	(*SeekResponse)(nil),          // 24: mavio.session.v1.SeekResponse
-	(*StopRequest)(nil),           // 25: mavio.session.v1.StopRequest
-	(*StopResponse)(nil),          // 26: mavio.session.v1.StopResponse
-	(*NextItemRequest)(nil),       // 27: mavio.session.v1.NextItemRequest
-	(*NextItemResponse)(nil),      // 28: mavio.session.v1.NextItemResponse
-	(*PreviousItemRequest)(nil),   // 29: mavio.session.v1.PreviousItemRequest
-	(*PreviousItemResponse)(nil),  // 30: mavio.session.v1.PreviousItemResponse
-	(*ReportStateRequest)(nil),    // 31: mavio.session.v1.ReportStateRequest
-	(*ReportStateResponse)(nil),   // 32: mavio.session.v1.ReportStateResponse
-	(*ReportPingRequest)(nil),     // 33: mavio.session.v1.ReportPingRequest
-	(*ReportPingResponse)(nil),    // 34: mavio.session.v1.ReportPingResponse
-	(*durationpb.Duration)(nil),   // 35: google.protobuf.Duration
-	(*timestamppb.Timestamp)(nil), // 36: google.protobuf.Timestamp
+	(SyncPlayState)(0),              // 0: mavio.session.v1.SyncPlayState
+	(SyncPlayCommandKind)(0),        // 1: mavio.session.v1.SyncPlayCommandKind
+	(*SyncPlayGroup)(nil),           // 2: mavio.session.v1.SyncPlayGroup
+	(*SyncPlayMember)(nil),          // 3: mavio.session.v1.SyncPlayMember
+	(*SyncPlayQueueEntry)(nil),      // 4: mavio.session.v1.SyncPlayQueueEntry
+	(*SyncPlayCommand)(nil),         // 5: mavio.session.v1.SyncPlayCommand
+	(*SyncPlayUpdate)(nil),          // 6: mavio.session.v1.SyncPlayUpdate
+	(*GetTimeRequest)(nil),          // 7: mavio.session.v1.GetTimeRequest
+	(*GetTimeResponse)(nil),         // 8: mavio.session.v1.GetTimeResponse
+	(*ListGroupsRequest)(nil),       // 9: mavio.session.v1.ListGroupsRequest
+	(*ListGroupsResponse)(nil),      // 10: mavio.session.v1.ListGroupsResponse
+	(*CreateGroupRequest)(nil),      // 11: mavio.session.v1.CreateGroupRequest
+	(*CreateGroupResponse)(nil),     // 12: mavio.session.v1.CreateGroupResponse
+	(*JoinGroupRequest)(nil),        // 13: mavio.session.v1.JoinGroupRequest
+	(*JoinGroupResponse)(nil),       // 14: mavio.session.v1.JoinGroupResponse
+	(*LeaveGroupRequest)(nil),       // 15: mavio.session.v1.LeaveGroupRequest
+	(*LeaveGroupResponse)(nil),      // 16: mavio.session.v1.LeaveGroupResponse
+	(*SetQueueRequest)(nil),         // 17: mavio.session.v1.SetQueueRequest
+	(*SetQueueResponse)(nil),        // 18: mavio.session.v1.SetQueueResponse
+	(*PauseRequest)(nil),            // 19: mavio.session.v1.PauseRequest
+	(*PauseResponse)(nil),           // 20: mavio.session.v1.PauseResponse
+	(*UnpauseRequest)(nil),          // 21: mavio.session.v1.UnpauseRequest
+	(*UnpauseResponse)(nil),         // 22: mavio.session.v1.UnpauseResponse
+	(*SeekRequest)(nil),             // 23: mavio.session.v1.SeekRequest
+	(*SeekResponse)(nil),            // 24: mavio.session.v1.SeekResponse
+	(*StopRequest)(nil),             // 25: mavio.session.v1.StopRequest
+	(*StopResponse)(nil),            // 26: mavio.session.v1.StopResponse
+	(*NextItemRequest)(nil),         // 27: mavio.session.v1.NextItemRequest
+	(*NextItemResponse)(nil),        // 28: mavio.session.v1.NextItemResponse
+	(*PreviousItemRequest)(nil),     // 29: mavio.session.v1.PreviousItemRequest
+	(*PreviousItemResponse)(nil),    // 30: mavio.session.v1.PreviousItemResponse
+	(*AddToQueueRequest)(nil),       // 31: mavio.session.v1.AddToQueueRequest
+	(*AddToQueueResponse)(nil),      // 32: mavio.session.v1.AddToQueueResponse
+	(*RemoveFromQueueRequest)(nil),  // 33: mavio.session.v1.RemoveFromQueueRequest
+	(*RemoveFromQueueResponse)(nil), // 34: mavio.session.v1.RemoveFromQueueResponse
+	(*MoveQueueEntryRequest)(nil),   // 35: mavio.session.v1.MoveQueueEntryRequest
+	(*MoveQueueEntryResponse)(nil),  // 36: mavio.session.v1.MoveQueueEntryResponse
+	(*SetCurrentEntryRequest)(nil),  // 37: mavio.session.v1.SetCurrentEntryRequest
+	(*SetCurrentEntryResponse)(nil), // 38: mavio.session.v1.SetCurrentEntryResponse
+	(*ReportStateRequest)(nil),      // 39: mavio.session.v1.ReportStateRequest
+	(*ReportStateResponse)(nil),     // 40: mavio.session.v1.ReportStateResponse
+	(*ReportPingRequest)(nil),       // 41: mavio.session.v1.ReportPingRequest
+	(*ReportPingResponse)(nil),      // 42: mavio.session.v1.ReportPingResponse
+	(*durationpb.Duration)(nil),     // 43: google.protobuf.Duration
+	(*timestamppb.Timestamp)(nil),   // 44: google.protobuf.Timestamp
 }
 var file_mavio_session_v1_syncplay_proto_depIdxs = []int32{
 	0,  // 0: mavio.session.v1.SyncPlayGroup.state:type_name -> mavio.session.v1.SyncPlayState
 	3,  // 1: mavio.session.v1.SyncPlayGroup.members:type_name -> mavio.session.v1.SyncPlayMember
 	4,  // 2: mavio.session.v1.SyncPlayGroup.queue:type_name -> mavio.session.v1.SyncPlayQueueEntry
-	35, // 3: mavio.session.v1.SyncPlayGroup.position:type_name -> google.protobuf.Duration
-	36, // 4: mavio.session.v1.SyncPlayGroup.position_time:type_name -> google.protobuf.Timestamp
+	43, // 3: mavio.session.v1.SyncPlayGroup.position:type_name -> google.protobuf.Duration
+	44, // 4: mavio.session.v1.SyncPlayGroup.position_time:type_name -> google.protobuf.Timestamp
 	1,  // 5: mavio.session.v1.SyncPlayCommand.kind:type_name -> mavio.session.v1.SyncPlayCommandKind
-	36, // 6: mavio.session.v1.SyncPlayCommand.when:type_name -> google.protobuf.Timestamp
-	35, // 7: mavio.session.v1.SyncPlayCommand.position:type_name -> google.protobuf.Duration
+	44, // 6: mavio.session.v1.SyncPlayCommand.when:type_name -> google.protobuf.Timestamp
+	43, // 7: mavio.session.v1.SyncPlayCommand.position:type_name -> google.protobuf.Duration
 	2,  // 8: mavio.session.v1.SyncPlayUpdate.group:type_name -> mavio.session.v1.SyncPlayGroup
 	5,  // 9: mavio.session.v1.SyncPlayUpdate.command:type_name -> mavio.session.v1.SyncPlayCommand
-	36, // 10: mavio.session.v1.GetTimeResponse.receive_time:type_name -> google.protobuf.Timestamp
-	36, // 11: mavio.session.v1.GetTimeResponse.send_time:type_name -> google.protobuf.Timestamp
+	44, // 10: mavio.session.v1.GetTimeResponse.receive_time:type_name -> google.protobuf.Timestamp
+	44, // 11: mavio.session.v1.GetTimeResponse.send_time:type_name -> google.protobuf.Timestamp
 	2,  // 12: mavio.session.v1.ListGroupsResponse.groups:type_name -> mavio.session.v1.SyncPlayGroup
 	2,  // 13: mavio.session.v1.CreateGroupResponse.group:type_name -> mavio.session.v1.SyncPlayGroup
 	2,  // 14: mavio.session.v1.JoinGroupResponse.group:type_name -> mavio.session.v1.SyncPlayGroup
-	35, // 15: mavio.session.v1.SetQueueRequest.start_position:type_name -> google.protobuf.Duration
-	35, // 16: mavio.session.v1.SeekRequest.position:type_name -> google.protobuf.Duration
-	35, // 17: mavio.session.v1.ReportStateRequest.position:type_name -> google.protobuf.Duration
-	36, // 18: mavio.session.v1.ReportStateRequest.when:type_name -> google.protobuf.Timestamp
-	35, // 19: mavio.session.v1.ReportPingRequest.ping:type_name -> google.protobuf.Duration
+	43, // 15: mavio.session.v1.SetQueueRequest.start_position:type_name -> google.protobuf.Duration
+	43, // 16: mavio.session.v1.SeekRequest.position:type_name -> google.protobuf.Duration
+	43, // 17: mavio.session.v1.ReportStateRequest.position:type_name -> google.protobuf.Duration
+	44, // 18: mavio.session.v1.ReportStateRequest.when:type_name -> google.protobuf.Timestamp
+	43, // 19: mavio.session.v1.ReportPingRequest.ping:type_name -> google.protobuf.Duration
 	7,  // 20: mavio.session.v1.SyncPlayService.GetTime:input_type -> mavio.session.v1.GetTimeRequest
 	9,  // 21: mavio.session.v1.SyncPlayService.ListGroups:input_type -> mavio.session.v1.ListGroupsRequest
 	11, // 22: mavio.session.v1.SyncPlayService.CreateGroup:input_type -> mavio.session.v1.CreateGroupRequest
@@ -2775,24 +3310,32 @@ var file_mavio_session_v1_syncplay_proto_depIdxs = []int32{
 	25, // 29: mavio.session.v1.SyncPlayService.Stop:input_type -> mavio.session.v1.StopRequest
 	27, // 30: mavio.session.v1.SyncPlayService.NextItem:input_type -> mavio.session.v1.NextItemRequest
 	29, // 31: mavio.session.v1.SyncPlayService.PreviousItem:input_type -> mavio.session.v1.PreviousItemRequest
-	31, // 32: mavio.session.v1.SyncPlayService.ReportState:input_type -> mavio.session.v1.ReportStateRequest
-	33, // 33: mavio.session.v1.SyncPlayService.ReportPing:input_type -> mavio.session.v1.ReportPingRequest
-	8,  // 34: mavio.session.v1.SyncPlayService.GetTime:output_type -> mavio.session.v1.GetTimeResponse
-	10, // 35: mavio.session.v1.SyncPlayService.ListGroups:output_type -> mavio.session.v1.ListGroupsResponse
-	12, // 36: mavio.session.v1.SyncPlayService.CreateGroup:output_type -> mavio.session.v1.CreateGroupResponse
-	14, // 37: mavio.session.v1.SyncPlayService.JoinGroup:output_type -> mavio.session.v1.JoinGroupResponse
-	16, // 38: mavio.session.v1.SyncPlayService.LeaveGroup:output_type -> mavio.session.v1.LeaveGroupResponse
-	18, // 39: mavio.session.v1.SyncPlayService.SetQueue:output_type -> mavio.session.v1.SetQueueResponse
-	20, // 40: mavio.session.v1.SyncPlayService.Pause:output_type -> mavio.session.v1.PauseResponse
-	22, // 41: mavio.session.v1.SyncPlayService.Unpause:output_type -> mavio.session.v1.UnpauseResponse
-	24, // 42: mavio.session.v1.SyncPlayService.Seek:output_type -> mavio.session.v1.SeekResponse
-	26, // 43: mavio.session.v1.SyncPlayService.Stop:output_type -> mavio.session.v1.StopResponse
-	28, // 44: mavio.session.v1.SyncPlayService.NextItem:output_type -> mavio.session.v1.NextItemResponse
-	30, // 45: mavio.session.v1.SyncPlayService.PreviousItem:output_type -> mavio.session.v1.PreviousItemResponse
-	32, // 46: mavio.session.v1.SyncPlayService.ReportState:output_type -> mavio.session.v1.ReportStateResponse
-	34, // 47: mavio.session.v1.SyncPlayService.ReportPing:output_type -> mavio.session.v1.ReportPingResponse
-	34, // [34:48] is the sub-list for method output_type
-	20, // [20:34] is the sub-list for method input_type
+	31, // 32: mavio.session.v1.SyncPlayService.AddToQueue:input_type -> mavio.session.v1.AddToQueueRequest
+	33, // 33: mavio.session.v1.SyncPlayService.RemoveFromQueue:input_type -> mavio.session.v1.RemoveFromQueueRequest
+	35, // 34: mavio.session.v1.SyncPlayService.MoveQueueEntry:input_type -> mavio.session.v1.MoveQueueEntryRequest
+	37, // 35: mavio.session.v1.SyncPlayService.SetCurrentEntry:input_type -> mavio.session.v1.SetCurrentEntryRequest
+	39, // 36: mavio.session.v1.SyncPlayService.ReportState:input_type -> mavio.session.v1.ReportStateRequest
+	41, // 37: mavio.session.v1.SyncPlayService.ReportPing:input_type -> mavio.session.v1.ReportPingRequest
+	8,  // 38: mavio.session.v1.SyncPlayService.GetTime:output_type -> mavio.session.v1.GetTimeResponse
+	10, // 39: mavio.session.v1.SyncPlayService.ListGroups:output_type -> mavio.session.v1.ListGroupsResponse
+	12, // 40: mavio.session.v1.SyncPlayService.CreateGroup:output_type -> mavio.session.v1.CreateGroupResponse
+	14, // 41: mavio.session.v1.SyncPlayService.JoinGroup:output_type -> mavio.session.v1.JoinGroupResponse
+	16, // 42: mavio.session.v1.SyncPlayService.LeaveGroup:output_type -> mavio.session.v1.LeaveGroupResponse
+	18, // 43: mavio.session.v1.SyncPlayService.SetQueue:output_type -> mavio.session.v1.SetQueueResponse
+	20, // 44: mavio.session.v1.SyncPlayService.Pause:output_type -> mavio.session.v1.PauseResponse
+	22, // 45: mavio.session.v1.SyncPlayService.Unpause:output_type -> mavio.session.v1.UnpauseResponse
+	24, // 46: mavio.session.v1.SyncPlayService.Seek:output_type -> mavio.session.v1.SeekResponse
+	26, // 47: mavio.session.v1.SyncPlayService.Stop:output_type -> mavio.session.v1.StopResponse
+	28, // 48: mavio.session.v1.SyncPlayService.NextItem:output_type -> mavio.session.v1.NextItemResponse
+	30, // 49: mavio.session.v1.SyncPlayService.PreviousItem:output_type -> mavio.session.v1.PreviousItemResponse
+	32, // 50: mavio.session.v1.SyncPlayService.AddToQueue:output_type -> mavio.session.v1.AddToQueueResponse
+	34, // 51: mavio.session.v1.SyncPlayService.RemoveFromQueue:output_type -> mavio.session.v1.RemoveFromQueueResponse
+	36, // 52: mavio.session.v1.SyncPlayService.MoveQueueEntry:output_type -> mavio.session.v1.MoveQueueEntryResponse
+	38, // 53: mavio.session.v1.SyncPlayService.SetCurrentEntry:output_type -> mavio.session.v1.SetCurrentEntryResponse
+	40, // 54: mavio.session.v1.SyncPlayService.ReportState:output_type -> mavio.session.v1.ReportStateResponse
+	42, // 55: mavio.session.v1.SyncPlayService.ReportPing:output_type -> mavio.session.v1.ReportPingResponse
+	38, // [38:56] is the sub-list for method output_type
+	20, // [20:38] is the sub-list for method input_type
 	20, // [20:20] is the sub-list for extension type_name
 	20, // [20:20] is the sub-list for extension extendee
 	0,  // [0:20] is the sub-list for field type_name
@@ -2809,7 +3352,7 @@ func file_mavio_session_v1_syncplay_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_session_v1_syncplay_proto_rawDesc), len(file_mavio_session_v1_syncplay_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   33,
+			NumMessages:   41,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

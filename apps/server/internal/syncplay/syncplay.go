@@ -38,6 +38,8 @@ const (
 	// droppedFor is how long a device dropped from its group while
 	// offline is remembered, to tell it so when it returns.
 	droppedFor = 24 * time.Hour
+	// MaxQueue is the most entries a group's queue holds.
+	MaxQueue = 1000
 )
 
 // Errors of requests.
@@ -403,6 +405,110 @@ func Step(by int) Request {
 			return fmt.Errorf("%w: no entry %d in the queue", core.ErrNotFound, next)
 		}
 		g.current = next
+		m.waitForAll(g, 0, true, now, nil)
+		return nil
+	}
+}
+
+// AddToQueue adds items to the queue, right after the entry being played
+// when next is set, else at the end; the group goes on as it was. Items
+// added to an empty queue wait to be played.
+func AddToQueue(items []core.ID, next bool) Request {
+	return func(m *Manager, g *group, _ *Member, _ time.Time) error {
+		if len(g.queue)+len(items) > MaxQueue {
+			return fmt.Errorf("%w: a queue holds at most %d entries", core.ErrInvalid, MaxQueue)
+		}
+		at := len(g.queue)
+		if next && len(g.queue) > 0 {
+			at = g.current + 1
+		}
+		added := make([]Entry, len(items))
+		for i, id := range items {
+			added[i] = Entry{ID: core.NewID(), ItemID: id}
+		}
+		g.queue = slices.Insert(g.queue, at, added...)
+		m.broadcast(g, nil)
+		return nil
+	}
+}
+
+// RemoveFromQueue removes entries from the queue, ignoring those it does
+// not hold. Removing the entry being played plays the first entry left
+// after it once every member is ready, or, when none is left after it,
+// stops the group; an idle group only moves on to that entry.
+func RemoveFromQueue(entries []core.ID) Request {
+	return func(m *Manager, g *group, _ *Member, now time.Time) error {
+		if len(g.queue) == 0 {
+			return nil
+		}
+		current := g.queue[g.current]
+		// The entries left before the one being played.
+		before := 0
+		for _, e := range g.queue[:g.current] {
+			if !slices.Contains(entries, e.ID) {
+				before++
+			}
+		}
+		left := slices.DeleteFunc(slices.Clone(g.queue), func(e Entry) bool { return slices.Contains(entries, e.ID) })
+		if len(left) == len(g.queue) {
+			return nil
+		}
+		g.queue = left
+		if !slices.Contains(entries, current.ID) {
+			g.current = before
+			m.broadcast(g, nil)
+			return nil
+		}
+		g.current = min(before, max(0, len(left)-1))
+		switch {
+		case g.state == Idle:
+			m.broadcast(g, nil)
+		case before < len(left):
+			m.waitForAll(g, 0, g.state == Playing || g.state == Waiting && g.resume, now, nil)
+		default:
+			// Nothing left to play: the members playing the removed entry stop.
+			g.state, g.position, g.positionTime = Idle, 0, now
+			for _, mb := range g.members {
+				mb.Buffering = false
+			}
+			cmd := g.command(sessionv1.SyncPlayCommandKind_SYNC_PLAY_COMMAND_KIND_STOP, now)
+			cmd.SetEntryId(current.ID.String())
+			m.broadcast(g, cmd)
+		}
+		return nil
+	}
+}
+
+// MoveQueueEntry moves an entry to an index of the queue, the end when
+// past it; the entry being played stays the same.
+func MoveQueueEntry(entry core.ID, index int) Request {
+	return func(m *Manager, g *group, _ *Member, _ time.Time) error {
+		from := slices.IndexFunc(g.queue, func(e Entry) bool { return e.ID == entry })
+		if from < 0 {
+			return fmt.Errorf("syncplay queue entry %s: %w", entry, core.ErrNotFound)
+		}
+		index = min(max(index, 0), len(g.queue)-1)
+		if index == from {
+			return nil
+		}
+		current := g.queue[g.current].ID
+		e := g.queue[from]
+		g.queue = slices.Insert(slices.Delete(g.queue, from, from+1), index, e)
+		g.current = slices.IndexFunc(g.queue, func(e Entry) bool { return e.ID == current })
+		m.broadcast(g, nil)
+		return nil
+	}
+}
+
+// SetCurrentEntry plays an entry of the queue from its start once every
+// member is ready.
+func SetCurrentEntry(entry core.ID) Request {
+	return func(m *Manager, g *group, _ *Member, now time.Time) error {
+		i := slices.IndexFunc(g.queue, func(e Entry) bool { return e.ID == entry })
+		if i < 0 {
+			return fmt.Errorf("syncplay queue entry %s: %w", entry, core.ErrNotFound)
+		}
+		g.current = i
 		m.waitForAll(g, 0, true, now, nil)
 		return nil
 	}

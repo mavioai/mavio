@@ -3978,6 +3978,20 @@
     <string name="syncplay_waiting_for">Waiting for %s</string>
     <!-- A group's name and number of members, on the chip opening it. -->
     <string name="syncplay_chip">%1$s · %2$s</string>
+    <!-- Heading of a SyncPlay group's queue. -->
+    <string name="syncplay_queue">Queue</string>
+    <!-- Shown when a SyncPlay group's queue is empty. -->
+    <string name="syncplay_empty_queue">Nothing is queued.</string>
+    <!-- Marks the entry a SyncPlay group plays. -->
+    <string name="syncplay_now_playing">Now Playing</string>
+    <!-- Accessibility label of a queue entry, which plays it for every member of the group. -->
+    <string name="syncplay_play_entry">Play “%s” in the Group</string>
+    <!-- Adds the item to the SyncPlay group's queue after the entry it plays. -->
+    <string name="syncplay_play_next">Play Next</string>
+    <!-- Adds the item at the end of the SyncPlay group's queue. -->
+    <string name="syncplay_add_to_queue">Add to Queue</string>
+    <!-- Adds the item to the queue of the SyncPlay group the browser is in, from an item's More menu. -->
+    <string name="syncplay_add_to_group_queue">Add to Watch Together Queue</string>
     <!-- More menu item reporting a problem with an item. -->
     <string name="issues_report">Report a Problem…</string>
     <!-- Title of the dialog reporting a problem. -->

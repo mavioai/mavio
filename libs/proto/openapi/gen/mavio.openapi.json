@@ -18198,6 +18198,33 @@
         "additionalProperties": false,
         "description": "WatchProvider is a service streaming a title."
       },
+      "mavio.session.v1.AddToQueueRequest": {
+        "type": "object",
+        "properties": {
+          "itemIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "item_ids",
+            "maxItems": 1000,
+            "minItems": 1
+          },
+          "next": {
+            "type": "boolean",
+            "title": "next",
+            "description": "The items go right after the entry being played instead of at the end\n of the queue."
+          }
+        },
+        "title": "AddToQueueRequest",
+        "additionalProperties": false
+      },
+      "mavio.session.v1.AddToQueueResponse": {
+        "type": "object",
+        "title": "AddToQueueResponse",
+        "additionalProperties": false
+      },
       "mavio.session.v1.Command": {
         "type": "object",
         "allOf": [
@@ -18948,6 +18975,33 @@
         "additionalProperties": false,
         "description": "Message shows a text."
       },
+      "mavio.session.v1.MoveQueueEntryRequest": {
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "title": "entry_id",
+            "format": "uuid"
+          },
+          "index": {
+            "type": "integer",
+            "title": "index",
+            "minimum": 0,
+            "format": "int32",
+            "description": "The entry's new index; past the end moves it to the end."
+          }
+        },
+        "title": "MoveQueueEntryRequest",
+        "required": [
+          "entryId"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.session.v1.MoveQueueEntryResponse": {
+        "type": "object",
+        "title": "MoveQueueEntryResponse",
+        "additionalProperties": false
+      },
       "mavio.session.v1.NextItemRequest": {
         "type": "object",
         "title": "NextItemRequest",
@@ -19120,6 +19174,29 @@
       "mavio.session.v1.PreviousItemResponse": {
         "type": "object",
         "title": "PreviousItemResponse",
+        "additionalProperties": false
+      },
+      "mavio.session.v1.RemoveFromQueueRequest": {
+        "type": "object",
+        "properties": {
+          "entryIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "entry_ids",
+            "maxItems": 1000,
+            "minItems": 1,
+            "description": "Entries no longer in the queue are ignored."
+          }
+        },
+        "title": "RemoveFromQueueRequest",
+        "additionalProperties": false
+      },
+      "mavio.session.v1.RemoveFromQueueResponse": {
+        "type": "object",
+        "title": "RemoveFromQueueResponse",
         "additionalProperties": false
       },
       "mavio.session.v1.ReportPingRequest": {
@@ -19398,6 +19475,26 @@
         "title": "SessionsChanged",
         "additionalProperties": false,
         "description": "SessionsChanged tells that a device of the user came online, went\n offline, or started, stopped or reported a playback. Clients showing\n sessions list them again."
+      },
+      "mavio.session.v1.SetCurrentEntryRequest": {
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "title": "entry_id",
+            "format": "uuid"
+          }
+        },
+        "title": "SetCurrentEntryRequest",
+        "required": [
+          "entryId"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.session.v1.SetCurrentEntryResponse": {
+        "type": "object",
+        "title": "SetCurrentEntryResponse",
+        "additionalProperties": false
       },
       "mavio.session.v1.SetQueueRequest": {
         "type": "object",
@@ -25063,13 +25160,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/CreateCollection": {
+    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
       "post": {
         "tags": [
           "CollectionService"
         ],
-        "summary": "CreateCollection",
-        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
+        "summary": "RemoveFromCollection",
+        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -25094,7 +25191,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
               }
             }
           },
@@ -25116,7 +25213,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
                 }
               }
             }
@@ -25124,14 +25221,14 @@
         }
       }
     },
-    "/mavio.system.v1.PluginManagementService/ListContainers": {
+    "/mavio.storage.v1.StorageService/DeleteRemote": {
       "post": {
         "tags": [
-          "PluginManagementService"
+          "StorageService"
         ],
-        "summary": "ListContainers",
-        "description": "ListContainers lists the container dependencies of every plugin that\n the server runs or that an administrator gave an address, by plugin.",
-        "operationId": "mavio.system.v1.PluginManagementService.ListContainers",
+        "summary": "DeleteRemote",
+        "description": "DeleteRemote removes a remote's configuration. Libraries on it become\n unreadable; their items are kept until a scan finds it again.",
+        "operationId": "mavio.storage.v1.StorageService.DeleteRemote",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -25156,7 +25253,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.ListContainersRequest"
+                "$ref": "#/components/schemas/mavio.storage.v1.DeleteRemoteRequest"
               }
             }
           },
@@ -25178,7 +25275,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.ListContainersResponse"
+                  "$ref": "#/components/schemas/mavio.storage.v1.DeleteRemoteResponse"
                 }
               }
             }
@@ -27902,13 +27999,13 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/GetItem": {
+    "/mavio.acquisition.v1.ProfileService/UpdateQualityProfile": {
       "post": {
         "tags": [
-          "ItemService"
+          "ProfileService"
         ],
-        "summary": "GetItem",
-        "operationId": "mavio.library.v1.ItemService.GetItem",
+        "summary": "UpdateQualityProfile",
+        "operationId": "mavio.acquisition.v1.ProfileService.UpdateQualityProfile",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -27933,7 +28030,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetItemRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateQualityProfileRequest"
               }
             }
           },
@@ -27955,7 +28052,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetItemResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateQualityProfileResponse"
                 }
               }
             }
@@ -29140,14 +29237,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/AssignSubtitleProfile": {
+    "/mavio.library.v1.ItemService/GetPerson": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "ItemService"
         ],
-        "summary": "AssignSubtitleProfile",
-        "description": "AssignSubtitleProfile assigns a profile to a library, a movie or a\n series, or removes the assignment; the movies and episodes it covers\n are searched for the subtitles they now lack.",
-        "operationId": "mavio.acquisition.v1.SubtitleService.AssignSubtitleProfile",
+        "summary": "GetPerson",
+        "operationId": "mavio.library.v1.ItemService.GetPerson",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29172,7 +29268,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.AssignSubtitleProfileRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.GetPersonRequest"
               }
             }
           },
@@ -29194,7 +29290,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.AssignSubtitleProfileResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.GetPersonResponse"
                 }
               }
             }
@@ -33911,14 +34007,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
+    "/mavio.library.v1.CollectionService/CreateCollection": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "CollectionService"
         ],
-        "summary": "GetCollection",
-        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
+        "summary": "CreateCollection",
+        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -33943,7 +34038,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
               }
             }
           },
@@ -33965,7 +34060,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
                 }
               }
             }
@@ -34034,14 +34129,14 @@
         }
       }
     },
-    "/mavio.system.v1.AiProviderService/LogoutAi": {
+    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
       "post": {
         "tags": [
-          "AiProviderService"
+          "DiscoverService"
         ],
-        "summary": "LogoutAi",
-        "description": "LogoutAi removes a provider's stored credential.",
-        "operationId": "mavio.system.v1.AiProviderService.LogoutAi",
+        "summary": "GetCollection",
+        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -34066,7 +34161,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.LogoutAiRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
               }
             }
           },
@@ -34088,7 +34183,130 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.LogoutAiResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.CollectionService/UpdateCollection": {
+      "post": {
+        "tags": [
+          "CollectionService"
+        ],
+        "summary": "UpdateCollection",
+        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.session.v1.SessionService/SendCommand": {
+      "post": {
+        "tags": [
+          "SessionService"
+        ],
+        "summary": "SendCommand",
+        "description": "SendCommand sends a command to an online device of the calling user,\n or of anyone for administrators, through its event stream, or to a\n plugin's remote device through its plugin. The device carries it out\n and reports its playback as usual.",
+        "operationId": "mavio.session.v1.SessionService.SendCommand",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.session.v1.SendCommandRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.session.v1.SendCommandResponse"
                 }
               }
             }
@@ -34158,13 +34376,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/UpdateQualityProfile": {
+    "/mavio.acquisition.v1.SubtitleService/AssignSubtitleProfile": {
       "post": {
         "tags": [
-          "ProfileService"
+          "SubtitleService"
         ],
-        "summary": "UpdateQualityProfile",
-        "operationId": "mavio.acquisition.v1.ProfileService.UpdateQualityProfile",
+        "summary": "AssignSubtitleProfile",
+        "description": "AssignSubtitleProfile assigns a profile to a library, a movie or a\n series, or removes the assignment; the movies and episodes it covers\n are searched for the subtitles they now lack.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.AssignSubtitleProfile",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -34189,7 +34408,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateQualityProfileRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.AssignSubtitleProfileRequest"
               }
             }
           },
@@ -34211,130 +34430,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateQualityProfileResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.ItemService/GetLyrics": {
-      "post": {
-        "tags": [
-          "ItemService"
-        ],
-        "summary": "GetLyrics",
-        "description": "GetLyrics returns the lyrics of a track, read from the lyric file\n beside it (.elrc, .lrc or .txt).",
-        "operationId": "mavio.library.v1.ItemService.GetLyrics",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetLyricsRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetLyricsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.ItemService/GetPerson": {
-      "post": {
-        "tags": [
-          "ItemService"
-        ],
-        "summary": "GetPerson",
-        "operationId": "mavio.library.v1.ItemService.GetPerson",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetPersonRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetPersonResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.AssignSubtitleProfileResponse"
                 }
               }
             }
@@ -36751,14 +36847,13 @@
         }
       }
     },
-    "/mavio.session.v1.SessionService/SendCommand": {
+    "/mavio.library.v1.ItemService/GetItem": {
       "post": {
         "tags": [
-          "SessionService"
+          "ItemService"
         ],
-        "summary": "SendCommand",
-        "description": "SendCommand sends a command to an online device of the calling user,\n or of anyone for administrators, through its event stream, or to a\n plugin's remote device through its plugin. The device carries it out\n and reports its playback as usual.",
-        "operationId": "mavio.session.v1.SessionService.SendCommand",
+        "summary": "GetItem",
+        "operationId": "mavio.library.v1.ItemService.GetItem",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -36783,7 +36878,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.session.v1.SendCommandRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.GetItemRequest"
               }
             }
           },
@@ -36805,7 +36900,69 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.session.v1.SendCommandResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.GetItemResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.session.v1.SyncPlayService/AddToQueue": {
+      "post": {
+        "tags": [
+          "SyncPlayService"
+        ],
+        "summary": "AddToQueue",
+        "description": "AddToQueue adds items every member may play to the queue, after the\n entry being played or at the end; the group goes on as it was.",
+        "operationId": "mavio.session.v1.SyncPlayService.AddToQueue",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.session.v1.AddToQueueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.session.v1.AddToQueueResponse"
                 }
               }
             }
@@ -37122,6 +37279,68 @@
         }
       }
     },
+    "/mavio.session.v1.SyncPlayService/MoveQueueEntry": {
+      "post": {
+        "tags": [
+          "SyncPlayService"
+        ],
+        "summary": "MoveQueueEntry",
+        "description": "MoveQueueEntry moves an entry to another index of the queue; the\n entry being played stays the same.",
+        "operationId": "mavio.session.v1.SyncPlayService.MoveQueueEntry",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.session.v1.MoveQueueEntryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.session.v1.MoveQueueEntryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.session.v1.SyncPlayService/NextItem": {
       "post": {
         "tags": [
@@ -37298,6 +37517,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.session.v1.PreviousItemResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.session.v1.SyncPlayService/RemoveFromQueue": {
+      "post": {
+        "tags": [
+          "SyncPlayService"
+        ],
+        "summary": "RemoveFromQueue",
+        "description": "RemoveFromQueue removes entries from the queue. Removing the entry\n being played plays the entry after it, once every member is ready, or\n stops the group when none is left after it.",
+        "operationId": "mavio.session.v1.SyncPlayService.RemoveFromQueue",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.session.v1.RemoveFromQueueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.session.v1.RemoveFromQueueResponse"
                 }
               }
             }
@@ -37483,6 +37764,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.session.v1.SeekResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.session.v1.SyncPlayService/SetCurrentEntry": {
+      "post": {
+        "tags": [
+          "SyncPlayService"
+        ],
+        "summary": "SetCurrentEntry",
+        "description": "SetCurrentEntry plays an entry of the queue from its start once every\n member is ready.",
+        "operationId": "mavio.session.v1.SyncPlayService.SetCurrentEntry",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.session.v1.SetCurrentEntryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.session.v1.SetCurrentEntryResponse"
                 }
               }
             }
@@ -37798,14 +38141,14 @@
         }
       }
     },
-    "/mavio.storage.v1.StorageService/DeleteRemote": {
+    "/mavio.library.v1.ItemService/GetLyrics": {
       "post": {
         "tags": [
-          "StorageService"
+          "ItemService"
         ],
-        "summary": "DeleteRemote",
-        "description": "DeleteRemote removes a remote's configuration. Libraries on it become\n unreadable; their items are kept until a scan finds it again.",
-        "operationId": "mavio.storage.v1.StorageService.DeleteRemote",
+        "summary": "GetLyrics",
+        "description": "GetLyrics returns the lyrics of a track, read from the lyric file\n beside it (.elrc, .lrc or .txt).",
+        "operationId": "mavio.library.v1.ItemService.GetLyrics",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -37830,7 +38173,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.storage.v1.DeleteRemoteRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.GetLyricsRequest"
               }
             }
           },
@@ -37852,7 +38195,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.storage.v1.DeleteRemoteResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.GetLyricsResponse"
                 }
               }
             }
@@ -39101,13 +39444,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+    "/mavio.system.v1.AiProviderService/LogoutAi": {
       "post": {
         "tags": [
-          "CollectionService"
+          "AiProviderService"
         ],
-        "summary": "RemoveFromCollection",
-        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "summary": "LogoutAi",
+        "description": "LogoutAi removes a provider's stored credential.",
+        "operationId": "mavio.system.v1.AiProviderService.LogoutAi",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -39132,7 +39476,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.LogoutAiRequest"
               }
             }
           },
@@ -39154,7 +39498,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.LogoutAiResponse"
                 }
               }
             }
@@ -39963,13 +40307,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/UpdateCollection": {
+    "/mavio.system.v1.PluginManagementService/ListContainers": {
       "post": {
         "tags": [
-          "CollectionService"
+          "PluginManagementService"
         ],
-        "summary": "UpdateCollection",
-        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
+        "summary": "ListContainers",
+        "description": "ListContainers lists the container dependencies of every plugin that\n the server runs or that an administrator gave an address, by plugin.",
+        "operationId": "mavio.system.v1.PluginManagementService.ListContainers",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -39994,7 +40339,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.ListContainersRequest"
               }
             }
           },
@@ -40016,7 +40361,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.ListContainersResponse"
                 }
               }
             }

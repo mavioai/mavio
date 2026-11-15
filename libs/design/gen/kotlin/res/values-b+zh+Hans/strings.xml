@@ -1999,6 +1999,13 @@
     <string name="syncplay_paused">已暂停：%s</string>
     <string name="syncplay_waiting_for">正在等待 %s</string>
     <string name="syncplay_chip">%1$s · %2$s</string>
+    <string name="syncplay_queue">队列</string>
+    <string name="syncplay_empty_queue">队列中没有内容。</string>
+    <string name="syncplay_now_playing">正在播放</string>
+    <string name="syncplay_play_entry">在小组中播放“%s”</string>
+    <string name="syncplay_play_next">下一个播放</string>
+    <string name="syncplay_add_to_queue">添加到队列</string>
+    <string name="syncplay_add_to_group_queue">添加到一起看的队列</string>
     <string name="issues_report">报告问题…</string>
     <string name="issues_report_title">报告“%s”的问题</string>
     <string name="issues_type">问题类型</string>

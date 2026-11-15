@@ -94,6 +94,38 @@ pub type OwnedPreviousItemRequestView = ::buffa::view::OwnedView<
 pub type OwnedPreviousItemResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::session::v1::__buffa::view::PreviousItemResponseView<'static>,
 >;
+///Shorthand for `OwnedView<AddToQueueRequestView<'static>>`.
+pub type OwnedAddToQueueRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::AddToQueueRequestView<'static>,
+>;
+///Shorthand for `OwnedView<AddToQueueResponseView<'static>>`.
+pub type OwnedAddToQueueResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::AddToQueueResponseView<'static>,
+>;
+///Shorthand for `OwnedView<RemoveFromQueueRequestView<'static>>`.
+pub type OwnedRemoveFromQueueRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::RemoveFromQueueRequestView<'static>,
+>;
+///Shorthand for `OwnedView<RemoveFromQueueResponseView<'static>>`.
+pub type OwnedRemoveFromQueueResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::RemoveFromQueueResponseView<'static>,
+>;
+///Shorthand for `OwnedView<MoveQueueEntryRequestView<'static>>`.
+pub type OwnedMoveQueueEntryRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::MoveQueueEntryRequestView<'static>,
+>;
+///Shorthand for `OwnedView<MoveQueueEntryResponseView<'static>>`.
+pub type OwnedMoveQueueEntryResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::MoveQueueEntryResponseView<'static>,
+>;
+///Shorthand for `OwnedView<SetCurrentEntryRequestView<'static>>`.
+pub type OwnedSetCurrentEntryRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::SetCurrentEntryRequestView<'static>,
+>;
+///Shorthand for `OwnedView<SetCurrentEntryResponseView<'static>>`.
+pub type OwnedSetCurrentEntryResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::SetCurrentEntryResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<ReportStateRequestView<'static>>`.
 pub type OwnedReportStateRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::session::v1::__buffa::view::ReportStateRequestView<'static>,
@@ -518,6 +550,142 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::session::v1::AddToQueueResponse>
+for crate::proto::mavio::session::v1::__buffa::view::AddToQueueResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::session::v1::AddToQueueResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::AddToQueueResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::session::v1::RemoveFromQueueResponse>
+for crate::proto::mavio::session::v1::__buffa::view::RemoveFromQueueResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::session::v1::RemoveFromQueueResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::RemoveFromQueueResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::session::v1::MoveQueueEntryResponse>
+for crate::proto::mavio::session::v1::__buffa::view::MoveQueueEntryResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::session::v1::MoveQueueEntryResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::MoveQueueEntryResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::session::v1::SetCurrentEntryResponse>
+for crate::proto::mavio::session::v1::__buffa::view::SetCurrentEntryResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::session::v1::SetCurrentEntryResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::SetCurrentEntryResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::mavio::session::v1::ReportStateResponse>
 for crate::proto::mavio::session::v1::__buffa::view::ReportStateResponseView<'_> {
     fn encode(
@@ -657,6 +825,30 @@ pub const SYNC_PLAY_SERVICE_NEXT_ITEM_SPEC: ::connectrpc::Spec = ::connectrpc::S
 /// Static [`Spec`](::connectrpc::Spec) for the `PreviousItem` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const SYNC_PLAY_SERVICE_PREVIOUS_ITEM_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.session.v1.SyncPlayService/PreviousItem",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `AddToQueue` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SYNC_PLAY_SERVICE_ADD_TO_QUEUE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.session.v1.SyncPlayService/AddToQueue",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `RemoveFromQueue` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SYNC_PLAY_SERVICE_REMOVE_FROM_QUEUE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.session.v1.SyncPlayService/RemoveFromQueue",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `MoveQueueEntry` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SYNC_PLAY_SERVICE_MOVE_QUEUE_ENTRY_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.session.v1.SyncPlayService/MoveQueueEntry",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `SetCurrentEntry` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SYNC_PLAY_SERVICE_SET_CURRENT_ENTRY_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.session.v1.SyncPlayService/SetCurrentEntry",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -1004,6 +1196,103 @@ pub trait SyncPlayService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::session::v1::PreviousItemResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// AddToQueue adds items every member may play to the queue, after the
+    /// entry being played or at the end; the group goes on as it was.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn add_to_queue<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::session::v1::AddToQueueRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::session::v1::AddToQueueResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// RemoveFromQueue removes entries from the queue. Removing the entry
+    /// being played plays the entry after it, once every member is ready, or
+    /// stops the group when none is left after it.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn remove_from_queue<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::session::v1::RemoveFromQueueRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::session::v1::RemoveFromQueueResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// MoveQueueEntry moves an entry to another index of the queue; the
+    /// entry being played stays the same.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn move_queue_entry<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::session::v1::MoveQueueEntryRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::session::v1::MoveQueueEntryResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// SetCurrentEntry plays an entry of the queue from its start once every
+    /// member is ready.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn set_current_entry<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::session::v1::SetCurrentEntryRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::session::v1::SetCurrentEntryResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1437,6 +1726,122 @@ impl<S: SyncPlayService> SyncPlayServiceExt for S {
             .with_spec(SYNC_PLAY_SERVICE_PREVIOUS_ITEM_SPEC)
             .route_view(
                 SYNC_PLAY_SERVICE_SERVICE_NAME,
+                "AddToQueue",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::session::v1::__buffa::view::AddToQueueRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::session::v1::AddToQueueRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.add_to_queue(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::session::v1::AddToQueueResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SYNC_PLAY_SERVICE_ADD_TO_QUEUE_SPEC)
+            .route_view(
+                SYNC_PLAY_SERVICE_SERVICE_NAME,
+                "RemoveFromQueue",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::session::v1::__buffa::view::RemoveFromQueueRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::session::v1::RemoveFromQueueRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.remove_from_queue(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::session::v1::RemoveFromQueueResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SYNC_PLAY_SERVICE_REMOVE_FROM_QUEUE_SPEC)
+            .route_view(
+                SYNC_PLAY_SERVICE_SERVICE_NAME,
+                "MoveQueueEntry",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::session::v1::__buffa::view::MoveQueueEntryRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::session::v1::MoveQueueEntryRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.move_queue_entry(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::session::v1::MoveQueueEntryResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SYNC_PLAY_SERVICE_MOVE_QUEUE_ENTRY_SPEC)
+            .route_view(
+                SYNC_PLAY_SERVICE_SERVICE_NAME,
+                "SetCurrentEntry",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::session::v1::__buffa::view::SetCurrentEntryRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::session::v1::SetCurrentEntryRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.set_current_entry(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::session::v1::SetCurrentEntryResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SYNC_PLAY_SERVICE_SET_CURRENT_ENTRY_SPEC)
+            .route_view(
+                SYNC_PLAY_SERVICE_SERVICE_NAME,
                 "ReportState",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -1617,6 +2022,30 @@ impl<T: SyncPlayService> ::connectrpc::Dispatcher for SyncPlayServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(SYNC_PLAY_SERVICE_PREVIOUS_ITEM_SPEC),
+                )
+            }
+            "AddToQueue" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(SYNC_PLAY_SERVICE_ADD_TO_QUEUE_SPEC),
+                )
+            }
+            "RemoveFromQueue" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(SYNC_PLAY_SERVICE_REMOVE_FROM_QUEUE_SPEC),
+                )
+            }
+            "MoveQueueEntry" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(SYNC_PLAY_SERVICE_MOVE_QUEUE_ENTRY_SPEC),
+                )
+            }
+            "SetCurrentEntry" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(SYNC_PLAY_SERVICE_SET_CURRENT_ENTRY_SPEC),
                 )
             }
             "ReportState" => {
@@ -1903,6 +2332,94 @@ impl<T: SyncPlayService> ::connectrpc::Dispatcher for SyncPlayServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::session::v1::PreviousItemResponse,
+                        >(format)
+                })
+            }
+            "AddToQueue" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::session::v1::AddToQueueRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::session::v1::__buffa::view::AddToQueueRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::session::v1::AddToQueueRequest,
+                    >::from_parts(&req, &body);
+                    svc.add_to_queue(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::session::v1::AddToQueueResponse,
+                        >(format)
+                })
+            }
+            "RemoveFromQueue" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::session::v1::RemoveFromQueueRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::session::v1::__buffa::view::RemoveFromQueueRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::session::v1::RemoveFromQueueRequest,
+                    >::from_parts(&req, &body);
+                    svc.remove_from_queue(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::session::v1::RemoveFromQueueResponse,
+                        >(format)
+                })
+            }
+            "MoveQueueEntry" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::session::v1::MoveQueueEntryRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::session::v1::__buffa::view::MoveQueueEntryRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::session::v1::MoveQueueEntryRequest,
+                    >::from_parts(&req, &body);
+                    svc.move_queue_entry(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::session::v1::MoveQueueEntryResponse,
+                        >(format)
+                })
+            }
+            "SetCurrentEntry" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::session::v1::SetCurrentEntryRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::session::v1::__buffa::view::SetCurrentEntryRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::session::v1::SetCurrentEntryRequest,
+                    >::from_parts(&req, &body);
+                    svc.set_current_entry(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::session::v1::SetCurrentEntryResponse,
                         >(format)
                 })
             }
@@ -2597,6 +3114,186 @@ where
                 &self.transport,
                 &self.config,
                 SYNC_PLAY_SERVICE_PREVIOUS_ITEM_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the AddToQueue RPC. Sends a request to /mavio.session.v1.SyncPlayService/AddToQueue.
+    pub async fn add_to_queue(
+        &self,
+        request: crate::proto::mavio::session::v1::AddToQueueRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::session::v1::__buffa::view::AddToQueueResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.add_to_queue_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the AddToQueue RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn add_to_queue_with_options(
+        &self,
+        request: crate::proto::mavio::session::v1::AddToQueueRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::session::v1::__buffa::view::AddToQueueResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SYNC_PLAY_SERVICE_ADD_TO_QUEUE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the RemoveFromQueue RPC. Sends a request to /mavio.session.v1.SyncPlayService/RemoveFromQueue.
+    pub async fn remove_from_queue(
+        &self,
+        request: crate::proto::mavio::session::v1::RemoveFromQueueRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::session::v1::__buffa::view::RemoveFromQueueResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.remove_from_queue_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the RemoveFromQueue RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn remove_from_queue_with_options(
+        &self,
+        request: crate::proto::mavio::session::v1::RemoveFromQueueRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::session::v1::__buffa::view::RemoveFromQueueResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SYNC_PLAY_SERVICE_REMOVE_FROM_QUEUE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the MoveQueueEntry RPC. Sends a request to /mavio.session.v1.SyncPlayService/MoveQueueEntry.
+    pub async fn move_queue_entry(
+        &self,
+        request: crate::proto::mavio::session::v1::MoveQueueEntryRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::session::v1::__buffa::view::MoveQueueEntryResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.move_queue_entry_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the MoveQueueEntry RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn move_queue_entry_with_options(
+        &self,
+        request: crate::proto::mavio::session::v1::MoveQueueEntryRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::session::v1::__buffa::view::MoveQueueEntryResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SYNC_PLAY_SERVICE_MOVE_QUEUE_ENTRY_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the SetCurrentEntry RPC. Sends a request to /mavio.session.v1.SyncPlayService/SetCurrentEntry.
+    pub async fn set_current_entry(
+        &self,
+        request: crate::proto::mavio::session::v1::SetCurrentEntryRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::session::v1::__buffa::view::SetCurrentEntryResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.set_current_entry_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the SetCurrentEntry RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn set_current_entry_with_options(
+        &self,
+        request: crate::proto::mavio::session::v1::SetCurrentEntryRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::session::v1::__buffa::view::SetCurrentEntryResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SYNC_PLAY_SERVICE_SET_CURRENT_ENTRY_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

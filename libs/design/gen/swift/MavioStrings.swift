@@ -6258,6 +6258,29 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("syncplay.chip", bundle: .module, comment: ""), name, count)
     }
 
+    /// Heading of a SyncPlay group's queue.
+    public static var syncplayQueue: String { NSLocalizedString("syncplay.queue", bundle: .module, comment: "") }
+
+    /// Shown when a SyncPlay group's queue is empty.
+    public static var syncplayEmptyQueue: String { NSLocalizedString("syncplay.emptyQueue", bundle: .module, comment: "") }
+
+    /// Marks the entry a SyncPlay group plays.
+    public static var syncplayNowPlaying: String { NSLocalizedString("syncplay.nowPlaying", bundle: .module, comment: "") }
+
+    /// Accessibility label of a queue entry, which plays it for every member of the group.
+    public static func syncplayPlayEntry(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("syncplay.playEntry", bundle: .module, comment: ""), name)
+    }
+
+    /// Adds the item to the SyncPlay group's queue after the entry it plays.
+    public static var syncplayPlayNext: String { NSLocalizedString("syncplay.playNext", bundle: .module, comment: "") }
+
+    /// Adds the item at the end of the SyncPlay group's queue.
+    public static var syncplayAddToQueue: String { NSLocalizedString("syncplay.addToQueue", bundle: .module, comment: "") }
+
+    /// Adds the item to the queue of the SyncPlay group the browser is in, from an item's More menu.
+    public static var syncplayAddToGroupQueue: String { NSLocalizedString("syncplay.addToGroupQueue", bundle: .module, comment: "") }
+
     /// More menu item reporting a problem with an item.
     public static var issuesReport: String { NSLocalizedString("issues.report", bundle: .module, comment: "") }
 

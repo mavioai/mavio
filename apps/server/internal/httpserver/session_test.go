@@ -253,6 +253,31 @@ func TestSyncPlay(t *testing.T) {
 	await(t, tv, "phone left", func(e *sessionv1.Event) bool { return isSync(e) && len(e.GetSyncPlay().GetGroup().GetMembers()) == 1 })
 	_, err = phoneSync.Pause(ctx, &sessionv1.PauseRequest{})
 	wantCode(t, "pause outside a group", err, connect.CodeFailedPrecondition)
+
+	// The queue is edited: an item no one has is not found, the film
+	// queued again goes after the entry played, and is moved and removed.
+	_, err = tvSync.AddToQueue(ctx, sessionv1.AddToQueueRequest_builder{ItemIds: []string{core.NewID().String()}}.Build())
+	wantCode(t, "queue an unknown item", err, connect.CodeNotFound)
+	if _, err := tvSync.AddToQueue(ctx, sessionv1.AddToQueueRequest_builder{ItemIds: []string{film.ID.String()}, Next: new(true)}.Build()); err != nil {
+		t.Fatal(err)
+	}
+	queued = await(t, tv, "queued again", func(e *sessionv1.Event) bool { return isSync(e) && len(e.GetSyncPlay().GetGroup().GetQueue()) == 2 })
+	again := queued.GetSyncPlay().GetGroup().GetQueue()[1].GetId()
+	if _, err := tvSync.MoveQueueEntry(ctx, sessionv1.MoveQueueEntryRequest_builder{EntryId: &again, Index: new(int32(0))}.Build()); err != nil {
+		t.Fatal(err)
+	}
+	moved := await(t, tv, "moved", func(e *sessionv1.Event) bool {
+		return isSync(e) && e.GetSyncPlay().GetGroup().GetQueue()[0].GetId() == again
+	})
+	if got := moved.GetSyncPlay().GetGroup().GetCurrentIndex(); got != 1 {
+		t.Errorf("current index after the move = %d, want 1", got)
+	}
+	_, err = phoneSync.SetCurrentEntry(ctx, sessionv1.SetCurrentEntryRequest_builder{EntryId: &again}.Build())
+	wantCode(t, "jump outside a group", err, connect.CodeFailedPrecondition)
+	if _, err := tvSync.RemoveFromQueue(ctx, sessionv1.RemoveFromQueueRequest_builder{EntryIds: []string{again}}.Build()); err != nil {
+		t.Fatal(err)
+	}
+	await(t, tv, "removed", func(e *sessionv1.Event) bool { return isSync(e) && len(e.GetSyncPlay().GetGroup().GetQueue()) == 1 })
 }
 
 func TestRevokeSession(t *testing.T) {

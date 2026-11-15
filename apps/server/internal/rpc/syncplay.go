@@ -107,17 +107,9 @@ func (s *SyncPlayService) SetQueue(ctx context.Context, req *sessionv1.SetQueueR
 	if err != nil {
 		return nil, err
 	}
-	ids := make([]core.ID, len(req.GetItemIds()))
-	for i, id := range req.GetItemIds() {
-		ids[i] = core.MustParseID(id)
-	}
-	for _, mb := range s.groups.Members(p.Session.ID) {
-		if err := s.mayPlay(ctx, &mb.User, ids); err != nil {
-			if mb.User.ID == p.User.ID {
-				return nil, connectError(ctx, err)
-			}
-			return nil, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("%s may not play every item", mb.User.Name))
-		}
+	ids, err := s.playableByGroup(ctx, p, req.GetItemIds())
+	if err != nil {
+		return nil, err
 	}
 	start := time.Duration(0)
 	if req.HasStartPosition() {
@@ -154,6 +146,40 @@ func (s *SyncPlayService) NextItem(ctx context.Context, _ *sessionv1.NextItemReq
 // PreviousItem plays the previous entry of the caller's group.
 func (s *SyncPlayService) PreviousItem(ctx context.Context, _ *sessionv1.PreviousItemRequest) (*sessionv1.PreviousItemResponse, error) {
 	return &sessionv1.PreviousItemResponse{}, s.handle(ctx, syncplay.Step(-1))
+}
+
+// AddToQueue adds items every member may play to the caller's group's
+// queue.
+func (s *SyncPlayService) AddToQueue(ctx context.Context, req *sessionv1.AddToQueueRequest) (*sessionv1.AddToQueueResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ids, err := s.playableByGroup(ctx, p, req.GetItemIds())
+	if err != nil {
+		return nil, err
+	}
+	return &sessionv1.AddToQueueResponse{}, s.handle(ctx, syncplay.AddToQueue(ids, req.GetNext()))
+}
+
+// RemoveFromQueue removes entries from the caller's group's queue.
+func (s *SyncPlayService) RemoveFromQueue(ctx context.Context, req *sessionv1.RemoveFromQueueRequest) (*sessionv1.RemoveFromQueueResponse, error) {
+	ids := make([]core.ID, len(req.GetEntryIds()))
+	for i, id := range req.GetEntryIds() {
+		ids[i] = core.MustParseID(id)
+	}
+	return &sessionv1.RemoveFromQueueResponse{}, s.handle(ctx, syncplay.RemoveFromQueue(ids))
+}
+
+// MoveQueueEntry moves an entry of the caller's group's queue.
+func (s *SyncPlayService) MoveQueueEntry(ctx context.Context, req *sessionv1.MoveQueueEntryRequest) (*sessionv1.MoveQueueEntryResponse, error) {
+	r := syncplay.MoveQueueEntry(core.MustParseID(req.GetEntryId()), int(req.GetIndex()))
+	return &sessionv1.MoveQueueEntryResponse{}, s.handle(ctx, r)
+}
+
+// SetCurrentEntry plays an entry of the caller's group's queue.
+func (s *SyncPlayService) SetCurrentEntry(ctx context.Context, req *sessionv1.SetCurrentEntryRequest) (*sessionv1.SetCurrentEntryResponse, error) {
+	return &sessionv1.SetCurrentEntryResponse{}, s.handle(ctx, syncplay.SetCurrentEntry(core.MustParseID(req.GetEntryId())))
 }
 
 // ReportState records whether the calling device is ready or buffering.
@@ -199,6 +225,25 @@ func (s *SyncPlayService) member(ctx context.Context) (syncplay.Member, error) {
 
 func memberOf(p auth.Principal) syncplay.Member {
 	return syncplay.Member{Session: p.Session.ID, User: p.User, DeviceName: p.Session.DeviceName}
+}
+
+// playableByGroup parses item IDs that every member of the caller's group
+// may play: an item the caller may not is not found, and one another
+// member may not fails the precondition.
+func (s *SyncPlayService) playableByGroup(ctx context.Context, p auth.Principal, itemIDs []string) ([]core.ID, error) {
+	ids := make([]core.ID, len(itemIDs))
+	for i, id := range itemIDs {
+		ids[i] = core.MustParseID(id)
+	}
+	for _, mb := range s.groups.Members(p.Session.ID) {
+		if err := s.mayPlay(ctx, &mb.User, ids); err != nil {
+			if mb.User.ID == p.User.ID {
+				return nil, connectError(ctx, err)
+			}
+			return nil, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("%s may not play every item", mb.User.Name))
+		}
+	}
+	return ids, nil
 }
 
 // mayPlayGroup reports whether the user may play every item of a group's

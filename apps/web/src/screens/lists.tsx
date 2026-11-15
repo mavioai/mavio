@@ -4,8 +4,8 @@
 // playlist's entries in order, moved and removed; a collection's members
 // removed by its administrators. A playlist or collection plays in order or
 // shuffled, the player going on to the next entry (§6.5). The menu also
-// plays the item on another device (§6.3.23), watches it together
-// (§6.3.24), reports a problem with it (§6.3.25) and, for administrators,
+// plays the item on another device (§6.3.23), watches it together or adds
+// it to the queue of the group the browser is in (§6.3.24), reports a problem with it (§6.3.25) and, for administrators,
 // opens its metadata (§6.3.22).
 import {
   errorMessage,
@@ -20,15 +20,18 @@ import {
   usePlaylistActions,
   usePlaylistEntries,
   usePlaylists,
+  useServersStore,
 } from "@mavio/client-ts";
 import { type Item, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import type { PlaylistEntry } from "@mavio/proto/mavio/library/v1/playlist_pb";
+import { SyncPlayService } from "@mavio/proto/mavio/session/v1/syncplay_pb";
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { playItems, playQueueAt } from "../queue.ts";
+import { useSyncPlay } from "../syncplay.tsx";
 import { Artwork, Button, Grid, ItemCard, runtimeOf, subtitleOf } from "../ui.tsx";
 import { Menu, MenuItem, MenuSeparator } from "../controls/menu.tsx";
 import { Tip } from "../controls/tooltip.tsx";
@@ -39,7 +42,7 @@ import { playable, PlayOnDialog } from "./remote.tsx";
 import { ReportDialog, reportable, useMayReport } from "./issues.tsx";
 import { SyncPlayDialog } from "./syncplay.tsx";
 
-type Dialog = "playOn" | "together" | "report" | "playlist" | "collection" | "edit" | "identify" | "refresh" | "images" | "rename" | "delete";
+type Dialog = "playOn" | "together" | "queue" | "report" | "playlist" | "collection" | "edit" | "identify" | "refresh" | "images" | "rename" | "delete";
 
 /** Kinds that can be put in a playlist or a collection. */
 const listable = (kind: ItemKind) => kind !== ItemKind.PLAYLIST && kind !== ItemKind.COLLECTION && kind !== ItemKind.FOLDER;
@@ -49,11 +52,35 @@ export function MoreMenu({ server, item, className, iconSize, phone }: { server:
   const admin = useAdminServers().some((s) => s.id === server.id);
   const mayReport = useMayReport(server);
   const [dialog, setDialog] = useState<Dialog>();
+  const servers = useServersStore();
+  // In a group on the item's server, the item is added to its queue at once, the group's dialog then showing it.
+  const grouped = useSyncPlay()?.joined?.server.id === server.id;
+  const [queueError, setQueueError] = useState<string>();
+  const addToQueue = async () => {
+    try {
+      await servers.client(SyncPlayService, server).addToQueue({ itemIds: [item.id] });
+      setQueueError(undefined);
+    } catch (err) {
+      setQueueError(errorMessage(err));
+    }
+    setDialog("together");
+  };
+  const choose = (d: Dialog) => {
+    if (d === "queue") return void addToQueue();
+    setQueueError(undefined);
+    setDialog(d);
+  };
   const own = item.kind === ItemKind.PLAYLIST || (item.kind === ItemKind.COLLECTION && admin);
   // The entries in groups, separated: playing, adding to lists, metadata,
   // reporting, and renaming or deleting a list, the deletion last.
   const groups: [Dialog, string][][] = [
-    playable(item.kind) ? [["playOn", t("remote.playOn")], ["together", t("syncplay.watchTogether")]] : [],
+    playable(item.kind)
+      ? [
+          ["playOn", t("remote.playOn")],
+          ["together", t("syncplay.watchTogether")],
+          ...(grouped ? [["queue", t("syncplay.addToGroupQueue")] as [Dialog, string]] : []),
+        ]
+      : [],
     listable(item.kind)
       ? [["playlist", t("lists.addToPlaylist")], ...(admin ? [["collection", t("lists.addToCollection")] as [Dialog, string]] : [])]
       : [],
@@ -86,7 +113,7 @@ export function MoreMenu({ server, item, className, iconSize, phone }: { server:
         {groups.map((group, i) => [
           i > 0 && <MenuSeparator key={`separator-${i}`} />,
           ...group.map(([d, label]) => (
-            <MenuItem key={d} danger={d === "delete"} onClick={() => setDialog(d)}>
+            <MenuItem key={d} danger={d === "delete"} onClick={() => choose(d)}>
               {/* Plain names, without the ellipsis some strings end in. */}
               {label.replace(/…$/, "")}
             </MenuItem>
@@ -95,7 +122,7 @@ export function MoreMenu({ server, item, className, iconSize, phone }: { server:
       </Menu>
       {(dialog === "playlist" || dialog === "collection") && <AddDialog server={server} item={item} kind={dialog} onClose={() => setDialog(undefined)} />}
       {dialog === "report" && <ReportDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
-      {dialog === "together" && <SyncPlayDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
+      {dialog === "together" && <SyncPlayDialog server={server} item={item} error={queueError} onClose={() => setDialog(undefined)} />}
       {dialog === "playOn" && <PlayOnDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
       {dialog === "edit" && <EditDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
       {dialog === "identify" && <IdentifyDialog server={server} item={item} onClose={() => setDialog(undefined)} />}

@@ -237,6 +237,14 @@ export function useGroupPlayer(
     const g = e.kind.value.group;
     const v = video.current;
     const sync = latest.current.sp;
+    // The entry the player follows removed with none after it stops the
+    // group, whose current entry is then another.
+    const stopped = e.kind.value.command;
+    if (stopped?.kind === SyncPlayCommandKind.STOP && latest.current.active && stopped.entryId === latest.current.entry?.id) {
+      clearTimeout(timer.current);
+      onStop();
+      return;
+    }
     if (!v || !sync || !g || g.queue[g.currentIndex]?.itemId !== itemId) return;
     // An update with no command, as the group sent again when the stream
     // reopens, has the video catch up with the group's state, whose

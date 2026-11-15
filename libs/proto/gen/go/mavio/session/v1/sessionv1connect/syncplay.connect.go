@@ -64,6 +64,18 @@ const (
 	// SyncPlayServicePreviousItemProcedure is the fully-qualified name of the SyncPlayService's
 	// PreviousItem RPC.
 	SyncPlayServicePreviousItemProcedure = "/mavio.session.v1.SyncPlayService/PreviousItem"
+	// SyncPlayServiceAddToQueueProcedure is the fully-qualified name of the SyncPlayService's
+	// AddToQueue RPC.
+	SyncPlayServiceAddToQueueProcedure = "/mavio.session.v1.SyncPlayService/AddToQueue"
+	// SyncPlayServiceRemoveFromQueueProcedure is the fully-qualified name of the SyncPlayService's
+	// RemoveFromQueue RPC.
+	SyncPlayServiceRemoveFromQueueProcedure = "/mavio.session.v1.SyncPlayService/RemoveFromQueue"
+	// SyncPlayServiceMoveQueueEntryProcedure is the fully-qualified name of the SyncPlayService's
+	// MoveQueueEntry RPC.
+	SyncPlayServiceMoveQueueEntryProcedure = "/mavio.session.v1.SyncPlayService/MoveQueueEntry"
+	// SyncPlayServiceSetCurrentEntryProcedure is the fully-qualified name of the SyncPlayService's
+	// SetCurrentEntry RPC.
+	SyncPlayServiceSetCurrentEntryProcedure = "/mavio.session.v1.SyncPlayService/SetCurrentEntry"
 	// SyncPlayServiceReportStateProcedure is the fully-qualified name of the SyncPlayService's
 	// ReportState RPC.
 	SyncPlayServiceReportStateProcedure = "/mavio.session.v1.SyncPlayService/ReportState"
@@ -94,6 +106,19 @@ type SyncPlayServiceClient interface {
 	Stop(context.Context, *v1.StopRequest) (*v1.StopResponse, error)
 	NextItem(context.Context, *v1.NextItemRequest) (*v1.NextItemResponse, error)
 	PreviousItem(context.Context, *v1.PreviousItemRequest) (*v1.PreviousItemResponse, error)
+	// AddToQueue adds items every member may play to the queue, after the
+	// entry being played or at the end; the group goes on as it was.
+	AddToQueue(context.Context, *v1.AddToQueueRequest) (*v1.AddToQueueResponse, error)
+	// RemoveFromQueue removes entries from the queue. Removing the entry
+	// being played plays the entry after it, once every member is ready, or
+	// stops the group when none is left after it.
+	RemoveFromQueue(context.Context, *v1.RemoveFromQueueRequest) (*v1.RemoveFromQueueResponse, error)
+	// MoveQueueEntry moves an entry to another index of the queue; the
+	// entry being played stays the same.
+	MoveQueueEntry(context.Context, *v1.MoveQueueEntryRequest) (*v1.MoveQueueEntryResponse, error)
+	// SetCurrentEntry plays an entry of the queue from its start once every
+	// member is ready.
+	SetCurrentEntry(context.Context, *v1.SetCurrentEntryRequest) (*v1.SetCurrentEntryResponse, error)
 	// ReportState tells the group the calling device is ready to play at a
 	// position, or buffering; a buffering member makes the group wait.
 	ReportState(context.Context, *v1.ReportStateRequest) (*v1.ReportStateResponse, error)
@@ -187,6 +212,30 @@ func NewSyncPlayServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(syncPlayServiceMethods.ByName("PreviousItem")),
 			connect.WithClientOptions(opts...),
 		),
+		addToQueue: connect.NewClient[v1.AddToQueueRequest, v1.AddToQueueResponse](
+			httpClient,
+			baseURL+SyncPlayServiceAddToQueueProcedure,
+			connect.WithSchema(syncPlayServiceMethods.ByName("AddToQueue")),
+			connect.WithClientOptions(opts...),
+		),
+		removeFromQueue: connect.NewClient[v1.RemoveFromQueueRequest, v1.RemoveFromQueueResponse](
+			httpClient,
+			baseURL+SyncPlayServiceRemoveFromQueueProcedure,
+			connect.WithSchema(syncPlayServiceMethods.ByName("RemoveFromQueue")),
+			connect.WithClientOptions(opts...),
+		),
+		moveQueueEntry: connect.NewClient[v1.MoveQueueEntryRequest, v1.MoveQueueEntryResponse](
+			httpClient,
+			baseURL+SyncPlayServiceMoveQueueEntryProcedure,
+			connect.WithSchema(syncPlayServiceMethods.ByName("MoveQueueEntry")),
+			connect.WithClientOptions(opts...),
+		),
+		setCurrentEntry: connect.NewClient[v1.SetCurrentEntryRequest, v1.SetCurrentEntryResponse](
+			httpClient,
+			baseURL+SyncPlayServiceSetCurrentEntryProcedure,
+			connect.WithSchema(syncPlayServiceMethods.ByName("SetCurrentEntry")),
+			connect.WithClientOptions(opts...),
+		),
 		reportState: connect.NewClient[v1.ReportStateRequest, v1.ReportStateResponse](
 			httpClient,
 			baseURL+SyncPlayServiceReportStateProcedure,
@@ -204,20 +253,24 @@ func NewSyncPlayServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 
 // syncPlayServiceClient implements SyncPlayServiceClient.
 type syncPlayServiceClient struct {
-	getTime      *connect.Client[v1.GetTimeRequest, v1.GetTimeResponse]
-	listGroups   *connect.Client[v1.ListGroupsRequest, v1.ListGroupsResponse]
-	createGroup  *connect.Client[v1.CreateGroupRequest, v1.CreateGroupResponse]
-	joinGroup    *connect.Client[v1.JoinGroupRequest, v1.JoinGroupResponse]
-	leaveGroup   *connect.Client[v1.LeaveGroupRequest, v1.LeaveGroupResponse]
-	setQueue     *connect.Client[v1.SetQueueRequest, v1.SetQueueResponse]
-	pause        *connect.Client[v1.PauseRequest, v1.PauseResponse]
-	unpause      *connect.Client[v1.UnpauseRequest, v1.UnpauseResponse]
-	seek         *connect.Client[v1.SeekRequest, v1.SeekResponse]
-	stop         *connect.Client[v1.StopRequest, v1.StopResponse]
-	nextItem     *connect.Client[v1.NextItemRequest, v1.NextItemResponse]
-	previousItem *connect.Client[v1.PreviousItemRequest, v1.PreviousItemResponse]
-	reportState  *connect.Client[v1.ReportStateRequest, v1.ReportStateResponse]
-	reportPing   *connect.Client[v1.ReportPingRequest, v1.ReportPingResponse]
+	getTime         *connect.Client[v1.GetTimeRequest, v1.GetTimeResponse]
+	listGroups      *connect.Client[v1.ListGroupsRequest, v1.ListGroupsResponse]
+	createGroup     *connect.Client[v1.CreateGroupRequest, v1.CreateGroupResponse]
+	joinGroup       *connect.Client[v1.JoinGroupRequest, v1.JoinGroupResponse]
+	leaveGroup      *connect.Client[v1.LeaveGroupRequest, v1.LeaveGroupResponse]
+	setQueue        *connect.Client[v1.SetQueueRequest, v1.SetQueueResponse]
+	pause           *connect.Client[v1.PauseRequest, v1.PauseResponse]
+	unpause         *connect.Client[v1.UnpauseRequest, v1.UnpauseResponse]
+	seek            *connect.Client[v1.SeekRequest, v1.SeekResponse]
+	stop            *connect.Client[v1.StopRequest, v1.StopResponse]
+	nextItem        *connect.Client[v1.NextItemRequest, v1.NextItemResponse]
+	previousItem    *connect.Client[v1.PreviousItemRequest, v1.PreviousItemResponse]
+	addToQueue      *connect.Client[v1.AddToQueueRequest, v1.AddToQueueResponse]
+	removeFromQueue *connect.Client[v1.RemoveFromQueueRequest, v1.RemoveFromQueueResponse]
+	moveQueueEntry  *connect.Client[v1.MoveQueueEntryRequest, v1.MoveQueueEntryResponse]
+	setCurrentEntry *connect.Client[v1.SetCurrentEntryRequest, v1.SetCurrentEntryResponse]
+	reportState     *connect.Client[v1.ReportStateRequest, v1.ReportStateResponse]
+	reportPing      *connect.Client[v1.ReportPingRequest, v1.ReportPingResponse]
 }
 
 // GetTime calls mavio.session.v1.SyncPlayService.GetTime.
@@ -328,6 +381,42 @@ func (c *syncPlayServiceClient) PreviousItem(ctx context.Context, req *v1.Previo
 	return nil, err
 }
 
+// AddToQueue calls mavio.session.v1.SyncPlayService.AddToQueue.
+func (c *syncPlayServiceClient) AddToQueue(ctx context.Context, req *v1.AddToQueueRequest) (*v1.AddToQueueResponse, error) {
+	response, err := c.addToQueue.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// RemoveFromQueue calls mavio.session.v1.SyncPlayService.RemoveFromQueue.
+func (c *syncPlayServiceClient) RemoveFromQueue(ctx context.Context, req *v1.RemoveFromQueueRequest) (*v1.RemoveFromQueueResponse, error) {
+	response, err := c.removeFromQueue.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// MoveQueueEntry calls mavio.session.v1.SyncPlayService.MoveQueueEntry.
+func (c *syncPlayServiceClient) MoveQueueEntry(ctx context.Context, req *v1.MoveQueueEntryRequest) (*v1.MoveQueueEntryResponse, error) {
+	response, err := c.moveQueueEntry.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// SetCurrentEntry calls mavio.session.v1.SyncPlayService.SetCurrentEntry.
+func (c *syncPlayServiceClient) SetCurrentEntry(ctx context.Context, req *v1.SetCurrentEntryRequest) (*v1.SetCurrentEntryResponse, error) {
+	response, err := c.setCurrentEntry.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ReportState calls mavio.session.v1.SyncPlayService.ReportState.
 func (c *syncPlayServiceClient) ReportState(ctx context.Context, req *v1.ReportStateRequest) (*v1.ReportStateResponse, error) {
 	response, err := c.reportState.CallUnary(ctx, connect.NewRequest(req))
@@ -368,6 +457,19 @@ type SyncPlayServiceHandler interface {
 	Stop(context.Context, *v1.StopRequest) (*v1.StopResponse, error)
 	NextItem(context.Context, *v1.NextItemRequest) (*v1.NextItemResponse, error)
 	PreviousItem(context.Context, *v1.PreviousItemRequest) (*v1.PreviousItemResponse, error)
+	// AddToQueue adds items every member may play to the queue, after the
+	// entry being played or at the end; the group goes on as it was.
+	AddToQueue(context.Context, *v1.AddToQueueRequest) (*v1.AddToQueueResponse, error)
+	// RemoveFromQueue removes entries from the queue. Removing the entry
+	// being played plays the entry after it, once every member is ready, or
+	// stops the group when none is left after it.
+	RemoveFromQueue(context.Context, *v1.RemoveFromQueueRequest) (*v1.RemoveFromQueueResponse, error)
+	// MoveQueueEntry moves an entry to another index of the queue; the
+	// entry being played stays the same.
+	MoveQueueEntry(context.Context, *v1.MoveQueueEntryRequest) (*v1.MoveQueueEntryResponse, error)
+	// SetCurrentEntry plays an entry of the queue from its start once every
+	// member is ready.
+	SetCurrentEntry(context.Context, *v1.SetCurrentEntryRequest) (*v1.SetCurrentEntryResponse, error)
 	// ReportState tells the group the calling device is ready to play at a
 	// position, or buffering; a buffering member makes the group wait.
 	ReportState(context.Context, *v1.ReportStateRequest) (*v1.ReportStateResponse, error)
@@ -457,6 +559,30 @@ func NewSyncPlayServiceHandler(svc SyncPlayServiceHandler, opts ...connect.Handl
 		connect.WithSchema(syncPlayServiceMethods.ByName("PreviousItem")),
 		connect.WithHandlerOptions(opts...),
 	)
+	syncPlayServiceAddToQueueHandler := connect.NewUnaryHandlerSimple(
+		SyncPlayServiceAddToQueueProcedure,
+		svc.AddToQueue,
+		connect.WithSchema(syncPlayServiceMethods.ByName("AddToQueue")),
+		connect.WithHandlerOptions(opts...),
+	)
+	syncPlayServiceRemoveFromQueueHandler := connect.NewUnaryHandlerSimple(
+		SyncPlayServiceRemoveFromQueueProcedure,
+		svc.RemoveFromQueue,
+		connect.WithSchema(syncPlayServiceMethods.ByName("RemoveFromQueue")),
+		connect.WithHandlerOptions(opts...),
+	)
+	syncPlayServiceMoveQueueEntryHandler := connect.NewUnaryHandlerSimple(
+		SyncPlayServiceMoveQueueEntryProcedure,
+		svc.MoveQueueEntry,
+		connect.WithSchema(syncPlayServiceMethods.ByName("MoveQueueEntry")),
+		connect.WithHandlerOptions(opts...),
+	)
+	syncPlayServiceSetCurrentEntryHandler := connect.NewUnaryHandlerSimple(
+		SyncPlayServiceSetCurrentEntryProcedure,
+		svc.SetCurrentEntry,
+		connect.WithSchema(syncPlayServiceMethods.ByName("SetCurrentEntry")),
+		connect.WithHandlerOptions(opts...),
+	)
 	syncPlayServiceReportStateHandler := connect.NewUnaryHandlerSimple(
 		SyncPlayServiceReportStateProcedure,
 		svc.ReportState,
@@ -495,6 +621,14 @@ func NewSyncPlayServiceHandler(svc SyncPlayServiceHandler, opts ...connect.Handl
 			syncPlayServiceNextItemHandler.ServeHTTP(w, r)
 		case SyncPlayServicePreviousItemProcedure:
 			syncPlayServicePreviousItemHandler.ServeHTTP(w, r)
+		case SyncPlayServiceAddToQueueProcedure:
+			syncPlayServiceAddToQueueHandler.ServeHTTP(w, r)
+		case SyncPlayServiceRemoveFromQueueProcedure:
+			syncPlayServiceRemoveFromQueueHandler.ServeHTTP(w, r)
+		case SyncPlayServiceMoveQueueEntryProcedure:
+			syncPlayServiceMoveQueueEntryHandler.ServeHTTP(w, r)
+		case SyncPlayServiceSetCurrentEntryProcedure:
+			syncPlayServiceSetCurrentEntryHandler.ServeHTTP(w, r)
 		case SyncPlayServiceReportStateProcedure:
 			syncPlayServiceReportStateHandler.ServeHTTP(w, r)
 		case SyncPlayServiceReportPingProcedure:
@@ -554,6 +688,22 @@ func (UnimplementedSyncPlayServiceHandler) NextItem(context.Context, *v1.NextIte
 
 func (UnimplementedSyncPlayServiceHandler) PreviousItem(context.Context, *v1.PreviousItemRequest) (*v1.PreviousItemResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.session.v1.SyncPlayService.PreviousItem is not implemented"))
+}
+
+func (UnimplementedSyncPlayServiceHandler) AddToQueue(context.Context, *v1.AddToQueueRequest) (*v1.AddToQueueResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.session.v1.SyncPlayService.AddToQueue is not implemented"))
+}
+
+func (UnimplementedSyncPlayServiceHandler) RemoveFromQueue(context.Context, *v1.RemoveFromQueueRequest) (*v1.RemoveFromQueueResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.session.v1.SyncPlayService.RemoveFromQueue is not implemented"))
+}
+
+func (UnimplementedSyncPlayServiceHandler) MoveQueueEntry(context.Context, *v1.MoveQueueEntryRequest) (*v1.MoveQueueEntryResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.session.v1.SyncPlayService.MoveQueueEntry is not implemented"))
+}
+
+func (UnimplementedSyncPlayServiceHandler) SetCurrentEntry(context.Context, *v1.SetCurrentEntryRequest) (*v1.SetCurrentEntryResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.session.v1.SyncPlayService.SetCurrentEntry is not implemented"))
 }
 
 func (UnimplementedSyncPlayServiceHandler) ReportState(context.Context, *v1.ReportStateRequest) (*v1.ReportStateResponse, error) {

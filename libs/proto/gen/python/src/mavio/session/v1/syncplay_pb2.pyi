@@ -216,6 +216,50 @@ class PreviousItemResponse(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...
 
+class AddToQueueRequest(_message.Message):
+    __slots__ = ("item_ids", "next")
+    ITEM_IDS_FIELD_NUMBER: _ClassVar[int]
+    NEXT_FIELD_NUMBER: _ClassVar[int]
+    item_ids: _containers.RepeatedScalarFieldContainer[str]
+    next: bool
+    def __init__(self, item_ids: _Optional[_Iterable[str]] = ..., next: _Optional[bool] = ...) -> None: ...
+
+class AddToQueueResponse(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class RemoveFromQueueRequest(_message.Message):
+    __slots__ = ("entry_ids",)
+    ENTRY_IDS_FIELD_NUMBER: _ClassVar[int]
+    entry_ids: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, entry_ids: _Optional[_Iterable[str]] = ...) -> None: ...
+
+class RemoveFromQueueResponse(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class MoveQueueEntryRequest(_message.Message):
+    __slots__ = ("entry_id", "index")
+    ENTRY_ID_FIELD_NUMBER: _ClassVar[int]
+    INDEX_FIELD_NUMBER: _ClassVar[int]
+    entry_id: str
+    index: int
+    def __init__(self, entry_id: _Optional[str] = ..., index: _Optional[int] = ...) -> None: ...
+
+class MoveQueueEntryResponse(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class SetCurrentEntryRequest(_message.Message):
+    __slots__ = ("entry_id",)
+    ENTRY_ID_FIELD_NUMBER: _ClassVar[int]
+    entry_id: str
+    def __init__(self, entry_id: _Optional[str] = ...) -> None: ...
+
+class SetCurrentEntryResponse(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
 class ReportStateRequest(_message.Message):
     __slots__ = ("entry_id", "position", "when", "playing", "ready")
     ENTRY_ID_FIELD_NUMBER: _ClassVar[int]

@@ -150,6 +150,38 @@ pub use self::__buffa::view::PreviousItemResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::PreviousItemResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::AddToQueueRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::AddToQueueRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AddToQueueResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::AddToQueueResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveFromQueueRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveFromQueueRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveFromQueueResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveFromQueueResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::MoveQueueEntryRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::MoveQueueEntryRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::MoveQueueEntryResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::MoveQueueEntryResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetCurrentEntryRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SetCurrentEntryRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetCurrentEntryResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SetCurrentEntryResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ReportStateRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::ReportStateRequestOwnedView;

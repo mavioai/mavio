@@ -35623,6 +35623,132 @@
         }
       }
     },
+    "syncplay.queue": {
+      "comment": "Heading of a SyncPlay group's queue.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Queue"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "队列"
+          }
+        }
+      }
+    },
+    "syncplay.emptyQueue": {
+      "comment": "Shown when a SyncPlay group's queue is empty.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing is queued."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "队列中没有内容。"
+          }
+        }
+      }
+    },
+    "syncplay.nowPlaying": {
+      "comment": "Marks the entry a SyncPlay group plays.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now Playing"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在播放"
+          }
+        }
+      }
+    },
+    "syncplay.playEntry": {
+      "comment": "Accessibility label of a queue entry, which plays it for every member of the group.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play “%@” in the Group"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在小组中播放“%@”"
+          }
+        }
+      }
+    },
+    "syncplay.playNext": {
+      "comment": "Adds the item to the SyncPlay group's queue after the entry it plays.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play Next"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一个播放"
+          }
+        }
+      }
+    },
+    "syncplay.addToQueue": {
+      "comment": "Adds the item at the end of the SyncPlay group's queue.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to Queue"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加到队列"
+          }
+        }
+      }
+    },
+    "syncplay.addToGroupQueue": {
+      "comment": "Adds the item to the queue of the SyncPlay group the browser is in, from an item's More menu.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to Watch Together Queue"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加到一起看的队列"
+          }
+        }
+      }
+    },
     "issues.report": {
       "comment": "More menu item reporting a problem with an item.",
       "extractionState": "manual",

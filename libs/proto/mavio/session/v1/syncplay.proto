@@ -37,6 +37,19 @@ service SyncPlayService {
   rpc Stop(StopRequest) returns (StopResponse);
   rpc NextItem(NextItemRequest) returns (NextItemResponse);
   rpc PreviousItem(PreviousItemRequest) returns (PreviousItemResponse);
+  // AddToQueue adds items every member may play to the queue, after the
+  // entry being played or at the end; the group goes on as it was.
+  rpc AddToQueue(AddToQueueRequest) returns (AddToQueueResponse);
+  // RemoveFromQueue removes entries from the queue. Removing the entry
+  // being played plays the entry after it, once every member is ready, or
+  // stops the group when none is left after it.
+  rpc RemoveFromQueue(RemoveFromQueueRequest) returns (RemoveFromQueueResponse);
+  // MoveQueueEntry moves an entry to another index of the queue; the
+  // entry being played stays the same.
+  rpc MoveQueueEntry(MoveQueueEntryRequest) returns (MoveQueueEntryResponse);
+  // SetCurrentEntry plays an entry of the queue from its start once every
+  // member is ready.
+  rpc SetCurrentEntry(SetCurrentEntryRequest) returns (SetCurrentEntryResponse);
   // ReportState tells the group the calling device is ready to play at a
   // position, or buffering; a buffering member makes the group wait.
   rpc ReportState(ReportStateRequest) returns (ReportStateResponse);
@@ -194,6 +207,54 @@ message NextItemResponse {}
 message PreviousItemRequest {}
 
 message PreviousItemResponse {}
+
+message AddToQueueRequest {
+  repeated string item_ids = 1 [(buf.validate.field).repeated = {
+    min_items: 1
+    max_items: 1000
+    items: {
+      string: {uuid: true}
+    }
+  }];
+  // The items go right after the entry being played instead of at the end
+  // of the queue.
+  bool next = 2;
+}
+
+message AddToQueueResponse {}
+
+message RemoveFromQueueRequest {
+  // Entries no longer in the queue are ignored.
+  repeated string entry_ids = 1 [(buf.validate.field).repeated = {
+    min_items: 1
+    max_items: 1000
+    items: {
+      string: {uuid: true}
+    }
+  }];
+}
+
+message RemoveFromQueueResponse {}
+
+message MoveQueueEntryRequest {
+  string entry_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  // The entry's new index; past the end moves it to the end.
+  int32 index = 2 [(buf.validate.field).int32.gte = 0];
+}
+
+message MoveQueueEntryResponse {}
+
+message SetCurrentEntryRequest {
+  string entry_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message SetCurrentEntryResponse {}
 
 message ReportStateRequest {
   // The entry the device plays.

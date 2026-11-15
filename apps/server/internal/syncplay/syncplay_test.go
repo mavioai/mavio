@@ -259,3 +259,134 @@ func TestOffline(t *testing.T) {
 		}
 	})
 }
+
+func TestEditQueue(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		in := &inbox{updates: map[core.ID][]*sessionv1.SyncPlayUpdate{}}
+		m := New(in.send)
+		ann, bob := member("ann"), member("bob")
+		g := m.Create(ann, "Movie night")
+		if _, err := m.Join(bob, core.MustParseID(g.GetId())); err != nil {
+			t.Fatal(err)
+		}
+		handle := func(mb Member, r Request) {
+			t.Helper()
+			if err := m.Handle(mb.Session, r); err != nil {
+				t.Fatal(err)
+			}
+		}
+		const idle, waiting, playing = sessionv1.SyncPlayState_SYNC_PLAY_STATE_IDLE, sessionv1.SyncPlayState_SYNC_PLAY_STATE_WAITING, sessionv1.SyncPlayState_SYNC_PLAY_STATE_PLAYING
+		const stop = sessionv1.SyncPlayCommandKind_SYNC_PLAY_COMMAND_KIND_STOP
+		a, b, c, d := core.NewID(), core.NewID(), core.NewID(), core.NewID()
+		names := map[core.ID]string{a: "a", b: "b", c: "c", d: "d"}
+		// The queue's items by name, with the entry being played in brackets.
+		queue := func(u *sessionv1.SyncPlayUpdate) string {
+			out := ""
+			for i, e := range u.GetGroup().GetQueue() {
+				name := names[core.MustParseID(e.GetItemId())]
+				if i == int(u.GetGroup().GetCurrentIndex()) {
+					name = "[" + name + "]"
+				}
+				out += name
+			}
+			return out
+		}
+		entry := func(u *sessionv1.SyncPlayUpdate, i int) core.ID {
+			return core.MustParseID(u.GetGroup().GetQueue()[i].GetId())
+		}
+		ready := func(u *sessionv1.SyncPlayUpdate) {
+			t.Helper()
+			e := entry(u, int(u.GetGroup().GetCurrentIndex()))
+			for _, mb := range []Member{ann, bob} {
+				handle(mb, ReportState(e, 0, time.Now(), false, true))
+			}
+		}
+
+		// Items added to an empty group wait to be played.
+		handle(ann, AddToQueue([]core.ID{a}, true))
+		u := in.last(bob.Session)
+		if queue(u) != "[a]" || u.GetGroup().GetState() != idle || u.HasCommand() {
+			t.Fatalf("after adding to an empty queue = %v", u)
+		}
+
+		// Playing a, b goes at the end and c right after a; the group plays on.
+		handle(ann, Unpause())
+		ready(in.last(ann.Session))
+		in.last(bob.Session)
+		handle(bob, AddToQueue([]core.ID{b}, false))
+		handle(bob, AddToQueue([]core.ID{c, d}, true))
+		u = in.last(ann.Session)
+		if queue(u) != "[a]cdb" || u.GetGroup().GetState() != playing || u.HasCommand() {
+			t.Fatalf("after adding = %q %v", queue(u), u)
+		}
+
+		// Moving entries keeps a playing, wherever it goes; past the end is the end.
+		handle(ann, MoveQueueEntry(entry(u, 0), 9))
+		if u = in.last(bob.Session); queue(u) != "cdb[a]" || u.GetGroup().GetState() != playing {
+			t.Errorf("after moving a to the end = %q", queue(u))
+		}
+		handle(ann, MoveQueueEntry(entry(u, 2), 0))
+		if u = in.last(bob.Session); queue(u) != "bcd[a]" {
+			t.Errorf("after moving b first = %q", queue(u))
+		}
+		if err := m.Handle(ann.Session, MoveQueueEntry(core.NewID(), 0)); !errors.Is(err, core.ErrNotFound) {
+			t.Errorf("moving an unknown entry: %v, want ErrNotFound", err)
+		}
+
+		// Jumping to c waits for both, then plays it from its start.
+		handle(bob, SetCurrentEntry(entry(u, 1)))
+		u = in.last(ann.Session)
+		if queue(u) != "b[c]da" || u.GetGroup().GetState() != waiting || u.GetGroup().GetPosition().AsDuration() != 0 {
+			t.Errorf("after jumping to c = %q %v", queue(u), u)
+		}
+		ready(u)
+		in.last(bob.Session)
+		if u = in.last(ann.Session); u.GetGroup().GetState() != playing {
+			t.Errorf("after both were ready = %v", u)
+		}
+
+		// Removing others keeps c playing; unknown entries are ignored.
+		handle(ann, RemoveFromQueue([]core.ID{entry(u, 0), core.NewID()}))
+		if u = in.last(bob.Session); queue(u) != "[c]da" || u.GetGroup().GetState() != playing || u.HasCommand() {
+			t.Errorf("after removing b = %q %v", queue(u), u)
+		}
+
+		// Removing c plays d, the entry after it.
+		handle(ann, RemoveFromQueue([]core.ID{entry(u, 0)}))
+		if u = in.last(bob.Session); queue(u) != "[d]a" || u.GetGroup().GetState() != waiting {
+			t.Errorf("after removing c = %q %v", queue(u), u)
+		}
+		ready(u)
+		in.last(ann.Session)
+		u = in.last(bob.Session)
+
+		// Removing what is left from d on stops the members playing d.
+		dEntry := entry(u, 0)
+		handle(bob, RemoveFromQueue([]core.ID{dEntry, entry(u, 1)}))
+		u = in.last(ann.Session)
+		if len(u.GetGroup().GetQueue()) != 0 || u.GetGroup().GetState() != idle || u.GetCommand().GetKind() != stop ||
+			u.GetCommand().GetEntryId() != dEntry.String() {
+			t.Errorf("after emptying the queue = %v", u)
+		}
+		if err := m.Handle(ann.Session, Unpause()); !errors.Is(err, ErrNoQueue) {
+			t.Errorf("unpausing an empty queue: %v, want ErrNoQueue", err)
+		}
+
+		// The last entry removed while others are left before it stops the group there.
+		handle(ann, AddToQueue([]core.ID{a, b}, false))
+		handle(ann, SetCurrentEntry(entry(in.last(ann.Session), 1)))
+		u = in.last(ann.Session)
+		ready(u)
+		in.last(bob.Session)
+		in.last(ann.Session)
+		handle(ann, RemoveFromQueue([]core.ID{entry(u, 1)}))
+		if u = in.last(bob.Session); queue(u) != "[a]" || u.GetGroup().GetState() != idle || u.GetCommand().GetKind() != stop {
+			t.Errorf("after removing the last entry = %q %v", queue(u), u)
+		}
+
+		// A queue holds at most MaxQueue entries.
+		if err := m.Handle(ann.Session, AddToQueue(make([]core.ID, MaxQueue), false)); !errors.Is(err, core.ErrInvalid) {
+			t.Errorf("overfilling the queue: %v, want ErrInvalid", err)
+		}
+	})
+}
