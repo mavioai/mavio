@@ -64,7 +64,7 @@ class Catalog(_message.Message):
     def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., kind: _Optional[_Union[_discovery_pb2.CatalogKind, str]] = ..., media_kinds: _Optional[_Iterable[_Union[_profile_pb2.MediaKind, str]]] = ..., mixed: _Optional[bool] = ..., filters: _Optional[_Iterable[_Union[_discovery_pb2.DiscoverFilter, str]]] = ..., sorts: _Optional[_Iterable[_Union[_discovery_pb2.DiscoverSort, str]]] = ..., plugin_id: _Optional[str] = ...) -> None: ...
 
 class DiscoverRequest(_message.Message):
-    __slots__ = ("catalog", "media_kind", "tmdb_id", "genres", "studios", "networks", "keywords", "excluded_keywords", "watch_providers", "watch_region", "original_language", "released_from", "released_to", "runtime_min", "runtime_max", "rating_min", "rating_max", "votes_min", "certifications", "sort", "ascending", "language", "page", "tmdb_collection_id")
+    __slots__ = ("catalog", "media_kind", "tmdb_id", "genres", "studios", "networks", "keywords", "excluded_keywords", "watch_providers", "watch_region", "original_language", "released_from", "released_to", "runtime_min", "runtime_max", "rating_min", "rating_max", "votes_min", "certifications", "sort", "ascending", "language", "page", "tmdb_collection_id", "certification_country")
     CATALOG_FIELD_NUMBER: _ClassVar[int]
     MEDIA_KIND_FIELD_NUMBER: _ClassVar[int]
     TMDB_ID_FIELD_NUMBER: _ClassVar[int]
@@ -89,6 +89,7 @@ class DiscoverRequest(_message.Message):
     LANGUAGE_FIELD_NUMBER: _ClassVar[int]
     PAGE_FIELD_NUMBER: _ClassVar[int]
     TMDB_COLLECTION_ID_FIELD_NUMBER: _ClassVar[int]
+    CERTIFICATION_COUNTRY_FIELD_NUMBER: _ClassVar[int]
     catalog: str
     media_kind: _profile_pb2.MediaKind
     tmdb_id: int
@@ -113,7 +114,8 @@ class DiscoverRequest(_message.Message):
     language: str
     page: int
     tmdb_collection_id: int
-    def __init__(self, catalog: _Optional[str] = ..., media_kind: _Optional[_Union[_profile_pb2.MediaKind, str]] = ..., tmdb_id: _Optional[int] = ..., genres: _Optional[_Iterable[str]] = ..., studios: _Optional[_Iterable[str]] = ..., networks: _Optional[_Iterable[str]] = ..., keywords: _Optional[_Iterable[str]] = ..., excluded_keywords: _Optional[_Iterable[str]] = ..., watch_providers: _Optional[_Iterable[str]] = ..., watch_region: _Optional[str] = ..., original_language: _Optional[str] = ..., released_from: _Optional[str] = ..., released_to: _Optional[str] = ..., runtime_min: _Optional[int] = ..., runtime_max: _Optional[int] = ..., rating_min: _Optional[float] = ..., rating_max: _Optional[float] = ..., votes_min: _Optional[int] = ..., certifications: _Optional[_Iterable[str]] = ..., sort: _Optional[_Union[_discovery_pb2.DiscoverSort, str]] = ..., ascending: _Optional[bool] = ..., language: _Optional[str] = ..., page: _Optional[int] = ..., tmdb_collection_id: _Optional[int] = ...) -> None: ...
+    certification_country: str
+    def __init__(self, catalog: _Optional[str] = ..., media_kind: _Optional[_Union[_profile_pb2.MediaKind, str]] = ..., tmdb_id: _Optional[int] = ..., genres: _Optional[_Iterable[str]] = ..., studios: _Optional[_Iterable[str]] = ..., networks: _Optional[_Iterable[str]] = ..., keywords: _Optional[_Iterable[str]] = ..., excluded_keywords: _Optional[_Iterable[str]] = ..., watch_providers: _Optional[_Iterable[str]] = ..., watch_region: _Optional[str] = ..., original_language: _Optional[str] = ..., released_from: _Optional[str] = ..., released_to: _Optional[str] = ..., runtime_min: _Optional[int] = ..., runtime_max: _Optional[int] = ..., rating_min: _Optional[float] = ..., rating_max: _Optional[float] = ..., votes_min: _Optional[int] = ..., certifications: _Optional[_Iterable[str]] = ..., sort: _Optional[_Union[_discovery_pb2.DiscoverSort, str]] = ..., ascending: _Optional[bool] = ..., language: _Optional[str] = ..., page: _Optional[int] = ..., tmdb_collection_id: _Optional[int] = ..., certification_country: _Optional[str] = ...) -> None: ...
 
 class DiscoverResponse(_message.Message):
     __slots__ = ("titles", "page", "total_pages", "total_results", "hidden_results")
@@ -197,10 +199,12 @@ class ListFilterValuesRequest(_message.Message):
     def __init__(self, catalog: _Optional[str] = ..., filter: _Optional[_Union[_discovery_pb2.DiscoverFilter, str]] = ..., media_kind: _Optional[_Union[_profile_pb2.MediaKind, str]] = ..., query: _Optional[str] = ..., ids: _Optional[_Iterable[str]] = ..., language: _Optional[str] = ..., region: _Optional[str] = ...) -> None: ...
 
 class ListFilterValuesResponse(_message.Message):
-    __slots__ = ("values",)
+    __slots__ = ("values", "region")
     VALUES_FIELD_NUMBER: _ClassVar[int]
+    REGION_FIELD_NUMBER: _ClassVar[int]
     values: _containers.RepeatedCompositeFieldContainer[_discovery_pb2.FilterValue]
-    def __init__(self, values: _Optional[_Iterable[_Union[_discovery_pb2.FilterValue, _Mapping]]] = ...) -> None: ...
+    region: str
+    def __init__(self, values: _Optional[_Iterable[_Union[_discovery_pb2.FilterValue, _Mapping]]] = ..., region: _Optional[str] = ...) -> None: ...
 
 class SearchTitlesRequest(_message.Message):
     __slots__ = ("query", "media_kind", "year", "language", "page", "plugin_id")

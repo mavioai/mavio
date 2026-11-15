@@ -383,7 +383,7 @@ const chip =
 export function ToggleChip({ on, onChange, label, image }: { on: boolean; onChange: (on: boolean) => void; label: string; image?: string }) {
   return (
     <Toggle pressed={on} onPressedChange={onChange} className={chip}>
-      {image && <img src={image} alt="" className="size-5 rounded-[5px]" loading="lazy" />}
+      {image && <img src={image} alt="" className="size-5 rounded-[5px] object-contain" loading="lazy" />}
       {label}
     </Toggle>
   );

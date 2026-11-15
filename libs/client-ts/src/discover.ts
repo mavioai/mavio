@@ -6,7 +6,7 @@ import type { MessageInitShape } from "@bufbuild/protobuf";
 import { type Catalog, type Collection, type DiscoverRequestSchema, DiscoverService, type DiscoveredTitle, type Person, type SeasonEpisode, type Title } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { type Request, RequestService } from "@mavio/proto/mavio/acquisition/v1/request_pb";
-import { CatalogKind, type DiscoverFilter, DiscoverSort } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
+import { CatalogKind, DiscoverFilter, DiscoverSort } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
 import type { Rating } from "@mavio/proto/mavio/plugin/v1/ratings_pb";
 import { useInfiniteQuery, useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -104,6 +104,10 @@ export interface CatalogFilters {
   /** 0–10. */
   ratingMin?: number;
   votesMin?: number;
+  /** Content ratings of certificationCountry, any of them. */
+  certifications?: string[];
+  /** ISO 3166-1 country of the certifications; unset for the server's metadata country. */
+  certificationCountry?: string;
   /** The TMDB collection of a collection catalog. */
   collectionId?: number;
 }
@@ -121,12 +125,14 @@ export function filterCount(f: CatalogFilters): number {
     f.runtimeMin || f.runtimeMax,
     f.ratingMin,
     f.votesMin,
+    f.certifications?.length,
   ].filter(Boolean).length;
 }
 
 /** The fields of a DiscoverRequest that filter and sort as filters do. */
 export function discoverRequestOf(f: CatalogFilters): MessageInitShape<typeof DiscoverRequestSchema> {
   const providers = f.watchProviders ?? [];
+  const certifications = f.certifications ?? [];
   return {
     sort: f.sort ?? DiscoverSort.UNSPECIFIED,
     ascending: f.ascending ?? false,
@@ -143,6 +149,8 @@ export function discoverRequestOf(f: CatalogFilters): MessageInitShape<typeof Di
     runtimeMax: f.runtimeMax ?? 0,
     ratingMin: f.ratingMin ?? 0,
     votesMin: f.votesMin ?? 0,
+    certifications,
+    certificationCountry: certifications.length > 0 ? (f.certificationCountry ?? "") : "",
     tmdbCollectionId: f.collectionId ?? 0,
   };
 }
@@ -171,7 +179,8 @@ export function useCatalog(server: ServerEntry | undefined, catalog: string, med
 /**
  * The values a catalog's filter takes: all of them for genres and watch
  * providers, those matching a query for studios and keywords, none
- * without one, or those of the IDs given, for their names.
+ * without one, the best known networks matching a query, or the network
+ * whose ID it is, or those of the IDs given, for their names.
  */
 export function useFilterValues(
   server: ServerEntry | undefined,
@@ -182,6 +191,27 @@ export function useFilterValues(
   return useQuery({
     queryKey: serverKey(server?.id ?? "", "discover", "filterValues", v),
     queryFn: async () => (await servers.client(DiscoverService, server!).listFilterValues({ ...v, query: v.query ?? "", ids: v.ids ?? [], region: v.region ?? "" })).values,
+    enabled: !!server && enabled,
+    staleTime: 60 * 60_000,
+  });
+}
+
+/**
+ * The certifications a catalog filters by, of a country's rating system
+ * from the least restricted, less those above the user's rating limit,
+ * with the country they are of: the server's metadata country when none
+ * is given.
+ */
+export function useCertifications(server: ServerEntry | undefined, v: { catalog: string; mediaKind: MediaKind; country?: string }, enabled = true) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server?.id ?? "", "discover", "certifications", v),
+    queryFn: async () => {
+      const r = await servers
+        .client(DiscoverService, server!)
+        .listFilterValues({ catalog: v.catalog, filter: DiscoverFilter.CERTIFICATION, mediaKind: v.mediaKind, region: v.country ?? "" });
+      return { values: r.values, country: r.region };
+    },
     enabled: !!server && enabled,
     staleTime: 60 * 60_000,
   });

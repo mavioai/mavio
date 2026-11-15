@@ -768,7 +768,7 @@ flowchart TD
   - [x] Web UI 的人物页面（`apps/web/src/screens/person.tsx`、`libs/client-ts/src/people.ts`），由演职人员卡片打开：人物及署名此人的作品
   - [x] Web UI 的发现页（`apps/web/src/screens/discover.tsx`、`libs/client-ts/src/discover.ts`）：第一台提供发现的服务器的目录按行显示，每个目录的网格，作品及其各季，观看，以及请求电影或剧集的若干季；首页热门趋势中没有服务器拥有的作品打开作品页
     - [x] 目录的筛选与排序（`apps/web/src/screens/discover-filters.tsx`）：目录支持的排序、类型、制片公司、关键词、按国家的流媒体服务、原始语言、年份、时长、评分与评分人数，保存在页面地址中（`ListFilterValues`）；以及搜索结果中提供发现的服务器找到的作品（`SearchTitles`）
-    - [ ] 电视网与分级筛选：提供者无法搜索电视网，只能按其 ID 选择；分级需要某个国家的分级体系
+    - [x] 电视网与分级筛选（`apps/web/src/screens/discover-filters.tsx`，`libs/client-ts/src/discover.ts` 中的 `useCertifications`）：scraper-tmdb 列出最知名的电视网及其标志（`plugins/scraper-tmdb/networks.go`），由于 TMDB 不能搜索电视网，按名称在其中查找，或按 TMDB ID 找到任一电视网，以 `with_networks` 筛选剧集；以及取自 TMDB 分级列表的某个国家分级体系中的内容分级，默认为服务器的元数据国家，去掉高于用户分级上限的分级（`ListFilterValues` 的 `CERTIFICATION` 与 `region`，`DiscoverRequest.certification_country`）
     - [x] 请求（`apps/web/src/screens/requests.tsx`、`libs/client-ts/src/requests.ts`）：用户的请求及其状态与配额，管理员则可看所有人的请求，按状态筛选；批准、拒绝、重试、更改季与删除请求（`RequestService`）
     - [x] 黑名单：在作品或合集页面屏蔽它们，以及在“获取”的“已屏蔽的作品”中列出已屏蔽的作品以解除屏蔽（`apps/web/src/screens/admin/blocklist.tsx`，`libs/client-ts/src/requests.ts` 中的 `useBlockedTitles`），可按名称与屏蔽方式查找（`BlockTitle`、`ListBlockedTitles`、`UnblockTitle`、`BlockCollection`）
     - [x] 管理员代其他用户请求或不计入配额（`CreateRequest` 的 `user_id` 与 `ignore_quota`）：请求对话框（`apps/web/src/screens/discover.tsx` 中的 `RequestDialog`，电影也有）中的“代为请求”与“不计入配额”，并显示所选用户配额的剩余（`GetQuota` 的 `user_id`）

@@ -84,6 +84,8 @@ type plugin struct {
 
 	mu  sync.RWMutex
 	cfg config
+
+	networks networkCache
 }
 
 func (p *plugin) Describe(context.Context, *pluginv1.DescribeRequest) (*pluginv1.DescribeResponse, error) {
@@ -130,8 +132,9 @@ func (p *plugin) config() config {
 // session is one request's view of the configuration.
 type session struct {
 	*client
-	cast  castConfig
-	adult bool
+	cast         castConfig
+	adult        bool
+	networkCache *networkCache
 }
 
 func (p *plugin) session() (session, error) {
@@ -151,8 +154,9 @@ func (p *plugin) session() (session, error) {
 		cast.maxCast = *cfg.MaxCastMembers
 	}
 	return session{
-		client: c,
-		cast:   cast,
-		adult:  cfg.IncludeAdult,
+		client:       c,
+		cast:         cast,
+		adult:        cfg.IncludeAdult,
+		networkCache: &p.networks,
 	}, nil
 }

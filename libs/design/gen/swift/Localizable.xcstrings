@@ -2233,6 +2233,78 @@
         }
       }
     },
+    "discover.searchNetworks": {
+      "comment": "Placeholder of the field finding the networks to filter series by: among the best known by name, or any by its ID.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search networks by name or TMDB ID"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按名称或 TMDB ID 搜索电视网"
+          }
+        }
+      }
+    },
+    "discover.certifications": {
+      "comment": "Filter of titles by their content rating, such as PG-13, in a country's rating system.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Content Ratings"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内容分级"
+          }
+        }
+      }
+    },
+    "discover.certificationCountry": {
+      "comment": "Label of the choice of the country whose content ratings Discover's filters list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rating system"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分级制度"
+          }
+        }
+      }
+    },
+    "discover.noCertifications": {
+      "comment": "Shown in Discover's filters when the country chosen has no content ratings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This country has no content ratings to filter by."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该国家或地区没有可筛选的内容分级。"
+          }
+        }
+      }
+    },
     "discover.statusRumored": {
       "comment": "Production status of a title",
       "extractionState": "manual",

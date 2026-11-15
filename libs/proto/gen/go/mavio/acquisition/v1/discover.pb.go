@@ -485,35 +485,36 @@ func (b0 Catalog_builder) Build() *Catalog {
 }
 
 type DiscoverRequest struct {
-	state                       protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Catalog          *string                `protobuf:"bytes,1,opt,name=catalog"`
-	xxx_hidden_MediaKind        MediaKind              `protobuf:"varint,2,opt,name=media_kind,json=mediaKind,enum=mavio.acquisition.v1.MediaKind"`
-	xxx_hidden_TmdbId           int32                  `protobuf:"varint,3,opt,name=tmdb_id,json=tmdbId"`
-	xxx_hidden_Genres           []string               `protobuf:"bytes,4,rep,name=genres"`
-	xxx_hidden_Studios          []string               `protobuf:"bytes,5,rep,name=studios"`
-	xxx_hidden_Networks         []string               `protobuf:"bytes,6,rep,name=networks"`
-	xxx_hidden_Keywords         []string               `protobuf:"bytes,7,rep,name=keywords"`
-	xxx_hidden_ExcludedKeywords []string               `protobuf:"bytes,8,rep,name=excluded_keywords,json=excludedKeywords"`
-	xxx_hidden_WatchProviders   []string               `protobuf:"bytes,9,rep,name=watch_providers,json=watchProviders"`
-	xxx_hidden_WatchRegion      *string                `protobuf:"bytes,10,opt,name=watch_region,json=watchRegion"`
-	xxx_hidden_OriginalLanguage *string                `protobuf:"bytes,11,opt,name=original_language,json=originalLanguage"`
-	xxx_hidden_ReleasedFrom     *string                `protobuf:"bytes,12,opt,name=released_from,json=releasedFrom"`
-	xxx_hidden_ReleasedTo       *string                `protobuf:"bytes,13,opt,name=released_to,json=releasedTo"`
-	xxx_hidden_RuntimeMin       int32                  `protobuf:"varint,14,opt,name=runtime_min,json=runtimeMin"`
-	xxx_hidden_RuntimeMax       int32                  `protobuf:"varint,15,opt,name=runtime_max,json=runtimeMax"`
-	xxx_hidden_RatingMin        float64                `protobuf:"fixed64,16,opt,name=rating_min,json=ratingMin"`
-	xxx_hidden_RatingMax        float64                `protobuf:"fixed64,17,opt,name=rating_max,json=ratingMax"`
-	xxx_hidden_VotesMin         int32                  `protobuf:"varint,18,opt,name=votes_min,json=votesMin"`
-	xxx_hidden_Certifications   []string               `protobuf:"bytes,19,rep,name=certifications"`
-	xxx_hidden_Sort             v1.DiscoverSort        `protobuf:"varint,20,opt,name=sort,enum=mavio.plugin.v1.DiscoverSort"`
-	xxx_hidden_Ascending        bool                   `protobuf:"varint,21,opt,name=ascending"`
-	xxx_hidden_Language         *string                `protobuf:"bytes,22,opt,name=language"`
-	xxx_hidden_Page             int32                  `protobuf:"varint,23,opt,name=page"`
-	xxx_hidden_TmdbCollectionId int32                  `protobuf:"varint,24,opt,name=tmdb_collection_id,json=tmdbCollectionId"`
-	XXX_raceDetectHookData      protoimpl.RaceDetectHookData
-	XXX_presence                [1]uint32
-	unknownFields               protoimpl.UnknownFields
-	sizeCache                   protoimpl.SizeCache
+	state                           protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Catalog              *string                `protobuf:"bytes,1,opt,name=catalog"`
+	xxx_hidden_MediaKind            MediaKind              `protobuf:"varint,2,opt,name=media_kind,json=mediaKind,enum=mavio.acquisition.v1.MediaKind"`
+	xxx_hidden_TmdbId               int32                  `protobuf:"varint,3,opt,name=tmdb_id,json=tmdbId"`
+	xxx_hidden_Genres               []string               `protobuf:"bytes,4,rep,name=genres"`
+	xxx_hidden_Studios              []string               `protobuf:"bytes,5,rep,name=studios"`
+	xxx_hidden_Networks             []string               `protobuf:"bytes,6,rep,name=networks"`
+	xxx_hidden_Keywords             []string               `protobuf:"bytes,7,rep,name=keywords"`
+	xxx_hidden_ExcludedKeywords     []string               `protobuf:"bytes,8,rep,name=excluded_keywords,json=excludedKeywords"`
+	xxx_hidden_WatchProviders       []string               `protobuf:"bytes,9,rep,name=watch_providers,json=watchProviders"`
+	xxx_hidden_WatchRegion          *string                `protobuf:"bytes,10,opt,name=watch_region,json=watchRegion"`
+	xxx_hidden_OriginalLanguage     *string                `protobuf:"bytes,11,opt,name=original_language,json=originalLanguage"`
+	xxx_hidden_ReleasedFrom         *string                `protobuf:"bytes,12,opt,name=released_from,json=releasedFrom"`
+	xxx_hidden_ReleasedTo           *string                `protobuf:"bytes,13,opt,name=released_to,json=releasedTo"`
+	xxx_hidden_RuntimeMin           int32                  `protobuf:"varint,14,opt,name=runtime_min,json=runtimeMin"`
+	xxx_hidden_RuntimeMax           int32                  `protobuf:"varint,15,opt,name=runtime_max,json=runtimeMax"`
+	xxx_hidden_RatingMin            float64                `protobuf:"fixed64,16,opt,name=rating_min,json=ratingMin"`
+	xxx_hidden_RatingMax            float64                `protobuf:"fixed64,17,opt,name=rating_max,json=ratingMax"`
+	xxx_hidden_VotesMin             int32                  `protobuf:"varint,18,opt,name=votes_min,json=votesMin"`
+	xxx_hidden_Certifications       []string               `protobuf:"bytes,19,rep,name=certifications"`
+	xxx_hidden_Sort                 v1.DiscoverSort        `protobuf:"varint,20,opt,name=sort,enum=mavio.plugin.v1.DiscoverSort"`
+	xxx_hidden_Ascending            bool                   `protobuf:"varint,21,opt,name=ascending"`
+	xxx_hidden_Language             *string                `protobuf:"bytes,22,opt,name=language"`
+	xxx_hidden_Page                 int32                  `protobuf:"varint,23,opt,name=page"`
+	xxx_hidden_TmdbCollectionId     int32                  `protobuf:"varint,24,opt,name=tmdb_collection_id,json=tmdbCollectionId"`
+	xxx_hidden_CertificationCountry *string                `protobuf:"bytes,25,opt,name=certification_country,json=certificationCountry"`
+	XXX_raceDetectHookData          protoimpl.RaceDetectHookData
+	XXX_presence                    [1]uint32
+	unknownFields                   protoimpl.UnknownFields
+	sizeCache                       protoimpl.SizeCache
 }
 
 func (x *DiscoverRequest) Reset() {
@@ -731,19 +732,29 @@ func (x *DiscoverRequest) GetTmdbCollectionId() int32 {
 	return 0
 }
 
+func (x *DiscoverRequest) GetCertificationCountry() string {
+	if x != nil {
+		if x.xxx_hidden_CertificationCountry != nil {
+			return *x.xxx_hidden_CertificationCountry
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *DiscoverRequest) SetCatalog(v string) {
 	x.xxx_hidden_Catalog = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 25)
 }
 
 func (x *DiscoverRequest) SetMediaKind(v MediaKind) {
 	x.xxx_hidden_MediaKind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 25)
 }
 
 func (x *DiscoverRequest) SetTmdbId(v int32) {
 	x.xxx_hidden_TmdbId = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 25)
 }
 
 func (x *DiscoverRequest) SetGenres(v []string) {
@@ -772,47 +783,47 @@ func (x *DiscoverRequest) SetWatchProviders(v []string) {
 
 func (x *DiscoverRequest) SetWatchRegion(v string) {
 	x.xxx_hidden_WatchRegion = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 25)
 }
 
 func (x *DiscoverRequest) SetOriginalLanguage(v string) {
 	x.xxx_hidden_OriginalLanguage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 25)
 }
 
 func (x *DiscoverRequest) SetReleasedFrom(v string) {
 	x.xxx_hidden_ReleasedFrom = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 25)
 }
 
 func (x *DiscoverRequest) SetReleasedTo(v string) {
 	x.xxx_hidden_ReleasedTo = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 25)
 }
 
 func (x *DiscoverRequest) SetRuntimeMin(v int32) {
 	x.xxx_hidden_RuntimeMin = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 25)
 }
 
 func (x *DiscoverRequest) SetRuntimeMax(v int32) {
 	x.xxx_hidden_RuntimeMax = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 25)
 }
 
 func (x *DiscoverRequest) SetRatingMin(v float64) {
 	x.xxx_hidden_RatingMin = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 25)
 }
 
 func (x *DiscoverRequest) SetRatingMax(v float64) {
 	x.xxx_hidden_RatingMax = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 25)
 }
 
 func (x *DiscoverRequest) SetVotesMin(v int32) {
 	x.xxx_hidden_VotesMin = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 25)
 }
 
 func (x *DiscoverRequest) SetCertifications(v []string) {
@@ -821,27 +832,32 @@ func (x *DiscoverRequest) SetCertifications(v []string) {
 
 func (x *DiscoverRequest) SetSort(v v1.DiscoverSort) {
 	x.xxx_hidden_Sort = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 25)
 }
 
 func (x *DiscoverRequest) SetAscending(v bool) {
 	x.xxx_hidden_Ascending = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 25)
 }
 
 func (x *DiscoverRequest) SetLanguage(v string) {
 	x.xxx_hidden_Language = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 25)
 }
 
 func (x *DiscoverRequest) SetPage(v int32) {
 	x.xxx_hidden_Page = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 25)
 }
 
 func (x *DiscoverRequest) SetTmdbCollectionId(v int32) {
 	x.xxx_hidden_TmdbCollectionId = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 24)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 25)
+}
+
+func (x *DiscoverRequest) SetCertificationCountry(v string) {
+	x.xxx_hidden_CertificationCountry = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 25)
 }
 
 func (x *DiscoverRequest) HasCatalog() bool {
@@ -963,6 +979,13 @@ func (x *DiscoverRequest) HasTmdbCollectionId() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 23)
 }
 
+func (x *DiscoverRequest) HasCertificationCountry() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 24)
+}
+
 func (x *DiscoverRequest) ClearCatalog() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Catalog = nil
@@ -1048,6 +1071,11 @@ func (x *DiscoverRequest) ClearTmdbCollectionId() {
 	x.xxx_hidden_TmdbCollectionId = 0
 }
 
+func (x *DiscoverRequest) ClearCertificationCountry() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 24)
+	x.xxx_hidden_CertificationCountry = nil
+}
+
 type DiscoverRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -1079,8 +1107,9 @@ type DiscoverRequest_builder struct {
 	RatingMin *float64
 	RatingMax *float64
 	VotesMin  *int32
-	// Content ratings of the server's metadata country, any of them; those
-	// above the caller's rating limit are dropped.
+	// Content ratings of certification_country, any of them, as
+	// ListFilterValues lists them; those above the caller's rating limit are
+	// dropped.
 	Certifications []string
 	Sort           *v1.DiscoverSort
 	Ascending      *bool
@@ -1090,6 +1119,9 @@ type DiscoverRequest_builder struct {
 	Page *int32
 	// The collection of a collection catalog, by its TMDB ID.
 	TmdbCollectionId *int32
+	// ISO 3166-1 country of certifications; unset for the server's metadata
+	// country.
+	CertificationCountry *string
 }
 
 func (b0 DiscoverRequest_builder) Build() *DiscoverRequest {
@@ -1097,15 +1129,15 @@ func (b0 DiscoverRequest_builder) Build() *DiscoverRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Catalog != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 25)
 		x.xxx_hidden_Catalog = b.Catalog
 	}
 	if b.MediaKind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 25)
 		x.xxx_hidden_MediaKind = *b.MediaKind
 	}
 	if b.TmdbId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 25)
 		x.xxx_hidden_TmdbId = *b.TmdbId
 	}
 	x.xxx_hidden_Genres = b.Genres
@@ -1115,61 +1147,65 @@ func (b0 DiscoverRequest_builder) Build() *DiscoverRequest {
 	x.xxx_hidden_ExcludedKeywords = b.ExcludedKeywords
 	x.xxx_hidden_WatchProviders = b.WatchProviders
 	if b.WatchRegion != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 25)
 		x.xxx_hidden_WatchRegion = b.WatchRegion
 	}
 	if b.OriginalLanguage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 25)
 		x.xxx_hidden_OriginalLanguage = b.OriginalLanguage
 	}
 	if b.ReleasedFrom != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 25)
 		x.xxx_hidden_ReleasedFrom = b.ReleasedFrom
 	}
 	if b.ReleasedTo != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 25)
 		x.xxx_hidden_ReleasedTo = b.ReleasedTo
 	}
 	if b.RuntimeMin != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 25)
 		x.xxx_hidden_RuntimeMin = *b.RuntimeMin
 	}
 	if b.RuntimeMax != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 25)
 		x.xxx_hidden_RuntimeMax = *b.RuntimeMax
 	}
 	if b.RatingMin != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 25)
 		x.xxx_hidden_RatingMin = *b.RatingMin
 	}
 	if b.RatingMax != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 25)
 		x.xxx_hidden_RatingMax = *b.RatingMax
 	}
 	if b.VotesMin != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 25)
 		x.xxx_hidden_VotesMin = *b.VotesMin
 	}
 	x.xxx_hidden_Certifications = b.Certifications
 	if b.Sort != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 25)
 		x.xxx_hidden_Sort = *b.Sort
 	}
 	if b.Ascending != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 25)
 		x.xxx_hidden_Ascending = *b.Ascending
 	}
 	if b.Language != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 25)
 		x.xxx_hidden_Language = b.Language
 	}
 	if b.Page != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 25)
 		x.xxx_hidden_Page = *b.Page
 	}
 	if b.TmdbCollectionId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 24)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 25)
 		x.xxx_hidden_TmdbCollectionId = *b.TmdbCollectionId
+	}
+	if b.CertificationCountry != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 25)
+		x.xxx_hidden_CertificationCountry = b.CertificationCountry
 	}
 	return m0
 }
@@ -2209,16 +2245,19 @@ type ListFilterValuesRequest_builder struct {
 
 	// The catalog whose provider lists the values.
 	Catalog *string
-	// GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.
+	// GENRE, STUDIO, NETWORK, KEYWORD, WATCH_PROVIDER or CERTIFICATION.
 	Filter *v1.DiscoverFilter
 	// Movies or series.
 	MediaKind *MediaKind
-	// Matched against names; studios and keywords need one.
+	// Matched against names; studios and keywords need one. Networks are
+	// listed without one, the provider's best known, and a network's ID
+	// finds it.
 	Query *string
 	// The values' IDs, for their names.
 	Ids      []string
 	Language *string
-	// ISO 3166-1 region of watch providers.
+	// ISO 3166-1 region of watch providers, or country of certifications,
+	// whose unset is the server's metadata country.
 	Region *string
 }
 
@@ -2255,10 +2294,13 @@ func (b0 ListFilterValuesRequest_builder) Build() *ListFilterValuesRequest {
 }
 
 type ListFilterValuesResponse struct {
-	state             protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Values *[]*v1.FilterValue     `protobuf:"bytes,1,rep,name=values"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Values      *[]*v1.FilterValue     `protobuf:"bytes,1,rep,name=values"`
+	xxx_hidden_Region      *string                `protobuf:"bytes,2,opt,name=region"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *ListFilterValuesResponse) Reset() {
@@ -2295,14 +2337,46 @@ func (x *ListFilterValuesResponse) GetValues() []*v1.FilterValue {
 	return nil
 }
 
+func (x *ListFilterValuesResponse) GetRegion() string {
+	if x != nil {
+		if x.xxx_hidden_Region != nil {
+			return *x.xxx_hidden_Region
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *ListFilterValuesResponse) SetValues(v []*v1.FilterValue) {
 	x.xxx_hidden_Values = &v
+}
+
+func (x *ListFilterValuesResponse) SetRegion(v string) {
+	x.xxx_hidden_Region = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *ListFilterValuesResponse) HasRegion() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *ListFilterValuesResponse) ClearRegion() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Region = nil
 }
 
 type ListFilterValuesResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
+	// Certifications in their rating system's order, from the least
+	// restricted; those above the caller's rating limit are left out.
 	Values []*v1.FilterValue
+	// The country of the values listed: for certifications, the request's
+	// or the server's metadata country.
+	Region *string
 }
 
 func (b0 ListFilterValuesResponse_builder) Build() *ListFilterValuesResponse {
@@ -2310,6 +2384,10 @@ func (b0 ListFilterValuesResponse_builder) Build() *ListFilterValuesResponse {
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_Values = &b.Values
+	if b.Region != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Region = b.Region
+	}
 	return m0
 }
 
@@ -6408,7 +6486,7 @@ const file_mavio_acquisition_v1_discover_proto_rawDesc = "" +
 	"\x05mixed\x18\x05 \x01(\bR\x05mixed\x129\n" +
 	"\afilters\x18\x06 \x03(\x0e2\x1f.mavio.plugin.v1.DiscoverFilterR\afilters\x123\n" +
 	"\x05sorts\x18\a \x03(\x0e2\x1d.mavio.plugin.v1.DiscoverSortR\x05sorts\x12\x1b\n" +
-	"\tplugin_id\x18\b \x01(\tR\bpluginId\"\xd6\a\n" +
+	"\tplugin_id\x18\b \x01(\tR\bpluginId\"\xa1\b\n" +
 	"\x0fDiscoverRequest\x12!\n" +
 	"\acatalog\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\acatalog\x12H\n" +
 	"\n" +
@@ -6441,7 +6519,8 @@ const file_mavio_acquisition_v1_discover_proto_rawDesc = "" +
 	"\blanguage\x18\x16 \x01(\tR\blanguage\x12\x1e\n" +
 	"\x04page\x18\x17 \x01(\x05B\n" +
 	"\xbaH\a\x1a\x05\x18\xf4\x03(\x00R\x04page\x125\n" +
-	"\x12tmdb_collection_id\x18\x18 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x10tmdbCollectionId\"\xd2\x01\n" +
+	"\x12tmdb_collection_id\x18\x18 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x10tmdbCollectionId\x12I\n" +
+	"\x15certification_country\x18\x19 \x01(\tB\x14\xbaH\x11r\x0f2\r^([A-Z]{2})?$R\x14certificationCountry\"\xd2\x01\n" +
 	"\x10DiscoverResponse\x12=\n" +
 	"\x06titles\x18\x01 \x03(\v2%.mavio.acquisition.v1.DiscoveredTitleR\x06titles\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1f\n" +
@@ -6488,9 +6567,10 @@ const file_mavio_acquisition_v1_discover_proto_rawDesc = "" +
 	"\x05query\x18\x04 \x01(\tR\x05query\x12\x10\n" +
 	"\x03ids\x18\x05 \x03(\tR\x03ids\x12\x1a\n" +
 	"\blanguage\x18\x06 \x01(\tR\blanguage\x12\x16\n" +
-	"\x06region\x18\a \x01(\tR\x06region\"P\n" +
+	"\x06region\x18\a \x01(\tR\x06region\"h\n" +
 	"\x18ListFilterValuesResponse\x124\n" +
-	"\x06values\x18\x01 \x03(\v2\x1c.mavio.plugin.v1.FilterValueR\x06values\"\xfb\x01\n" +
+	"\x06values\x18\x01 \x03(\v2\x1c.mavio.plugin.v1.FilterValueR\x06values\x12\x16\n" +
+	"\x06region\x18\x02 \x01(\tR\x06region\"\xfb\x01\n" +
 	"\x13SearchTitlesRequest\x12!\n" +
 	"\x05query\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\x18\xc8\x01R\x05query\x12H\n" +
 	"\n" +

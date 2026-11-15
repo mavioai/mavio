@@ -116,10 +116,12 @@ type DiscoverPage struct {
 }
 
 // Discover lists a page of a catalog, marked with what the server has of
-// each title, as Seerr's /discover routes. The user's rating limit
-// applies: catalogs filtering by certification are asked for the
-// certifications of the server's country within it when the caller
-// filters by certification or the user's policy blocks unrated titles,
+// each title, as Seerr's /discover routes. Certifications are those of
+// the request's certification country, the server's metadata country by
+// default. The user's rating limit applies: catalogs filtering by
+// certification are asked for the certifications within it, of the
+// request's country when the caller filters by certification, or of the
+// server's when the user's policy blocks unrated titles,
 // since asking for certifications leaves the unrated titles out; of other
 // pages, the titles the metadata providers rate above the limit are left
 // out, as are unrated ones when the policy blocks them. Adult titles are
@@ -130,6 +132,9 @@ func (s *Service) Discover(ctx context.Context, caller core.User, catalogID stri
 		return DiscoverPage{}, err
 	}
 	country, _ := s.region()
+	if len(req.GetCertifications()) > 0 && req.GetCertificationCountry() != "" {
+		country = req.GetCertificationCountry()
+	}
 	req.SetCatalog(c.GetId())
 	req.SetIncludeAdult(false)
 	restricted := caller.EffectiveAccess().MaxParentalRating != nil
@@ -352,15 +357,28 @@ func (s *Service) titleState(ctx context.Context, u *core.User, x *mediaIndex, k
 	return st, nil
 }
 
-// FilterValues lists the values a catalog's filter takes.
-func (s *Service) FilterValues(ctx context.Context, catalogID string, req *pluginv1.ListFilterValuesRequest) ([]*pluginv1.FilterValue, error) {
+// FilterValues lists the values a catalog's filter takes, with the
+// country they are of: certifications are those of the request's region,
+// the server's metadata country by default, less those above the
+// caller's rating limit, which Discover would drop.
+func (s *Service) FilterValues(ctx context.Context, caller core.User, catalogID string, req *pluginv1.ListFilterValuesRequest) ([]*pluginv1.FilterValue, string, error) {
 	p, _, err := s.catalog(ctx, catalogID)
 	if err != nil {
-		return nil, err
+		return nil, "", err
+	}
+	certs := req.GetFilter() == pluginv1.DiscoverFilter_DISCOVER_FILTER_CERTIFICATION
+	if certs && req.GetRegion() == "" {
+		country, _ := s.region()
+		req.SetRegion(country)
 	}
 	res, err := p.Client.ListFilterValues(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("list filter values of %s: %w", catalogID, err)
+		return nil, "", fmt.Errorf("list filter values of %s: %w", catalogID, err)
 	}
-	return res.GetValues(), nil
+	values := res.GetValues()
+	if certs && caller.EffectiveAccess().MaxParentalRating != nil {
+		allowed := Certifications(&caller, req.GetRegion())
+		values = slices.DeleteFunc(values, func(v *pluginv1.FilterValue) bool { return !slices.Contains(allowed, v.GetId()) })
+	}
+	return values, req.GetRegion(), nil
 }

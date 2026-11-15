@@ -423,6 +423,18 @@ public enum MavioStrings {
     /// Filter of a series catalog: the networks the titles air on
     public static var discoverNetworks: String { NSLocalizedString("discover.networks", bundle: .module, comment: "") }
 
+    /// Placeholder of the field finding the networks to filter series by: among the best known by name, or any by its ID.
+    public static var discoverSearchNetworks: String { NSLocalizedString("discover.searchNetworks", bundle: .module, comment: "") }
+
+    /// Filter of titles by their content rating, such as PG-13, in a country's rating system.
+    public static var discoverCertifications: String { NSLocalizedString("discover.certifications", bundle: .module, comment: "") }
+
+    /// Label of the choice of the country whose content ratings Discover's filters list.
+    public static var discoverCertificationCountry: String { NSLocalizedString("discover.certificationCountry", bundle: .module, comment: "") }
+
+    /// Shown in Discover's filters when the country chosen has no content ratings.
+    public static var discoverNoCertifications: String { NSLocalizedString("discover.noCertifications", bundle: .module, comment: "") }
+
     /// Production status of a title
     public static var discoverStatusRumored: String { NSLocalizedString("discover.statusRumored", bundle: .module, comment: "") }
 

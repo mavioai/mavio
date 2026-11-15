@@ -29,6 +29,18 @@ test.each<{ name: string; f: CatalogFilters; want: Record<string, unknown>; coun
     count: 2,
   },
   {
+    name: "the certification country only with certifications",
+    f: { certificationCountry: "GB" },
+    want: { certifications: [], certificationCountry: "" },
+    count: 0,
+  },
+  {
+    name: "certifications in their country, and networks",
+    f: { certifications: ["PG", "12A"], certificationCountry: "GB", networks: [{ id: "49", name: "HBO" }] },
+    want: { certifications: ["PG", "12A"], certificationCountry: "GB", networks: ["49"] },
+    count: 2,
+  },
+  {
     name: "a collection, which is not a filter",
     f: { collectionId: 1166519 },
     want: { tmdbCollectionId: 1166519 },

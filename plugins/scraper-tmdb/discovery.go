@@ -358,8 +358,17 @@ func (p *plugin) ListFilterValues(ctx context.Context, req *pluginv1.ListFilterV
 	case pluginv1.DiscoverFilter_DISCOVER_FILTER_STUDIO:
 		values, err = s.filterValues(ctx, "company", req.GetQuery(), req.GetIds())
 	case pluginv1.DiscoverFilter_DISCOVER_FILTER_NETWORK:
-		// TMDB searches no networks: they are looked up by ID only.
-		values, err = s.filterValues(ctx, "network", "", req.GetIds())
+		values, err = s.networks(ctx, req.GetQuery(), req.GetIds())
+	case pluginv1.DiscoverFilter_DISCOVER_FILTER_CERTIFICATION:
+		var certs []tmdbCertification
+		if certs, err = s.certifications(ctx, kind, req.GetRegion()); err != nil {
+			return nil, err
+		}
+		resp := &pluginv1.ListFilterValuesResponse{}
+		for _, c := range certs {
+			resp.SetValues(append(resp.GetValues(), pluginv1.FilterValue_builder{Id: proto.String(c.Certification), Name: proto.String(c.Certification)}.Build()))
+		}
+		return resp, nil
 	default:
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("filter %v has no values", req.GetFilter()))
 	}
@@ -369,7 +378,7 @@ func (p *plugin) ListFilterValues(ctx context.Context, req *pluginv1.ListFilterV
 	resp := &pluginv1.ListFilterValuesResponse{}
 	query := strings.ToLower(req.GetQuery())
 	for _, v := range values {
-		if req.GetFilter() != pluginv1.DiscoverFilter_DISCOVER_FILTER_KEYWORD && req.GetFilter() != pluginv1.DiscoverFilter_DISCOVER_FILTER_STUDIO &&
+		if (req.GetFilter() == pluginv1.DiscoverFilter_DISCOVER_FILTER_GENRE || req.GetFilter() == pluginv1.DiscoverFilter_DISCOVER_FILTER_WATCH_PROVIDER) &&
 			query != "" && !strings.Contains(strings.ToLower(v.name()), query) {
 			continue
 		}
@@ -382,8 +391,8 @@ func (p *plugin) ListFilterValues(ctx context.Context, req *pluginv1.ListFilterV
 	return resp, nil
 }
 
-// filterValues searches keywords or companies by name, or looks keywords,
-// companies or networks up by ID.
+// filterValues searches keywords or companies by name, or looks them up
+// by ID.
 func (s session) filterValues(ctx context.Context, kind, query string, ids []string) ([]tmdbFilterValue, error) {
 	if query != "" {
 		var page struct {

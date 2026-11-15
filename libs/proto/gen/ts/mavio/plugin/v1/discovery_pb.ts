@@ -416,7 +416,7 @@ export const DiscoveredTitleSchema: GenMessage<DiscoveredTitle> = /*@__PURE__*/
  */
 export type ListFilterValuesRequest = Message<"mavio.plugin.v1.ListFilterValuesRequest"> & {
   /**
-   * GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.
+   * GENRE, STUDIO, NETWORK, KEYWORD, WATCH_PROVIDER or CERTIFICATION.
    *
    * @generated from field: mavio.plugin.v1.DiscoverFilter filter = 1;
    */
@@ -430,7 +430,9 @@ export type ListFilterValuesRequest = Message<"mavio.plugin.v1.ListFilterValuesR
   mediaKind: MediaKind;
 
   /**
-   * Matched against names; studios and keywords need one.
+   * Matched against names; studios and keywords need one. A provider that
+   * cannot search networks lists those it knows best without one, matched
+   * against the query's names, and finds a network by its ID.
    *
    * @generated from field: string query = 3;
    */
@@ -449,7 +451,8 @@ export type ListFilterValuesRequest = Message<"mavio.plugin.v1.ListFilterValuesR
   language: string;
 
   /**
-   * ISO 3166-1 region of watch providers.
+   * ISO 3166-1 region of watch providers, or country whose rating system
+   * the certifications are, listed in its order from the least restricted.
    *
    * @generated from field: string region = 6;
    */

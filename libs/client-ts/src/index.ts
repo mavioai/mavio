@@ -34,6 +34,7 @@ export {
   titlesOf,
   useCatalog,
   useCatalogs,
+  useCertifications,
   useCollection,
   useDiscoveredPerson,
   useDiscovery,

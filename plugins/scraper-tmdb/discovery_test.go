@@ -29,6 +29,12 @@ var discoveryRoutes = map[string]string{
 	"/3/watch/providers/tv": `{"results":[{"provider_id":8,"provider_name":"Netflix","logo_path":"/nf.jpg"}]}`,
 	"/3/search/keyword":     `{"results":[{"id":9882,"name":"space"}]}`,
 	"/3/network/49":         `{"id":49,"name":"HBO","logo_path":"/hbo.png"}`,
+	"/3/network/213":        `{"id":213,"name":"Netflix","logo_path":"/netflix.png"}`,
+	"/3/network/3186":       `{"id":3186,"name":"Max","logo_path":"/max.png"}`,
+	"/3/certification/tv/list": `{"certifications":{
+		"US":[{"certification":"TV-MA","meaning":"Mature","order":6},{"certification":"TV-Y","meaning":"All children","order":1},
+			{"certification":"TV-14","meaning":"14","order":5}],
+		"DE":[{"certification":"0","order":1}]}}`,
 	"/3/collection/726871": `{"id":726871,"name":"Dune Collection","parts":[
 		{"id":438631,"title":"Dune","release_date":"2021-09-15"},{"id":693134,"title":"Dune: Part Two","release_date":"2024-02-27"}]}`,
 }
@@ -247,6 +253,92 @@ func TestListFilterValues(t *testing.T) {
 	}
 	if q := fake.requests[0].URL.Query(); q.Has("query") {
 		t.Errorf("network lookup query = %v", q)
+	}
+}
+
+func TestListNetworks(t *testing.T) {
+	p, fake := newDiscoveryPlugin(t)
+	list := func(query string, ids ...string) (got []string) {
+		t.Helper()
+		resp, err := p.ListFilterValues(t.Context(), pluginv1.ListFilterValuesRequest_builder{
+			Filter: pluginv1.DiscoverFilter_DISCOVER_FILTER_NETWORK.Enum(), Query: proto.String(query), Ids: ids,
+		}.Build())
+		if err != nil {
+			t.Fatalf("ListFilterValues(%q, %v) = %v", query, ids, err)
+		}
+		for _, v := range resp.GetValues() {
+			got = append(got, v.GetId()+" "+v.GetName()+" "+v.GetImageUrl())
+		}
+		return got
+	}
+	// Without a query, the known networks, named as TMDB names them, or as
+	// they are known when TMDB does not.
+	all := list("")
+	if len(all) != len(knownNetworks) {
+		t.Fatalf("networks = %d, want = %d", len(all), len(knownNetworks))
+	}
+	if want := []string{"213 Netflix " + imageURL("/netflix.png"), "49 HBO " + imageURL("/hbo.png"), "3186 Max " + imageURL("/max.png"), "1024 Prime Video "}; !slices.Equal(all[:4], want) {
+		t.Errorf("networks = %q, want = %q first", all[:4], want)
+	}
+	// TMDB is asked once of each network.
+	fake.requests = nil
+	// Matched by their names, known or TMDB's.
+	if got, want := list("hbo"), []string{"49 HBO " + imageURL("/hbo.png"), "3186 Max " + imageURL("/max.png")}; !slices.Equal(got, want) {
+		t.Errorf("networks(hbo) = %q, want = %q", got, want)
+	}
+	if got, want := list(" MAX"), []string{"3186 Max " + imageURL("/max.png")}; !slices.Equal(got, want) {
+		t.Errorf("networks(max) = %q, want = %q", got, want)
+	}
+	if got := fake.paths(); len(got) != 0 {
+		t.Errorf("requests = %v, want = none, the networks being kept", got)
+	}
+	// Found by ID, any network.
+	fake.routes["/3/network/1234"] = `{"id":1234,"name":"Arte","logo_path":"/arte.png"}`
+	for _, q := range []string{"1234", "tmdb:1234"} {
+		if got, want := list(q), []string{"1234 Arte " + imageURL("/arte.png")}; !slices.Equal(got, want) {
+			t.Errorf("networks(%q) = %q, want = %q", q, got, want)
+		}
+	}
+	if got := list("999999"); len(got) != 0 {
+		t.Errorf("networks(unknown ID) = %q, want = none", got)
+	}
+	if got, want := list("", "49", "x", "404"), []string{"49 HBO " + imageURL("/hbo.png")}; !slices.Equal(got, want) {
+		t.Errorf("networks(IDs) = %q, want = %q", got, want)
+	}
+}
+
+func TestListCertifications(t *testing.T) {
+	p, fake := newDiscoveryPlugin(t)
+	list := func(region string) (got []string) {
+		t.Helper()
+		resp, err := p.ListFilterValues(t.Context(), pluginv1.ListFilterValuesRequest_builder{
+			Filter: pluginv1.DiscoverFilter_DISCOVER_FILTER_CERTIFICATION.Enum(), MediaKind: pluginv1.MediaKind_MEDIA_KIND_SERIES.Enum(),
+			Region: proto.String(region),
+		}.Build())
+		if err != nil {
+			t.Fatalf("ListFilterValues(%q) = %v", region, err)
+		}
+		for _, v := range resp.GetValues() {
+			if v.GetId() != v.GetName() {
+				t.Errorf("certification = %v, want = its name as ID", v)
+			}
+			got = append(got, v.GetId())
+		}
+		return got
+	}
+	// In the rating system's order.
+	if got, want := list("US"), []string{"TV-Y", "TV-14", "TV-MA"}; !slices.Equal(got, want) {
+		t.Errorf("certifications(US) = %q, want = %q", got, want)
+	}
+	if got := fake.paths(); !slices.Equal(got, []string{"/3/certification/tv/list"}) {
+		t.Errorf("requests = %v", got)
+	}
+	if got := list("FR"); len(got) != 0 {
+		t.Errorf("certifications(FR) = %q, want = none", got)
+	}
+	fake.requests = nil
+	if got := list(""); len(got) != 0 || len(fake.paths()) != 0 {
+		t.Errorf("certifications() = %q after %v, want = none, asking nothing", got, fake.paths())
 	}
 }
 

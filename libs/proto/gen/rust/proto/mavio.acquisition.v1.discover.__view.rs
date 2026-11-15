@@ -1057,8 +1057,9 @@ pub struct DiscoverRequestView<'a> {
     pub rating_max: ::core::option::Option<f64>,
     /// Field 18: `votes_min`
     pub votes_min: ::core::option::Option<i32>,
-    /// Content ratings of the server's metadata country, any of them; those
-    /// above the caller's rating limit are dropped.
+    /// Content ratings of certification_country, any of them, as
+    /// ListFilterValues lists them; those above the caller's rating limit are
+    /// dropped.
     ///
     /// Field 19: `certifications`
     pub certifications: ::buffa::RepeatedView<'a, &'a str>,
@@ -1080,6 +1081,11 @@ pub struct DiscoverRequestView<'a> {
     ///
     /// Field 24: `tmdb_collection_id`
     pub tmdb_collection_id: ::core::option::Option<i32>,
+    /// ISO 3166-1 country of certifications; unset for the server's metadata
+    /// country.
+    ///
+    /// Field 25: `certification_country`
+    pub certification_country: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for DiscoverRequestView<'a> {
@@ -1235,6 +1241,13 @@ impl<'a> ::buffa::MessageView<'a> for DiscoverRequestView<'a> {
                 )?;
                 view.tmdb_collection_id = Some(::buffa::types::decode_int32(&mut cur)?);
             }
+            25u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.certification_country = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             4u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -1366,6 +1379,7 @@ impl<'a> ::buffa::MessageView<'a> for DiscoverRequestView<'a> {
             language: self.language.map(|s| s.to_string()),
             page: self.page,
             tmdb_collection_id: self.tmdb_collection_id,
+            certification_country: self.certification_country.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1449,6 +1463,9 @@ impl<'a> ::buffa::ViewEncode<'a> for DiscoverRequestView<'a> {
         if let Some(v) = self.tmdb_collection_id {
             size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.certification_country {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1531,6 +1548,9 @@ impl<'a> ::buffa::ViewEncode<'a> for DiscoverRequestView<'a> {
         }
         if let Some(v) = self.tmdb_collection_id {
             ::buffa::types::put_int32_field(24u32, v, buf);
+        }
+        if let Some(ref v) = self.certification_country {
+            ::buffa::types::put_string_field(25u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1736,8 +1756,9 @@ impl DiscoverRequestOwnedView {
     pub fn votes_min(&self) -> ::core::option::Option<i32> {
         self.0.reborrow().votes_min
     }
-    /// Content ratings of the server's metadata country, any of them; those
-    /// above the caller's rating limit are dropped.
+    /// Content ratings of certification_country, any of them, as
+    /// ListFilterValues lists them; those above the caller's rating limit are
+    /// dropped.
     ///
     /// Field 19: `certifications`
     #[must_use]
@@ -1778,6 +1799,14 @@ impl DiscoverRequestOwnedView {
     #[must_use]
     pub fn tmdb_collection_id(&self) -> ::core::option::Option<i32> {
         self.0.reborrow().tmdb_collection_id
+    }
+    /// ISO 3166-1 country of certifications; unset for the server's metadata
+    /// country.
+    ///
+    /// Field 25: `certification_country`
+    #[must_use]
+    pub fn certification_country(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().certification_country
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<DiscoverRequestView<'static>>>
@@ -2876,7 +2905,7 @@ pub struct ListFilterValuesRequestView<'a> {
     ///
     /// Field 1: `catalog`
     pub catalog: ::core::option::Option<&'a str>,
-    /// GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.
+    /// GENRE, STUDIO, NETWORK, KEYWORD, WATCH_PROVIDER or CERTIFICATION.
     ///
     /// Field 2: `filter`
     pub filter: ::core::option::Option<
@@ -2886,7 +2915,9 @@ pub struct ListFilterValuesRequestView<'a> {
     ///
     /// Field 3: `media_kind`
     pub media_kind: ::core::option::Option<::buffa::EnumValue<super::super::MediaKind>>,
-    /// Matched against names; studios and keywords need one.
+    /// Matched against names; studios and keywords need one. Networks are
+    /// listed without one, the provider's best known, and a network's ID
+    /// finds it.
     ///
     /// Field 4: `query`
     pub query: ::core::option::Option<&'a str>,
@@ -2896,7 +2927,8 @@ pub struct ListFilterValuesRequestView<'a> {
     pub ids: ::buffa::RepeatedView<'a, &'a str>,
     /// Field 6: `language`
     pub language: ::core::option::Option<&'a str>,
-    /// ISO 3166-1 region of watch providers.
+    /// ISO 3166-1 region of watch providers, or country of certifications,
+    /// whose unset is the server's metadata country.
     ///
     /// Field 7: `region`
     pub region: ::core::option::Option<&'a str>,
@@ -3190,7 +3222,7 @@ impl ListFilterValuesRequestOwnedView {
     pub fn catalog(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().catalog
     }
-    /// GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.
+    /// GENRE, STUDIO, NETWORK, KEYWORD, WATCH_PROVIDER or CERTIFICATION.
     ///
     /// Field 2: `filter`
     #[must_use]
@@ -3210,7 +3242,9 @@ impl ListFilterValuesRequestOwnedView {
     ) -> ::core::option::Option<::buffa::EnumValue<super::super::MediaKind>> {
         self.0.reborrow().media_kind
     }
-    /// Matched against names; studios and keywords need one.
+    /// Matched against names; studios and keywords need one. Networks are
+    /// listed without one, the provider's best known, and a network's ID
+    /// finds it.
     ///
     /// Field 4: `query`
     #[must_use]
@@ -3229,7 +3263,8 @@ impl ListFilterValuesRequestOwnedView {
     pub fn language(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().language
     }
-    /// ISO 3166-1 region of watch providers.
+    /// ISO 3166-1 region of watch providers, or country of certifications,
+    /// whose unset is the server's metadata country.
     ///
     /// Field 7: `region`
     #[must_use]
@@ -3261,11 +3296,19 @@ impl ::buffa::HasMessageView for super::super::ListFilterValuesRequest {
 }
 #[derive(Clone, Debug, Default)]
 pub struct ListFilterValuesResponseView<'a> {
+    /// Certifications in their rating system's order, from the least
+    /// restricted; those above the caller's rating limit are left out.
+    ///
     /// Field 1: `values`
     pub values: ::buffa::RepeatedView<
         'a,
         super::super::super::super::plugin::v1::__buffa::view::FilterValueView<'a>,
     >,
+    /// The country of the values listed: for certifications, the request's
+    /// or the server's metadata country.
+    ///
+    /// Field 2: `region`
+    pub region: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ListFilterValuesResponseView<'a> {
@@ -3298,6 +3341,13 @@ impl<'a> ::buffa::MessageView<'a> for ListFilterValuesResponseView<'a> {
         let view = self;
         let mut cur = cur;
         match tag.field_number() {
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.region = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             1u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -3351,6 +3401,7 @@ impl<'a> ::buffa::MessageView<'a> for ListFilterValuesResponseView<'a> {
                 .iter()
                 .map(|v| v.to_owned_from_source(__buffa_src))
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
+            region: self.region.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -3370,6 +3421,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ListFilterValuesResponseView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(ref v) = self.region {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3388,6 +3442,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ListFilterValuesResponseView<'a> {
                 buf,
             );
             v.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.region {
+            ::buffa::types::put_string_field(2u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3484,6 +3541,9 @@ impl ListFilterValuesResponseOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
+    /// Certifications in their rating system's order, from the least
+    /// restricted; those above the caller's rating limit are left out.
+    ///
     /// Field 1: `values`
     #[must_use]
     pub fn values(
@@ -3493,6 +3553,14 @@ impl ListFilterValuesResponseOwnedView {
         super::super::super::super::plugin::v1::__buffa::view::FilterValueView<'_>,
     > {
         &self.0.reborrow().values
+    }
+    /// The country of the values listed: for certifications, the request's
+    /// or the server's metadata country.
+    ///
+    /// Field 2: `region`
+    #[must_use]
+    pub fn region(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().region
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ListFilterValuesResponseView<'static>>>

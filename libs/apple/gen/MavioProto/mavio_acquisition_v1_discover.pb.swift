@@ -354,8 +354,9 @@ public nonisolated struct Mavio_Acquisition_V1_DiscoverRequest: @unchecked Senda
   /// Clears the value of `votesMin`. Subsequent reads from it will return its default value.
   public mutating func clearVotesMin() {_uniqueStorage()._votesMin = nil}
 
-  /// Content ratings of the server's metadata country, any of them; those
-  /// above the caller's rating limit are dropped.
+  /// Content ratings of certification_country, any of them, as
+  /// ListFilterValues lists them; those above the caller's rating limit are
+  /// dropped.
   public var certifications: [String] {
     get {_storage._certifications}
     set {_uniqueStorage()._certifications = newValue}
@@ -408,6 +409,17 @@ public nonisolated struct Mavio_Acquisition_V1_DiscoverRequest: @unchecked Senda
   public var hasTmdbCollectionID: Bool {_storage._tmdbCollectionID != nil}
   /// Clears the value of `tmdbCollectionID`. Subsequent reads from it will return its default value.
   public mutating func clearTmdbCollectionID() {_uniqueStorage()._tmdbCollectionID = nil}
+
+  /// ISO 3166-1 country of certifications; unset for the server's metadata
+  /// country.
+  public var certificationCountry: String {
+    get {_storage._certificationCountry ?? String()}
+    set {_uniqueStorage()._certificationCountry = newValue}
+  }
+  /// Returns true if `certificationCountry` has been explicitly set.
+  public var hasCertificationCountry: Bool {_storage._certificationCountry != nil}
+  /// Clears the value of `certificationCountry`. Subsequent reads from it will return its default value.
+  public mutating func clearCertificationCountry() {_uniqueStorage()._certificationCountry = nil}
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -681,7 +693,7 @@ public nonisolated struct Mavio_Acquisition_V1_ListFilterValuesRequest: Sendable
   /// Clears the value of `catalog`. Subsequent reads from it will return its default value.
   public mutating func clearCatalog() {self._catalog = nil}
 
-  /// GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.
+  /// GENRE, STUDIO, NETWORK, KEYWORD, WATCH_PROVIDER or CERTIFICATION.
   public var filter: Mavio_Plugin_V1_DiscoverFilter {
     get {_filter ?? .unspecified}
     set {_filter = newValue}
@@ -701,7 +713,9 @@ public nonisolated struct Mavio_Acquisition_V1_ListFilterValuesRequest: Sendable
   /// Clears the value of `mediaKind`. Subsequent reads from it will return its default value.
   public mutating func clearMediaKind() {self._mediaKind = nil}
 
-  /// Matched against names; studios and keywords need one.
+  /// Matched against names; studios and keywords need one. Networks are
+  /// listed without one, the provider's best known, and a network's ID
+  /// finds it.
   public var query: String {
     get {_query ?? String()}
     set {_query = newValue}
@@ -723,7 +737,8 @@ public nonisolated struct Mavio_Acquisition_V1_ListFilterValuesRequest: Sendable
   /// Clears the value of `language`. Subsequent reads from it will return its default value.
   public mutating func clearLanguage() {self._language = nil}
 
-  /// ISO 3166-1 region of watch providers.
+  /// ISO 3166-1 region of watch providers, or country of certifications,
+  /// whose unset is the server's metadata country.
   public var region: String {
     get {_region ?? String()}
     set {_region = newValue}
@@ -750,11 +765,26 @@ public nonisolated struct Mavio_Acquisition_V1_ListFilterValuesResponse: Sendabl
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// Certifications in their rating system's order, from the least
+  /// restricted; those above the caller's rating limit are left out.
   public var values: [Mavio_Plugin_V1_FilterValue] = []
+
+  /// The country of the values listed: for certifications, the request's
+  /// or the server's metadata country.
+  public var region: String {
+    get {_region ?? String()}
+    set {_region = newValue}
+  }
+  /// Returns true if `region` has been explicitly set.
+  public var hasRegion: Bool {self._region != nil}
+  /// Clears the value of `region`. Subsequent reads from it will return its default value.
+  public mutating func clearRegion() {self._region = nil}
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
+
+  fileprivate var _region: String? = nil
 }
 
 public nonisolated struct Mavio_Acquisition_V1_SearchTitlesRequest: Sendable {
@@ -2142,7 +2172,7 @@ nonisolated extension Mavio_Acquisition_V1_Catalog: SwiftProtobuf.Message, Swift
 
 nonisolated extension Mavio_Acquisition_V1_DiscoverRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DiscoverRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}catalog\0\u{3}media_kind\0\u{3}tmdb_id\0\u{1}genres\0\u{1}studios\0\u{1}networks\0\u{1}keywords\0\u{3}excluded_keywords\0\u{3}watch_providers\0\u{3}watch_region\0\u{3}original_language\0\u{3}released_from\0\u{3}released_to\0\u{3}runtime_min\0\u{3}runtime_max\0\u{3}rating_min\0\u{3}rating_max\0\u{3}votes_min\0\u{1}certifications\0\u{1}sort\0\u{1}ascending\0\u{1}language\0\u{1}page\0\u{3}tmdb_collection_id\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}catalog\0\u{3}media_kind\0\u{3}tmdb_id\0\u{1}genres\0\u{1}studios\0\u{1}networks\0\u{1}keywords\0\u{3}excluded_keywords\0\u{3}watch_providers\0\u{3}watch_region\0\u{3}original_language\0\u{3}released_from\0\u{3}released_to\0\u{3}runtime_min\0\u{3}runtime_max\0\u{3}rating_min\0\u{3}rating_max\0\u{3}votes_min\0\u{1}certifications\0\u{1}sort\0\u{1}ascending\0\u{1}language\0\u{1}page\0\u{3}tmdb_collection_id\0\u{3}certification_country\0")
 
   fileprivate class _StorageClass {
     var _catalog: String? = nil
@@ -2169,6 +2199,7 @@ nonisolated extension Mavio_Acquisition_V1_DiscoverRequest: SwiftProtobuf.Messag
     var _language: String? = nil
     var _page: Int32? = nil
     var _tmdbCollectionID: Int32? = nil
+    var _certificationCountry: String? = nil
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -2203,6 +2234,7 @@ nonisolated extension Mavio_Acquisition_V1_DiscoverRequest: SwiftProtobuf.Messag
       _language = source._language
       _page = source._page
       _tmdbCollectionID = source._tmdbCollectionID
+      _certificationCountry = source._certificationCountry
     }
   }
 
@@ -2245,6 +2277,7 @@ nonisolated extension Mavio_Acquisition_V1_DiscoverRequest: SwiftProtobuf.Messag
         case 22: try { try decoder.decodeSingularStringField(value: &_storage._language) }()
         case 23: try { try decoder.decodeSingularInt32Field(value: &_storage._page) }()
         case 24: try { try decoder.decodeSingularInt32Field(value: &_storage._tmdbCollectionID) }()
+        case 25: try { try decoder.decodeSingularStringField(value: &_storage._certificationCountry) }()
         default: break
         }
       }
@@ -2329,6 +2362,9 @@ nonisolated extension Mavio_Acquisition_V1_DiscoverRequest: SwiftProtobuf.Messag
       try { if let v = _storage._tmdbCollectionID {
         try visitor.visitSingularInt32Field(value: v, fieldNumber: 24)
       } }()
+      try { if let v = _storage._certificationCountry {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 25)
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -2362,6 +2398,7 @@ nonisolated extension Mavio_Acquisition_V1_DiscoverRequest: SwiftProtobuf.Messag
         if _storage._language != rhs_storage._language {return false}
         if _storage._page != rhs_storage._page {return false}
         if _storage._tmdbCollectionID != rhs_storage._tmdbCollectionID {return false}
+        if _storage._certificationCountry != rhs_storage._certificationCountry {return false}
         return true
       }
       if !storagesAreEqual {return false}
@@ -2687,7 +2724,7 @@ nonisolated extension Mavio_Acquisition_V1_ListFilterValuesRequest: SwiftProtobu
 
 nonisolated extension Mavio_Acquisition_V1_ListFilterValuesResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ListFilterValuesResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}values\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}values\0\u{1}region\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -2696,20 +2733,29 @@ nonisolated extension Mavio_Acquisition_V1_ListFilterValuesResponse: SwiftProtob
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeRepeatedMessageField(value: &self.values) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self._region) }()
       default: break
       }
     }
   }
 
   public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.values.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.values, fieldNumber: 1)
     }
+    try { if let v = self._region {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: Mavio_Acquisition_V1_ListFilterValuesResponse, rhs: Mavio_Acquisition_V1_ListFilterValuesResponse) -> Bool {
     if lhs.values != rhs.values {return false}
+    if lhs._region != rhs._region {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

@@ -594,18 +594,19 @@ func discoverToPlugin(req *acquisitionv1.DiscoverRequest) *pluginv1.DiscoverRequ
 		MediaKind: new(pluginKinds[req.GetMediaKind()]), Genres: req.GetGenres(), Studios: req.GetStudios(),
 		Networks: req.GetNetworks(), Keywords: req.GetKeywords(), ExcludedKeywords: req.GetExcludedKeywords(),
 		WatchProviders: req.GetWatchProviders(), Certifications: req.GetCertifications(),
-		WatchRegion:      ifSet(req.HasWatchRegion(), req.GetWatchRegion()),
-		OriginalLanguage: ifSet(req.HasOriginalLanguage(), req.GetOriginalLanguage()),
-		ReleasedFrom:     ifSet(req.HasReleasedFrom(), req.GetReleasedFrom()),
-		ReleasedTo:       ifSet(req.HasReleasedTo(), req.GetReleasedTo()),
-		RuntimeMin:       ifSet(req.HasRuntimeMin(), req.GetRuntimeMin()),
-		RuntimeMax:       ifSet(req.HasRuntimeMax(), req.GetRuntimeMax()),
-		RatingMin:        ifSet(req.HasRatingMin(), req.GetRatingMin()),
-		RatingMax:        ifSet(req.HasRatingMax(), req.GetRatingMax()),
-		VotesMin:         ifSet(req.HasVotesMin(), req.GetVotesMin()),
-		Sort:             ifSet(req.HasSort(), req.GetSort()),
-		Ascending:        ifSet(req.HasAscending(), req.GetAscending()),
-		Language:         ifSet(req.HasLanguage(), req.GetLanguage()),
+		WatchRegion:          ifSet(req.HasWatchRegion(), req.GetWatchRegion()),
+		CertificationCountry: ifSet(req.HasCertificationCountry(), req.GetCertificationCountry()),
+		OriginalLanguage:     ifSet(req.HasOriginalLanguage(), req.GetOriginalLanguage()),
+		ReleasedFrom:         ifSet(req.HasReleasedFrom(), req.GetReleasedFrom()),
+		ReleasedTo:           ifSet(req.HasReleasedTo(), req.GetReleasedTo()),
+		RuntimeMin:           ifSet(req.HasRuntimeMin(), req.GetRuntimeMin()),
+		RuntimeMax:           ifSet(req.HasRuntimeMax(), req.GetRuntimeMax()),
+		RatingMin:            ifSet(req.HasRatingMin(), req.GetRatingMin()),
+		RatingMax:            ifSet(req.HasRatingMax(), req.GetRatingMax()),
+		VotesMin:             ifSet(req.HasVotesMin(), req.GetVotesMin()),
+		Sort:                 ifSet(req.HasSort(), req.GetSort()),
+		Ascending:            ifSet(req.HasAscending(), req.GetAscending()),
+		Language:             ifSet(req.HasLanguage(), req.GetLanguage()),
 	}
 	if req.GetTmdbId() > 0 {
 		pr.ExternalIds = map[string]string{string(core.ProviderTMDB): strconv.Itoa(int(req.GetTmdbId()))}
@@ -855,16 +856,17 @@ func refsToProto(rs []metadata.Ref) []*pluginv1.Reference {
 
 // ListFilterValues lists the values a filter of a catalog takes.
 func (s *DiscoverService) ListFilterValues(ctx context.Context, req *acquisitionv1.ListFilterValuesRequest) (*acquisitionv1.ListFilterValuesResponse, error) {
-	if _, err := principal(ctx); err != nil {
+	p, err := principal(ctx)
+	if err != nil {
 		return nil, err
 	}
 	pr := pluginv1.ListFilterValuesRequest_builder{
 		Filter: new(req.GetFilter()), MediaKind: new(pluginKinds[req.GetMediaKind()]), Query: new(req.GetQuery()),
 		Ids: req.GetIds(), Language: new(req.GetLanguage()), Region: new(req.GetRegion()),
 	}.Build()
-	values, err := s.requests.FilterValues(ctx, req.GetCatalog(), pr)
+	values, region, err := s.requests.FilterValues(ctx, p.User, req.GetCatalog(), pr)
 	if err != nil {
 		return nil, requestError(ctx, err)
 	}
-	return acquisitionv1.ListFilterValuesResponse_builder{Values: values}.Build(), nil
+	return acquisitionv1.ListFilterValuesResponse_builder{Values: values, Region: new(region)}.Build(), nil
 }

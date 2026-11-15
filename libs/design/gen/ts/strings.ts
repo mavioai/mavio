@@ -134,6 +134,10 @@ export type MessageKey =
   | 'discover.searchNowMovieDetail'
   | 'discover.searchNowSeriesDetail'
   | 'discover.networks'
+  | 'discover.searchNetworks'
+  | 'discover.certifications'
+  | 'discover.certificationCountry'
+  | 'discover.noCertifications'
   | 'discover.statusRumored'
   | 'discover.statusPlanned'
   | 'discover.statusInProduction'
@@ -2448,6 +2452,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "discover.searchNowMovieDetail": "Search for the movie as soon as it's added",
     "discover.searchNowSeriesDetail": "Search for the monitored episodes missing a file as soon as it's added",
     "discover.networks": "Networks",
+    "discover.searchNetworks": "Search networks by name or TMDB ID",
+    "discover.certifications": "Content Ratings",
+    "discover.certificationCountry": "Rating system",
+    "discover.noCertifications": "This country has no content ratings to filter by.",
     "discover.statusRumored": "Rumored",
     "discover.statusPlanned": "Planned",
     "discover.statusInProduction": "In Production",
@@ -4760,6 +4768,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "discover.searchNowMovieDetail": "添加后立即搜索此电影",
     "discover.searchNowSeriesDetail": "添加后立即搜索监视中缺失文件的集",
     "discover.networks": "电视网",
+    "discover.searchNetworks": "按名称或 TMDB ID 搜索电视网",
+    "discover.certifications": "内容分级",
+    "discover.certificationCountry": "分级制度",
+    "discover.noCertifications": "该国家或地区没有可筛选的内容分级。",
     "discover.statusRumored": "传闻",
     "discover.statusPlanned": "已计划",
     "discover.statusInProduction": "制作中",

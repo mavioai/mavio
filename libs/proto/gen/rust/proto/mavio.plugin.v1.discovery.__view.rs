@@ -2761,7 +2761,7 @@ impl ::buffa::HasMessageView for super::super::DiscoveredTitle {
 }
 #[derive(Clone, Debug, Default)]
 pub struct ListFilterValuesRequestView<'a> {
-    /// GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.
+    /// GENRE, STUDIO, NETWORK, KEYWORD, WATCH_PROVIDER or CERTIFICATION.
     ///
     /// Field 1: `filter`
     pub filter: ::core::option::Option<::buffa::EnumValue<super::super::DiscoverFilter>>,
@@ -2769,7 +2769,9 @@ pub struct ListFilterValuesRequestView<'a> {
     ///
     /// Field 2: `media_kind`
     pub media_kind: ::core::option::Option<::buffa::EnumValue<super::super::MediaKind>>,
-    /// Matched against names; studios and keywords need one.
+    /// Matched against names; studios and keywords need one. A provider that
+    /// cannot search networks lists those it knows best without one, matched
+    /// against the query's names, and finds a network by its ID.
     ///
     /// Field 3: `query`
     pub query: ::core::option::Option<&'a str>,
@@ -2779,7 +2781,8 @@ pub struct ListFilterValuesRequestView<'a> {
     pub ids: ::buffa::RepeatedView<'a, &'a str>,
     /// Field 5: `language`
     pub language: ::core::option::Option<&'a str>,
-    /// ISO 3166-1 region of watch providers.
+    /// ISO 3166-1 region of watch providers, or country whose rating system
+    /// the certifications are, listed in its order from the least restricted.
     ///
     /// Field 6: `region`
     pub region: ::core::option::Option<&'a str>,
@@ -3052,7 +3055,7 @@ impl ListFilterValuesRequestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.
+    /// GENRE, STUDIO, NETWORK, KEYWORD, WATCH_PROVIDER or CERTIFICATION.
     ///
     /// Field 1: `filter`
     #[must_use]
@@ -3070,7 +3073,9 @@ impl ListFilterValuesRequestOwnedView {
     ) -> ::core::option::Option<::buffa::EnumValue<super::super::MediaKind>> {
         self.0.reborrow().media_kind
     }
-    /// Matched against names; studios and keywords need one.
+    /// Matched against names; studios and keywords need one. A provider that
+    /// cannot search networks lists those it knows best without one, matched
+    /// against the query's names, and finds a network by its ID.
     ///
     /// Field 3: `query`
     #[must_use]
@@ -3089,7 +3094,8 @@ impl ListFilterValuesRequestOwnedView {
     pub fn language(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().language
     }
-    /// ISO 3166-1 region of watch providers.
+    /// ISO 3166-1 region of watch providers, or country whose rating system
+    /// the certifications are, listed in its order from the least restricted.
     ///
     /// Field 6: `region`
     #[must_use]

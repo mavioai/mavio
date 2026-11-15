@@ -830,8 +830,9 @@ pub struct DiscoverRequest {
     pub rating_max: ::core::option::Option<f64>,
     /// Field 18: `votes_min`
     pub votes_min: ::core::option::Option<i32>,
-    /// Content ratings of the server's metadata country, any of them; those
-    /// above the caller's rating limit are dropped.
+    /// Content ratings of certification_country, any of them, as
+    /// ListFilterValues lists them; those above the caller's rating limit are
+    /// dropped.
     ///
     /// Field 19: `certifications`
     pub certifications: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
@@ -853,6 +854,11 @@ pub struct DiscoverRequest {
     ///
     /// Field 24: `tmdb_collection_id`
     pub tmdb_collection_id: ::core::option::Option<i32>,
+    /// ISO 3166-1 country of certifications; unset for the server's metadata
+    /// country.
+    ///
+    /// Field 25: `certification_country`
+    pub certification_country: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -883,6 +889,7 @@ impl ::core::fmt::Debug for DiscoverRequest {
             .field("language", &self.language)
             .field("page", &self.page)
             .field("tmdb_collection_id", &self.tmdb_collection_id)
+            .field("certification_country", &self.certification_country)
             .finish()
     }
 }
@@ -1037,6 +1044,16 @@ impl DiscoverRequest {
         self.tmdb_collection_id = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::certification_country`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_certification_country(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.certification_country = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(DiscoverRequest);
 impl ::buffa::MessageName for DiscoverRequest {
@@ -1130,6 +1147,9 @@ impl ::buffa::Message for DiscoverRequest {
         if let Some(v) = self.tmdb_collection_id {
             size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.certification_country {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1211,6 +1231,9 @@ impl ::buffa::Message for DiscoverRequest {
         }
         if let Some(v) = self.tmdb_collection_id {
             ::buffa::types::put_int32_field(24u32, v, buf);
+        }
+        if let Some(ref v) = self.certification_country {
+            ::buffa::types::put_string_field(25u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1471,6 +1494,18 @@ impl ::buffa::Message for DiscoverRequest {
                     ::buffa::types::decode_int32(buf)?,
                 );
             }
+            25u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .certification_country
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1503,6 +1538,7 @@ impl ::buffa::Message for DiscoverRequest {
         self.language = ::core::option::Option::None;
         self.page = ::core::option::Option::None;
         self.tmdb_collection_id = ::core::option::Option::None;
+        self.certification_country = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -2408,7 +2444,7 @@ pub struct ListFilterValuesRequest {
     ///
     /// Field 1: `catalog`
     pub catalog: ::core::option::Option<::buffa::alloc::string::String>,
-    /// GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.
+    /// GENRE, STUDIO, NETWORK, KEYWORD, WATCH_PROVIDER or CERTIFICATION.
     ///
     /// Field 2: `filter`
     pub filter: ::core::option::Option<
@@ -2418,7 +2454,9 @@ pub struct ListFilterValuesRequest {
     ///
     /// Field 3: `media_kind`
     pub media_kind: ::core::option::Option<::buffa::EnumValue<MediaKind>>,
-    /// Matched against names; studios and keywords need one.
+    /// Matched against names; studios and keywords need one. Networks are
+    /// listed without one, the provider's best known, and a network's ID
+    /// finds it.
     ///
     /// Field 4: `query`
     pub query: ::core::option::Option<::buffa::alloc::string::String>,
@@ -2428,7 +2466,8 @@ pub struct ListFilterValuesRequest {
     pub ids: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     /// Field 6: `language`
     pub language: ::core::option::Option<::buffa::alloc::string::String>,
-    /// ISO 3166-1 region of watch providers.
+    /// ISO 3166-1 region of watch providers, or country of certifications,
+    /// whose unset is the server's metadata country.
     ///
     /// Field 7: `region`
     pub region: ::core::option::Option<::buffa::alloc::string::String>,
@@ -2702,14 +2741,25 @@ impl ::buffa::ExtensionSet for ListFilterValuesRequest {
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct ListFilterValuesResponse {
+    /// Certifications in their rating system's order, from the least
+    /// restricted; those above the caller's rating limit are left out.
+    ///
     /// Field 1: `values`
     pub values: ::buffa::alloc::vec::Vec<super::super::plugin::v1::FilterValue>,
+    /// The country of the values listed: for certifications, the request's
+    /// or the server's metadata country.
+    ///
+    /// Field 2: `region`
+    pub region: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
 impl ::core::fmt::Debug for ListFilterValuesResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("ListFilterValuesResponse").field("values", &self.values).finish()
+        f.debug_struct("ListFilterValuesResponse")
+            .field("values", &self.values)
+            .field("region", &self.region)
+            .finish()
     }
 }
 impl ListFilterValuesResponse {
@@ -2718,6 +2768,18 @@ impl ListFilterValuesResponse {
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
     pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.ListFilterValuesResponse";
+}
+impl ListFilterValuesResponse {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::region`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_region(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.region = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(ListFilterValuesResponse);
 impl ::buffa::MessageName for ListFilterValuesResponse {
@@ -2747,6 +2809,9 @@ impl ::buffa::Message for ListFilterValuesResponse {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(ref v) = self.region {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2764,6 +2829,9 @@ impl ::buffa::Message for ListFilterValuesResponse {
                 buf,
             );
             v.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.region {
+            ::buffa::types::put_string_field(2u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2790,6 +2858,16 @@ impl ::buffa::Message for ListFilterValuesResponse {
                 ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
                 self.values.push(elem);
             }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.region.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2799,6 +2877,7 @@ impl ::buffa::Message for ListFilterValuesResponse {
     }
     fn clear(&mut self) {
         self.values.clear();
+        self.region = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

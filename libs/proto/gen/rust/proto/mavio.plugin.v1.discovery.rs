@@ -2512,7 +2512,7 @@ impl ::buffa::ExtensionSet for DiscoveredTitle {
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct ListFilterValuesRequest {
-    /// GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.
+    /// GENRE, STUDIO, NETWORK, KEYWORD, WATCH_PROVIDER or CERTIFICATION.
     ///
     /// Field 1: `filter`
     pub filter: ::core::option::Option<::buffa::EnumValue<DiscoverFilter>>,
@@ -2520,7 +2520,9 @@ pub struct ListFilterValuesRequest {
     ///
     /// Field 2: `media_kind`
     pub media_kind: ::core::option::Option<::buffa::EnumValue<MediaKind>>,
-    /// Matched against names; studios and keywords need one.
+    /// Matched against names; studios and keywords need one. A provider that
+    /// cannot search networks lists those it knows best without one, matched
+    /// against the query's names, and finds a network by its ID.
     ///
     /// Field 3: `query`
     pub query: ::core::option::Option<::buffa::alloc::string::String>,
@@ -2530,7 +2532,8 @@ pub struct ListFilterValuesRequest {
     pub ids: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     /// Field 5: `language`
     pub language: ::core::option::Option<::buffa::alloc::string::String>,
-    /// ISO 3166-1 region of watch providers.
+    /// ISO 3166-1 region of watch providers, or country whose rating system
+    /// the certifications are, listed in its order from the least restricted.
     ///
     /// Field 6: `region`
     pub region: ::core::option::Option<::buffa::alloc::string::String>,

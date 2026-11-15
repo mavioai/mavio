@@ -2127,16 +2127,19 @@ func (x *ListFilterValuesRequest) ClearRegion() {
 type ListFilterValuesRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.
+	// GENRE, STUDIO, NETWORK, KEYWORD, WATCH_PROVIDER or CERTIFICATION.
 	Filter *DiscoverFilter
 	// Movies or series.
 	MediaKind *MediaKind
-	// Matched against names; studios and keywords need one.
+	// Matched against names; studios and keywords need one. A provider that
+	// cannot search networks lists those it knows best without one, matched
+	// against the query's names, and finds a network by its ID.
 	Query *string
 	// The values' IDs, for their names; with a query, matched too.
 	Ids      []string
 	Language *string
-	// ISO 3166-1 region of watch providers.
+	// ISO 3166-1 region of watch providers, or country whose rating system
+	// the certifications are, listed in its order from the least restricted.
 	Region *string
 }
 

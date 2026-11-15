@@ -1785,7 +1785,7 @@
               "type": "string"
             },
             "title": "certifications",
-            "description": "Content ratings of the server's metadata country, any of them; those\n above the caller's rating limit are dropped."
+            "description": "Content ratings of certification_country, any of them, as\n ListFilterValues lists them; those above the caller's rating limit are\n dropped."
           },
           "sort": {
             "allOf": [
@@ -1819,6 +1819,12 @@
             "minimum": 0,
             "format": "int32",
             "description": "The collection of a collection catalog, by its TMDB ID."
+          },
+          "certificationCountry": {
+            "type": "string",
+            "title": "certification_country",
+            "pattern": "^([A-Z]{2})?$",
+            "description": "ISO 3166-1 country of certifications; unset for the server's metadata\n country."
           }
         },
         "title": "DiscoverRequest",
@@ -3491,7 +3497,7 @@
               ]
             },
             "title": "filter",
-            "description": "GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.\nenum.defined_only = true\n"
+            "description": "GENRE, STUDIO, NETWORK, KEYWORD, WATCH_PROVIDER or CERTIFICATION.\nenum.defined_only = true\n"
           },
           "mediaKind": {
             "allOf": [
@@ -3505,7 +3511,7 @@
           "query": {
             "type": "string",
             "title": "query",
-            "description": "Matched against names; studios and keywords need one."
+            "description": "Matched against names; studios and keywords need one. Networks are\n listed without one, the provider's best known, and a network's ID\n finds it."
           },
           "ids": {
             "type": "array",
@@ -3522,7 +3528,7 @@
           "region": {
             "type": "string",
             "title": "region",
-            "description": "ISO 3166-1 region of watch providers."
+            "description": "ISO 3166-1 region of watch providers, or country of certifications,\n whose unset is the server's metadata country."
           }
         },
         "title": "ListFilterValuesRequest",
@@ -3536,7 +3542,13 @@
             "items": {
               "$ref": "#/components/schemas/mavio.plugin.v1.FilterValue"
             },
-            "title": "values"
+            "title": "values",
+            "description": "Certifications in their rating system's order, from the least\n restricted; those above the caller's rating limit are left out."
+          },
+          "region": {
+            "type": "string",
+            "title": "region",
+            "description": "The country of the values listed: for certifications, the request's\n or the server's metadata country."
           }
         },
         "title": "ListFilterValuesResponse",

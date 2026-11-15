@@ -1,8 +1,9 @@
 // A catalog's filters and sorts (docs/clients.md §6.3.28): the dialog
 // choosing the order of its titles and the filters it takes — genres,
-// studios, keywords and streaming services by their values, the original
-// language, and ranges of years, runtime, rating and votes.
-import { type CatalogFilters, type NamedValue, type ServerEntry, useFilterValues, useLocalization } from "@mavio/client-ts";
+// studios, networks, keywords and streaming services by their values, the
+// original language, ranges of years, runtime, rating and votes, and the
+// content ratings of a country.
+import { type CatalogFilters, type NamedValue, type ServerEntry, useCertifications, useFilterValues, useLocalization } from "@mavio/client-ts";
 import type { Catalog } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { DiscoverFilter, DiscoverSort } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
@@ -47,6 +48,7 @@ const count = (v: unknown, max: number): number | undefined => {
   return Number.isInteger(n) && n > 0 && n <= max ? n : undefined;
 };
 const code = (v: unknown): string | undefined => (typeof v === "string" && /^[A-Za-z]{2,3}$/.test(v) ? v : undefined);
+const country = (v: unknown): string | undefined => (typeof v === "string" && /^[A-Z]{2}$/.test(v) ? v : undefined);
 
 /** The filters in a catalog page's address, those that are well formed; none when none is set. */
 export function parseFilters(raw: unknown): CatalogFilters | undefined {
@@ -69,6 +71,8 @@ export function parseFilters(raw: unknown): CatalogFilters | undefined {
     runtimeMax: count(r.runtimeMax, 1000),
     ratingMin: count(r.ratingMin, 10),
     votesMin: count(r.votesMin, 1_000_000),
+    certifications: strings(r.certifications),
+    certificationCountry: country(r.certificationCountry),
   };
   for (const k of Object.keys(f) as (keyof CatalogFilters)[]) if (f[k] === undefined) delete f[k];
   return Object.keys(f).length > 0 ? f : undefined;
@@ -83,7 +87,11 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-/** Values found by name, as studios and keywords are: the chosen ones, a field, and what it finds. */
+/**
+ * Values found by name, as studios and keywords are: the chosen ones, a
+ * field, and what it finds; values listed without a query, as networks
+ * are, show what the provider lists until something is typed.
+ */
 function SearchedValues({
   server,
   catalog,
@@ -92,7 +100,8 @@ function SearchedValues({
   title,
   value,
   onChange,
-  searchable = true,
+  listed = false,
+  placeholder,
 }: {
   server: ServerEntry;
   catalog: string;
@@ -101,8 +110,9 @@ function SearchedValues({
   title: string;
   value: NamedValue[];
   onChange: (v: NamedValue[]) => void;
-  /** False for values looked up by ID only, as networks are: just the chosen ones. */
-  searchable?: boolean;
+  /** True for values the provider lists without a query, as the best known networks. */
+  listed?: boolean;
+  placeholder?: string;
 }) {
   const [text, setText] = useState("");
   const [query, setQuery] = useState("");
@@ -110,7 +120,9 @@ function SearchedValues({
     const timer = setTimeout(() => setQuery(text.trim()), 300);
     return () => clearTimeout(timer);
   }, [text]);
-  const found = useFilterValues(server, { catalog, filter, mediaKind, query, language: discoverLanguage }, query !== "");
+  const found = useFilterValues(server, { catalog, filter, mediaKind, query, language: discoverLanguage }, listed || query !== "");
+  const shown = listed || query !== "";
+  const hint = placeholder ?? t("discover.searchValues", { filter: title });
   const chosen = new Set(value.map((v) => v.id));
   return (
     <Section title={title}>
@@ -129,24 +141,18 @@ function SearchedValues({
           ))}
         </div>
       )}
-      {searchable && <input
-        type="search"
-        className={field}
-        aria-label={t("discover.searchValues", { filter: title })}
-        placeholder={t("discover.searchValues", { filter: title })}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      />}
-      {query !== "" && (
-        <div className="flex max-h-32 flex-wrap gap-2 overflow-y-auto">
+      <input type="search" className={field} aria-label={hint} placeholder={hint} value={text} onChange={(e) => setText(e.target.value)} />
+      {shown && (
+        <div className={`flex flex-wrap gap-2 overflow-y-auto ${listed ? "max-h-40" : "max-h-32"}`}>
           {(found.data ?? [])
             .filter((v) => !chosen.has(v.id))
-            .slice(0, 20)
+            .slice(0, listed ? 50 : 20)
             .map((v) => (
               <ToggleChip
                 key={v.id}
                 on={false}
                 label={v.name}
+                image={v.imageUrl || undefined}
                 onChange={() => {
                   onChange([...value, { id: v.id, name: v.name }]);
                   setText("");
@@ -202,6 +208,56 @@ function ListedValues({
           );
         })}
       </div>
+    </Section>
+  );
+}
+
+/**
+ * Content ratings of a country's rating system, the server's metadata
+ * country until another is chosen, from the least restricted; those above
+ * the user's rating limit are not offered.
+ */
+function Certifications({
+  server,
+  catalog,
+  mediaKind,
+  country,
+  value,
+  onChange,
+}: {
+  server: ServerEntry;
+  catalog: string;
+  mediaKind: MediaKind;
+  country?: string;
+  value: string[];
+  onChange: (certifications: string[], country: string | undefined) => void;
+}) {
+  const { countries } = useLocalization(server);
+  const certs = useCertifications(server, { catalog, mediaKind, country });
+  const shown = country ?? certs.data?.country ?? "";
+  const list = certs.data?.values ?? [];
+  return (
+    <Section title={t("discover.certifications")}>
+      <Select
+        value={shown}
+        label={t("discover.certificationCountry")}
+        options={countryOptions(countries)}
+        onChange={(c) => onChange([], c || undefined)}
+      />
+      {certs.isSuccess && list.length === 0 ? (
+        <p className="type-footnote text-text-secondary">{t("discover.noCertifications")}</p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {list.map((v) => (
+            <ToggleChip
+              key={v.id}
+              on={value.includes(v.id)}
+              label={v.name}
+              onChange={(now) => onChange(now ? [...value, v.id] : value.filter((x) => x !== v.id), country ?? certs.data?.country)}
+            />
+          ))}
+        </div>
+      )}
     </Section>
   );
 }
@@ -266,14 +322,15 @@ export function FiltersDialog({
         {takes(DiscoverFilter.STUDIO) && mediaKind === MediaKind.MOVIE && (
           <SearchedValues {...common} filter={DiscoverFilter.STUDIO} title={t("discover.studios")} value={f.studios ?? []} onChange={(studios) => set({ studios })} />
         )}
-        {mediaKind === MediaKind.SERIES && (f.networks?.length ?? 0) > 0 && (
+        {mediaKind === MediaKind.SERIES && (takes(DiscoverFilter.NETWORK) || (f.networks?.length ?? 0) > 0) && (
           <SearchedValues
             {...common}
             filter={DiscoverFilter.NETWORK}
             title={t("discover.networks")}
             value={f.networks ?? []}
             onChange={(networks) => set({ networks })}
-            searchable={false}
+            listed
+            placeholder={t("discover.searchNetworks")}
           />
         )}
         {takes(DiscoverFilter.KEYWORD) && (
@@ -352,6 +409,16 @@ export function FiltersDialog({
               </Section>
             )}
           </div>
+        )}
+        {takes(DiscoverFilter.CERTIFICATION) && (
+          <Certifications
+            {...common}
+            country={f.certificationCountry}
+            value={f.certifications ?? []}
+            onChange={(certifications, certificationCountry) =>
+              set({ certifications: certifications.length > 0 ? certifications : undefined, certificationCountry })
+            }
+          />
         )}
       </div>
       <div className="flex justify-end gap-2">

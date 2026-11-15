@@ -250,6 +250,14 @@
     <string name="discover_search_now_series_detail">Search for the monitored episodes missing a file as soon as it\'s added</string>
     <!-- Filter of a series catalog: the networks the titles air on -->
     <string name="discover_networks">Networks</string>
+    <!-- Placeholder of the field finding the networks to filter series by: among the best known by name, or any by its ID. -->
+    <string name="discover_search_networks">Search networks by name or TMDB ID</string>
+    <!-- Filter of titles by their content rating, such as PG-13, in a country's rating system. -->
+    <string name="discover_certifications">Content Ratings</string>
+    <!-- Label of the choice of the country whose content ratings Discover's filters list. -->
+    <string name="discover_certification_country">Rating system</string>
+    <!-- Shown in Discover's filters when the country chosen has no content ratings. -->
+    <string name="discover_no_certifications">This country has no content ratings to filter by.</string>
     <!-- Production status of a title -->
     <string name="discover_status_rumored">Rumored</string>
     <!-- Production status of a title -->

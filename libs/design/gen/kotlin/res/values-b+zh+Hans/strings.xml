@@ -126,6 +126,10 @@
     <string name="discover_search_now_movie_detail">添加后立即搜索此电影</string>
     <string name="discover_search_now_series_detail">添加后立即搜索监视中缺失文件的集</string>
     <string name="discover_networks">电视网</string>
+    <string name="discover_search_networks">按名称或 TMDB ID 搜索电视网</string>
+    <string name="discover_certifications">内容分级</string>
+    <string name="discover_certification_country">分级制度</string>
+    <string name="discover_no_certifications">该国家或地区没有可筛选的内容分级。</string>
     <string name="discover_status_rumored">传闻</string>
     <string name="discover_status_planned">已计划</string>
     <string name="discover_status_in_production">制作中</string>

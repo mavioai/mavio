@@ -134,8 +134,9 @@ message DiscoverRequest {
     lte: 10
   }];
   int32 votes_min = 18 [(buf.validate.field).int32.gte = 0];
-  // Content ratings of the server's metadata country, any of them; those
-  // above the caller's rating limit are dropped.
+  // Content ratings of certification_country, any of them, as
+  // ListFilterValues lists them; those above the caller's rating limit are
+  // dropped.
   repeated string certifications = 19;
   mavio.plugin.v1.DiscoverSort sort = 20 [(buf.validate.field).enum.defined_only = true];
   bool ascending = 21;
@@ -148,6 +149,9 @@ message DiscoverRequest {
   }];
   // The collection of a collection catalog, by its TMDB ID.
   int32 tmdb_collection_id = 24 [(buf.validate.field).int32.gte = 0];
+  // ISO 3166-1 country of certifications; unset for the server's metadata
+  // country.
+  string certification_country = 25 [(buf.validate.field).string.pattern = "^([A-Z]{2})?$"];
 }
 
 // DiscoverResponse is a page of a catalog. Its pages are the provider's:
@@ -226,24 +230,32 @@ message DiscoveredTitle {
 message ListFilterValuesRequest {
   // The catalog whose provider lists the values.
   string catalog = 1 [(buf.validate.field).string.min_len = 1];
-  // GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.
+  // GENRE, STUDIO, NETWORK, KEYWORD, WATCH_PROVIDER or CERTIFICATION.
   mavio.plugin.v1.DiscoverFilter filter = 2 [(buf.validate.field).enum = {
     defined_only: true
     not_in: [0]
   }];
   // Movies or series.
   MediaKind media_kind = 3 [(buf.validate.field).enum.defined_only = true];
-  // Matched against names; studios and keywords need one.
+  // Matched against names; studios and keywords need one. Networks are
+  // listed without one, the provider's best known, and a network's ID
+  // finds it.
   string query = 4;
   // The values' IDs, for their names.
   repeated string ids = 5;
   string language = 6;
-  // ISO 3166-1 region of watch providers.
+  // ISO 3166-1 region of watch providers, or country of certifications,
+  // whose unset is the server's metadata country.
   string region = 7;
 }
 
 message ListFilterValuesResponse {
+  // Certifications in their rating system's order, from the least
+  // restricted; those above the caller's rating limit are left out.
   repeated mavio.plugin.v1.FilterValue values = 1;
+  // The country of the values listed: for certifications, the request's
+  // or the server's metadata country.
+  string region = 2;
 }
 
 message SearchTitlesRequest {

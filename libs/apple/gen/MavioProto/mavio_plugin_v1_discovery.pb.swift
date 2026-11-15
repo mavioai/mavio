@@ -756,7 +756,7 @@ public nonisolated struct Mavio_Plugin_V1_ListFilterValuesRequest: Sendable {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// GENRE, STUDIO, NETWORK, KEYWORD or WATCH_PROVIDER.
+  /// GENRE, STUDIO, NETWORK, KEYWORD, WATCH_PROVIDER or CERTIFICATION.
   public var filter: Mavio_Plugin_V1_DiscoverFilter {
     get {_filter ?? .unspecified}
     set {_filter = newValue}
@@ -776,7 +776,9 @@ public nonisolated struct Mavio_Plugin_V1_ListFilterValuesRequest: Sendable {
   /// Clears the value of `mediaKind`. Subsequent reads from it will return its default value.
   public mutating func clearMediaKind() {self._mediaKind = nil}
 
-  /// Matched against names; studios and keywords need one.
+  /// Matched against names; studios and keywords need one. A provider that
+  /// cannot search networks lists those it knows best without one, matched
+  /// against the query's names, and finds a network by its ID.
   public var query: String {
     get {_query ?? String()}
     set {_query = newValue}
@@ -798,7 +800,8 @@ public nonisolated struct Mavio_Plugin_V1_ListFilterValuesRequest: Sendable {
   /// Clears the value of `language`. Subsequent reads from it will return its default value.
   public mutating func clearLanguage() {self._language = nil}
 
-  /// ISO 3166-1 region of watch providers.
+  /// ISO 3166-1 region of watch providers, or country whose rating system
+  /// the certifications are, listed in its order from the least restricted.
   public var region: String {
     get {_region ?? String()}
     set {_region = newValue}

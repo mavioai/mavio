@@ -733,6 +733,7 @@ type fakeDiscovery struct {
 	titles     []*pluginv1.DiscoveredTitle
 	last       *pluginv1.DiscoverRequest
 	lastSearch *pluginv1.SearchTitlesRequest
+	lastValues *pluginv1.ListFilterValuesRequest
 	// noSearch answers searches, people and collections unimplemented.
 	noSearch bool
 }
@@ -800,8 +801,21 @@ func (f *fakeDiscovery) Discover(_ context.Context, req *pluginv1.DiscoverReques
 	return pluginv1.DiscoverResponse_builder{Titles: f.titles, Page: new(int32(1)), TotalPages: new(int32(1)), TotalResults: new(int32(len(f.titles)))}.Build(), nil
 }
 
-func (f *fakeDiscovery) ListFilterValues(context.Context, *pluginv1.ListFilterValuesRequest) (*pluginv1.ListFilterValuesResponse, error) {
-	return pluginv1.ListFilterValuesResponse_builder{Values: []*pluginv1.FilterValue{pluginv1.FilterValue_builder{Id: new("28"), Name: new("Action")}.Build()}}.Build(), nil
+// ListFilterValues lists a genre, or the certifications of the US and
+// GB.
+func (f *fakeDiscovery) ListFilterValues(_ context.Context, req *pluginv1.ListFilterValuesRequest) (*pluginv1.ListFilterValuesResponse, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.lastValues = req
+	values := []string{"28"}
+	if req.GetFilter() == pluginv1.DiscoverFilter_DISCOVER_FILTER_CERTIFICATION {
+		values = map[string][]string{"US": {"G", "PG", "PG-13", "R"}, "GB": {"U", "PG", "12A", "15", "18"}}[req.GetRegion()]
+	}
+	resp := &pluginv1.ListFilterValuesResponse{}
+	for _, v := range values {
+		resp.SetValues(append(resp.GetValues(), pluginv1.FilterValue_builder{Id: new(v), Name: new(v)}.Build()))
+	}
+	return resp, nil
 }
 
 func discovered(kind pluginv1.MediaKind, tmdb int, adult bool) *pluginv1.DiscoveredTitle {
@@ -809,6 +823,46 @@ func discovered(kind pluginv1.MediaKind, tmdb int, adult bool) *pluginv1.Discove
 		MediaKind: new(kind), Name: new("T" + strconv.Itoa(tmdb)), Adult: new(adult),
 		ExternalIds: map[string]string{"tmdb": strconv.Itoa(tmdb)},
 	}.Build()
+}
+
+func TestFilterValuesCertifications(t *testing.T) {
+	e := newEnv(t)
+	d := &fakeDiscovery{}
+	e.svc.Discovery = func() []DiscoveryProvider { return []DiscoveryProvider{{ID: "tmdb", Client: d}} }
+	pg := e.user("pg", func(u *core.User) { u.Access.MaxParentalRating = score(t, "PG") })
+	certs := func(u core.User, region string) ([]string, string) {
+		t.Helper()
+		req := pluginv1.ListFilterValuesRequest_builder{Filter: new(pluginv1.DiscoverFilter_DISCOVER_FILTER_CERTIFICATION), Region: new(region)}.Build()
+		values, got, err := e.svc.FilterValues(e.ctx, u, "tmdb/popular", req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var ids []string
+		for _, v := range values {
+			ids = append(ids, v.GetId())
+		}
+		return ids, got
+	}
+	// The server's metadata country by default, the request's otherwise.
+	if got, region := certs(e.admin, ""); !slices.Equal(got, []string{"G", "PG", "PG-13", "R"}) || region != "US" || d.lastValues.GetRegion() != "US" {
+		t.Errorf("certifications = %v of %q, want the US' all", got, region)
+	}
+	if got, region := certs(e.admin, "GB"); !slices.Equal(got, []string{"U", "PG", "12A", "15", "18"}) || region != "GB" {
+		t.Errorf("certifications(GB) = %v of %q, want GB's all", got, region)
+	}
+	// Those above the caller's limit are left out.
+	if got, _ := certs(pg, ""); !slices.Equal(got, []string{"G", "PG"}) {
+		t.Errorf("certifications within PG = %v, want [G PG]", got)
+	}
+	if got, _ := certs(pg, "GB"); slices.Contains(got, "15") || !slices.Contains(got, "U") {
+		t.Errorf("certifications within PG in GB = %v, want U and not 15", got)
+	}
+	// Other filters' values are the provider's, whatever the limit.
+	if v, region, err := e.svc.FilterValues(e.ctx, pg, "tmdb/popular", pluginv1.ListFilterValuesRequest_builder{
+		Filter: new(pluginv1.DiscoverFilter_DISCOVER_FILTER_GENRE),
+	}.Build()); err != nil || len(v) != 1 || region != "" {
+		t.Errorf("FilterValues(genre) = %v of %q, %v", v, region, err)
+	}
 }
 
 func TestDiscover(t *testing.T) {
@@ -824,7 +878,7 @@ func TestDiscover(t *testing.T) {
 	if err != nil || len(cs) != 2 || cs[0].ID != "tmdb/popular" || cs[1].ID != "tmdb/trending" {
 		t.Fatalf("Catalogs() = %+v, %v", cs, err)
 	}
-	if v, err := e.svc.FilterValues(e.ctx, "tmdb/popular", &pluginv1.ListFilterValuesRequest{}); err != nil || len(v) != 1 {
+	if v, _, err := e.svc.FilterValues(e.ctx, e.admin, "tmdb/popular", &pluginv1.ListFilterValuesRequest{}); err != nil || len(v) != 1 {
 		t.Errorf("FilterValues() = %v, %v", v, err)
 	}
 	if _, err := e.svc.Discover(e.ctx, e.admin, "nope/popular", &pluginv1.DiscoverRequest{}); !errors.Is(err, core.ErrNotFound) {
@@ -870,6 +924,24 @@ func TestDiscover(t *testing.T) {
 	}
 	if slices.ContainsFunc(strictPage.Titles, func(d DiscoveredTitle) bool { return d.TmdbID == 3 }) {
 		t.Errorf("unrated title listed to a user blocking them")
+	}
+	// Certifications of another country than the server's are asked in it,
+	// within the limit there.
+	if _, err := e.svc.Discover(e.ctx, pg, "tmdb/popular", pluginv1.DiscoverRequest_builder{
+		MediaKind: new(movie), CertificationCountry: new("GB"), Certifications: []string{"U", "15"},
+	}.Build()); err != nil {
+		t.Fatal(err)
+	}
+	if got := d.last.GetCertifications(); !slices.Equal(got, []string{"U"}) || d.last.GetCertificationCountry() != "GB" {
+		t.Errorf("certifications asked in GB = %v in %q, want [U] in GB", got, d.last.GetCertificationCountry())
+	}
+	// A country without certifications asked keeps the server's for the
+	// policy's.
+	if _, err := e.svc.Discover(e.ctx, strict, "tmdb/popular", pluginv1.DiscoverRequest_builder{MediaKind: new(movie), CertificationCountry: new("GB")}.Build()); err != nil {
+		t.Fatal(err)
+	}
+	if got := d.last.GetCertifications(); !slices.Contains(got, "PG") || d.last.GetCertificationCountry() != "US" {
+		t.Errorf("certifications of the policy = %v in %q, want the US'", got, d.last.GetCertificationCountry())
 	}
 	// Others' titles are looked up and those above the limit left out.
 	page, err = e.svc.Discover(e.ctx, pg, "tmdb/trending", &pluginv1.DiscoverRequest{})
