@@ -1822,6 +1822,20 @@ export type MessageKey =
   | 'downloads.importFooter'
   | 'downloads.folder'
   | 'downloads.scan'
+  | 'downloads.choose'
+  | 'downloads.chooseMovie'
+  | 'downloads.chooseTitle'
+  | 'downloads.importFor'
+  | 'downloads.forMovie'
+  | 'downloads.forEpisodes'
+  | 'downloads.searchMovies'
+  | 'downloads.searchSeries'
+  | 'downloads.nothingFound'
+  | 'downloads.chosen'
+  | 'downloads.chooseEpisodes'
+  | 'downloads.season'
+  | 'downloads.noEpisodes'
+  | 'downloads.episode'
   | 'acquire.title'
   | 'acquire.notWanted'
   | 'acquire.notWantedFooter'
@@ -4145,9 +4159,23 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "downloads.blocklistFooter": "Blocklisted releases are not grabbed again for their item.",
     "downloads.blocklistEmpty": "The blocklist is empty.",
     "downloads.unblock": "Remove",
-    "downloads.importFooter": "Files are matched to wanted movies by their names; files no movie matches cannot be imported here.",
+    "downloads.importFooter": "Files are matched to wanted movies by their names; choose the movie or episodes of the others.",
     "downloads.folder": "Folder on the server",
     "downloads.scan": "Scan",
+    "downloads.choose": "Choose Movie or Episodes",
+    "downloads.chooseMovie": "Choose Movie",
+    "downloads.chooseTitle": "Import File For",
+    "downloads.importFor": "Import for",
+    "downloads.forMovie": "Movie",
+    "downloads.forEpisodes": "Episodes",
+    "downloads.searchMovies": "Search Movies",
+    "downloads.searchSeries": "Search Series",
+    "downloads.nothingFound": "Nothing found.",
+    "downloads.chosen": "Chosen",
+    "downloads.chooseEpisodes": "The episodes the file holds",
+    "downloads.season": "Season",
+    "downloads.noEpisodes": "The series has no episodes.",
+    "downloads.episode": "{episode}. {name}",
     "acquire.title": "Acquisition",
     "acquire.notWanted": "Not wanted: the server doesn't acquire it.",
     "acquire.notWantedFooter": "Movies and series are added to the wanted when requested.",
@@ -6469,9 +6497,23 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "downloads.blocklistFooter": "黑名单中的发布不会再为其条目抓取。",
     "downloads.blocklistEmpty": "黑名单为空。",
     "downloads.unblock": "移除",
-    "downloads.importFooter": "文件按名称匹配想要的电影；无法匹配电影的文件不能在此导入。",
+    "downloads.importFooter": "文件按名称匹配想要的电影；其余文件可选择其电影或分集。",
     "downloads.folder": "服务器上的文件夹",
     "downloads.scan": "扫描",
+    "downloads.choose": "选择电影或分集",
+    "downloads.chooseMovie": "选择电影",
+    "downloads.chooseTitle": "导入文件为",
+    "downloads.importFor": "导入为",
+    "downloads.forMovie": "电影",
+    "downloads.forEpisodes": "分集",
+    "downloads.searchMovies": "搜索电影",
+    "downloads.searchSeries": "搜索剧集",
+    "downloads.nothingFound": "未找到。",
+    "downloads.chosen": "已选择",
+    "downloads.chooseEpisodes": "文件包含的分集",
+    "downloads.season": "季",
+    "downloads.noEpisodes": "该剧集没有分集。",
+    "downloads.episode": "{episode}. {name}",
     "acquire.title": "获取",
     "acquire.notWanted": "未在想要中：服务器不会获取它。",
     "acquire.notWantedFooter": "电影与剧集在被请求时加入想要。",

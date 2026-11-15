@@ -779,7 +779,7 @@ flowchart TD
     - [x] 索引搜索（`apps/web/src/screens/indexer-search.tsx`，§6.3.31）：在所管理的全部服务器或其中一台上按文字搜索索引器，不带条目把发布发送到下载客户端（不带 `item_id` 的 `GrabRelease`），并可固定到侧边栏的“功能”分组
     - [ ] Apple、Android 与桌面应用中的索引搜索
     - [x] 电影或剧集的其他想要设置（`apps/web/src/screens/acquire.tsx` 中的 `WantedDialog`，`libs/client-ts/src/acquisition.ts` 中的 `useWantedActions().save` 与 `parseTags`），由其获取中的“编辑”打开，使用 `apps/web/src/screens/discover-wanted.tsx` 的各行：标签、电影的最低可用性、剧集的新季、类型（`Wanted.series_type`）与季文件夹（`UpdateWanted`），以及按 Sonarr 的选项（含特别篇）要监控的集，选择后应用（带 `series` 的 `SetMonitored`）；发现的“添加”也可填写标签
-    - [ ] 手动导入与想要的电影都不匹配的文件，为其选择电影或分集
+    - [x] 手动导入与想要的电影都不匹配的文件，为其选择电影或分集（`apps/web/src/screens/admin/manual-import.tsx`，`libs/client-ts/src/acquisition.ts` 中的 `useImportTargets` 与 `useSeriesEpisodes`）：按名称查找的电影，或将文件夹中的文件导入为想要的剧集的分集，初始选中其文件名包含的分集（`ListManualImportRequest.series_id`、`ManualImportFile.episode_ids`、`ManualImportRequest.series_id` 与 `episode_ids`），如 Sonarr 的手动导入一样导入到剧集的文件夹
     - [x] 从发现的作品将电影与剧集添加到想要（`apps/web/src/screens/discover-wanted.tsx`，`libs/client-ts/src/acquisition.ts` 中的 `useAddWanted` 与 `wantedTarget`），供进行发现的服务器的管理员使用，如 Radarr 与 Sonarr 的“添加新的”：媒体库与质量配置（默认是批准的请求所去之处）、电影的最低可用性、剧集的监视、新季、类型与季文件夹，以及立即搜索（`AddMovie`、`AddSeries`）；服务器已有的作品则显示其状态与“观看”
   - [x] Web UI 中面向管理员的条目操作：编辑元数据、识别、刷新与选择图片（`MetadataService`，§6.3.22）
   - [ ] Web UI 的播放与媒体库：播放列表与合集（`PlaylistService`、`CollectionService`）；在详情页与播放器中搜索、下载、上传、提取、同步与翻译字幕（`SubtitleService`）；以及音乐的歌词（`GetLyrics`）

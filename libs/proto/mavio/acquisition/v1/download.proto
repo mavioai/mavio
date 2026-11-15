@@ -42,13 +42,16 @@ service DownloadService {
   // ListManualImport lists the video files of a tracked movie download,
   // or of a folder that is not one, with the movie each is for, the
   // quality, languages and release group an import would give them and
-  // why the import specifications reject them, as Radarr's manual import.
+  // why the import specifications reject them, as Radarr's manual import;
+  // or the files of a folder with the episodes of a wanted series each
+  // holds, as Sonarr's.
   rpc ListManualImport(ListManualImportRequest) returns (ListManualImportResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
   // ManualImport imports a video file of a tracked movie download, or of
   // a folder that is not one, for the movie chosen whatever the import
-  // specifications reject, and completes a tracked download.
+  // specifications reject, and completes a tracked download; or a file
+  // of a folder for episodes of a wanted series.
   rpc ManualImport(ManualImportRequest) returns (ManualImportResponse);
   // GetDownloadClientPaths returns the folders a download client puts
   // completed downloads in, with where the server reads each, as
@@ -313,6 +316,9 @@ message ManualImportFile {
   // give the file.
   repeated string languages = 8;
   string release_group = 9;
+  // With series_id: the episodes of the series the file holds; empty when
+  // its names hold none.
+  repeated string episode_ids = 10;
 }
 
 // ImportMode is how a manual import transfers a file, as Radarr's.
@@ -333,6 +339,9 @@ message ListManualImportRequest {
   // The movie the files are for; unset for the download's movie, or for
   // the wanted movie each file's name matches.
   string movie_id = 3 [(buf.validate.field).string.uuid = true];
+  // The wanted series a folder's files are for instead of a movie, each
+  // with the episodes its names hold.
+  string series_id = 4 [(buf.validate.field).string.uuid = true];
 }
 
 message ListManualImportResponse {
@@ -360,6 +369,16 @@ message ManualImportRequest {
   // ListManualImport lists.
   string release_group = 7;
   ImportMode mode = 8;
+  // The wanted series to import a folder's file for instead of a movie.
+  string series_id = 9 [(buf.validate.field).string.uuid = true];
+  // With series_id: the episodes of the series the file holds; empty for
+  // those ListManualImport lists.
+  repeated string episode_ids = 10 [(buf.validate.field).repeated = {
+    max_items: 1000
+    items: {
+      string: {uuid: true}
+    }
+  }];
 }
 
 message ManualImportResponse {}

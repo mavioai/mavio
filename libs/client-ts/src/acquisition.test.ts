@@ -4,7 +4,7 @@ import { RequestSettingsSchema } from "@mavio/proto/mavio/acquisition/v1/request
 import { LibraryKind } from "@mavio/proto/mavio/library/v1/library_pb";
 import { expect, test } from "vitest";
 
-import { parseTags, wantedTarget } from "./acquisition.ts";
+import { parseTags, seasonsOf, wantedTarget } from "./acquisition.ts";
 
 const libraries = [
   { id: "movies", kind: LibraryKind.MOVIES },
@@ -64,4 +64,9 @@ test.each([
   { typed: "anime, anime,kids", want: ["anime", "kids"] },
 ])("parseTags($typed)", ({ typed, want }) => {
   expect(parseTags(typed)).toEqual(want);
+});
+
+test("seasonsOf puts the seasons in order, specials last", () => {
+  const episodes = [2, 0, 1, 2, 1, 10].map((parentIndexNumber) => ({ parentIndexNumber }));
+  expect(seasonsOf(episodes)).toEqual([1, 2, 10, 0]);
 });

@@ -903,7 +903,9 @@ pub trait DownloadService: Send + Sync + 'static {
     /// ListManualImport lists the video files of a tracked movie download,
     /// or of a folder that is not one, with the movie each is for, the
     /// quality, languages and release group an import would give them and
-    /// why the import specifications reject them, as Radarr's manual import.
+    /// why the import specifications reject them, as Radarr's manual import;
+    /// or the files of a folder with the episodes of a wanted series each
+    /// holds, as Sonarr's.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -928,7 +930,8 @@ pub trait DownloadService: Send + Sync + 'static {
     > + Send;
     /// ManualImport imports a video file of a tracked movie download, or of
     /// a folder that is not one, for the movie chosen whatever the import
-    /// specifications reject, and completes a tracked download.
+    /// specifications reject, and completes a tracked download; or a file
+    /// of a folder for episodes of a wanted series.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///

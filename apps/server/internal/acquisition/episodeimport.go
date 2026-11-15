@@ -55,6 +55,9 @@ type localEpisode struct {
 	// Sonarr's FolderEpisodeInfo; nil for a lone file.
 	folderInfo *release.ParsedEpisodeInfo
 	reasons    []string
+	// mode is how a manual import transfers the file; nil for as the
+	// download's client lets it.
+	mode *transferMode
 }
 
 // importEpisodeDownload imports the video files of a completed episode
@@ -97,7 +100,7 @@ func (r *Runtime) importEpisodeDownload(ctx context.Context, rn *run, d *core.Do
 		d.State = core.DownloadImportPending
 		return r.warn(ctx, d, fmt.Sprintf(msgNoFiles, local))
 	}
-	locals, err := r.episodeDecisions(ctx, rn, sh, d, local, files, expected)
+	locals, err := r.episodeDecisions(ctx, rn, sh, d, local, files, expected, "")
 	if err != nil {
 		return err
 	}
@@ -193,7 +196,8 @@ func (r *Runtime) importedSlots(ctx context.Context, sh *show, d *core.Download)
 // confirmed scene numbering; the file no sample, with audio, not being
 // unpacked, fitting the free space, no full season nor split episode,
 // and an upgrade of the files it replaces, none holding more episodes.
-func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *core.Download, local string, files []importFile, expected []slot) ([]*localEpisode, error) {
+// With only, the file of that path alone is decided, as among the others.
+func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *core.Download, local string, files []importFile, expected []slot, only string) ([]*localEpisode, error) {
 	ps, err := rn.parsing(ctx)
 	if err != nil {
 		return nil, err
@@ -221,6 +225,9 @@ func (r *Runtime) episodeDecisions(ctx context.Context, rn *run, sh *show, d *co
 	}
 	out := make([]*localEpisode, 0, len(files))
 	for _, f := range files {
+		if only != "" && f.path != only {
+			continue
+		}
 		le := &localEpisode{file: f, langs: langs, folderInfo: folderInfo}
 		out = append(out, le)
 		le.parsed = release.ParseSeriesPath(f.path)
@@ -422,6 +429,8 @@ func (r *Runtime) placeEpisodeFile(ctx context.Context, rn *run, sh *show, d *co
 	s := r.settings()
 	mode := transferCopy
 	switch {
+	case le.mode != nil:
+		mode = *le.mode
 	case p.item.GetCanMoveFiles():
 		mode = transferMove
 	case s.CopyUsingHardlinks:
@@ -481,9 +490,12 @@ func (r *Runtime) placeEpisodeFile(ctx context.Context, rn *run, sh *show, d *co
 	}
 	data := map[string]string{
 		dataImportedPath: imported, dataDroppedPath: filepath.ToSlash(le.file.path),
-		dataDownloadClient: p.client.Ref(), dataDownloadClientName: p.client.GetName(),
 		dataSceneName: le.sceneName, dataSize: strconv.FormatInt(le.file.size, 10), dataIndexer: d.Indexer,
 		dataCustomFormatScore: strconv.Itoa(sh.series.Profile.FormatScore(le.formats)),
+	}
+	if p.client.DownloadClient != nil {
+		// Files of folders that are not tracked downloads have no client.
+		data[dataDownloadClient], data[dataDownloadClientName] = p.client.Ref(), p.client.GetName()
 	}
 	if le.parsed != nil && le.parsed.ReleaseGroup != "" {
 		data[dataReleaseGroup] = le.parsed.ReleaseGroup

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -170,5 +171,98 @@ func TestManualImportFolder(t *testing.T) {
 	if len(imported) != 1 || !slices.Equal(imported[0].Languages, []string{"German"}) || imported[0].Data[dataReleaseGroup] != group ||
 		imported[0].Data[dataDownloadClient] != "" || imported[0].DownloadID != "" {
 		t.Errorf("imported events = %+v, want = one in German by MINE without a download client", imported)
+	}
+}
+
+// TestManualImportEpisodes checks the files of a folder are listed with
+// the episodes of a wanted series their names hold, and imported by hand
+// for those, or for the episodes chosen for a file whose names hold none,
+// as Sonarr's ManualImportService.
+func TestManualImportEpisodes(t *testing.T) {
+	e := newSeriesEnv(t)
+	s := e.addSeries(81189, core.SeriesStandard)
+	ep2, ep3 := e.episode(s.ID, 1, 2), e.episode(s.ID, 1, 3)
+	folder := filepath.Join(e.dlDir, "manual")
+	if err := os.MkdirAll(folder, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	const (
+		s01e02  = "Breaking.Bad.S01E02.720p.HDTV.x264-GRP.mkv"
+		unknown = "Some.Home.Video.mkv"
+	)
+	for _, f := range []string{s01e02, unknown} {
+		if err := os.WriteFile(filepath.Join(folder, f), []byte("content of "+f), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	files, err := e.rt.ListManualImport(e.ctx, ManualImportQuery{Folder: folder, SeriesID: s.ID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	byName := map[string]ManualImportFile{}
+	for _, f := range files {
+		byName[f.RelativePath] = f
+	}
+	if f := byName[s01e02]; !slices.Equal(f.EpisodeIDs, []core.ID{ep2.ID}) || f.Quality.Quality != release.HDTV720p || f.ReleaseGroup != "GRP" || !f.MovieID.IsZero() {
+		t.Errorf("file = %+v, want = S01E02 at HDTV-720p by GRP", f)
+	}
+	if f := byName[unknown]; len(f.EpisodeIDs) != 0 || !slices.Contains(f.Rejections, msgUnknownEpisodes) {
+		t.Errorf("file = %+v, want = of unknown episodes", f)
+	}
+	if _, err := e.rt.ListManualImport(e.ctx, ManualImportQuery{Folder: folder, SeriesID: s.ID, MovieID: e.addMovie().ID}); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("ListManualImport for a movie and a series: err = %v, want = invalid", err)
+	}
+	if _, err := e.rt.ListManualImport(e.ctx, ManualImportQuery{Folder: folder, SeriesID: core.NewID()}); !errors.Is(err, core.ErrNotFound) {
+		t.Errorf("ListManualImport for a series not wanted: err = %v, want = not found", err)
+	}
+
+	for _, tc := range []struct {
+		name string
+		req  ManualImportRequest
+	}{
+		{"unknown episodes", ManualImportRequest{Folder: folder, Path: filepath.Join(folder, unknown), SeriesID: s.ID}},
+		{"another series' episode", ManualImportRequest{Folder: folder, Path: filepath.Join(folder, unknown), SeriesID: s.ID, EpisodeIDs: []core.ID{core.NewID()}}},
+		{"episodes without a series", ManualImportRequest{Folder: folder, Path: filepath.Join(folder, unknown), EpisodeIDs: []core.ID{ep3.ID}}},
+	} {
+		if err := e.rt.ManualImport(e.ctx, tc.req); !errors.Is(err, core.ErrInvalid) {
+			t.Errorf("ManualImport of %s: err = %v, want = invalid", tc.name, err)
+		}
+	}
+
+	if err := e.rt.ManualImport(e.ctx, ManualImportRequest{Folder: folder, Path: filepath.Join(folder, s01e02), SeriesID: s.ID, Mode: ImportCopy}); err != nil {
+		t.Fatal(err)
+	}
+	if got := e.item(ep2.ID); got.Virtual || !strings.HasPrefix(filepath.Base(got.Path), "Breaking Bad - S01E02 - ") ||
+		filepath.Base(filepath.Dir(got.Path)) != "Season 1" {
+		t.Errorf("S01E02 = %q, want = imported into Season 1", got.Path)
+	}
+	if _, err := os.Stat(filepath.Join(folder, s01e02)); err != nil {
+		t.Errorf("copied file: %v, want = still in the folder", err)
+	}
+
+	group := "MINE"
+	if err := e.rt.ManualImport(e.ctx, ManualImportRequest{
+		Folder: folder, Path: filepath.Join(folder, unknown), SeriesID: s.ID, EpisodeIDs: []core.ID{ep3.ID}, ReleaseGroup: &group,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if got := e.item(ep3.ID); got.Virtual || !strings.HasPrefix(filepath.Base(got.Path), "Breaking Bad - S01E03 - ") {
+		t.Errorf("S01E03 = %q, want = imported", got.Path)
+	}
+	if _, err := os.Stat(filepath.Join(folder, unknown)); !errors.Is(err, os.ErrNotExist) {
+		t.Errorf("moved file stat = %v, want = gone from the folder", err)
+	}
+	imported := e.history(core.HistoryImported)
+	if len(imported) != 2 {
+		t.Fatalf("imported events = %+v, want = two", imported)
+	}
+	for _, h := range imported {
+		if h.ParentID != s.ID || h.Data[dataDownloadClient] != "" || h.DownloadID != "" {
+			t.Errorf("imported event = %+v, want = of the series without a download client", h)
+		}
+		if h.ItemID == ep3.ID && h.Data[dataReleaseGroup] != group {
+			t.Errorf("imported event of S01E03 = %+v, want = by MINE", h)
+		}
 	}
 }

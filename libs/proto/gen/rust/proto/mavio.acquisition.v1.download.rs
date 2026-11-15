@@ -4544,6 +4544,11 @@ pub struct ManualImportFile {
     pub languages: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     /// Field 9: `release_group`
     pub release_group: ::core::option::Option<::buffa::alloc::string::String>,
+    /// With series_id: the episodes of the series the file holds; empty when
+    /// its names hold none.
+    ///
+    /// Field 10: `episode_ids`
+    pub episode_ids: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -4559,6 +4564,7 @@ impl ::core::fmt::Debug for ManualImportFile {
             .field("movie_id", &self.movie_id)
             .field("languages", &self.languages)
             .field("release_group", &self.release_group)
+            .field("episode_ids", &self.episode_ids)
             .finish()
     }
 }
@@ -4682,6 +4688,9 @@ impl ::buffa::Message for ManualImportFile {
         if let Some(ref v) = self.release_group {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        for v in &self.episode_ids {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4718,6 +4727,9 @@ impl ::buffa::Message for ManualImportFile {
         }
         if let Some(ref v) = self.release_group {
             ::buffa::types::put_string_field(9u32, v, buf);
+        }
+        for v in &self.episode_ids {
+            ::buffa::types::put_string_field(10u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4828,6 +4840,17 @@ impl ::buffa::Message for ManualImportFile {
                     buf,
                 )?;
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.episode_ids.push(__elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -4845,6 +4868,7 @@ impl ::buffa::Message for ManualImportFile {
         self.movie_id = ::core::option::Option::None;
         self.languages.clear();
         self.release_group = ::core::option::Option::None;
+        self.episode_ids.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -4872,6 +4896,11 @@ pub struct ListManualImportRequest {
     ///
     /// Field 3: `movie_id`
     pub movie_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The wanted series a folder's files are for instead of a movie, each
+    /// with the episodes its names hold.
+    ///
+    /// Field 4: `series_id`
+    pub series_id: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -4881,6 +4910,7 @@ impl ::core::fmt::Debug for ListManualImportRequest {
             .field("id", &self.id)
             .field("folder", &self.folder)
             .field("movie_id", &self.movie_id)
+            .field("series_id", &self.series_id)
             .finish()
     }
 }
@@ -4919,6 +4949,16 @@ impl ListManualImportRequest {
         self.movie_id = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::series_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_series_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.series_id = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(ListManualImportRequest);
 impl ::buffa::MessageName for ListManualImportRequest {
@@ -4949,6 +4989,9 @@ impl ::buffa::Message for ListManualImportRequest {
         if let Some(ref v) = self.movie_id {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.series_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4967,6 +5010,9 @@ impl ::buffa::Message for ListManualImportRequest {
         }
         if let Some(ref v) = self.movie_id {
             ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.series_id {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5013,6 +5059,18 @@ impl ::buffa::Message for ListManualImportRequest {
                     buf,
                 )?;
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .series_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -5024,6 +5082,7 @@ impl ::buffa::Message for ListManualImportRequest {
         self.id = ::core::option::Option::None;
         self.folder = ::core::option::Option::None;
         self.movie_id = ::core::option::Option::None;
+        self.series_id = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -5185,6 +5244,15 @@ pub struct ManualImportRequest {
     pub release_group: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 8: `mode`
     pub mode: ::core::option::Option<::buffa::EnumValue<ImportMode>>,
+    /// The wanted series to import a folder's file for instead of a movie.
+    ///
+    /// Field 9: `series_id`
+    pub series_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// With series_id: the episodes of the series the file holds; empty for
+    /// those ListManualImport lists.
+    ///
+    /// Field 10: `episode_ids`
+    pub episode_ids: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -5199,6 +5267,8 @@ impl ::core::fmt::Debug for ManualImportRequest {
             .field("languages", &self.languages)
             .field("release_group", &self.release_group)
             .field("mode", &self.mode)
+            .field("series_id", &self.series_id)
+            .field("episode_ids", &self.episode_ids)
             .finish()
     }
 }
@@ -5277,6 +5347,16 @@ impl ManualImportRequest {
         self.mode = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::series_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_series_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.series_id = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(ManualImportRequest);
 impl ::buffa::MessageName for ManualImportRequest {
@@ -5322,6 +5402,12 @@ impl ::buffa::Message for ManualImportRequest {
         if let Some(ref v) = self.mode {
             size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
         }
+        if let Some(ref v) = self.series_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.episode_ids {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -5355,6 +5441,12 @@ impl ::buffa::Message for ManualImportRequest {
         }
         if let Some(ref v) = self.mode {
             ::buffa::types::put_int32_field(8u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.series_id {
+            ::buffa::types::put_string_field(9u32, v, buf);
+        }
+        for v in &self.episode_ids {
+            ::buffa::types::put_string_field(10u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5453,6 +5545,29 @@ impl ::buffa::Message for ManualImportRequest {
                     ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
                 );
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .series_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.episode_ids.push(__elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -5469,6 +5584,8 @@ impl ::buffa::Message for ManualImportRequest {
         self.languages.clear();
         self.release_group = ::core::option::Option::None;
         self.mode = ::core::option::Option::None;
+        self.series_id = ::core::option::Option::None;
+        self.episode_ids.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

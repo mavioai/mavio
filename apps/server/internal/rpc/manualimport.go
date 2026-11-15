@@ -19,7 +19,7 @@ var importModes = map[acquisition.ImportMode]acquisitionv1.ImportMode{
 }
 
 // ListManualImport lists the video files of a tracked movie download, or
-// of a folder that is not one.
+// of a folder that is not one, for movies or a series' episodes.
 func (s *DownloadService) ListManualImport(ctx context.Context, req *acquisitionv1.ListManualImportRequest) (*acquisitionv1.ListManualImportResponse, error) {
 	if _, err := admin(ctx); err != nil {
 		return nil, err
@@ -32,7 +32,11 @@ func (s *DownloadService) ListManualImport(ctx context.Context, req *acquisition
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	files, err := s.rt.ListManualImport(ctx, acquisition.ManualImportQuery{DownloadID: id, Folder: req.GetFolder(), MovieID: movieID})
+	seriesID, err := parseOptionalID(req.GetSeriesId())
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	files, err := s.rt.ListManualImport(ctx, acquisition.ManualImportQuery{DownloadID: id, Folder: req.GetFolder(), MovieID: movieID, SeriesID: seriesID})
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -42,13 +46,14 @@ func (s *DownloadService) ListManualImport(ctx context.Context, req *acquisition
 			Path: new(f.Path), RelativePath: new(f.RelativePath), Size: new(f.Size),
 			Quality: new(f.Quality.Quality.String()), Revision: new(int32(f.Quality.Revision.Version)), Rejections: f.Rejections,
 			MovieId: optionalID(f.MovieID), Languages: languageNames(f.Languages), ReleaseGroup: new(f.ReleaseGroup),
+			EpisodeIds: idStrings(f.EpisodeIDs),
 		}.Build()
 	}
 	return acquisitionv1.ListManualImportResponse_builder{Files: out}.Build(), nil
 }
 
 // ManualImport imports a video file of a tracked movie download, or of a
-// folder that is not one.
+// folder that is not one, for a movie or a series' episodes.
 func (s *DownloadService) ManualImport(ctx context.Context, req *acquisitionv1.ManualImportRequest) (*acquisitionv1.ManualImportResponse, error) {
 	if _, err := admin(ctx); err != nil {
 		return nil, err
@@ -61,7 +66,17 @@ func (s *DownloadService) ManualImport(ctx context.Context, req *acquisitionv1.M
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	in := acquisition.ManualImportRequest{DownloadID: id, Folder: req.GetFolder(), Path: req.GetPath(), MovieID: movieID}
+	seriesID, err := parseOptionalID(req.GetSeriesId())
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	episodeIDs, err := parseIDs(ctx, req.GetEpisodeIds())
+	if err != nil {
+		return nil, err
+	}
+	in := acquisition.ManualImportRequest{
+		DownloadID: id, Folder: req.GetFolder(), Path: req.GetPath(), MovieID: movieID, SeriesID: seriesID, EpisodeIDs: episodeIDs,
+	}
 	if name := strings.TrimSpace(req.GetQuality()); name != "" {
 		q, ok := qualityNamed(name)
 		if !ok {
@@ -95,4 +110,13 @@ func qualityNamed(name string) (release.Quality, bool) {
 		}
 	}
 	return release.Unknown, false
+}
+
+// idStrings returns IDs as strings; nil for none.
+func idStrings(ids []core.ID) []string {
+	var out []string
+	for _, id := range ids {
+		out = append(out, id.String())
+	}
+	return out
 }

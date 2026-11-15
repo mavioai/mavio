@@ -22,6 +22,7 @@ import {
   type WantedKind,
   WantedService,
 } from "@mavio/proto/mavio/acquisition/v1/wanted_pb";
+import { type Item, ItemKind, ItemService, SortField } from "@mavio/proto/mavio/library/v1/item_pb";
 import { LibraryKind } from "@mavio/proto/mavio/library/v1/library_pb";
 import { clone, type MessageInitShape } from "@bufbuild/protobuf";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -287,13 +288,54 @@ export function useDownloadActions(server: ServerEntry) {
   };
 }
 
-/** The video files of a tracked download, or of a folder, as a manual import would take them. */
-export function useManualImport(server: ServerEntry, target: { id?: string; folder?: string; movieId?: string }, enabled = true) {
+/**
+ * The video files of a tracked download, or of a folder, as a manual import
+ * would take them: for the movie each matches, or the one given, or for the
+ * episodes of a series each holds.
+ */
+export function useManualImport(server: ServerEntry, target: { id?: string; folder?: string; movieId?: string; seriesId?: string }, enabled = true) {
   const servers = useServersStore();
   return useQuery({
-    queryKey: serverKey(server.id, "acquisition", "downloads", "manual-import", target.id ?? "", target.folder ?? "", target.movieId ?? ""),
+    queryKey: serverKey(server.id, "acquisition", "downloads", "manual-import", target.id ?? "", target.folder ?? "", target.movieId ?? "", target.seriesId ?? ""),
     queryFn: async () => (await servers.client(DownloadService, server).listManualImport(target)).files,
     enabled: enabled && !!(target.id || target.folder),
     retry: false,
   });
+}
+
+/** The movies or series of a server's libraries a file can be imported for by hand, by name, those without files too. */
+export function useImportTargets(server: ServerEntry, kind: ItemKind.MOVIE | ItemKind.SERIES, search: string, enabled = true) {
+  const servers = useServersStore();
+  const q = search.trim();
+  return useQuery({
+    queryKey: serverKey(server.id, "acquisition", "import-targets", kind, q),
+    queryFn: async () =>
+      (
+        await servers
+          .client(ItemService, server)
+          .listItems({ kinds: [kind], search: q || undefined, includeVirtual: true, sort: [{ field: SortField.NAME }], limit: 20 })
+      ).items,
+    enabled,
+    placeholderData: (previous) => previous,
+  });
+}
+
+/** A series' episodes, those without files too, by season and number. */
+export function useSeriesEpisodes(server: ServerEntry, seriesId: string | undefined) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "acquisition", "series-episodes", seriesId),
+    queryFn: async () => {
+      const { items } = await servers
+        .client(ItemService, server)
+        .listItems({ parentId: seriesId, recursive: true, kinds: [ItemKind.EPISODE], includeVirtual: true });
+      return items.toSorted((a, b) => a.parentIndexNumber - b.parentIndexNumber || a.indexNumber - b.indexNumber);
+    },
+    enabled: !!seriesId,
+  });
+}
+
+/** The seasons of a series' episodes, in order; specials, season 0, last. */
+export function seasonsOf(episodes: Pick<Item, "parentIndexNumber">[]): number[] {
+  return [...new Set(episodes.map((e) => e.parentIndexNumber))].sort((a, b) => (a === 0 ? 1 : b === 0 ? -1 : a - b));
 }

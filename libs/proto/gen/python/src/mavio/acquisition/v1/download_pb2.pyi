@@ -334,7 +334,7 @@ class DeleteBlocklistResponse(_message.Message):
     def __init__(self) -> None: ...
 
 class ManualImportFile(_message.Message):
-    __slots__ = ("path", "relative_path", "size", "quality", "revision", "rejections", "movie_id", "languages", "release_group")
+    __slots__ = ("path", "relative_path", "size", "quality", "revision", "rejections", "movie_id", "languages", "release_group", "episode_ids")
     PATH_FIELD_NUMBER: _ClassVar[int]
     RELATIVE_PATH_FIELD_NUMBER: _ClassVar[int]
     SIZE_FIELD_NUMBER: _ClassVar[int]
@@ -344,6 +344,7 @@ class ManualImportFile(_message.Message):
     MOVIE_ID_FIELD_NUMBER: _ClassVar[int]
     LANGUAGES_FIELD_NUMBER: _ClassVar[int]
     RELEASE_GROUP_FIELD_NUMBER: _ClassVar[int]
+    EPISODE_IDS_FIELD_NUMBER: _ClassVar[int]
     path: str
     relative_path: str
     size: int
@@ -353,17 +354,20 @@ class ManualImportFile(_message.Message):
     movie_id: str
     languages: _containers.RepeatedScalarFieldContainer[str]
     release_group: str
-    def __init__(self, path: _Optional[str] = ..., relative_path: _Optional[str] = ..., size: _Optional[int] = ..., quality: _Optional[str] = ..., revision: _Optional[int] = ..., rejections: _Optional[_Iterable[str]] = ..., movie_id: _Optional[str] = ..., languages: _Optional[_Iterable[str]] = ..., release_group: _Optional[str] = ...) -> None: ...
+    episode_ids: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, path: _Optional[str] = ..., relative_path: _Optional[str] = ..., size: _Optional[int] = ..., quality: _Optional[str] = ..., revision: _Optional[int] = ..., rejections: _Optional[_Iterable[str]] = ..., movie_id: _Optional[str] = ..., languages: _Optional[_Iterable[str]] = ..., release_group: _Optional[str] = ..., episode_ids: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class ListManualImportRequest(_message.Message):
-    __slots__ = ("id", "folder", "movie_id")
+    __slots__ = ("id", "folder", "movie_id", "series_id")
     ID_FIELD_NUMBER: _ClassVar[int]
     FOLDER_FIELD_NUMBER: _ClassVar[int]
     MOVIE_ID_FIELD_NUMBER: _ClassVar[int]
+    SERIES_ID_FIELD_NUMBER: _ClassVar[int]
     id: str
     folder: str
     movie_id: str
-    def __init__(self, id: _Optional[str] = ..., folder: _Optional[str] = ..., movie_id: _Optional[str] = ...) -> None: ...
+    series_id: str
+    def __init__(self, id: _Optional[str] = ..., folder: _Optional[str] = ..., movie_id: _Optional[str] = ..., series_id: _Optional[str] = ...) -> None: ...
 
 class ListManualImportResponse(_message.Message):
     __slots__ = ("files",)
@@ -372,7 +376,7 @@ class ListManualImportResponse(_message.Message):
     def __init__(self, files: _Optional[_Iterable[_Union[ManualImportFile, _Mapping]]] = ...) -> None: ...
 
 class ManualImportRequest(_message.Message):
-    __slots__ = ("id", "path", "quality", "folder", "movie_id", "languages", "release_group", "mode")
+    __slots__ = ("id", "path", "quality", "folder", "movie_id", "languages", "release_group", "mode", "series_id", "episode_ids")
     ID_FIELD_NUMBER: _ClassVar[int]
     PATH_FIELD_NUMBER: _ClassVar[int]
     QUALITY_FIELD_NUMBER: _ClassVar[int]
@@ -381,6 +385,8 @@ class ManualImportRequest(_message.Message):
     LANGUAGES_FIELD_NUMBER: _ClassVar[int]
     RELEASE_GROUP_FIELD_NUMBER: _ClassVar[int]
     MODE_FIELD_NUMBER: _ClassVar[int]
+    SERIES_ID_FIELD_NUMBER: _ClassVar[int]
+    EPISODE_IDS_FIELD_NUMBER: _ClassVar[int]
     id: str
     path: str
     quality: str
@@ -389,7 +395,9 @@ class ManualImportRequest(_message.Message):
     languages: _containers.RepeatedScalarFieldContainer[str]
     release_group: str
     mode: ImportMode
-    def __init__(self, id: _Optional[str] = ..., path: _Optional[str] = ..., quality: _Optional[str] = ..., folder: _Optional[str] = ..., movie_id: _Optional[str] = ..., languages: _Optional[_Iterable[str]] = ..., release_group: _Optional[str] = ..., mode: _Optional[_Union[ImportMode, str]] = ...) -> None: ...
+    series_id: str
+    episode_ids: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, id: _Optional[str] = ..., path: _Optional[str] = ..., quality: _Optional[str] = ..., folder: _Optional[str] = ..., movie_id: _Optional[str] = ..., languages: _Optional[_Iterable[str]] = ..., release_group: _Optional[str] = ..., mode: _Optional[_Union[ImportMode, str]] = ..., series_id: _Optional[str] = ..., episode_ids: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class ManualImportResponse(_message.Message):
     __slots__ = ()

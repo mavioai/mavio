@@ -1,7 +1,8 @@
 // The settings' Downloads (docs/clients.md §6.3.17): the tracked downloads
 // with their progress, removed with their release blocklisted or not; the
 // history, where a grab is marked failed; the blocklist; and the manual
-// import of a download's files or of a folder, as Radarr's Activity.
+// import of a download's files or of a folder, for the movie or episodes
+// chosen, as Radarr's and Sonarr's Activity.
 import { durationMs, timestampDate } from "@bufbuild/protobuf/wkt";
 import { errorMessage, type ServerEntry, useBlocklist, useDownloadActions, useHistory, useManualImport, useQueue } from "@mavio/client-ts";
 import {
@@ -23,6 +24,7 @@ import { Progress, Switch, Tabs } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
 import { fromNow, lengthOf, Page, sizeOf, useChoice } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
+import { ImportTargetDialog } from "./manual-import.tsx";
 
 type Tab = "queue" | "history" | "blocklist" | "import";
 
@@ -239,6 +241,7 @@ function ImportFiles({ server, target }: { server: ServerEntry; target: { id?: s
 function ImportFile({ server, target, file: f, mode }: { server: ServerEntry; target: { id?: string; folder?: string }; file: ManualImportFile; mode: ImportMode }) {
   const { manualImport } = useDownloadActions(server);
   const [done, setDone] = useState(false);
+  const [choosing, setChoosing] = useState(false);
   const detail = [sizeOf(f.size), f.quality, f.languages.join(", "), f.releaseGroup].filter(Boolean);
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border pt-2 first-of-type:border-t-0">
@@ -252,13 +255,21 @@ function ImportFile({ server, target, file: f, mode }: { server: ServerEntry; ta
         ))}
         {manualImport.isError && <p className="type-footnote break-words text-danger">{errorMessage(manualImport.error)}</p>}
       </div>
-      <Button
-        variant="secondary"
-        disabled={!f.movieId || manualImport.isPending || done}
-        onClick={() => manualImport.mutate({ ...target, path: f.path, mode }, { onSuccess: () => setDone(true) })}
-      >
-        {done ? t("downloads.importedFile") : t("downloads.importFile")}
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        {!done && (
+          <Button variant="plain" onClick={() => setChoosing(true)}>
+            {target.id ? t("downloads.chooseMovie") : t("downloads.choose")}
+          </Button>
+        )}
+        <Button
+          variant="secondary"
+          disabled={!f.movieId || manualImport.isPending || done}
+          onClick={() => manualImport.mutate({ ...target, path: f.path, mode }, { onSuccess: () => setDone(true) })}
+        >
+          {done ? t("downloads.importedFile") : t("downloads.importFile")}
+        </Button>
+      </div>
+      {choosing && <ImportTargetDialog server={server} target={target} file={f} mode={mode} onImported={() => setDone(true)} onClose={() => setChoosing(false)} />}
     </div>
   );
 }
@@ -406,7 +417,7 @@ function BlocklistRow({ server, entry: e }: { server: ServerEntry; entry: Blockl
   );
 }
 
-/** A folder's files, imported for the wanted movies their names match. */
+/** A folder's files, imported for the wanted movies their names match, or the movie or episodes chosen. */
 function FolderImport({ server }: { server: ServerEntry }) {
   const [path, setPath] = useState("");
   const [folder, setFolder] = useState("");

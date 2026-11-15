@@ -3723,6 +3723,12 @@
             "title": "movie_id",
             "format": "uuid",
             "description": "The movie the files are for; unset for the download's movie, or for\n the wanted movie each file's name matches."
+          },
+          "seriesId": {
+            "type": "string",
+            "title": "series_id",
+            "format": "uuid",
+            "description": "The wanted series a folder's files are for instead of a movie, each\n with the episodes its names hold."
           }
         },
         "title": "ListManualImportRequest",
@@ -4347,6 +4353,14 @@
           "releaseGroup": {
             "type": "string",
             "title": "release_group"
+          },
+          "episodeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "episode_ids",
+            "description": "With series_id: the episodes of the series the file holds; empty when\n its names hold none."
           }
         },
         "title": "ManualImportFile",
@@ -4403,6 +4417,22 @@
               }
             ],
             "title": "mode"
+          },
+          "seriesId": {
+            "type": "string",
+            "title": "series_id",
+            "format": "uuid",
+            "description": "The wanted series to import a folder's file for instead of a movie."
+          },
+          "episodeIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "episode_ids",
+            "maxItems": 1000,
+            "description": "With series_id: the episodes of the series the file holds; empty for\n those ListManualImport lists."
           }
         },
         "title": "ManualImportRequest",
@@ -26051,7 +26081,7 @@
           "DownloadService"
         ],
         "summary": "ListManualImport",
-        "description": "ListManualImport lists the video files of a tracked movie download,\n or of a folder that is not one, with the movie each is for, the\n quality, languages and release group an import would give them and\n why the import specifications reject them, as Radarr's manual import.",
+        "description": "ListManualImport lists the video files of a tracked movie download,\n or of a folder that is not one, with the movie each is for, the\n quality, languages and release group an import would give them and\n why the import specifications reject them, as Radarr's manual import;\n or the files of a folder with the episodes of a wanted series each\n holds, as Sonarr's.",
         "operationId": "mavio.acquisition.v1.DownloadService.ListManualImport",
         "parameters": [
           {
@@ -26175,7 +26205,7 @@
           "DownloadService"
         ],
         "summary": "ManualImport",
-        "description": "ManualImport imports a video file of a tracked movie download, or of\n a folder that is not one, for the movie chosen whatever the import\n specifications reject, and completes a tracked download.",
+        "description": "ManualImport imports a video file of a tracked movie download, or of\n a folder that is not one, for the movie chosen whatever the import\n specifications reject, and completes a tracked download; or a file\n of a folder for episodes of a wanted series.",
         "operationId": "mavio.acquisition.v1.DownloadService.ManualImport",
         "parameters": [
           {

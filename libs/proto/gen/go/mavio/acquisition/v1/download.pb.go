@@ -3502,6 +3502,7 @@ type ManualImportFile struct {
 	xxx_hidden_MovieId      *string                `protobuf:"bytes,7,opt,name=movie_id,json=movieId"`
 	xxx_hidden_Languages    []string               `protobuf:"bytes,8,rep,name=languages"`
 	xxx_hidden_ReleaseGroup *string                `protobuf:"bytes,9,opt,name=release_group,json=releaseGroup"`
+	xxx_hidden_EpisodeIds   []string               `protobuf:"bytes,10,rep,name=episode_ids,json=episodeIds"`
 	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
 	XXX_presence            [1]uint32
 	unknownFields           protoimpl.UnknownFields
@@ -3611,29 +3612,36 @@ func (x *ManualImportFile) GetReleaseGroup() string {
 	return ""
 }
 
+func (x *ManualImportFile) GetEpisodeIds() []string {
+	if x != nil {
+		return x.xxx_hidden_EpisodeIds
+	}
+	return nil
+}
+
 func (x *ManualImportFile) SetPath(v string) {
 	x.xxx_hidden_Path = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
 }
 
 func (x *ManualImportFile) SetRelativePath(v string) {
 	x.xxx_hidden_RelativePath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
 }
 
 func (x *ManualImportFile) SetSize(v int64) {
 	x.xxx_hidden_Size = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
 }
 
 func (x *ManualImportFile) SetQuality(v string) {
 	x.xxx_hidden_Quality = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
 }
 
 func (x *ManualImportFile) SetRevision(v int32) {
 	x.xxx_hidden_Revision = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 10)
 }
 
 func (x *ManualImportFile) SetRejections(v []string) {
@@ -3642,7 +3650,7 @@ func (x *ManualImportFile) SetRejections(v []string) {
 
 func (x *ManualImportFile) SetMovieId(v string) {
 	x.xxx_hidden_MovieId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 10)
 }
 
 func (x *ManualImportFile) SetLanguages(v []string) {
@@ -3651,7 +3659,11 @@ func (x *ManualImportFile) SetLanguages(v []string) {
 
 func (x *ManualImportFile) SetReleaseGroup(v string) {
 	x.xxx_hidden_ReleaseGroup = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 10)
+}
+
+func (x *ManualImportFile) SetEpisodeIds(v []string) {
+	x.xxx_hidden_EpisodeIds = v
 }
 
 func (x *ManualImportFile) HasPath() bool {
@@ -3761,6 +3773,9 @@ type ManualImportFile_builder struct {
 	// give the file.
 	Languages    []string
 	ReleaseGroup *string
+	// With series_id: the episodes of the series the file holds; empty when
+	// its names hold none.
+	EpisodeIds []string
 }
 
 func (b0 ManualImportFile_builder) Build() *ManualImportFile {
@@ -3768,35 +3783,36 @@ func (b0 ManualImportFile_builder) Build() *ManualImportFile {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Path != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
 		x.xxx_hidden_Path = b.Path
 	}
 	if b.RelativePath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
 		x.xxx_hidden_RelativePath = b.RelativePath
 	}
 	if b.Size != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
 		x.xxx_hidden_Size = *b.Size
 	}
 	if b.Quality != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
 		x.xxx_hidden_Quality = b.Quality
 	}
 	if b.Revision != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 10)
 		x.xxx_hidden_Revision = *b.Revision
 	}
 	x.xxx_hidden_Rejections = b.Rejections
 	if b.MovieId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 10)
 		x.xxx_hidden_MovieId = b.MovieId
 	}
 	x.xxx_hidden_Languages = b.Languages
 	if b.ReleaseGroup != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 10)
 		x.xxx_hidden_ReleaseGroup = b.ReleaseGroup
 	}
+	x.xxx_hidden_EpisodeIds = b.EpisodeIds
 	return m0
 }
 
@@ -3805,6 +3821,7 @@ type ListManualImportRequest struct {
 	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
 	xxx_hidden_Folder      *string                `protobuf:"bytes,2,opt,name=folder"`
 	xxx_hidden_MovieId     *string                `protobuf:"bytes,3,opt,name=movie_id,json=movieId"`
+	xxx_hidden_SeriesId    *string                `protobuf:"bytes,4,opt,name=series_id,json=seriesId"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -3866,19 +3883,34 @@ func (x *ListManualImportRequest) GetMovieId() string {
 	return ""
 }
 
+func (x *ListManualImportRequest) GetSeriesId() string {
+	if x != nil {
+		if x.xxx_hidden_SeriesId != nil {
+			return *x.xxx_hidden_SeriesId
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *ListManualImportRequest) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
 }
 
 func (x *ListManualImportRequest) SetFolder(v string) {
 	x.xxx_hidden_Folder = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
 }
 
 func (x *ListManualImportRequest) SetMovieId(v string) {
 	x.xxx_hidden_MovieId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *ListManualImportRequest) SetSeriesId(v string) {
+	x.xxx_hidden_SeriesId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
 }
 
 func (x *ListManualImportRequest) HasId() bool {
@@ -3902,6 +3934,13 @@ func (x *ListManualImportRequest) HasMovieId() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
+func (x *ListManualImportRequest) HasSeriesId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
 func (x *ListManualImportRequest) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -3917,6 +3956,11 @@ func (x *ListManualImportRequest) ClearMovieId() {
 	x.xxx_hidden_MovieId = nil
 }
 
+func (x *ListManualImportRequest) ClearSeriesId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_SeriesId = nil
+}
+
 type ListManualImportRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -3927,6 +3971,9 @@ type ListManualImportRequest_builder struct {
 	// The movie the files are for; unset for the download's movie, or for
 	// the wanted movie each file's name matches.
 	MovieId *string
+	// The wanted series a folder's files are for instead of a movie, each
+	// with the episodes its names hold.
+	SeriesId *string
 }
 
 func (b0 ListManualImportRequest_builder) Build() *ListManualImportRequest {
@@ -3934,16 +3981,20 @@ func (b0 ListManualImportRequest_builder) Build() *ListManualImportRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Folder != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
 		x.xxx_hidden_Folder = b.Folder
 	}
 	if b.MovieId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
 		x.xxx_hidden_MovieId = b.MovieId
+	}
+	if b.SeriesId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_SeriesId = b.SeriesId
 	}
 	return m0
 }
@@ -4018,6 +4069,8 @@ type ManualImportRequest struct {
 	xxx_hidden_Languages    []string               `protobuf:"bytes,6,rep,name=languages"`
 	xxx_hidden_ReleaseGroup *string                `protobuf:"bytes,7,opt,name=release_group,json=releaseGroup"`
 	xxx_hidden_Mode         ImportMode             `protobuf:"varint,8,opt,name=mode,enum=mavio.acquisition.v1.ImportMode"`
+	xxx_hidden_SeriesId     *string                `protobuf:"bytes,9,opt,name=series_id,json=seriesId"`
+	xxx_hidden_EpisodeIds   []string               `protobuf:"bytes,10,rep,name=episode_ids,json=episodeIds"`
 	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
 	XXX_presence            [1]uint32
 	unknownFields           protoimpl.UnknownFields
@@ -4125,29 +4178,46 @@ func (x *ManualImportRequest) GetMode() ImportMode {
 	return ImportMode_IMPORT_MODE_UNSPECIFIED
 }
 
+func (x *ManualImportRequest) GetSeriesId() string {
+	if x != nil {
+		if x.xxx_hidden_SeriesId != nil {
+			return *x.xxx_hidden_SeriesId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ManualImportRequest) GetEpisodeIds() []string {
+	if x != nil {
+		return x.xxx_hidden_EpisodeIds
+	}
+	return nil
+}
+
 func (x *ManualImportRequest) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
 }
 
 func (x *ManualImportRequest) SetPath(v string) {
 	x.xxx_hidden_Path = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
 }
 
 func (x *ManualImportRequest) SetQuality(v string) {
 	x.xxx_hidden_Quality = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
 }
 
 func (x *ManualImportRequest) SetFolder(v string) {
 	x.xxx_hidden_Folder = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
 }
 
 func (x *ManualImportRequest) SetMovieId(v string) {
 	x.xxx_hidden_MovieId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 10)
 }
 
 func (x *ManualImportRequest) SetLanguages(v []string) {
@@ -4156,12 +4226,21 @@ func (x *ManualImportRequest) SetLanguages(v []string) {
 
 func (x *ManualImportRequest) SetReleaseGroup(v string) {
 	x.xxx_hidden_ReleaseGroup = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 10)
 }
 
 func (x *ManualImportRequest) SetMode(v ImportMode) {
 	x.xxx_hidden_Mode = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 10)
+}
+
+func (x *ManualImportRequest) SetSeriesId(v string) {
+	x.xxx_hidden_SeriesId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 10)
+}
+
+func (x *ManualImportRequest) SetEpisodeIds(v []string) {
+	x.xxx_hidden_EpisodeIds = v
 }
 
 func (x *ManualImportRequest) HasId() bool {
@@ -4213,6 +4292,13 @@ func (x *ManualImportRequest) HasMode() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
 }
 
+func (x *ManualImportRequest) HasSeriesId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
+}
+
 func (x *ManualImportRequest) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -4248,6 +4334,11 @@ func (x *ManualImportRequest) ClearMode() {
 	x.xxx_hidden_Mode = ImportMode_IMPORT_MODE_UNSPECIFIED
 }
 
+func (x *ManualImportRequest) ClearSeriesId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
+	x.xxx_hidden_SeriesId = nil
+}
+
 type ManualImportRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -4270,6 +4361,11 @@ type ManualImportRequest_builder struct {
 	// ListManualImport lists.
 	ReleaseGroup *string
 	Mode         *ImportMode
+	// The wanted series to import a folder's file for instead of a movie.
+	SeriesId *string
+	// With series_id: the episodes of the series the file holds; empty for
+	// those ListManualImport lists.
+	EpisodeIds []string
 }
 
 func (b0 ManualImportRequest_builder) Build() *ManualImportRequest {
@@ -4277,34 +4373,39 @@ func (b0 ManualImportRequest_builder) Build() *ManualImportRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Path != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
 		x.xxx_hidden_Path = b.Path
 	}
 	if b.Quality != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
 		x.xxx_hidden_Quality = b.Quality
 	}
 	if b.Folder != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
 		x.xxx_hidden_Folder = b.Folder
 	}
 	if b.MovieId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 10)
 		x.xxx_hidden_MovieId = b.MovieId
 	}
 	x.xxx_hidden_Languages = b.Languages
 	if b.ReleaseGroup != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 10)
 		x.xxx_hidden_ReleaseGroup = b.ReleaseGroup
 	}
 	if b.Mode != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 10)
 		x.xxx_hidden_Mode = *b.Mode
 	}
+	if b.SeriesId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 10)
+		x.xxx_hidden_SeriesId = b.SeriesId
+	}
+	x.xxx_hidden_EpisodeIds = b.EpisodeIds
 	return m0
 }
 
@@ -5232,7 +5333,7 @@ const file_mavio_acquisition_v1_download_proto_rawDesc = "" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\";\n" +
 	"\x16DeleteBlocklistRequest\x12!\n" +
 	"\x03ids\x18\x01 \x03(\tB\x0f\xbaH\f\x92\x01\t\b\x01\"\x05r\x03\xb0\x01\x01R\x03ids\"\x19\n" +
-	"\x17DeleteBlocklistResponse\"\x93\x02\n" +
+	"\x17DeleteBlocklistResponse\"\xb4\x02\n" +
 	"\x10ManualImportFile\x12\x12\n" +
 	"\x04path\x18\x01 \x01(\tR\x04path\x12#\n" +
 	"\rrelative_path\x18\x02 \x01(\tR\frelativePath\x12\x12\n" +
@@ -5244,13 +5345,17 @@ const file_mavio_acquisition_v1_download_proto_rawDesc = "" +
 	"rejections\x12\x19\n" +
 	"\bmovie_id\x18\a \x01(\tR\amovieId\x12\x1c\n" +
 	"\tlanguages\x18\b \x03(\tR\tlanguages\x12#\n" +
-	"\rrelease_group\x18\t \x01(\tR\freleaseGroup\"p\n" +
+	"\rrelease_group\x18\t \x01(\tR\freleaseGroup\x12\x1f\n" +
+	"\vepisode_ids\x18\n" +
+	" \x03(\tR\n" +
+	"episodeIds\"\x97\x01\n" +
 	"\x17ListManualImportRequest\x12\x18\n" +
 	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12\x16\n" +
 	"\x06folder\x18\x02 \x01(\tR\x06folder\x12#\n" +
-	"\bmovie_id\x18\x03 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\amovieId\"X\n" +
+	"\bmovie_id\x18\x03 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\amovieId\x12%\n" +
+	"\tseries_id\x18\x04 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\bseriesId\"X\n" +
 	"\x18ListManualImportResponse\x12<\n" +
-	"\x05files\x18\x01 \x03(\v2&.mavio.acquisition.v1.ManualImportFileR\x05files\"\x9b\x02\n" +
+	"\x05files\x18\x01 \x03(\v2&.mavio.acquisition.v1.ManualImportFileR\x05files\"\xf5\x02\n" +
 	"\x13ManualImportRequest\x12\x18\n" +
 	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12\x1a\n" +
 	"\x04path\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04path\x12\x18\n" +
@@ -5259,7 +5364,12 @@ const file_mavio_acquisition_v1_download_proto_rawDesc = "" +
 	"\bmovie_id\x18\x05 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\amovieId\x12\x1c\n" +
 	"\tlanguages\x18\x06 \x03(\tR\tlanguages\x12#\n" +
 	"\rrelease_group\x18\a \x01(\tR\freleaseGroup\x124\n" +
-	"\x04mode\x18\b \x01(\x0e2 .mavio.acquisition.v1.ImportModeR\x04mode\"\x16\n" +
+	"\x04mode\x18\b \x01(\x0e2 .mavio.acquisition.v1.ImportModeR\x04mode\x12%\n" +
+	"\tseries_id\x18\t \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\bseriesId\x121\n" +
+	"\vepisode_ids\x18\n" +
+	" \x03(\tB\x10\xbaH\r\x92\x01\n" +
+	"\x10\xe8\a\"\x05r\x03\xb0\x01\x01R\n" +
+	"episodeIds\"\x16\n" +
 	"\x14ManualImportResponse\"\xc6\x02\n" +
 	"\x12DownloadClientPath\x12+\n" +
 	"\vremote_path\x18\x01 \x01(\tB\n" +

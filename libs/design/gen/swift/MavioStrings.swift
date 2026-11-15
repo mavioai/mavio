@@ -5745,6 +5745,50 @@ public enum MavioStrings {
     /// Lists the files of a folder to import.
     public static var downloadsScan: String { NSLocalizedString("downloads.scan", bundle: .module, comment: "") }
 
+    /// Opens the choice of what a file of a manual import is for.
+    public static var downloadsChoose: String { NSLocalizedString("downloads.choose", bundle: .module, comment: "") }
+
+    /// Opens the choice of the movie a file of a download is for.
+    public static var downloadsChooseMovie: String { NSLocalizedString("downloads.chooseMovie", bundle: .module, comment: "") }
+
+    /// Title of the choice of what a file of a manual import is for.
+    public static var downloadsChooseTitle: String { NSLocalizedString("downloads.chooseTitle", bundle: .module, comment: "") }
+
+    /// Label of the choice between a movie and episodes.
+    public static var downloadsImportFor: String { NSLocalizedString("downloads.importFor", bundle: .module, comment: "") }
+
+    /// Imports a file for a movie.
+    public static var downloadsForMovie: String { NSLocalizedString("downloads.forMovie", bundle: .module, comment: "") }
+
+    /// Imports a file for episodes of a series.
+    public static var downloadsForEpisodes: String { NSLocalizedString("downloads.forEpisodes", bundle: .module, comment: "") }
+
+    /// Placeholder of the search of movies to import a file for.
+    public static var downloadsSearchMovies: String { NSLocalizedString("downloads.searchMovies", bundle: .module, comment: "") }
+
+    /// Placeholder of the search of series to import a file for.
+    public static var downloadsSearchSeries: String { NSLocalizedString("downloads.searchSeries", bundle: .module, comment: "") }
+
+    /// Shown when no movie or series has the name searched.
+    public static var downloadsNothingFound: String { NSLocalizedString("downloads.nothingFound", bundle: .module, comment: "") }
+
+    /// Marks the movie or series chosen.
+    public static var downloadsChosen: String { NSLocalizedString("downloads.chosen", bundle: .module, comment: "") }
+
+    /// Label of the episodes to import a file for.
+    public static var downloadsChooseEpisodes: String { NSLocalizedString("downloads.chooseEpisodes", bundle: .module, comment: "") }
+
+    /// Label of the season whose episodes are shown.
+    public static var downloadsSeason: String { NSLocalizedString("downloads.season", bundle: .module, comment: "") }
+
+    /// Shown when a series has no episodes to choose.
+    public static var downloadsNoEpisodes: String { NSLocalizedString("downloads.noEpisodes", bundle: .module, comment: "") }
+
+    /// An episode to choose: its number and name.
+    public static func downloadsEpisode(episode: String, name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("downloads.episode", bundle: .module, comment: ""), episode, name)
+    }
+
     /// Title of an item's acquisition on its details, for administrators.
     public static var acquireTitle: String { NSLocalizedString("acquire.title", bundle: .module, comment: "") }
 

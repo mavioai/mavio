@@ -94,11 +94,14 @@ type DownloadServiceClient interface {
 	// ListManualImport lists the video files of a tracked movie download,
 	// or of a folder that is not one, with the movie each is for, the
 	// quality, languages and release group an import would give them and
-	// why the import specifications reject them, as Radarr's manual import.
+	// why the import specifications reject them, as Radarr's manual import;
+	// or the files of a folder with the episodes of a wanted series each
+	// holds, as Sonarr's.
 	ListManualImport(context.Context, *v1.ListManualImportRequest) (*v1.ListManualImportResponse, error)
 	// ManualImport imports a video file of a tracked movie download, or of
 	// a folder that is not one, for the movie chosen whatever the import
-	// specifications reject, and completes a tracked download.
+	// specifications reject, and completes a tracked download; or a file
+	// of a folder for episodes of a wanted series.
 	ManualImport(context.Context, *v1.ManualImportRequest) (*v1.ManualImportResponse, error)
 	// GetDownloadClientPaths returns the folders a download client puts
 	// completed downloads in, with where the server reads each, as
@@ -349,11 +352,14 @@ type DownloadServiceHandler interface {
 	// ListManualImport lists the video files of a tracked movie download,
 	// or of a folder that is not one, with the movie each is for, the
 	// quality, languages and release group an import would give them and
-	// why the import specifications reject them, as Radarr's manual import.
+	// why the import specifications reject them, as Radarr's manual import;
+	// or the files of a folder with the episodes of a wanted series each
+	// holds, as Sonarr's.
 	ListManualImport(context.Context, *v1.ListManualImportRequest) (*v1.ListManualImportResponse, error)
 	// ManualImport imports a video file of a tracked movie download, or of
 	// a folder that is not one, for the movie chosen whatever the import
-	// specifications reject, and completes a tracked download.
+	// specifications reject, and completes a tracked download; or a file
+	// of a folder for episodes of a wanted series.
 	ManualImport(context.Context, *v1.ManualImportRequest) (*v1.ManualImportResponse, error)
 	// GetDownloadClientPaths returns the folders a download client puts
 	// completed downloads in, with where the server reads each, as

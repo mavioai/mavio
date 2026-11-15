@@ -36,6 +36,14 @@ func TestManualImportService(t *testing.T) {
 	wantCode(t, "ManualImport with an unknown quality", err, connect.CodeInvalidArgument)
 	_, err = admin.ManualImport(ctx, acquisitionv1.ManualImportRequest_builder{Id: new(unknown), Path: new("/downloads/a.mkv"), Quality: new("bluray-1080p")}.Build())
 	wantCode(t, "ManualImport of an unknown download", err, connect.CodeNotFound)
+
+	folder := t.TempDir()
+	_, err = admin.ListManualImport(ctx, acquisitionv1.ListManualImportRequest_builder{Folder: new(folder), SeriesId: new(unknown)}.Build())
+	wantCode(t, "ListManualImport for an unknown series", err, connect.CodeNotFound)
+	_, err = admin.ManualImport(ctx, acquisitionv1.ManualImportRequest_builder{
+		Folder: new(folder), Path: new(folder + "/a.mkv"), SeriesId: new(unknown), EpisodeIds: []string{"S01E01"},
+	}.Build())
+	wantCode(t, "ManualImport for an episode that is no ID", err, connect.CodeInvalidArgument)
 }
 
 func TestQualityNamed(t *testing.T) {

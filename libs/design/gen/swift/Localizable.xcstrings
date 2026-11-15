@@ -32840,13 +32840,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Files are matched to wanted movies by their names; files no movie matches cannot be imported here."
+            "value": "Files are matched to wanted movies by their names; choose the movie or episodes of the others."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "文件按名称匹配想要的电影；无法匹配电影的文件不能在此导入。"
+            "value": "文件按名称匹配想要的电影；其余文件可选择其电影或分集。"
           }
         }
       }
@@ -32883,6 +32883,258 @@
           "stringUnit": {
             "state": "translated",
             "value": "扫描"
+          }
+        }
+      }
+    },
+    "downloads.choose": {
+      "comment": "Opens the choice of what a file of a manual import is for.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Movie or Episodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择电影或分集"
+          }
+        }
+      }
+    },
+    "downloads.chooseMovie": {
+      "comment": "Opens the choice of the movie a file of a download is for.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Movie"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择电影"
+          }
+        }
+      }
+    },
+    "downloads.chooseTitle": {
+      "comment": "Title of the choice of what a file of a manual import is for.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import File For"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入文件为"
+          }
+        }
+      }
+    },
+    "downloads.importFor": {
+      "comment": "Label of the choice between a movie and episodes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import for"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入为"
+          }
+        }
+      }
+    },
+    "downloads.forMovie": {
+      "comment": "Imports a file for a movie.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movie"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电影"
+          }
+        }
+      }
+    },
+    "downloads.forEpisodes": {
+      "comment": "Imports a file for episodes of a series.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Episodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分集"
+          }
+        }
+      }
+    },
+    "downloads.searchMovies": {
+      "comment": "Placeholder of the search of movies to import a file for.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search Movies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索电影"
+          }
+        }
+      }
+    },
+    "downloads.searchSeries": {
+      "comment": "Placeholder of the search of series to import a file for.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search Series"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索剧集"
+          }
+        }
+      }
+    },
+    "downloads.nothingFound": {
+      "comment": "Shown when no movie or series has the name searched.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing found."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未找到。"
+          }
+        }
+      }
+    },
+    "downloads.chosen": {
+      "comment": "Marks the movie or series chosen.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chosen"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已选择"
+          }
+        }
+      }
+    },
+    "downloads.chooseEpisodes": {
+      "comment": "Label of the episodes to import a file for.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The episodes the file holds"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件包含的分集"
+          }
+        }
+      }
+    },
+    "downloads.season": {
+      "comment": "Label of the season whose episodes are shown.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Season"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "季"
+          }
+        }
+      }
+    },
+    "downloads.noEpisodes": {
+      "comment": "Shown when a series has no episodes to choose.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The series has no episodes."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该剧集没有分集。"
+          }
+        }
+      }
+    },
+    "downloads.episode": {
+      "comment": "An episode to choose: its number and name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@. %2$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@. %2$@"
           }
         }
       }

@@ -1283,6 +1283,10 @@ public nonisolated struct Mavio_Acquisition_V1_ManualImportFile: Sendable {
   /// Clears the value of `releaseGroup`. Subsequent reads from it will return its default value.
   public mutating func clearReleaseGroup() {self._releaseGroup = nil}
 
+  /// With series_id: the episodes of the series the file holds; empty when
+  /// its names hold none.
+  public var episodeIds: [String] = []
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -1332,6 +1336,17 @@ public nonisolated struct Mavio_Acquisition_V1_ListManualImportRequest: Sendable
   /// Clears the value of `movieID`. Subsequent reads from it will return its default value.
   public mutating func clearMovieID() {self._movieID = nil}
 
+  /// The wanted series a folder's files are for instead of a movie, each
+  /// with the episodes its names hold.
+  public var seriesID: String {
+    get {_seriesID ?? String()}
+    set {_seriesID = newValue}
+  }
+  /// Returns true if `seriesID` has been explicitly set.
+  public var hasSeriesID: Bool {self._seriesID != nil}
+  /// Clears the value of `seriesID`. Subsequent reads from it will return its default value.
+  public mutating func clearSeriesID() {self._seriesID = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -1339,6 +1354,7 @@ public nonisolated struct Mavio_Acquisition_V1_ListManualImportRequest: Sendable
   fileprivate var _id: String? = nil
   fileprivate var _folder: String? = nil
   fileprivate var _movieID: String? = nil
+  fileprivate var _seriesID: String? = nil
 }
 
 public nonisolated struct Mavio_Acquisition_V1_ListManualImportResponse: Sendable {
@@ -1435,6 +1451,20 @@ public nonisolated struct Mavio_Acquisition_V1_ManualImportRequest: Sendable {
   /// Clears the value of `mode`. Subsequent reads from it will return its default value.
   public mutating func clearMode() {self._mode = nil}
 
+  /// The wanted series to import a folder's file for instead of a movie.
+  public var seriesID: String {
+    get {_seriesID ?? String()}
+    set {_seriesID = newValue}
+  }
+  /// Returns true if `seriesID` has been explicitly set.
+  public var hasSeriesID: Bool {self._seriesID != nil}
+  /// Clears the value of `seriesID`. Subsequent reads from it will return its default value.
+  public mutating func clearSeriesID() {self._seriesID = nil}
+
+  /// With series_id: the episodes of the series the file holds; empty for
+  /// those ListManualImport lists.
+  public var episodeIds: [String] = []
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -1446,6 +1476,7 @@ public nonisolated struct Mavio_Acquisition_V1_ManualImportRequest: Sendable {
   fileprivate var _movieID: String? = nil
   fileprivate var _releaseGroup: String? = nil
   fileprivate var _mode: Mavio_Acquisition_V1_ImportMode? = nil
+  fileprivate var _seriesID: String? = nil
 }
 
 public nonisolated struct Mavio_Acquisition_V1_ManualImportResponse: Sendable {
@@ -2716,7 +2747,7 @@ nonisolated extension Mavio_Acquisition_V1_DeleteBlocklistResponse: SwiftProtobu
 
 nonisolated extension Mavio_Acquisition_V1_ManualImportFile: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ManualImportFile"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}path\0\u{3}relative_path\0\u{1}size\0\u{1}quality\0\u{1}revision\0\u{1}rejections\0\u{3}movie_id\0\u{1}languages\0\u{3}release_group\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}path\0\u{3}relative_path\0\u{1}size\0\u{1}quality\0\u{1}revision\0\u{1}rejections\0\u{3}movie_id\0\u{1}languages\0\u{3}release_group\0\u{3}episode_ids\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -2733,6 +2764,7 @@ nonisolated extension Mavio_Acquisition_V1_ManualImportFile: SwiftProtobuf.Messa
       case 7: try { try decoder.decodeSingularStringField(value: &self._movieID) }()
       case 8: try { try decoder.decodeRepeatedStringField(value: &self.languages) }()
       case 9: try { try decoder.decodeSingularStringField(value: &self._releaseGroup) }()
+      case 10: try { try decoder.decodeRepeatedStringField(value: &self.episodeIds) }()
       default: break
       }
     }
@@ -2770,6 +2802,9 @@ nonisolated extension Mavio_Acquisition_V1_ManualImportFile: SwiftProtobuf.Messa
     try { if let v = self._releaseGroup {
       try visitor.visitSingularStringField(value: v, fieldNumber: 9)
     } }()
+    if !self.episodeIds.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.episodeIds, fieldNumber: 10)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2783,6 +2818,7 @@ nonisolated extension Mavio_Acquisition_V1_ManualImportFile: SwiftProtobuf.Messa
     if lhs._movieID != rhs._movieID {return false}
     if lhs.languages != rhs.languages {return false}
     if lhs._releaseGroup != rhs._releaseGroup {return false}
+    if lhs.episodeIds != rhs.episodeIds {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2790,7 +2826,7 @@ nonisolated extension Mavio_Acquisition_V1_ManualImportFile: SwiftProtobuf.Messa
 
 nonisolated extension Mavio_Acquisition_V1_ListManualImportRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ListManualImportRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}folder\0\u{3}movie_id\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}folder\0\u{3}movie_id\0\u{3}series_id\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -2801,6 +2837,7 @@ nonisolated extension Mavio_Acquisition_V1_ListManualImportRequest: SwiftProtobu
       case 1: try { try decoder.decodeSingularStringField(value: &self._id) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self._folder) }()
       case 3: try { try decoder.decodeSingularStringField(value: &self._movieID) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self._seriesID) }()
       default: break
       }
     }
@@ -2820,6 +2857,9 @@ nonisolated extension Mavio_Acquisition_V1_ListManualImportRequest: SwiftProtobu
     try { if let v = self._movieID {
       try visitor.visitSingularStringField(value: v, fieldNumber: 3)
     } }()
+    try { if let v = self._seriesID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 4)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2827,6 +2867,7 @@ nonisolated extension Mavio_Acquisition_V1_ListManualImportRequest: SwiftProtobu
     if lhs._id != rhs._id {return false}
     if lhs._folder != rhs._folder {return false}
     if lhs._movieID != rhs._movieID {return false}
+    if lhs._seriesID != rhs._seriesID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2864,7 +2905,7 @@ nonisolated extension Mavio_Acquisition_V1_ListManualImportResponse: SwiftProtob
 
 nonisolated extension Mavio_Acquisition_V1_ManualImportRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ManualImportRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}path\0\u{1}quality\0\u{1}folder\0\u{3}movie_id\0\u{1}languages\0\u{3}release_group\0\u{1}mode\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}path\0\u{1}quality\0\u{1}folder\0\u{3}movie_id\0\u{1}languages\0\u{3}release_group\0\u{1}mode\0\u{3}series_id\0\u{3}episode_ids\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -2880,6 +2921,8 @@ nonisolated extension Mavio_Acquisition_V1_ManualImportRequest: SwiftProtobuf.Me
       case 6: try { try decoder.decodeRepeatedStringField(value: &self.languages) }()
       case 7: try { try decoder.decodeSingularStringField(value: &self._releaseGroup) }()
       case 8: try { try decoder.decodeSingularEnumField(value: &self._mode) }()
+      case 9: try { try decoder.decodeSingularStringField(value: &self._seriesID) }()
+      case 10: try { try decoder.decodeRepeatedStringField(value: &self.episodeIds) }()
       default: break
       }
     }
@@ -2914,6 +2957,12 @@ nonisolated extension Mavio_Acquisition_V1_ManualImportRequest: SwiftProtobuf.Me
     try { if let v = self._mode {
       try visitor.visitSingularEnumField(value: v, fieldNumber: 8)
     } }()
+    try { if let v = self._seriesID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 9)
+    } }()
+    if !self.episodeIds.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.episodeIds, fieldNumber: 10)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2926,6 +2975,8 @@ nonisolated extension Mavio_Acquisition_V1_ManualImportRequest: SwiftProtobuf.Me
     if lhs.languages != rhs.languages {return false}
     if lhs._releaseGroup != rhs._releaseGroup {return false}
     if lhs._mode != rhs._mode {return false}
+    if lhs._seriesID != rhs._seriesID {return false}
+    if lhs.episodeIds != rhs.episodeIds {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

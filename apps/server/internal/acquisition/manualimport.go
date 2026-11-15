@@ -1,11 +1,13 @@
 package acquisition
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
 	"io/fs"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/mavioai/mavio/libs/acquire"
@@ -45,6 +47,10 @@ type ManualImportQuery struct {
 	// MovieID is the movie the files are for; zero for the download's
 	// movie, or for that each file's names match among the wanted movies.
 	MovieID core.ID
+	// SeriesID is the wanted series the files of a folder are for instead,
+	// each mapped to the episodes its names hold, as Sonarr's manual
+	// import of a series' files.
+	SeriesID core.ID
 }
 
 // ManualImportFile is a video file that can be imported by hand, as
@@ -56,6 +62,9 @@ type ManualImportFile struct {
 	Size               int64
 	// MovieID is the movie it is for; zero when no movie matches.
 	MovieID core.ID
+	// EpisodeIDs are, with a series, the episodes it holds; empty when
+	// its names hold none.
+	EpisodeIDs []core.ID
 	// Quality, Languages and ReleaseGroup are what an import would give
 	// the file.
 	Quality      acquire.QualityModel
@@ -77,6 +86,11 @@ type ManualImportRequest struct {
 	// MovieID is the movie to import the file for; zero for that
 	// ListManualImport lists.
 	MovieID core.ID
+	// SeriesID is the wanted series to import a folder's file for
+	// instead, as the episodes EpisodeIDs names, else those its names
+	// hold.
+	SeriesID   core.ID
+	EpisodeIDs []core.ID
 	// Quality, Languages and ReleaseGroup, when set, are the file's
 	// rather than those ListManualImport lists.
 	Quality      *acquire.QualityModel
@@ -106,13 +120,39 @@ type manualSource struct {
 // specifications reject it, as Radarr's ManualImportService.GetMediaFiles.
 // A file is for the query's movie, else for the download's, else for the
 // wanted movie its name, or its folder's, matches; files no movie matches
-// are rejected as unknown.
+// are rejected as unknown. With a series, each file is for the episodes
+// its names hold, as Sonarr's, with why Sonarr's import specifications
+// reject it.
 func (r *Runtime) ListManualImport(ctx context.Context, q ManualImportQuery) ([]ManualImportFile, error) {
 	r.importing.Lock()
 	defer r.importing.Unlock()
 	src, err := r.manualSource(ctx, q.DownloadID, q.Folder)
 	if err != nil {
 		return nil, err
+	}
+	if !q.SeriesID.IsZero() {
+		sh, err := manualShow(ctx, src, q.SeriesID, q.MovieID)
+		if err != nil {
+			return nil, err
+		}
+		locals, err := r.episodeDecisions(ctx, src.rn, sh, &src.d, src.local, src.files, nil, "")
+		if err != nil {
+			return nil, err
+		}
+		out := make([]ManualImportFile, len(locals))
+		for i, le := range locals {
+			manualEpisode(le)
+			out[i] = ManualImportFile{
+				Path: le.file.path, RelativePath: le.file.rel, Size: le.file.size, Quality: le.quality, Languages: le.langs, Rejections: le.reasons,
+			}
+			for _, ep := range le.episodes {
+				out[i].EpisodeIDs = append(out[i].EpisodeIDs, ep.ID)
+			}
+			if le.parsed != nil {
+				out[i].ReleaseGroup = le.parsed.ReleaseGroup
+			}
+		}
+		return out, nil
 	}
 	out := make([]ManualImportFile, 0, len(src.files))
 	for _, f := range src.files {
@@ -161,6 +201,12 @@ func (r *Runtime) ManualImport(ctx context.Context, req ManualImportRequest) err
 	if file == nil {
 		return fmt.Errorf("%w: %s is not a video file of %s", core.ErrNotFound, req.Path, src.local)
 	}
+	if !req.SeriesID.IsZero() {
+		return r.manualImportEpisodes(ctx, src, path, req)
+	}
+	if len(req.EpisodeIDs) > 0 {
+		return fmt.Errorf("%w: episodes without their series", core.ErrInvalid)
+	}
 	m, err := r.manualMovie(ctx, src, *file, req.MovieID)
 	if err != nil {
 		return err
@@ -200,6 +246,94 @@ func (r *Runtime) ManualImport(ctx context.Context, req ManualImportRequest) err
 		r.cleanDownloadFolder(ctx, m, src.local, src.mappings)
 	}
 	return r.completeImport(ctx, &src.d, src.p)
+}
+
+// manualShow returns the wanted series a folder's files are imported
+// for by hand: episodes are imported from folders, not from tracked
+// movie downloads, and a file is for a movie or for episodes.
+func manualShow(ctx context.Context, src *manualSource, seriesID, movieID core.ID) (*show, error) {
+	switch {
+	case !movieID.IsZero():
+		return nil, fmt.Errorf("%w: a file is imported for a movie or for episodes, not both", core.ErrInvalid)
+	case src.tracked:
+		return nil, fmt.Errorf("%w: download %s is of a movie", core.ErrInvalid, src.d.Title)
+	}
+	return src.rn.show(ctx, seriesID)
+}
+
+// manualEpisode gives a file whose names hold no episodes, which the
+// decisions leave without a quality, the quality its name has.
+func manualEpisode(le *localEpisode) {
+	if len(le.episodes) == 0 {
+		le.quality = acquire.ModelOf(release.ParseQuality(filepath.Base(le.file.path), release.Series))
+	}
+}
+
+// manualImportEpisodes imports a file of a folder for episodes of a
+// wanted series, as Sonarr's ManualImportService.Execute: those chosen,
+// else those its names hold, whatever the import specifications reject,
+// with the quality, languages and release group chosen, else those read
+// from the file and its names, into the series' folder named after them,
+// the files they had going to the recycle bin.
+func (r *Runtime) manualImportEpisodes(ctx context.Context, src *manualSource, path string, req ManualImportRequest) error {
+	sh, err := manualShow(ctx, src, req.SeriesID, req.MovieID)
+	if err != nil {
+		return err
+	}
+	locals, err := r.episodeDecisions(ctx, src.rn, sh, &src.d, src.local, src.files, nil, path)
+	if err != nil {
+		return err
+	}
+	le := locals[0]
+	manualEpisode(le)
+	reasons := le.reasons
+	if len(req.EpisodeIDs) > 0 {
+		le.episodes = nil
+		for _, id := range req.EpisodeIDs {
+			ep, ok := sh.byID[id]
+			if !ok {
+				return fmt.Errorf("%w: %s is not an episode of %s", core.ErrInvalid, id, sh.item.Name)
+			}
+			if !slices.Contains(le.episodes, ep) {
+				le.episodes = append(le.episodes, ep)
+			}
+		}
+	}
+	if len(le.episodes) == 0 {
+		return fmt.Errorf("%w: %s: %s", core.ErrInvalid, msgUnknownEpisodes, req.Path)
+	}
+	if req.Quality != nil {
+		le.quality = *req.Quality
+	}
+	if req.Languages != nil {
+		le.langs = req.Languages
+	}
+	if req.ReleaseGroup != nil {
+		parsed := release.ParsedEpisodeInfo{}
+		if le.parsed != nil {
+			parsed = *le.parsed
+		}
+		parsed.ReleaseGroup = strings.TrimSpace(*req.ReleaseGroup)
+		le.parsed = &parsed
+	}
+	name := strings.TrimSuffix(filepath.Base(le.file.path), filepath.Ext(le.file.path))
+	le.formats = src.rn.seriesFormats(cmp.Or(le.sceneName, name), le.quality, le.langs, le.file.size, nil)
+	mode, err := r.manualMode(req.Mode, src)
+	if err != nil {
+		return err
+	}
+	le.mode = &mode
+	if len(reasons) > 0 {
+		r.logger().InfoContext(ctx, "importing episodes by hand despite rejections", "from", src.local, "path", path, "rejections", reasons)
+	}
+	_, reasons, err = r.importEpisodeFile(ctx, src.rn, sh, &src.d, src.p, le)
+	if err != nil {
+		return err
+	}
+	if len(reasons) > 0 {
+		return fmt.Errorf("%w: %s", core.ErrConflict, strings.Join(reasons, "; "))
+	}
+	return nil
 }
 
 // manualMode returns how a manual import transfers a file, as Radarr's
