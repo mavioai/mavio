@@ -106,6 +106,33 @@ export type MessageKey =
   | 'discover.openItem'
   | 'discover.blockFooter'
   | 'discover.downloading'
+  | 'discover.addWanted'
+  | 'discover.addWantedTitle'
+  | 'discover.addWantedMovieFooter'
+  | 'discover.addWantedSeriesFooter'
+  | 'discover.addWantedAdd'
+  | 'discover.addWantedNoLibrary'
+  | 'discover.addWantedNoProfile'
+  | 'discover.addWantedNoTvdb'
+  | 'discover.addWantedFailed'
+  | 'discover.monitor'
+  | 'discover.monitorAll'
+  | 'discover.monitorFuture'
+  | 'discover.monitorMissing'
+  | 'discover.monitorExisting'
+  | 'discover.monitorRecent'
+  | 'discover.monitorPilot'
+  | 'discover.monitorFirstSeason'
+  | 'discover.monitorLastSeason'
+  | 'discover.monitorNone'
+  | 'discover.seriesType'
+  | 'discover.seriesTypeAuto'
+  | 'discover.seriesTypeStandard'
+  | 'discover.seriesTypeDaily'
+  | 'discover.seriesTypeAnime'
+  | 'discover.searchNow'
+  | 'discover.searchNowMovieDetail'
+  | 'discover.searchNowSeriesDetail'
   | 'discover.networks'
   | 'discover.statusRumored'
   | 'discover.statusPlanned'
@@ -2376,6 +2403,33 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "discover.openItem": "Open in Library",
     "discover.blockFooter": "A blocklisted title can no longer be requested.",
     "discover.downloading": "Downloading {percent}%",
+    "discover.addWanted": "Add to Wanted",
+    "discover.addWantedTitle": "Add {name} to Wanted",
+    "discover.addWantedMovieFooter": "The movie is added to the library as wanted, and acquired with the quality profile once it is available.",
+    "discover.addWantedSeriesFooter": "The show is added to the library as wanted, and the episodes it monitors are acquired with the quality profile.",
+    "discover.addWantedAdd": "Add",
+    "discover.addWantedNoLibrary": "No library of this kind. Add one in Libraries first.",
+    "discover.addWantedNoProfile": "No quality profile of this kind. Add one in Acquisition first.",
+    "discover.addWantedNoTvdb": "The show has no TVDB ID, which adding it needs.",
+    "discover.addWantedFailed": "Couldn't add it: {reason}",
+    "discover.monitor": "Monitor",
+    "discover.monitorAll": "All Episodes",
+    "discover.monitorFuture": "Future Episodes",
+    "discover.monitorMissing": "Missing Episodes",
+    "discover.monitorExisting": "Existing Episodes",
+    "discover.monitorRecent": "Recent Episodes",
+    "discover.monitorPilot": "Pilot Episode",
+    "discover.monitorFirstSeason": "First Season",
+    "discover.monitorLastSeason": "Last Season",
+    "discover.monitorNone": "None",
+    "discover.seriesType": "Series Type",
+    "discover.seriesTypeAuto": "Automatic",
+    "discover.seriesTypeStandard": "Standard",
+    "discover.seriesTypeDaily": "Daily",
+    "discover.seriesTypeAnime": "Anime",
+    "discover.searchNow": "Search Now",
+    "discover.searchNowMovieDetail": "Search for the movie as soon as it's added",
+    "discover.searchNowSeriesDetail": "Search for the monitored episodes missing a file as soon as it's added",
     "discover.networks": "Networks",
     "discover.statusRumored": "Rumored",
     "discover.statusPlanned": "Planned",
@@ -4644,6 +4698,33 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "discover.openItem": "在媒体库中打开",
     "discover.blockFooter": "屏蔽后的作品不能再被请求。",
     "discover.downloading": "下载中 {percent}%",
+    "discover.addWanted": "添加到想要",
+    "discover.addWantedTitle": "将《{name}》添加到想要",
+    "discover.addWantedMovieFooter": "电影会作为想要的条目添加到媒体库，上映后按质量配置获取。",
+    "discover.addWantedSeriesFooter": "剧集会作为想要的条目添加到媒体库，其监视的集按质量配置获取。",
+    "discover.addWantedAdd": "添加",
+    "discover.addWantedNoLibrary": "没有此类媒体库，请先在“媒体库”中添加。",
+    "discover.addWantedNoProfile": "没有此类质量配置，请先在“获取”中添加。",
+    "discover.addWantedNoTvdb": "此剧集没有 TVDB ID，无法添加。",
+    "discover.addWantedFailed": "无法添加：{reason}",
+    "discover.monitor": "监视",
+    "discover.monitorAll": "全部集",
+    "discover.monitorFuture": "未播出的集",
+    "discover.monitorMissing": "缺失的集",
+    "discover.monitorExisting": "已有的集",
+    "discover.monitorRecent": "最近的集",
+    "discover.monitorPilot": "试播集",
+    "discover.monitorFirstSeason": "第一季",
+    "discover.monitorLastSeason": "最后一季",
+    "discover.monitorNone": "无",
+    "discover.seriesType": "剧集类型",
+    "discover.seriesTypeAuto": "自动",
+    "discover.seriesTypeStandard": "标准",
+    "discover.seriesTypeDaily": "日播",
+    "discover.seriesTypeAnime": "动画",
+    "discover.searchNow": "立即搜索",
+    "discover.searchNowMovieDetail": "添加后立即搜索此电影",
+    "discover.searchNowSeriesDetail": "添加后立即搜索监视中缺失文件的集",
     "discover.networks": "电视网",
     "discover.statusRumored": "传闻",
     "discover.statusPlanned": "已计划",

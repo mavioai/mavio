@@ -780,7 +780,7 @@ flowchart TD
     - [ ] The indexer search in the Apple, Android and desktop apps
     - [ ] A series' monitoring choices (`SetMonitored` with `series`) and its other wanted settings: tags, minimum availability, new items, season folders
     - [ ] Manual import of files no wanted movie matches, choosing their movie or episodes
-    - [ ] Adding movies and series to the wanted from Discover's titles (`AddMovie`, `AddSeries`)
+    - [x] Adding movies and series to the wanted from Discover's titles (`apps/web/src/screens/discover-wanted.tsx`, `useAddWanted` and `wantedTarget` in `libs/client-ts/src/acquisition.ts`), for administrators of the server that discovers, as Radarr's and Sonarr's Add New: the library and quality profile, by default those approved requests go to, a movie's minimum availability, a series' monitoring, new seasons, type and season folders, and searching at once (`AddMovie`, `AddSeries`); a title the server has shows its status and Watch instead
   - [x] The web UI's items for administrators: editing the metadata, identifying, refreshing and choosing images (`MetadataService`, §6.3.22)
   - [ ] The web UI's playback and library: playlists and collections (`PlaylistService`, `CollectionService`); subtitles searched, downloaded, uploaded, extracted, synced and translated from details and the player (`SubtitleService`); and the lyrics of music (`GetLyrics`)
     - [x] Playlists and collections from an item's More menu, a playlist's entries and a collection's members (§6.3.20)

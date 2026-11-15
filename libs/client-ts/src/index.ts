@@ -213,6 +213,7 @@ export { useRevokeSession, useSendCommand, useSessions } from "./remote.ts";
 export { useExternalIdKinds, useMetadataActions, useRemoteImages, useRemoteSearch } from "./metadata.ts";
 export { useCollectionActions, useCollections, usePlaylistActions, usePlaylistEntries, usePlaylists } from "./lists.ts";
 export {
+  useAddWanted,
   useBlocklist,
   useDownloadActions,
   useGrab,
@@ -226,6 +227,8 @@ export {
   useWanted,
   useWantedActions,
   useWantedList,
+  wantedTarget,
+  type WantedTarget,
 } from "./acquisition.ts";
 export { type ClockSample, clockSample, groupPositionAt, syncClock, useSyncPlayGroups } from "./syncplay.ts";
 export { useCurrentUser, useIssue, useIssueActions, useIssues } from "./issues.ts";

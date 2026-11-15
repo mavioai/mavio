@@ -780,7 +780,7 @@ flowchart TD
     - [ ] Apple、Android 与桌面应用中的索引搜索
     - [ ] 剧集的监控选项（带 `series` 的 `SetMonitored`）及其他想要设置：标签、最低可用性、新条目、季文件夹
     - [ ] 手动导入与想要的电影都不匹配的文件，为其选择电影或分集
-    - [ ] 从发现的作品将电影与剧集添加到想要（`AddMovie`、`AddSeries`）
+    - [x] 从发现的作品将电影与剧集添加到想要（`apps/web/src/screens/discover-wanted.tsx`，`libs/client-ts/src/acquisition.ts` 中的 `useAddWanted` 与 `wantedTarget`），供进行发现的服务器的管理员使用，如 Radarr 与 Sonarr 的“添加新的”：媒体库与质量配置（默认是批准的请求所去之处）、电影的最低可用性、剧集的监视、新季、类型与季文件夹，以及立即搜索（`AddMovie`、`AddSeries`）；服务器已有的作品则显示其状态与“观看”
   - [x] Web UI 中面向管理员的条目操作：编辑元数据、识别、刷新与选择图片（`MetadataService`，§6.3.22）
   - [ ] Web UI 的播放与媒体库：播放列表与合集（`PlaylistService`、`CollectionService`）；在详情页与播放器中搜索、下载、上传、提取、同步与翻译字幕（`SubtitleService`）；以及音乐的歌词（`GetLyrics`）
     - [x] 通过条目的“更多”菜单使用播放列表与合集，播放列表的条目与合集的成员（§6.3.20）

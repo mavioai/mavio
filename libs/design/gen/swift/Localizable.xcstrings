@@ -1729,6 +1729,492 @@
         }
       }
     },
+    "discover.addWanted": {
+      "comment": "Button of a discovered title's page, for administrators, adding the movie or series to a library's wanted to acquire it, as Radarr's and Sonarr's Add.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to Wanted"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加到想要"
+          }
+        }
+      }
+    },
+    "discover.addWantedTitle": {
+      "comment": "Title of the dialog adding a discovered title to the wanted; name is the title's.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add %@ to Wanted"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将《%@》添加到想要"
+          }
+        }
+      }
+    },
+    "discover.addWantedMovieFooter": {
+      "comment": "Footer of the dialog adding a movie to the wanted.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The movie is added to the library as wanted, and acquired with the quality profile once it is available."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电影会作为想要的条目添加到媒体库，上映后按质量配置获取。"
+          }
+        }
+      }
+    },
+    "discover.addWantedSeriesFooter": {
+      "comment": "Footer of the dialog adding a series to the wanted.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The show is added to the library as wanted, and the episodes it monitors are acquired with the quality profile."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剧集会作为想要的条目添加到媒体库，其监视的集按质量配置获取。"
+          }
+        }
+      }
+    },
+    "discover.addWantedAdd": {
+      "comment": "Button of the dialog adding a title to the wanted.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加"
+          }
+        }
+      }
+    },
+    "discover.addWantedNoLibrary": {
+      "comment": "Shown in the dialog adding a title to the wanted when the server has no library of its kind.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No library of this kind. Add one in Libraries first."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有此类媒体库，请先在“媒体库”中添加。"
+          }
+        }
+      }
+    },
+    "discover.addWantedNoProfile": {
+      "comment": "Shown in the dialog adding a title to the wanted when the server has no quality profile of its kind.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No quality profile of this kind. Add one in Acquisition first."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有此类质量配置，请先在“获取”中添加。"
+          }
+        }
+      }
+    },
+    "discover.addWantedNoTvdb": {
+      "comment": "Shown in the dialog adding a series to the wanted when the series has no TVDB ID.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The show has no TVDB ID, which adding it needs."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此剧集没有 TVDB ID，无法添加。"
+          }
+        }
+      }
+    },
+    "discover.addWantedFailed": {
+      "comment": "Shown when adding a title to the wanted fails; reason is the server's.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't add it: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法添加：%@"
+          }
+        }
+      }
+    },
+    "discover.monitor": {
+      "comment": "Which episodes of a series added to the wanted are monitored.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitor"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "监视"
+          }
+        }
+      }
+    },
+    "discover.monitorAll": {
+      "comment": "Monitoring choice: every episode but specials.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Episodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部集"
+          }
+        }
+      }
+    },
+    "discover.monitorFuture": {
+      "comment": "Monitoring choice: episodes not aired yet.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Future Episodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未播出的集"
+          }
+        }
+      }
+    },
+    "discover.monitorMissing": {
+      "comment": "Monitoring choice: episodes without a file.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missing Episodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "缺失的集"
+          }
+        }
+      }
+    },
+    "discover.monitorExisting": {
+      "comment": "Monitoring choice: episodes with a file.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Existing Episodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已有的集"
+          }
+        }
+      }
+    },
+    "discover.monitorRecent": {
+      "comment": "Monitoring choice: episodes aired in the last 90 days and future ones.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recent Episodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近的集"
+          }
+        }
+      }
+    },
+    "discover.monitorPilot": {
+      "comment": "Monitoring choice: the first episode of the first season.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pilot Episode"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "试播集"
+          }
+        }
+      }
+    },
+    "discover.monitorFirstSeason": {
+      "comment": "Monitoring choice: the episodes of the first season.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First Season"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第一季"
+          }
+        }
+      }
+    },
+    "discover.monitorLastSeason": {
+      "comment": "Monitoring choice: the episodes of the last season.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last Season"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最后一季"
+          }
+        }
+      }
+    },
+    "discover.monitorNone": {
+      "comment": "Monitoring choice: no episodes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无"
+          }
+        }
+      }
+    },
+    "discover.seriesType": {
+      "comment": "How a series added to the wanted numbers its episodes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Series Type"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剧集类型"
+          }
+        }
+      }
+    },
+    "discover.seriesTypeAuto": {
+      "comment": "Series type chosen by the server: daily when listed so, else standard.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动"
+          }
+        }
+      }
+    },
+    "discover.seriesTypeStandard": {
+      "comment": "Series type: by season and episode.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standard"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标准"
+          }
+        }
+      }
+    },
+    "discover.seriesTypeDaily": {
+      "comment": "Series type: by air date.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daily"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日播"
+          }
+        }
+      }
+    },
+    "discover.seriesTypeAnime": {
+      "comment": "Series type: by absolute number.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anime"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "动画"
+          }
+        }
+      }
+    },
+    "discover.searchNow": {
+      "comment": "Toggle of the dialog adding a title to the wanted: search the indexers for it at once.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search Now"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即搜索"
+          }
+        }
+      }
+    },
+    "discover.searchNowMovieDetail": {
+      "comment": "Detail of Search Now for a movie.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search for the movie as soon as it's added"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加后立即搜索此电影"
+          }
+        }
+      }
+    },
+    "discover.searchNowSeriesDetail": {
+      "comment": "Detail of Search Now for a series.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search for the monitored episodes missing a file as soon as it's added"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加后立即搜索监视中缺失文件的集"
+          }
+        }
+      }
+    },
     "discover.networks": {
       "comment": "Filter of a series catalog: the networks the titles air on",
       "extractionState": "manual",

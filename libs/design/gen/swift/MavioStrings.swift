@@ -335,6 +335,91 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("discover.downloading", bundle: .module, comment: ""), percent)
     }
 
+    /// Button of a discovered title's page, for administrators, adding the movie or series to a library's wanted to acquire it, as Radarr's and Sonarr's Add.
+    public static var discoverAddWanted: String { NSLocalizedString("discover.addWanted", bundle: .module, comment: "") }
+
+    /// Title of the dialog adding a discovered title to the wanted; name is the title's.
+    public static func discoverAddWantedTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("discover.addWantedTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Footer of the dialog adding a movie to the wanted.
+    public static var discoverAddWantedMovieFooter: String { NSLocalizedString("discover.addWantedMovieFooter", bundle: .module, comment: "") }
+
+    /// Footer of the dialog adding a series to the wanted.
+    public static var discoverAddWantedSeriesFooter: String { NSLocalizedString("discover.addWantedSeriesFooter", bundle: .module, comment: "") }
+
+    /// Button of the dialog adding a title to the wanted.
+    public static var discoverAddWantedAdd: String { NSLocalizedString("discover.addWantedAdd", bundle: .module, comment: "") }
+
+    /// Shown in the dialog adding a title to the wanted when the server has no library of its kind.
+    public static var discoverAddWantedNoLibrary: String { NSLocalizedString("discover.addWantedNoLibrary", bundle: .module, comment: "") }
+
+    /// Shown in the dialog adding a title to the wanted when the server has no quality profile of its kind.
+    public static var discoverAddWantedNoProfile: String { NSLocalizedString("discover.addWantedNoProfile", bundle: .module, comment: "") }
+
+    /// Shown in the dialog adding a series to the wanted when the series has no TVDB ID.
+    public static var discoverAddWantedNoTvdb: String { NSLocalizedString("discover.addWantedNoTvdb", bundle: .module, comment: "") }
+
+    /// Shown when adding a title to the wanted fails; reason is the server's.
+    public static func discoverAddWantedFailed(reason: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("discover.addWantedFailed", bundle: .module, comment: ""), reason)
+    }
+
+    /// Which episodes of a series added to the wanted are monitored.
+    public static var discoverMonitor: String { NSLocalizedString("discover.monitor", bundle: .module, comment: "") }
+
+    /// Monitoring choice: every episode but specials.
+    public static var discoverMonitorAll: String { NSLocalizedString("discover.monitorAll", bundle: .module, comment: "") }
+
+    /// Monitoring choice: episodes not aired yet.
+    public static var discoverMonitorFuture: String { NSLocalizedString("discover.monitorFuture", bundle: .module, comment: "") }
+
+    /// Monitoring choice: episodes without a file.
+    public static var discoverMonitorMissing: String { NSLocalizedString("discover.monitorMissing", bundle: .module, comment: "") }
+
+    /// Monitoring choice: episodes with a file.
+    public static var discoverMonitorExisting: String { NSLocalizedString("discover.monitorExisting", bundle: .module, comment: "") }
+
+    /// Monitoring choice: episodes aired in the last 90 days and future ones.
+    public static var discoverMonitorRecent: String { NSLocalizedString("discover.monitorRecent", bundle: .module, comment: "") }
+
+    /// Monitoring choice: the first episode of the first season.
+    public static var discoverMonitorPilot: String { NSLocalizedString("discover.monitorPilot", bundle: .module, comment: "") }
+
+    /// Monitoring choice: the episodes of the first season.
+    public static var discoverMonitorFirstSeason: String { NSLocalizedString("discover.monitorFirstSeason", bundle: .module, comment: "") }
+
+    /// Monitoring choice: the episodes of the last season.
+    public static var discoverMonitorLastSeason: String { NSLocalizedString("discover.monitorLastSeason", bundle: .module, comment: "") }
+
+    /// Monitoring choice: no episodes.
+    public static var discoverMonitorNone: String { NSLocalizedString("discover.monitorNone", bundle: .module, comment: "") }
+
+    /// How a series added to the wanted numbers its episodes.
+    public static var discoverSeriesType: String { NSLocalizedString("discover.seriesType", bundle: .module, comment: "") }
+
+    /// Series type chosen by the server: daily when listed so, else standard.
+    public static var discoverSeriesTypeAuto: String { NSLocalizedString("discover.seriesTypeAuto", bundle: .module, comment: "") }
+
+    /// Series type: by season and episode.
+    public static var discoverSeriesTypeStandard: String { NSLocalizedString("discover.seriesTypeStandard", bundle: .module, comment: "") }
+
+    /// Series type: by air date.
+    public static var discoverSeriesTypeDaily: String { NSLocalizedString("discover.seriesTypeDaily", bundle: .module, comment: "") }
+
+    /// Series type: by absolute number.
+    public static var discoverSeriesTypeAnime: String { NSLocalizedString("discover.seriesTypeAnime", bundle: .module, comment: "") }
+
+    /// Toggle of the dialog adding a title to the wanted: search the indexers for it at once.
+    public static var discoverSearchNow: String { NSLocalizedString("discover.searchNow", bundle: .module, comment: "") }
+
+    /// Detail of Search Now for a movie.
+    public static var discoverSearchNowMovieDetail: String { NSLocalizedString("discover.searchNowMovieDetail", bundle: .module, comment: "") }
+
+    /// Detail of Search Now for a series.
+    public static var discoverSearchNowSeriesDetail: String { NSLocalizedString("discover.searchNowSeriesDetail", bundle: .module, comment: "") }
+
     /// Filter of a series catalog: the networks the titles air on
     public static var discoverNetworks: String { NSLocalizedString("discover.networks", bundle: .module, comment: "") }
 

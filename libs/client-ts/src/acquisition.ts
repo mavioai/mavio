@@ -9,8 +9,12 @@ import {
   type ManualImportRequestSchema,
   type RemoveFromQueueRequestSchema,
 } from "@mavio/proto/mavio/acquisition/v1/download_pb";
+import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { type Release, type ReleaseSearchType, ReleaseService } from "@mavio/proto/mavio/acquisition/v1/release_pb";
+import type { RequestSettings } from "@mavio/proto/mavio/acquisition/v1/request_pb";
 import {
+  type AddMovieRequestSchema,
+  type AddSeriesRequestSchema,
   type SeriesMonitor,
   type Wanted,
   type WantedFilter,
@@ -18,6 +22,7 @@ import {
   type WantedKind,
   WantedService,
 } from "@mavio/proto/mavio/acquisition/v1/wanted_pb";
+import { LibraryKind } from "@mavio/proto/mavio/library/v1/library_pb";
 import { clone, type MessageInitShape } from "@bufbuild/protobuf";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -97,6 +102,59 @@ export function useWantedActions(server: ServerEntry) {
       },
       onSuccess,
     }),
+  };
+}
+
+/** The library and quality profile a title is added to the wanted with. */
+export interface WantedTarget {
+  libraryId: string;
+  qualityProfileId: string;
+}
+
+/**
+ * Where a movie or series is added to the wanted by default: the library
+ * and quality profile approved requests of its kind go to — an anime
+ * series' own, else a series' — or the first of its kind where those are
+ * unset or no longer offered.
+ */
+export function wantedTarget(
+  kind: MediaKind,
+  anime: boolean,
+  settings: RequestSettings | undefined,
+  libraries: { id: string; kind: LibraryKind }[],
+  profiles: { id: string; kind: MediaKind }[],
+): WantedTarget {
+  const movie = kind === MediaKind.MOVIE;
+  const libs = libraries.filter((l) => l.kind === (movie ? LibraryKind.MOVIES : LibraryKind.SHOWS)).map((l) => l.id);
+  const profs = profiles.filter((p) => p.kind === kind).map((p) => p.id);
+  const pick = (offered: string[], ...preferred: (string | undefined)[]) => preferred.find((id) => !!id && offered.includes(id)) ?? offered[0] ?? "";
+  const s = settings;
+  return movie
+    ? { libraryId: pick(libs, s?.movieLibraryId), qualityProfileId: pick(profs, s?.movieQualityProfileId) }
+    : {
+        libraryId: pick(libs, anime ? s?.animeLibraryId : undefined, s?.seriesLibraryId),
+        qualityProfileId: pick(profs, anime ? s?.animeQualityProfileId : undefined, s?.seriesQualityProfileId),
+      };
+}
+
+/**
+ * Adding a movie by its TMDB ID or a series by its TVDB ID to a library's
+ * wanted, as Radarr's and Sonarr's Add New; resolves to the new item's ID
+ * and refreshes what acquisition, the library and discovery show.
+ */
+export function useAddWanted(server: ServerEntry) {
+  const servers = useServersStore();
+  const qc = useQueryClient();
+  const c = () => servers.client(WantedService, server);
+  const onSuccess = () =>
+    Promise.all([
+      qc.invalidateQueries({ queryKey: serverKey(server.id, "acquisition") }),
+      qc.invalidateQueries({ queryKey: serverKey(server.id, "discover") }),
+      qc.invalidateQueries({ queryKey: serverKey(server.id, "items") }),
+    ]);
+  return {
+    movie: useMutation({ mutationFn: async (v: MessageInitShape<typeof AddMovieRequestSchema>) => (await c().addMovie(v)).itemId, onSuccess }),
+    series: useMutation({ mutationFn: async (v: MessageInitShape<typeof AddSeriesRequestSchema>) => (await c().addSeries(v)).itemId, onSuccess }),
   };
 }
 

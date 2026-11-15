@@ -45,6 +45,7 @@ import { Checkbox } from "../controls/inputs.tsx";
 import { QueueRow } from "./admin/downloads.tsx";
 import { IssueDialog, IssueRow, ReportDialog, useMayReport } from "./issues.tsx";
 import { RequestRow } from "./requests.tsx";
+import { AddWantedDialog } from "./discover-wanted.tsx";
 
 /** A title's kind in addresses. */
 export type KindParam = "movie" | "series";
@@ -320,7 +321,7 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
   const request = useRequestTitle(server);
   const admin = useAdminServers().some((s) => s.id === server.id);
   const actions = useRequestActions(server);
-  const [dialog, setDialog] = useState<"manage" | "report">();
+  const [dialog, setDialog] = useState<"manage" | "report" | "wanted">();
   // An issue is reported of what a library has, as on Seerr once available.
   const available = title.status === MediaStatus.AVAILABLE || title.status === MediaStatus.PARTIALLY_AVAILABLE;
   const mayReport = useMayReport(server);
@@ -446,6 +447,13 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
                   {t("discover.reportIssue")}
                 </button>
               )}
+              {/* A title the server has, in a library or wanted, shows that by its status and Watch instead. */}
+              {admin && !title.itemId && (
+                <button type="button" onClick={() => setDialog("wanted")} className={secondary}>
+                  <Icon name="downloads" size={tv ? 28 : 20} />
+                  {t("discover.addWanted")}
+                </button>
+              )}
               {admin && (
                 <button type="button" onClick={() => setDialog("manage")} className={secondary}>
                   <Icon name="settings" size={tv ? 28 : 20} />
@@ -491,6 +499,7 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
           />
         ))}
       {dialog === "report" && item.data?.item && <ReportDialog server={server} item={item.data.item} onClose={() => setDialog(undefined)} />}
+      {dialog === "wanted" && <AddWantedDialog server={server} title={title} onClose={() => setDialog(undefined)} />}
       {dialog === "manage" && <ManageDialog server={server} title={title} onClose={() => setDialog(undefined)} />}
       {asking && (
         <RequestDialog

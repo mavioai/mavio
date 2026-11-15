@@ -194,6 +194,60 @@
     <string name="discover_block_footer">A blocklisted title can no longer be requested.</string>
     <!-- Status badge of a title being downloaded -->
     <string name="discover_downloading">Downloading %s%%</string>
+    <!-- Button of a discovered title's page, for administrators, adding the movie or series to a library's wanted to acquire it, as Radarr's and Sonarr's Add. -->
+    <string name="discover_add_wanted">Add to Wanted</string>
+    <!-- Title of the dialog adding a discovered title to the wanted; name is the title's. -->
+    <string name="discover_add_wanted_title">Add %s to Wanted</string>
+    <!-- Footer of the dialog adding a movie to the wanted. -->
+    <string name="discover_add_wanted_movie_footer">The movie is added to the library as wanted, and acquired with the quality profile once it is available.</string>
+    <!-- Footer of the dialog adding a series to the wanted. -->
+    <string name="discover_add_wanted_series_footer">The show is added to the library as wanted, and the episodes it monitors are acquired with the quality profile.</string>
+    <!-- Button of the dialog adding a title to the wanted. -->
+    <string name="discover_add_wanted_add">Add</string>
+    <!-- Shown in the dialog adding a title to the wanted when the server has no library of its kind. -->
+    <string name="discover_add_wanted_no_library">No library of this kind. Add one in Libraries first.</string>
+    <!-- Shown in the dialog adding a title to the wanted when the server has no quality profile of its kind. -->
+    <string name="discover_add_wanted_no_profile">No quality profile of this kind. Add one in Acquisition first.</string>
+    <!-- Shown in the dialog adding a series to the wanted when the series has no TVDB ID. -->
+    <string name="discover_add_wanted_no_tvdb">The show has no TVDB ID, which adding it needs.</string>
+    <!-- Shown when adding a title to the wanted fails; reason is the server's. -->
+    <string name="discover_add_wanted_failed">Couldn\'t add it: %s</string>
+    <!-- Which episodes of a series added to the wanted are monitored. -->
+    <string name="discover_monitor">Monitor</string>
+    <!-- Monitoring choice: every episode but specials. -->
+    <string name="discover_monitor_all">All Episodes</string>
+    <!-- Monitoring choice: episodes not aired yet. -->
+    <string name="discover_monitor_future">Future Episodes</string>
+    <!-- Monitoring choice: episodes without a file. -->
+    <string name="discover_monitor_missing">Missing Episodes</string>
+    <!-- Monitoring choice: episodes with a file. -->
+    <string name="discover_monitor_existing">Existing Episodes</string>
+    <!-- Monitoring choice: episodes aired in the last 90 days and future ones. -->
+    <string name="discover_monitor_recent">Recent Episodes</string>
+    <!-- Monitoring choice: the first episode of the first season. -->
+    <string name="discover_monitor_pilot">Pilot Episode</string>
+    <!-- Monitoring choice: the episodes of the first season. -->
+    <string name="discover_monitor_first_season">First Season</string>
+    <!-- Monitoring choice: the episodes of the last season. -->
+    <string name="discover_monitor_last_season">Last Season</string>
+    <!-- Monitoring choice: no episodes. -->
+    <string name="discover_monitor_none">None</string>
+    <!-- How a series added to the wanted numbers its episodes. -->
+    <string name="discover_series_type">Series Type</string>
+    <!-- Series type chosen by the server: daily when listed so, else standard. -->
+    <string name="discover_series_type_auto">Automatic</string>
+    <!-- Series type: by season and episode. -->
+    <string name="discover_series_type_standard">Standard</string>
+    <!-- Series type: by air date. -->
+    <string name="discover_series_type_daily">Daily</string>
+    <!-- Series type: by absolute number. -->
+    <string name="discover_series_type_anime">Anime</string>
+    <!-- Toggle of the dialog adding a title to the wanted: search the indexers for it at once. -->
+    <string name="discover_search_now">Search Now</string>
+    <!-- Detail of Search Now for a movie. -->
+    <string name="discover_search_now_movie_detail">Search for the movie as soon as it\'s added</string>
+    <!-- Detail of Search Now for a series. -->
+    <string name="discover_search_now_series_detail">Search for the monitored episodes missing a file as soon as it\'s added</string>
     <!-- Filter of a series catalog: the networks the titles air on -->
     <string name="discover_networks">Networks</string>
     <!-- Production status of a title -->
