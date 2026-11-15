@@ -2,14 +2,19 @@
 // the More menu adding the item to a playlist, or for administrators to a
 // collection, and renaming or deleting a playlist or collection; a
 // playlist's entries in order, moved and removed; a collection's members
-// removed by its administrators. The menu also plays the item on another
-// device (§6.3.23), watches it together (§6.3.24), reports a problem with it
-// (§6.3.25) and, for administrators, opens its metadata (§6.3.22).
+// removed by its administrators. A playlist or collection plays in order or
+// shuffled, the player going on to the next entry (§6.5). The menu also
+// plays the item on another device (§6.3.23), watches it together
+// (§6.3.24), reports a problem with it (§6.3.25) and, for administrators,
+// opens its metadata (§6.3.22).
 import {
   errorMessage,
+  playQueue,
   type ServerEntry,
+  shuffledQueue,
   thumbOf,
   useAdminServers,
+  useChildren,
   useCollectionActions,
   useCollections,
   usePlaylistActions,
@@ -18,11 +23,12 @@ import {
 } from "@mavio/client-ts";
 import { type Item, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import type { PlaylistEntry } from "@mavio/proto/mavio/library/v1/playlist_pb";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
+import { playItems, playQueueAt } from "../queue.ts";
 import { Artwork, Button, Grid, ItemCard, runtimeOf, subtitleOf } from "../ui.tsx";
 import { Menu, MenuItem, MenuSeparator } from "../controls/menu.tsx";
 import { Tip } from "../controls/tooltip.tsx";
@@ -226,24 +232,96 @@ function DeleteDialog({ server, item, onClose }: { server: ServerEntry; item: It
   );
 }
 
+/** The IDs of a playlist's entries that play, in order. */
+const entryIds = (entries: PlaylistEntry[]) => entries.flatMap((e) => (e.item && playable(e.item.kind) ? [e.item.id] : []));
+
+/**
+ * Play and Shuffle of a playlist's entries or a collection's members that
+ * play, among the actions of its details; none while it has none.
+ */
+export function ListPlay(props: { server: ServerEntry; list: Item; primary: string; circle: string; icon: number }) {
+  return props.list.kind === ItemKind.PLAYLIST ? <PlaylistPlay {...props} /> : <CollectionPlay {...props} />;
+}
+
+function PlaylistPlay({ server, list, ...rest }: { server: ServerEntry; list: Item; primary: string; circle: string; icon: number }) {
+  const entries = usePlaylistEntries(server, list.id);
+  return <PlayButtons server={server} ids={entryIds(entries.data ?? [])} {...rest} />;
+}
+
+function CollectionPlay({ server, list, ...rest }: { server: ServerEntry; list: Item; primary: string; circle: string; icon: number }) {
+  // The members in the order they were added; a series or album among them is not played.
+  const children = useChildren(server, list);
+  return <PlayButtons server={server} ids={(children.data ?? []).filter((i) => playable(i.kind)).map((i) => i.id)} {...rest} />;
+}
+
+function PlayButtons({ server, ids, primary, circle, icon }: { server: ServerEntry; ids: string[]; primary: string; circle: string; icon: number }) {
+  const router = useRouter();
+  if (ids.length === 0) return null;
+  return (
+    <>
+      <button type="button" data-tv-button className={primary} onClick={() => playItems(router, server.id, ids)}>
+        <Icon name="play" fill size={icon} />
+        {t("item.play")}
+      </button>
+      {ids.length > 1 && (
+        <Tip label={t("lists.shuffle")}>
+          <button
+            type="button"
+            aria-label={t("lists.shuffle")}
+            data-tv-button
+            className={circle}
+            onClick={() => {
+              const q = shuffledQueue(ids);
+              if (q) void playQueueAt(router, server.id, q);
+            }}
+          >
+            <Icon name="shuffle" size={icon} />
+          </button>
+        </Tip>
+      )}
+    </>
+  );
+}
+
 /** A playlist's entries in order, each played, moved or removed in place. */
 export function PlaylistEntries({ server, playlist }: { server: ServerEntry; playlist: Item }) {
   const entries = usePlaylistEntries(server, playlist.id);
   const list = entries.data ?? [];
+  // An entry plays the playlist from it on.
+  const ids = entryIds(list);
+  let at = 0;
   return (
     <section className="px-margin py-4">
       {entries.isError && <p className="type-callout break-words text-danger">{errorMessage(entries.error)}</p>}
       {entries.isSuccess && list.length === 0 && <p className="type-body text-text-secondary">{t("lists.emptyPlaylist")}</p>}
       <ol className="flex flex-col">
-        {list.map((e, i) => (
-          <EntryRow key={e.id} server={server} playlistId={playlist.id} entry={e} index={i} last={i === list.length - 1} />
-        ))}
+        {list.map((e, i) => {
+          const start = e.item && playable(e.item.kind) ? at++ : -1;
+          return <EntryRow key={e.id} server={server} playlistId={playlist.id} entry={e} index={i} last={i === list.length - 1} ids={ids} start={start} />;
+        })}
       </ol>
     </section>
   );
 }
 
-function EntryRow({ server, playlistId, entry: e, index, last }: { server: ServerEntry; playlistId: string; entry: PlaylistEntry; index: number; last: boolean }) {
+function EntryRow({
+  server,
+  playlistId,
+  entry: e,
+  index,
+  last,
+  ids,
+  start,
+}: {
+  server: ServerEntry;
+  playlistId: string;
+  entry: PlaylistEntry;
+  index: number;
+  last: boolean;
+  /** The playlist's entries that play, and this one's index among them, -1 when it does not. */
+  ids: string[];
+  start: number;
+}) {
   const { move, removeEntries } = usePlaylistActions(server);
   const item = e.item;
   if (!item) return null;
@@ -252,7 +330,12 @@ function EntryRow({ server, playlistId, entry: e, index, last }: { server: Serve
   return (
     <li className="flex items-center gap-3 rounded-md px-2 py-2 hover:tint">
       <span className="w-6 text-right type-callout text-text-tertiary tabular-nums">{index + 1}</span>
-      <Link to="/s/$serverId/play/$itemId" params={{ serverId: server.id, itemId: item.id }} className="flex min-w-0 flex-1 items-center gap-3">
+      <Link
+        to="/s/$serverId/play/$itemId"
+        params={{ serverId: server.id, itemId: item.id }}
+        state={{ queue: start >= 0 ? playQueue(ids, start) : undefined }}
+        className="flex min-w-0 flex-1 items-center gap-3"
+      >
         <Artwork src={thumbOf(server, item, 240)?.url} alt="" className="aspect-video w-24 shrink-0 rounded-md" />
         <span className="min-w-0 flex-1">
           <span className="block truncate type-body">{item.name}</span>

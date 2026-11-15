@@ -670,7 +670,7 @@ flowchart TD
   - [x] Discovery and request screens, with P20
   - [x] Administration screens: libraries, users, devices, plugins, tasks, settings
   - [x] Collections and playlists (`apps/web/src/screens/lists.tsx`, `libs/client-ts/src/lists.ts`)
-    - [ ] Playing a playlist or collection in order, the player going on to the next entry
+    - [x] Playing a playlist or collection in order, or shuffled, from its details' Play and Shuffle or from an entry, the player going on to the next entry and back to the previous one (`apps/web/src/queue.ts`, `libs/client-ts/src/queue.ts`, §6.5)
   - [x] Playing the next episode at the end of one
   - [ ] Styled ASS subtitles with JASSUB
   - [ ] The query cache kept offline
@@ -790,7 +790,7 @@ flowchart TD
     - [ ] Lyrics searched and downloaded by administrators (`SearchRemoteLyrics`, `DownloadRemoteLyrics`)
   - [ ] The web UI together: SyncPlay groups (`SyncPlayService`), controlling the other sessions (`SessionService.SendCommand`), and issues reported on a title and handled by administrators (`IssueService`)
     - [x] Controlling the user's other devices: Play On from an item's More menu and the control from the Devices settings; the browser carries out the commands sent to it (§6.3.23)
-    - [ ] A Play command's items after its first, queued in the player
+    - [x] A Play command's items after the one it starts with, queued in the player, whose next and previous commands move through the queue (`apps/web/src/screens/remote.tsx`, `apps/web/src/queue.ts`)
     - [x] SyncPlay groups: created, joined and left from Watch Together, the player following the group with its clock kept in step (§6.3.24)
     - [ ] Editing a SyncPlay group's queue: adding items, moving and removing them (needs requests of `SyncPlayService`)
     - [x] Issues: reported from an item's More menu, an item's open issues on its details, and the settings' Issues with an issue's comments, resolving, reopening and deleting (§6.3.25)
@@ -1145,7 +1145,8 @@ flowchart TD
 - [ ] The Windows package run on Windows
 - [ ] Later: SmallWebRTC as a transport beside the WebSocket, for weak networks, with TURN on mavio.dev for servers reached through the relay and UDP ports in the container image
 - [ ] Later: Opus for the answer's speech on the WebSocket
-- [ ] The web player: queues of several items, which the assistant's actions ask for and the player cannot yet carry out, and the assistant's subtitle offset handed to the player's own; V listed with the player's shortcuts
+- [x] The web player: queues of several items, which the assistant's play actions ask for, the player's next and previous moving through them (`apps/web/src/assistant/panel.tsx`, `apps/web/src/queue.ts`)
+- [ ] The web player: the assistant's subtitle offset handed to the player's own; V listed with the player's shortcuts
 - [ ] Services Pipecat lacks for Chinese, Volcengine and Alibaba Cloud, as services of `plugins/pipecat`
 - [x] The Mac, iPhone and iPad apps: the orb and cards, the assistant button in the header or sidebar, the television bar and the player's controls, the Mac's key held to talk, voice sessions with `AVAudioEngine`'s voice processing, and the client actions on their screens and players
 - [x] Apple TV: the assistant button starting a voice session with a microphone connected to the Apple TV, an iPhone's, an iPad's or a headset's, else opening the system's keyboard for the Siri Remote's dictation; the orb and cards over the pages and the player, Back dismissing them; the client actions on its screens and player

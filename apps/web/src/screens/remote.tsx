@@ -6,7 +6,7 @@ import { durationFromMs, durationMs } from "@bufbuild/protobuf/wkt";
 import { errorMessage, type ServerEntry, useSendCommand, useSessions } from "@mavio/client-ts";
 import { type Item, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { PlayStateCommand, type Session } from "@mavio/proto/mavio/session/v1/session_pb";
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 import { Slider } from "../controls/inputs.tsx";
@@ -18,6 +18,7 @@ import { Button, subtitleOf } from "../ui.tsx";
 import { field } from "../controls/styles.ts";
 import { Modal } from "../controls/dialog.tsx";
 import { usePrefs } from "../prefs.ts";
+import { playItems } from "../queue.ts";
 
 /** Kinds a device plays by themselves. */
 export const playable = (kind: ItemKind) =>
@@ -31,11 +32,11 @@ interface Shown {
 
 /**
  * Carries out what other devices ask of this browser outside the player:
- * playing an item opens the player at its position, and a message shows
+ * playing items opens the player on the first at its position, the others
+ * queued after it, and a message shows
  * until dismissed or for as long as it asks.
  */
 export function RemoteCommands() {
-  const navigate = useNavigate();
   const router = useRouter();
   const [message, setMessage] = useState<Shown>();
   useServerEvents((server, e) => {
@@ -43,16 +44,10 @@ export function RemoteCommands() {
     const { fromUserName, command } = e.kind.value;
     const c = command?.kind;
     if (c?.case === "play") {
-      const id = c.value.itemIds[c.value.startIndex] ?? c.value.itemIds[0];
-      if (!id) return;
       const start = c.value.startPosition ? Math.round(durationMs(c.value.startPosition)) : undefined;
-      // An item asked for while playing another takes its place.
-      void navigate({
-        to: "/s/$serverId/play/$itemId",
-        params: { serverId: server.id, itemId: id },
-        search: { start: start || undefined },
-        replace: router.state.location.pathname.includes("/play/"),
-      });
+      // The items after the first are queued in the player; an item asked
+      // for while playing another takes its place.
+      playItems(router, server.id, c.value.itemIds, c.value.startIndex, { start: start || undefined }, router.state.location.pathname.includes("/play/"));
     } else if (c?.case === "message") {
       setMessage({ from: fromUserName, text: c.value.text, timeoutMs: c.value.timeout ? durationMs(c.value.timeout) : undefined });
     }

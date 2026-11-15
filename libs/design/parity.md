@@ -32,6 +32,7 @@ The state of every feature on each client ([Clients §6.8](../../docs/clients.md
 | Playback speed | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | Chapters and trickplay thumbnails | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | Next episode | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| Play queue: a playlist or collection in order or shuffled, a Play command's items | ✓ | ○ | ○ | ○ | ○ | ○ | ○ |
 | Picture in Picture | ○ | ○ | ○ | ○ | ○ | — | — |
 | AirPlay | ○ | ○ | — | ○ | — | — | — |
 | Open in an external player | ○ | — | — | — | — | — | — |

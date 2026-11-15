@@ -670,7 +670,7 @@ flowchart TD
   - [x] 发现与请求页面，随 P20
   - [x] 管理页面：媒体库、用户、设备、插件、任务、设置
   - [x] 合集与播放列表（`apps/web/src/screens/lists.tsx`、`libs/client-ts/src/lists.ts`）
-    - [ ] 按顺序播放播放列表或合集，播放器接着播放下一项
+    - [x] 从详情的“播放”与“随机播放”或从某一条目起，按顺序或随机播放播放列表或合集，播放器接着播放下一项，也可回到上一项（`apps/web/src/queue.ts`、`libs/client-ts/src/queue.ts`，§6.5）
   - [x] 一集结束时播放下一集
   - [ ] 借助 JASSUB 保留样式的 ASS 字幕
   - [ ] 离线保存查询缓存
@@ -790,7 +790,7 @@ flowchart TD
     - [ ] 由管理员搜索与下载歌词（`SearchRemoteLyrics`、`DownloadRemoteLyrics`）
   - [ ] Web UI 的共同观看：同步播放组（`SyncPlayService`）、控制其他会话（`SessionService.SendCommand`），以及对作品报告问题并由管理员处理（`IssueService`）
     - [x] 控制用户的其他设备：条目“更多”菜单中的“在…上播放”和“设备”设置中的控制；浏览器执行发给它的命令（§6.3.23）
-    - [ ] “播放”命令中第一个之后的条目，在播放器中排队
+    - [x] “播放”命令中起始条目之后的条目，在播放器中排队，播放器的下一个与上一个命令在队列中移动（`apps/web/src/screens/remote.tsx`、`apps/web/src/queue.ts`）
     - [x] 同步播放组：从“一起看”创建、加入和离开，播放器跟随小组并保持时钟同步（§6.3.24）
     - [ ] 编辑同步播放组的队列：添加、移动和移除条目（需要 `SyncPlayService` 的新请求）
     - [x] 问题：从条目的“更多”菜单报告，条目详情中的未解决问题，以及设置中的“问题”及其评论、标记为已解决、重新打开和删除（§6.3.25）
@@ -1145,7 +1145,8 @@ flowchart TD
 - [ ] 在 Windows 上运行 Windows 的包
 - [ ] 以后：在 WebSocket 之外加入 SmallWebRTC 作为传输，用于弱网，并为经由中转访问的服务端在 mavio.dev 上提供 TURN，在容器镜像中开放 UDP 端口
 - [ ] 以后：WebSocket 上回答的语音使用 Opus
-- [ ] Web 播放器：助手的动作会要求、而播放器尚不能执行的多个条目的队列，以及把助手的字幕偏移动作交给播放器已有的字幕偏移；在播放器的快捷键中列出 V
+- [x] Web 播放器：助手的播放动作要求的多个条目的队列，播放器的下一个与上一个在其中移动（`apps/web/src/assistant/panel.tsx`、`apps/web/src/queue.ts`）
+- [ ] Web 播放器：把助手的字幕偏移动作交给播放器已有的字幕偏移；在播放器的快捷键中列出 V
 - [ ] Pipecat 缺少的中文服务：火山引擎与阿里云，作为 `plugins/pipecat` 的服务
 - [x] Mac、iPhone 与 iPad 应用：光球与卡片，页眉或侧边栏、电视导航栏与播放器控制栏中的助手按钮，Mac 上按住说话的按键，使用 `AVAudioEngine` 语音处理的语音会话，以及在其页面与播放器上执行的客户端动作
 - [x] Apple TV：助手按钮在连接到 Apple TV 的麦克风（iPhone、iPad 或耳机的麦克风）存在时开始语音会话，否则打开系统键盘供 Siri Remote 听写；页面与播放器上的光球与卡片，返回键关闭它们；在其页面与播放器上执行的客户端动作

@@ -52,7 +52,7 @@ import { CastShelf, isCast, libraryCredits } from "./credits.tsx";
 import { dayText, FactList, languageText, moneyText, WatchProviders } from "./facts.tsx";
 import { ItemIssues } from "./issues.tsx";
 import { ItemSubtitles } from "./item-subtitles.tsx";
-import { CollectionMembers, MoreMenu, PlaylistEntries } from "./lists.tsx";
+import { CollectionMembers, ListPlay, MoreMenu, PlaylistEntries } from "./lists.tsx";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { Artwork, Grid, ItemCard, Loading, minutesLeft, minutesText, NotFoundView, progressOf, runtimeOf, Shelf, StatusView, VirtualList, yearOf } from "../ui.tsx";
@@ -578,6 +578,9 @@ function Actions({
     <div className="mt-1 flex flex-col gap-3">
       {/* On the television focus starts on Play, as on tvOS, else the first action. */}
       <div data-tv-initial className="flex flex-wrap items-center gap-3">
+        {!next && (item.kind === ItemKind.PLAYLIST || item.kind === ItemKind.COLLECTION) && (
+          <ListPlay server={server} list={item} primary={primary} circle={circle} icon={icon} />
+        )}
         {next && (
           <Link
             to="/s/$serverId/play/$itemId"

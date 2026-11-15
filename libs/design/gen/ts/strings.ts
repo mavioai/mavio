@@ -238,6 +238,8 @@ export type MessageKey =
   | 'player.pictureInPicture'
   | 'player.chapters'
   | 'player.nextEpisode'
+  | 'player.next'
+  | 'player.previous'
   | 'player.back'
   | 'player.openExternal'
   | 'player.copyLink'
@@ -1822,6 +1824,7 @@ export type MessageKey =
   | 'lists.remove'
   | 'lists.removeNamed'
   | 'lists.edit'
+  | 'lists.shuffle'
   | 'itemsubs.title'
   | 'itemsubs.unknown'
   | 'itemsubs.forcedLanguage'
@@ -2498,6 +2501,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.pictureInPicture": "Picture in Picture",
     "player.chapters": "Chapters",
     "player.nextEpisode": "Next Episode",
+    "player.next": "Next",
+    "player.previous": "Previous",
     "player.back": "Back",
     "player.openExternal": "Open in External Player",
     "player.copyLink": "Copy Stream Link",
@@ -4082,6 +4087,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "lists.remove": "Remove",
     "lists.removeNamed": "Remove {name}",
     "lists.edit": "Edit",
+    "lists.shuffle": "Shuffle",
     "itemsubs.title": "Subtitles",
     "itemsubs.unknown": "Unknown language",
     "itemsubs.forcedLanguage": "{language} (Forced)",
@@ -4756,6 +4762,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.pictureInPicture": "画中画",
     "player.chapters": "章节",
     "player.nextEpisode": "下一集",
+    "player.next": "下一项",
+    "player.previous": "上一项",
     "player.back": "返回",
     "player.openExternal": "在外部播放器中打开",
     "player.copyLink": "复制串流链接",
@@ -6340,6 +6348,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "lists.remove": "移除",
     "lists.removeNamed": "移除 {name}",
     "lists.edit": "编辑",
+    "lists.shuffle": "随机播放",
     "itemsubs.title": "字幕",
     "itemsubs.unknown": "未知语言",
     "itemsubs.forcedLanguage": "{language}（强制）",

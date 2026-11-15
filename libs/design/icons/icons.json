@@ -27,6 +27,7 @@
   "exitFullScreen": "corners-in",
   "pictureInPicture": "picture-in-picture",
   "loop": "repeat",
+  "shuffle": "shuffle",
   "speed": "gauge",
   "activity": "pulse",
   "cast": "screencast",

@@ -39,6 +39,7 @@ import { createContext, type ReactNode, useCallback, useContext, useEffect, useM
 import { locale, t } from "../i18n.ts";
 import { Tip } from "../controls/tooltip.tsx";
 import { Icon } from "../icon.tsx";
+import { playItems } from "../queue.ts";
 import { isTabPlace } from "../shell/places.ts";
 import { Artwork, subtitleOf } from "../ui.tsx";
 import { Orb, type OrbMode, orbSize } from "./orb.tsx";
@@ -196,20 +197,13 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       const k = a.kind;
       const p = openPlayer();
       switch (k.case) {
-        case "play": {
-          const id = k.value.itemIds[k.value.startIndex] ?? k.value.itemIds[0];
-          if (!id) return false;
-          void router.navigate({
-            to: "/s/$serverId/play/$itemId",
-            params: { serverId: srv.id, itemId: id },
-            search: {
-              start: k.value.startPosition ? durationMs(k.value.startPosition) : undefined,
-              audio: isFieldSet(k.value, PlayActionSchema.field.audioStreamIndex) ? k.value.audioStreamIndex : undefined,
-              subtitle: isFieldSet(k.value, PlayActionSchema.field.subtitleStreamIndex) ? k.value.subtitleStreamIndex : undefined,
-            },
+        case "play":
+          // The items after the first are queued in the player.
+          return playItems(router, srv.id, k.value.itemIds, k.value.startIndex, {
+            start: k.value.startPosition ? durationMs(k.value.startPosition) : undefined,
+            audio: isFieldSet(k.value, PlayActionSchema.field.audioStreamIndex) ? k.value.audioStreamIndex : undefined,
+            subtitle: isFieldSet(k.value, PlayActionSchema.field.subtitleStreamIndex) ? k.value.subtitleStreamIndex : undefined,
           });
-          return true;
-        }
         case "control": {
           if (!p) return false;
           const v = k.value.value;

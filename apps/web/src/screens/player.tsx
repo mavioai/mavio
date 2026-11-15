@@ -4,7 +4,8 @@
 // and on pause, seek and stop. As the Mac app's, the controls' row has a
 // menu each of the speed, subtitles, audio and quality and of how the item
 // plays; on the television a side panel has them. An episode's end starts
-// the next.
+// the next; a queue's entry's end, as a playlist's, starts the queue's next,
+// which, with its previous, the controls also go to.
 // Other devices of the user control it remotely (§6.3.23), and it follows
 // the SyncPlay group playing its item (§6.3.24). A track shows its lyrics
 // (§6.3.27). The assistant controls it (docs/assistant.md §5.2).
@@ -13,6 +14,8 @@ import {
   errorMessage,
   nativeHls,
   Playback,
+  type PlayQueue,
+  queueStep,
   type ServerEntry,
   urlOf,
   useItem,
@@ -40,6 +43,7 @@ import { useServerEvents } from "../events.tsx";
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { prefs, type Quality, qualities, qualityBitrates, setPrefs, usePrefs } from "../prefs.ts";
+import { playQueueAt, usePlayQueue } from "../queue.ts";
 import { useGroupPlayer } from "../syncplay.tsx";
 import { Spinner, StatusView } from "../ui.tsx";
 import { LyricsView } from "./lyrics.tsx";
@@ -88,8 +92,10 @@ function trackLabel(s: MediaStream): [string, string] {
 export function PlayerScreen() {
   const { serverId, itemId } = route.useParams();
   const server = useServer(serverId);
+  const queue = usePlayQueue(itemId);
   if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
-  return <Player key={itemId} server={server} itemId={itemId} />;
+  // A queue may hold the item more than once: each entry plays anew.
+  return <Player key={`${itemId} ${queue?.index ?? ""}`} server={server} itemId={itemId} queue={queue} />;
 }
 
 /** The streams and quality the user picked, which restart playback when they change. */
@@ -104,7 +110,7 @@ type Tab = "audio" | "subtitles" | "quality" | "info";
 /** A menu of the desktop's row. */
 type RowMenu = Tab | "speed";
 
-function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
+function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string; queue?: PlayQueue }) {
   const servers = useServersStore();
   const router = useRouter();
   const qc = useQueryClient();
@@ -193,15 +199,26 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     groupRef.current = group;
   });
 
+  // The local queue's entries after and before the one playing; a
+  // SyncPlay group's queue takes the local one's place.
+  const after = group ? undefined : queueStep(queue, 1);
+  const before = group ? undefined : queueStep(queue, -1);
+  const queued = !group && !!queue;
+  const hasNext = queued ? !!after : !!next.data || (!!group && group.group.currentIndex < group.group.queue.length - 1);
+
   const playNext = useCallback(() => {
     if (group) return group.next(next.data ? [next.data.id] : []);
+    if (queued) {
+      if (after) void playQueueAt(router, server.id, after, {}, true);
+      return;
+    }
     if (!next.data) return;
     void router.navigate({
       to: "/s/$serverId/play/$itemId",
       params: { serverId: server.id, itemId: next.data.id },
       replace: true,
     });
-  }, [router, server.id, next.data, group]);
+  }, [router, server.id, next.data, group, queued, after]);
 
   // Starts playback, again whenever the user picks other streams.
   useEffect(() => {
@@ -578,9 +595,15 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   const clickTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(clickTimer.current), []);
 
+  // The queue's previous entry, else the start of the item.
+  const playPrevious = () => {
+    if (before) void playQueueAt(router, server.id, before, {}, true);
+    else seekTo(0);
+  };
+
   // The assistant's controls, which read the latest of what they call.
-  const live = useRef({ play, pause, back, seekTo, fullScreen, playNext, hasNext: false, info, selection, group });
-  live.current = { play, pause, back, seekTo, fullScreen, playNext, hasNext: !!next.data || !!group, info, selection, group };
+  const live = useRef({ play, pause, back, seekTo, fullScreen, playNext, playPrevious, hasNext: false, info, selection, group });
+  live.current = { play, pause, back, seekTo, fullScreen, playNext, playPrevious, hasNext: queued ? !!after : !!next.data || !!group, info, selection, group };
   useEffect(
     () =>
       registerPlayer({
@@ -617,7 +640,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
           live.current.playNext();
           return true;
         },
-        previous: () => live.current.seekTo(0),
+        previous: () => live.current.playPrevious(),
         streams: (audio, subtitle) =>
           setSelection((s) => ({ ...s, ...(audio !== undefined ? { audio } : {}), ...(subtitle !== undefined ? { subtitle } : {}) })),
       }),
@@ -635,7 +658,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         [PlayStateCommand.UNPAUSE]: play,
         [PlayStateCommand.STOP]: back,
         [PlayStateCommand.NEXT]: playNext,
-        [PlayStateCommand.PREVIOUS]: () => (v.currentTime = 0),
+        [PlayStateCommand.PREVIOUS]: playPrevious,
       };
       commands[c.value.command]?.();
     } else if (c?.case === "seek" && c.value.position) {
@@ -847,7 +870,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
           if (v.volume !== prefs().volume) setPrefs({ volume: v.volume });
         }}
         onRateChange={(e) => !group && setSpeed(e.currentTarget.playbackRate)}
-        onEnded={() => (group ? group.ended() : prefs().autoplayNext && next.data ? playNext() : back())}
+        onEnded={() => (group ? group.ended() : queued ? (after ? playNext() : back()) : prefs().autoplayNext && next.data ? playNext() : back())}
       >
         {external.map((s) => (
           <track
@@ -975,14 +998,19 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
               </span>
               <div ref={row} data-tv-row className="ml-auto flex min-w-0 items-center gap-2">
                 {group && <GroupChip server={server} group={group.group} tv />}
-                {(next.data || (group && group.group.currentIndex < group.group.queue.length - 1)) && (
+                {before && (
+                  <PlayerButton label={t("player.previous")} onClick={playPrevious}>
+                    <Icon name="previous" fill />
+                  </PlayerButton>
+                )}
+                {hasNext && (
                   <button
                     type="button"
                     onClick={playNext}
                     className="flex h-12 items-center gap-2 rounded-full bg-white/15 px-5 type-callout font-semibold backdrop-blur-xl"
                   >
                     <Icon name="next" fill size={20} />
-                    {t("player.nextEpisode")}
+                    {queued ? t("player.next") : t("player.nextEpisode")}
                   </button>
                 )}
                 {subtitleTracks.length > 0 && (
@@ -1034,8 +1062,13 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
               }}
               className="w-20"
             />
-            {(next.data || (group && group.group.currentIndex < group.group.queue.length - 1)) && (
-              <PlayerButton label={t("player.nextEpisode")} onClick={playNext}>
+            {before && (
+              <PlayerButton label={t("player.previous")} onClick={playPrevious}>
+                <Icon name="previous" fill />
+              </PlayerButton>
+            )}
+            {hasNext && (
+              <PlayerButton label={queued ? t("player.next") : t("player.nextEpisode")} onClick={playNext}>
                 <Icon name="next" fill />
               </PlayerButton>
             )}
