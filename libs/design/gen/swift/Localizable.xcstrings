@@ -4717,6 +4717,24 @@
         }
       }
     },
+    "player.searchSubtitles": {
+      "comment": "Entry of the player's subtitles that searches the providers for subtitles of the item playing, for administrators.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索…"
+          }
+        }
+      }
+    },
     "player.subtitleOffset": {
       "comment": "Control shifting subtitles earlier or later.",
       "extractionState": "manual",

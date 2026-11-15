@@ -785,7 +785,7 @@ flowchart TD
   - [ ] The web UI's playback and library: playlists and collections (`PlaylistService`, `CollectionService`); subtitles searched, downloaded, uploaded, extracted, synced and translated from details and the player (`SubtitleService`); and the lyrics of music (`GetLyrics`)
     - [x] Playlists and collections from an item's More menu, a playlist's entries and a collection's members (§6.3.20)
     - [x] An item's subtitles on its details: searched, downloaded, uploaded, extracted, synced, modified, translated and deleted (§6.3.21)
-    - [ ] Subtitles searched and downloaded from the player's subtitle panel
+    - [x] Subtitles searched and downloaded from the player's subtitle panel (`SubtitleSearchPanel` in `apps/web/src/screens/player.tsx`, with `useItemSubtitleSearch` and `SubtitleSearchResults` of `apps/web/src/screens/item-subtitles.tsx`): Search… in the subtitles' menu and side panel for administrators, the subtitle downloaded played once the item's streams have it (`SearchItemSubtitles`, `DownloadItemSubtitle`)
     - [x] A track's lyrics in the player, synced ones following the song word by word (§6.3.27)
     - [ ] Lyrics searched and downloaded by administrators (`SearchRemoteLyrics`, `DownloadRemoteLyrics`)
   - [x] The web UI together: SyncPlay groups (`SyncPlayService`), controlling the other sessions (`SessionService.SendCommand`), and issues reported on a title and handled by administrators (`IssueService`)

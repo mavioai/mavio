@@ -533,6 +533,8 @@
     <string name="player_subtitles">Subtitles</string>
     <!-- Subtitle picker choice that shows no subtitles. -->
     <string name="player_subtitles_off">Off</string>
+    <!-- Entry of the player's subtitles that searches the providers for subtitles of the item playing, for administrators. -->
+    <string name="player_search_subtitles">Search…</string>
     <!-- Control shifting subtitles earlier or later. -->
     <string name="player_subtitle_offset">Subtitle Offset</string>
     <!-- Control shifting the sound earlier or later than the picture. -->

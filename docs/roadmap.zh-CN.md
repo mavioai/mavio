@@ -785,7 +785,7 @@ flowchart TD
   - [ ] Web UI 的播放与媒体库：播放列表与合集（`PlaylistService`、`CollectionService`）；在详情页与播放器中搜索、下载、上传、提取、同步与翻译字幕（`SubtitleService`）；以及音乐的歌词（`GetLyrics`）
     - [x] 通过条目的“更多”菜单使用播放列表与合集，播放列表的条目与合集的成员（§6.3.20）
     - [x] 在详情页管理条目的字幕：搜索、下载、上传、提取、同步、修改、翻译与删除（§6.3.21）
-    - [ ] 在播放器的字幕面板中搜索与下载字幕
+    - [x] 在播放器的字幕面板中搜索与下载字幕（`apps/web/src/screens/player.tsx` 中的 `SubtitleSearchPanel`，使用 `apps/web/src/screens/item-subtitles.tsx` 的 `useItemSubtitleSearch` 与 `SubtitleSearchResults`）：管理员在字幕菜单与侧面板中的“搜索…”，下载的字幕出现在条目的流中后即改用它播放（`SearchItemSubtitles`、`DownloadItemSubtitle`）
     - [x] 播放器中曲目的歌词，同步歌词逐字跟随歌曲（§6.3.27）
     - [ ] 由管理员搜索与下载歌词（`SearchRemoteLyrics`、`DownloadRemoteLyrics`）
   - [x] Web UI 的共同观看：同步播放组（`SyncPlayService`）、控制其他会话（`SessionService.SendCommand`），以及对作品报告问题并由管理员处理（`IssueService`）

@@ -324,15 +324,60 @@ function UploadPanel({ server, itemId, onDone }: { server: ServerEntry; itemId: 
   );
 }
 
-/** The providers' subtitles of the item in a language, or those its profile wants. */
-function SearchDialog({ server, item, missing, onClose }: { server: ServerEntry; item: Item; missing: SubtitleLanguageSpec[]; onClose: () => void }) {
+/**
+ * The search of the providers' subtitles of an item (§6.3.21), in a chosen
+ * language or those its profile lacks, also used by the player's subtitles
+ * (§6.5): the language's options and the search.
+ */
+export function useItemSubtitleSearch(server: ServerEntry, itemId: string, missing: SubtitleLanguageSpec[]) {
   const [language, setLanguage] = useState(missing.length > 0 ? "" : discoverLanguage);
   const languages = useSubtitleLanguages(server, language);
   const specs: Spec[] = language
     ? [{ language }]
     : missing.map((m) => ({ language: m.language, forced: m.forced, hearingImpaired: m.hearingImpaired }));
-  const search = useSubtitleSearch(server, item.id, specs, true);
+  const search = useSubtitleSearch(server, itemId, specs, true);
+  const options = [...(missing.length > 0 ? [{ value: "", label: t("itemsubs.wantedLanguages") }] : []), ...languages];
+  return { language, setLanguage, options, search };
+}
+
+/**
+ * A search's providers that failed and its subtitles, each downloaded in
+ * place; inset pads the rows to the edge of what holds them.
+ */
+export function SubtitleSearchResults({
+  server,
+  itemId,
+  search,
+  inset,
+  onDownloaded,
+}: {
+  server: ServerEntry;
+  itemId: string;
+  search: ReturnType<typeof useSubtitleSearch>;
+  inset: string;
+  onDownloaded?: (path: string) => void;
+}) {
   const list = search.data?.subtitles ?? [];
+  return (
+    <>
+      {(search.data?.failedProviders ?? []).map((p) => (
+        <p key={p} className={`${inset} py-1 type-footnote text-danger`}>
+          {t("itemsubs.providerFailed", { provider: p })}
+        </p>
+      ))}
+      {search.isFetching && list.length === 0 && <p className={`${inset} py-4 type-callout text-text-secondary`}>{t("itemsubs.searching")}</p>}
+      {search.isSuccess && !search.isFetching && list.length === 0 && <p className={`${inset} py-4 type-callout text-text-secondary`}>{t("itemsubs.noResults")}</p>}
+      {search.isError && <p className={`${inset} py-4 type-callout break-words text-danger`}>{errorMessage(search.error)}</p>}
+      {list.map((r) => (
+        <ResultRow key={`${r.provider}/${r.subtitleId}`} server={server} itemId={itemId} result={r} inset={inset} onDownloaded={onDownloaded} />
+      ))}
+    </>
+  );
+}
+
+/** The providers' subtitles of the item in a language, or those its profile wants. */
+function SearchDialog({ server, item, missing, onClose }: { server: ServerEntry; item: Item; missing: SubtitleLanguageSpec[]; onClose: () => void }) {
+  const { language, setLanguage, options, search } = useItemSubtitleSearch(server, item.id, missing);
   return (
     <Sheet label={t("itemsubs.searchTitle", { name: item.name })} width="full" onClose={onClose}>
       <div className="flex max-h-[85vh] min-h-0 flex-col gap-3 p-6">
@@ -340,39 +385,36 @@ function SearchDialog({ server, item, missing, onClose }: { server: ServerEntry;
           <h2 className="min-w-0 flex-1 type-title2">
             {t("itemsubs.searchTitle", { name: item.name })}
           </h2>
-          <Select
-            value={language}
-            label={t("itemsubs.language")}
-            options={[...(missing.length > 0 ? [{ value: "", label: t("itemsubs.wantedLanguages") }] : []), ...languages]}
-            onChange={setLanguage}
-          />
+          <Select value={language} label={t("itemsubs.language")} options={options} onChange={setLanguage} />
           <Button variant="plain" onClick={onClose}>
             {t("keys.done")}
           </Button>
         </div>
-        {(search.data?.failedProviders ?? []).map((p) => (
-          <p key={p} className="type-footnote text-danger">
-            {t("itemsubs.providerFailed", { provider: p })}
-          </p>
-        ))}
         <div className="-mx-6 min-h-0 flex-1 divide-y divide-border overflow-y-auto border-t border-border">
-          {search.isFetching && list.length === 0 && <p className="px-6 py-4 type-callout text-text-secondary">{t("itemsubs.searching")}</p>}
-          {search.isSuccess && !search.isFetching && list.length === 0 && <p className="px-6 py-4 type-callout text-text-secondary">{t("itemsubs.noResults")}</p>}
-          {search.isError && <p className="px-6 py-4 type-callout break-words text-danger">{errorMessage(search.error)}</p>}
-          {list.map((r) => (
-            <ResultRow key={`${r.provider}/${r.subtitleId}`} server={server} itemId={item.id} result={r} />
-          ))}
+          <SubtitleSearchResults server={server} itemId={item.id} search={search} inset="px-6" />
         </div>
       </div>
     </Sheet>
   );
 }
 
-function ResultRow({ server, itemId, result: r }: { server: ServerEntry; itemId: string; result: ScoredSubtitle }) {
+function ResultRow({
+  server,
+  itemId,
+  result: r,
+  inset,
+  onDownloaded,
+}: {
+  server: ServerEntry;
+  itemId: string;
+  result: ScoredSubtitle;
+  inset: string;
+  onDownloaded?: (path: string) => void;
+}) {
   const { download } = useItemSubtitleActions(server, itemId);
   const detail = [specLabel(r.language), t("itemsubs.score", { percent: r.percent }), r.provider, r.uploader, r.format.toUpperCase()].filter(Boolean);
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-6 py-3">
+    <div className={`flex flex-wrap items-center gap-x-4 gap-y-1 ${inset} py-3`}>
       <div className="flex min-w-0 flex-1 basis-72 flex-col gap-0.5">
         <p className="type-callout break-all">{r.releaseNames[0] || r.subtitleId}</p>
         {r.releaseNames.length > 1 && <p className="type-footnote break-all text-text-secondary">{r.releaseNames.slice(1).join(", ")}</p>}
@@ -384,7 +426,9 @@ function ResultRow({ server, itemId, result: r }: { server: ServerEntry; itemId:
       <Button
         variant={r.blocklisted ? "secondary" : "primary"}
         disabled={download.isPending || download.isSuccess || !r.language}
-        onClick={() => r.language && download.mutate({ provider: r.provider, subtitleId: r.subtitleId, language: r.language })}
+        onClick={() =>
+          r.language && download.mutate({ provider: r.provider, subtitleId: r.subtitleId, language: r.language }, { onSuccess: (path) => onDownloaded?.(path) })
+        }
       >
         {download.isSuccess ? t("itemsubs.downloaded") : download.isPending ? "…" : t("itemsubs.download")}
       </Button>

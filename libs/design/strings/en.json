@@ -254,6 +254,7 @@
   "player.audio": { "message": "Audio", "description": "Picker of the audio track." },
   "player.subtitles": { "message": "Subtitles", "description": "Picker of the subtitle track." },
   "player.subtitlesOff": { "message": "Off", "description": "Subtitle picker choice that shows no subtitles." },
+  "player.searchSubtitles": { "message": "Search…", "description": "Entry of the player's subtitles that searches the providers for subtitles of the item playing, for administrators." },
   "player.subtitleOffset": { "message": "Subtitle Offset", "description": "Control shifting subtitles earlier or later." },
   "player.audioOffset": { "message": "Audio Offset", "description": "Control shifting the sound earlier or later than the picture." },
   "player.offsetEarlier": { "message": "Earlier", "description": "Menu item shifting subtitles or the sound earlier by a tenth of a second." },

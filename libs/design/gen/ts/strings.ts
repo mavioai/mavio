@@ -256,6 +256,7 @@ export type MessageKey =
   | 'player.audio'
   | 'player.subtitles'
   | 'player.subtitlesOff'
+  | 'player.searchSubtitles'
   | 'player.subtitleOffset'
   | 'player.audioOffset'
   | 'player.offsetEarlier'
@@ -2599,6 +2600,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.audio": "Audio",
     "player.subtitles": "Subtitles",
     "player.subtitlesOff": "Off",
+    "player.searchSubtitles": "Search…",
     "player.subtitleOffset": "Subtitle Offset",
     "player.audioOffset": "Audio Offset",
     "player.offsetEarlier": "Earlier",
@@ -4940,6 +4942,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.audio": "音轨",
     "player.subtitles": "字幕",
     "player.subtitlesOff": "关闭",
+    "player.searchSubtitles": "搜索…",
     "player.subtitleOffset": "字幕偏移",
     "player.audioOffset": "音频偏移",
     "player.offsetEarlier": "提前",

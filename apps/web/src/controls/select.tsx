@@ -4,7 +4,7 @@
 // whose field searches them.
 import { Combobox } from "@base-ui/react/combobox";
 import { Select as Base } from "@base-ui/react/select";
-import { useState } from "react";
+import { type RefObject, useState } from "react";
 
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
@@ -20,7 +20,8 @@ const selectSearchFrom = 16;
  * television its options open as a menu's do (menu.tsx): below it, on the
  * chosen one, as frosted glass with larger items, and only as it is pressed.
  * Elsewhere, of selectSearchFrom options or more, its popup opens below it
- * with a field searching them.
+ * with a field searching them. Its popup opens in container where given,
+ * as an element in full screen, else the page.
  */
 export function Select<T extends string>({
   value,
@@ -30,6 +31,7 @@ export function Select<T extends string>({
   disabled,
   quiet = false,
   className,
+  container,
 }: {
   value: T;
   options: { value: T; label: string }[];
@@ -38,13 +40,14 @@ export function Select<T extends string>({
   disabled?: boolean;
   quiet?: boolean;
   className?: string;
+  container?: RefObject<HTMLElement | null>;
 }) {
   const { tv } = usePrefs();
   const look = quiet
     ? "min-h-7 gap-1 ps-2 pe-1.5 type-footnote desk:min-h-6 text-text-secondary hover:bg-fill data-popup-open:bg-fill"
     : "min-h-9 gap-2 bg-fill ps-2.5 pe-2.5 type-callout desk:min-h-7 desk:gap-1.5 desk:ps-2 desk:pe-1.5 text-on-background hover:bg-fill-selected data-popup-open:bg-fill-selected";
   if (!tv && options.length >= selectSearchFrom) {
-    return <SearchSelect value={value} options={options} onChange={onChange} label={label} disabled={disabled} look={look} className={className} />;
+    return <SearchSelect value={value} options={options} onChange={onChange} label={label} disabled={disabled} look={look} className={className} container={container} />;
   }
   return (
     <Base.Root items={options} value={value} disabled={disabled} onValueChange={(v) => v !== null && onChange(v)}>
@@ -58,7 +61,7 @@ export function Select<T extends string>({
           <Icon name="expand" size={14} />
         </Base.Icon>
       </Base.Trigger>
-      <Base.Portal>
+      <Base.Portal container={container}>
         <Base.Positioner alignItemWithTrigger={!tv} sideOffset={tv ? 8 : 4} className="z-50 outline-none">
           <Base.Popup
             data-tv-menu={tv || undefined}
@@ -100,6 +103,7 @@ function SearchSelect<T extends string>({
   disabled,
   look,
   className,
+  container,
 }: {
   value: T;
   options: { value: T; label: string }[];
@@ -108,6 +112,7 @@ function SearchSelect<T extends string>({
   disabled?: boolean;
   look: string;
   className?: string;
+  container?: RefObject<HTMLElement | null>;
 }) {
   type Option = { value: T; label: string };
   const [query, setQuery] = useState("");
@@ -133,7 +138,7 @@ function SearchSelect<T extends string>({
         <span className="min-w-0 truncate">{selected?.label}</span>
         <Icon name="expand" size={14} className="shrink-0 text-text-secondary" />
       </Combobox.Trigger>
-      <Combobox.Portal>
+      <Combobox.Portal container={container}>
         <Combobox.Positioner sideOffset={4} align="start" className="z-50 outline-none">
           <Combobox.Popup className={`${popup} flex w-[max(var(--anchor-width),16rem)] max-w-[calc(100vw-32px)] flex-col`}>
             <div className="mb-1 px-1 pt-0.5">

@@ -271,6 +271,7 @@
     <string name="player_audio">音轨</string>
     <string name="player_subtitles">字幕</string>
     <string name="player_subtitles_off">关闭</string>
+    <string name="player_search_subtitles">搜索…</string>
     <string name="player_subtitle_offset">字幕偏移</string>
     <string name="player_audio_offset">音频偏移</string>
     <string name="player_offset_earlier">提前</string>

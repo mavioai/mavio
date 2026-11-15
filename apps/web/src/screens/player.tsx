@@ -9,6 +9,8 @@
 // Other devices of the user control it remotely (§6.3.23), and it follows
 // the SyncPlay group playing its item (§6.3.24). A track shows its lyrics
 // (§6.3.27). The assistant controls it (docs/assistant.md §5.2).
+// Administrators search the providers' subtitles from the subtitles' panel
+// and play with the one downloaded (§6.3.21).
 import {
   capabilities,
   errorMessage,
@@ -18,7 +20,9 @@ import {
   queueStep,
   type ServerEntry,
   urlOf,
+  useAdminServers,
   useItem,
+  useItemSubtitles,
   useLyrics,
   useNextEpisode,
   useServer,
@@ -32,7 +36,7 @@ import { PlayStateCommand } from "@mavio/proto/mavio/session/v1/session_pb";
 import { useQueryClient } from "@tanstack/react-query";
 import { getRouteApi, useRouter } from "@tanstack/react-router";
 import type Hls from "hls.js";
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { type ReactNode, type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 import { AssistantButton } from "../assistant/panel.tsx";
 import { registerPlayer } from "../assistant/player.ts";
@@ -47,6 +51,8 @@ import { playQueueAt, usePlayQueue } from "../queue.ts";
 import { useGroupPlayer } from "../syncplay.tsx";
 import { Spinner, StatusView } from "../ui.tsx";
 import { LyricsView } from "./lyrics.tsx";
+import { SubtitleSearchResults, useItemSubtitleSearch } from "./item-subtitles.tsx";
+import { Select } from "../controls/select.tsx";
 import { PictureInPictureControls, usePictureInPicture } from "./pip.tsx";
 import { type ChapterMark, clock, SeekBar } from "./seekbar.tsx";
 import { GroupChip } from "./syncplay.tsx";
@@ -184,6 +190,13 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
   const pip = usePictureInPicture(video);
   const lyrics = useLyrics(server, itemId, item.data?.item?.kind === ItemKind.TRACK);
   const [showLyrics, setShowLyrics] = useState(true);
+  // Administrators search the providers' subtitles of a movie or episode in the subtitles' panel.
+  const admin = useAdminServers().some((s) => s.id === server.id);
+  const searchable = admin && (item.data?.item?.kind === ItemKind.MOVIE || item.data?.item?.kind === ItemKind.EPISODE);
+  const [searching, setSearching] = useState(false);
+  useEffect(() => {
+    if (panel !== "subtitles") setSearching(false);
+  }, [panel]);
 
   // Leaves for where the player was opened from, else the item's page in
   // the player's place.
@@ -771,6 +784,20 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
   const subtitlesOn = (info?.info.subtitleStreamIndex ?? -1) >= 0;
   const chapters: ChapterMark[] = (source?.chapters ?? []).map((c) => ({ start: c.start ? durationMs(c.start) / 1000 : 0, title: c.title }));
   const pick = (s: Partial<Selection>) => setSelection({ ...selection, ...s });
+  // A subtitle downloaded from the search plays once the item's streams
+  // have it: playback starts again with it where the video is, which
+  // reloads HLS's subtitle tracks.
+  const playDownloaded = async (path: string) => {
+    const r = await item.refetch();
+    const playing = r.data?.mediaSources.find((m) => m.id === info?.info.mediaSourceId);
+    const stream = playing?.streams.find((x) => x.kind === StreamKind.SUBTITLE && x.externalPath === path);
+    setSearching(false);
+    if (stream) setSelection((s) => ({ ...s, subtitle: stream.index }));
+  };
+  const searchSubtitles = () => {
+    setSearching(true);
+    setPanel("subtitles");
+  };
   const openPanel = (tab: Tab) => {
     if (document.activeElement instanceof HTMLElement) opener.current = document.activeElement;
     setPanel(panel === tab ? undefined : tab);
@@ -1013,7 +1040,7 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
                     {queued ? t("player.next") : t("player.nextEpisode")}
                   </button>
                 )}
-                {subtitleTracks.length > 0 && (
+                {(subtitleTracks.length > 0 || searchable) && (
                   <PlayerButton label={t("player.subtitles")} onClick={() => openPanel("subtitles")} active={panel === "subtitles"}>
                     <Icon name="subtitles" fill={subtitlesOn} />
                   </PlayerButton>
@@ -1098,7 +1125,7 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
                   </MenuChoice>
                 </>
               ))}
-              {subtitleTracks.length > 0 &&
+              {(subtitleTracks.length > 0 || searchable) &&
                 rowMenu("subtitles", t("player.subtitles"), <Icon name="subtitles" fill={subtitlesOn} />, (
                   <>
                     <MenuLabel>{t("player.subtitles")}</MenuLabel>
@@ -1115,6 +1142,12 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
                         );
                       })}
                     </MenuChoice>
+                    {searchable && (
+                      <>
+                        <MenuSeparator />
+                        <MenuItem onClick={searchSubtitles}>{t("player.searchSubtitles")}</MenuItem>
+                      </>
+                    )}
                     {subtitlesOn && (
                       <>
                         <MenuSeparator />
@@ -1267,7 +1300,10 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
                 )}
               </>
             )}
-            {panel === "subtitles" && (
+            {panel === "subtitles" && searching && (
+              <SubtitleSearchPanel server={server} itemId={itemId} container={shell} onBack={() => setSearching(false)} onDownloaded={(path) => void playDownloaded(path)} />
+            )}
+            {panel === "subtitles" && !searching && (
               <>
                 <Choice checked={!subtitlesOn} onClick={() => pick({ subtitle: -1 })} label={[t("player.subtitlesOff"), ""]} />
                 {subtitleTracks.map((s) => {
@@ -1281,6 +1317,14 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
                     />
                   );
                 })}
+                {searchable && (
+                  <button type="button" onClick={() => setSearching(true)} className="flex w-full items-center gap-3 rounded-[10px] px-2.5 py-2 text-left hover:bg-white/10">
+                    <span className="w-4 shrink-0">
+                      <Icon name="search" size={16} />
+                    </span>
+                    <span className="type-callout">{t("player.searchSubtitles")}</span>
+                  </button>
+                )}
                 {subtitlesOn && (
                   <>
                     <Heading>{t("player.subtitleOffset")}</Heading>
@@ -1395,6 +1439,63 @@ function OffsetButton({ onClick, disabled, children }: { onClick: () => void; di
     >
       {children}
     </button>
+  );
+}
+
+/**
+ * The providers' subtitles of the item playing, searched in the languages
+ * its profile lacks or in a chosen one, with the details' search (§6.3.21).
+ */
+function SubtitleSearchPanel({
+  server,
+  itemId,
+  container,
+  onBack,
+  onDownloaded,
+}: {
+  server: ServerEntry;
+  itemId: string;
+  container: RefObject<HTMLElement | null>;
+  onBack: () => void;
+  onDownloaded: (path: string) => void;
+}) {
+  const subs = useItemSubtitles(server, itemId);
+  return (
+    <>
+      <button type="button" onClick={onBack} className="flex items-center gap-1.5 rounded-[10px] px-2.5 py-2 type-callout font-semibold hover:bg-white/10">
+        <Icon name="back" size={16} />
+        {t("player.subtitles")}
+      </button>
+      {subs.isError && <p className="px-2.5 py-2 type-footnote break-words text-danger">{errorMessage(subs.error)}</p>}
+      {subs.isPending && <Spinner size={20} className="mx-auto my-4" />}
+      {subs.data && <SubtitleSearch server={server} itemId={itemId} missing={subs.data.missing} container={container} onDownloaded={onDownloaded} />}
+    </>
+  );
+}
+
+function SubtitleSearch({
+  server,
+  itemId,
+  missing,
+  container,
+  onDownloaded,
+}: {
+  server: ServerEntry;
+  itemId: string;
+  missing: Parameters<typeof useItemSubtitleSearch>[2];
+  container: RefObject<HTMLElement | null>;
+  onDownloaded: (path: string) => void;
+}) {
+  const { language, setLanguage, options, search } = useItemSubtitleSearch(server, itemId, missing);
+  return (
+    <>
+      <div className="px-2.5 pb-2">
+        <Select value={language} label={t("itemsubs.language")} options={options} container={container} onChange={setLanguage} />
+      </div>
+      <div className="divide-y divide-white/10 border-t border-white/10">
+        <SubtitleSearchResults server={server} itemId={itemId} search={search} inset="px-2.5" onDownloaded={onDownloaded} />
+      </div>
+    </>
   );
 }
 

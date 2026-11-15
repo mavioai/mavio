@@ -253,6 +253,7 @@
   "player.audio": "音轨",
   "player.subtitles": "字幕",
   "player.subtitlesOff": "关闭",
+  "player.searchSubtitles": "搜索…",
   "player.subtitleOffset": "字幕偏移",
   "player.audioOffset": "音频偏移",
   "player.offsetEarlier": "提前",

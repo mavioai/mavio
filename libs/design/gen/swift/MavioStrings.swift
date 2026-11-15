@@ -862,6 +862,9 @@ public enum MavioStrings {
     /// Subtitle picker choice that shows no subtitles.
     public static var playerSubtitlesOff: String { NSLocalizedString("player.subtitlesOff", bundle: .module, comment: "") }
 
+    /// Entry of the player's subtitles that searches the providers for subtitles of the item playing, for administrators.
+    public static var playerSearchSubtitles: String { NSLocalizedString("player.searchSubtitles", bundle: .module, comment: "") }
+
     /// Control shifting subtitles earlier or later.
     public static var playerSubtitleOffset: String { NSLocalizedString("player.subtitleOffset", bundle: .module, comment: "") }
 
