@@ -93,6 +93,16 @@ export {
   useSimilar,
   useUserData,
 } from "./hooks.ts";
+export {
+  type CacheStorage,
+  cacheScope,
+  clearKeptQueries,
+  indexedDBStorage,
+  keepQueries,
+  keepsQuery,
+  keptKinds,
+  type SignIns,
+} from "./persist.ts";
 export { mergePopularSearches, popularSearchLimit, usePopularSearches, useRecordSearch } from "./popular.ts";
 export {
   useAdminServers,

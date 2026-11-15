@@ -16,7 +16,9 @@
     "@connectrpc/connect": "2.2.0",
     "@connectrpc/connect-web": "2.2.0",
     "@mavio/proto": "workspace:*",
-    "@tanstack/react-query": "5.104.1"
+    "@tanstack/query-persist-client-core": "5.104.1",
+    "@tanstack/react-query": "5.104.1",
+    "idb-keyval": "6.3.0"
   },
   "peerDependencies": {
     "react": "19.3.0"

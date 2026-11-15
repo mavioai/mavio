@@ -673,7 +673,7 @@ flowchart TD
     - [x] Playing a playlist or collection in order, or shuffled, from its details' Play and Shuffle or from an entry, the player going on to the next entry and back to the previous one (`apps/web/src/queue.ts`, `libs/client-ts/src/queue.ts`, §6.5)
   - [x] Playing the next episode at the end of one
   - [x] Styled ASS subtitles with JASSUB: `capabilities(…, styled)` asks for ASS and SSA files as they are, which `apps/web/src/screens/styled-subtitles.ts` draws with JASSUB over the video, with the item's font attachments and Liberation Sans or Noto Sans SC, loaded lazily from the build, and falls back to the server's delivery when JASSUB fails
-  - [ ] The query cache kept offline
+  - [x] The query cache kept offline: Home's, the libraries' and items' details' queries in IndexedDB, one entry per sign-in, dropped by another version and on signing out (`libs/client-ts/src/persist.ts` with `@tanstack/query-persist-client-core` and idb-keyval, restored before the first draw in `apps/web/src/main.tsx`)
   - [ ] Storybook of the components
   - [ ] Snapshot tests of the screens beyond sign-in and Home
   - [x] Popular searches: the queries each server records and ranks (`ItemService.RecordSearch` when a result is opened, `ListPopularSearches`, `core.SearchRecord` in `search_records`, pruned by the daily cleanup), which the television's search shows while nothing is typed, as pills merged across servers, Home's rows where there are none (`apps/web/src/screens/search.tsx`, `libs/client-ts/src/popular.ts`)
