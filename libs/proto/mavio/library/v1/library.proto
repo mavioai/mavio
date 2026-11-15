@@ -94,6 +94,13 @@ message Library {
   // How far the library's scan has come, for administrators; unset while
   // the library is not being scanned.
   ScanProgress scan_progress = 22;
+  // The hubs the library shows, for administrators: those of hubs, and the
+  // defaults of its kind for a list hubs leaves unset.
+  LibraryHubs effective_hubs = 23;
+  // The hub kinds a library of its kind offers, for administrators, in
+  // their default order on its Recommended tab; all but continue watching
+  // can be on Home too.
+  HubList offered_hubs = 24;
 }
 
 // ScanProgress tells how far a library's scan and the work it queued

@@ -93,7 +93,7 @@ HUB_KIND_AVAILABLE_REQUESTS: HubKind
 HUB_KIND_TRENDING: HubKind
 
 class Library(_message.Message):
-    __slots__ = ("id", "name", "kind", "paths", "scan_interval", "preferred_language", "metadata_country", "create_time", "update_time", "save_local_metadata", "auto_collections", "extract_trickplay", "extract_chapter_images", "analyze_loudness", "download_lyrics", "provider_order", "virtual_episodes", "hubs", "storage_classes", "effective_storage_classes", "image_url", "scan_progress")
+    __slots__ = ("id", "name", "kind", "paths", "scan_interval", "preferred_language", "metadata_country", "create_time", "update_time", "save_local_metadata", "auto_collections", "extract_trickplay", "extract_chapter_images", "analyze_loudness", "download_lyrics", "provider_order", "virtual_episodes", "hubs", "storage_classes", "effective_storage_classes", "image_url", "scan_progress", "effective_hubs", "offered_hubs")
     class StorageClassesEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
@@ -130,6 +130,8 @@ class Library(_message.Message):
     EFFECTIVE_STORAGE_CLASSES_FIELD_NUMBER: _ClassVar[int]
     IMAGE_URL_FIELD_NUMBER: _ClassVar[int]
     SCAN_PROGRESS_FIELD_NUMBER: _ClassVar[int]
+    EFFECTIVE_HUBS_FIELD_NUMBER: _ClassVar[int]
+    OFFERED_HUBS_FIELD_NUMBER: _ClassVar[int]
     id: str
     name: str
     kind: LibraryKind
@@ -152,7 +154,9 @@ class Library(_message.Message):
     effective_storage_classes: _containers.ScalarMap[str, StorageClass]
     image_url: str
     scan_progress: ScanProgress
-    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., kind: _Optional[_Union[LibraryKind, str]] = ..., paths: _Optional[_Iterable[str]] = ..., scan_interval: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., preferred_language: _Optional[str] = ..., metadata_country: _Optional[str] = ..., create_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., update_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., save_local_metadata: _Optional[bool] = ..., auto_collections: _Optional[bool] = ..., extract_trickplay: _Optional[bool] = ..., extract_chapter_images: _Optional[bool] = ..., analyze_loudness: _Optional[bool] = ..., download_lyrics: _Optional[bool] = ..., provider_order: _Optional[_Union[ProviderOrder, _Mapping]] = ..., virtual_episodes: _Optional[_Union[VirtualEpisodes, _Mapping]] = ..., hubs: _Optional[_Union[LibraryHubs, _Mapping]] = ..., storage_classes: _Optional[_Mapping[str, StorageClass]] = ..., effective_storage_classes: _Optional[_Mapping[str, StorageClass]] = ..., image_url: _Optional[str] = ..., scan_progress: _Optional[_Union[ScanProgress, _Mapping]] = ...) -> None: ...
+    effective_hubs: LibraryHubs
+    offered_hubs: HubList
+    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., kind: _Optional[_Union[LibraryKind, str]] = ..., paths: _Optional[_Iterable[str]] = ..., scan_interval: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., preferred_language: _Optional[str] = ..., metadata_country: _Optional[str] = ..., create_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., update_time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., save_local_metadata: _Optional[bool] = ..., auto_collections: _Optional[bool] = ..., extract_trickplay: _Optional[bool] = ..., extract_chapter_images: _Optional[bool] = ..., analyze_loudness: _Optional[bool] = ..., download_lyrics: _Optional[bool] = ..., provider_order: _Optional[_Union[ProviderOrder, _Mapping]] = ..., virtual_episodes: _Optional[_Union[VirtualEpisodes, _Mapping]] = ..., hubs: _Optional[_Union[LibraryHubs, _Mapping]] = ..., storage_classes: _Optional[_Mapping[str, StorageClass]] = ..., effective_storage_classes: _Optional[_Mapping[str, StorageClass]] = ..., image_url: _Optional[str] = ..., scan_progress: _Optional[_Union[ScanProgress, _Mapping]] = ..., effective_hubs: _Optional[_Union[LibraryHubs, _Mapping]] = ..., offered_hubs: _Optional[_Union[HubList, _Mapping]] = ...) -> None: ...
 
 class ScanProgress(_message.Message):
     __slots__ = ("library_id", "phase", "folders_done", "folders_total", "items_done", "items_total", "fraction")

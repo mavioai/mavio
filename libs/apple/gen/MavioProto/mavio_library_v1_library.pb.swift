@@ -524,6 +524,29 @@ public nonisolated struct Mavio_Library_V1_Library: @unchecked Sendable {
   /// Clears the value of `scanProgress`. Subsequent reads from it will return its default value.
   public mutating func clearScanProgress() {_uniqueStorage()._scanProgress = nil}
 
+  /// The hubs the library shows, for administrators: those of hubs, and the
+  /// defaults of its kind for a list hubs leaves unset.
+  public var effectiveHubs: Mavio_Library_V1_LibraryHubs {
+    get {_storage._effectiveHubs ?? Mavio_Library_V1_LibraryHubs()}
+    set {_uniqueStorage()._effectiveHubs = newValue}
+  }
+  /// Returns true if `effectiveHubs` has been explicitly set.
+  public var hasEffectiveHubs: Bool {_storage._effectiveHubs != nil}
+  /// Clears the value of `effectiveHubs`. Subsequent reads from it will return its default value.
+  public mutating func clearEffectiveHubs() {_uniqueStorage()._effectiveHubs = nil}
+
+  /// The hub kinds a library of its kind offers, for administrators, in
+  /// their default order on its Recommended tab; all but continue watching
+  /// can be on Home too.
+  public var offeredHubs: Mavio_Library_V1_HubList {
+    get {_storage._offeredHubs ?? Mavio_Library_V1_HubList()}
+    set {_uniqueStorage()._offeredHubs = newValue}
+  }
+  /// Returns true if `offeredHubs` has been explicitly set.
+  public var hasOfferedHubs: Bool {_storage._offeredHubs != nil}
+  /// Clears the value of `offeredHubs`. Subsequent reads from it will return its default value.
+  public mutating func clearOfferedHubs() {_uniqueStorage()._offeredHubs = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -1232,7 +1255,7 @@ nonisolated extension Mavio_Library_V1_HubKind: SwiftProtobuf._ProtoNameProvidin
 
 nonisolated extension Mavio_Library_V1_Library: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Library"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}kind\0\u{1}paths\0\u{3}scan_interval\0\u{3}preferred_language\0\u{3}metadata_country\0\u{3}create_time\0\u{3}update_time\0\u{3}save_local_metadata\0\u{3}auto_collections\0\u{3}extract_trickplay\0\u{3}extract_chapter_images\0\u{3}analyze_loudness\0\u{3}download_lyrics\0\u{3}provider_order\0\u{3}virtual_episodes\0\u{1}hubs\0\u{3}storage_classes\0\u{3}effective_storage_classes\0\u{3}image_url\0\u{3}scan_progress\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}kind\0\u{1}paths\0\u{3}scan_interval\0\u{3}preferred_language\0\u{3}metadata_country\0\u{3}create_time\0\u{3}update_time\0\u{3}save_local_metadata\0\u{3}auto_collections\0\u{3}extract_trickplay\0\u{3}extract_chapter_images\0\u{3}analyze_loudness\0\u{3}download_lyrics\0\u{3}provider_order\0\u{3}virtual_episodes\0\u{1}hubs\0\u{3}storage_classes\0\u{3}effective_storage_classes\0\u{3}image_url\0\u{3}scan_progress\0\u{3}effective_hubs\0\u{3}offered_hubs\0")
 
   fileprivate class _StorageClass {
     var _id: String? = nil
@@ -1257,6 +1280,8 @@ nonisolated extension Mavio_Library_V1_Library: SwiftProtobuf.Message, SwiftProt
     var _effectiveStorageClasses: Dictionary<String,Mavio_Library_V1_StorageClass> = [:]
     var _imageURL: String? = nil
     var _scanProgress: Mavio_Library_V1_ScanProgress? = nil
+    var _effectiveHubs: Mavio_Library_V1_LibraryHubs? = nil
+    var _offeredHubs: Mavio_Library_V1_HubList? = nil
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -1289,6 +1314,8 @@ nonisolated extension Mavio_Library_V1_Library: SwiftProtobuf.Message, SwiftProt
       _effectiveStorageClasses = source._effectiveStorageClasses
       _imageURL = source._imageURL
       _scanProgress = source._scanProgress
+      _effectiveHubs = source._effectiveHubs
+      _offeredHubs = source._offeredHubs
     }
   }
 
@@ -1329,6 +1356,8 @@ nonisolated extension Mavio_Library_V1_Library: SwiftProtobuf.Message, SwiftProt
         case 20: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufEnumMap<SwiftProtobuf.ProtobufString,Mavio_Library_V1_StorageClass>.self, value: &_storage._effectiveStorageClasses) }()
         case 21: try { try decoder.decodeSingularStringField(value: &_storage._imageURL) }()
         case 22: try { try decoder.decodeSingularMessageField(value: &_storage._scanProgress) }()
+        case 23: try { try decoder.decodeSingularMessageField(value: &_storage._effectiveHubs) }()
+        case 24: try { try decoder.decodeSingularMessageField(value: &_storage._offeredHubs) }()
         default: break
         }
       }
@@ -1407,6 +1436,12 @@ nonisolated extension Mavio_Library_V1_Library: SwiftProtobuf.Message, SwiftProt
       try { if let v = _storage._scanProgress {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 22)
       } }()
+      try { if let v = _storage._effectiveHubs {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 23)
+      } }()
+      try { if let v = _storage._offeredHubs {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 24)
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1438,6 +1473,8 @@ nonisolated extension Mavio_Library_V1_Library: SwiftProtobuf.Message, SwiftProt
         if _storage._effectiveStorageClasses != rhs_storage._effectiveStorageClasses {return false}
         if _storage._imageURL != rhs_storage._imageURL {return false}
         if _storage._scanProgress != rhs_storage._scanProgress {return false}
+        if _storage._effectiveHubs != rhs_storage._effectiveHubs {return false}
+        if _storage._offeredHubs != rhs_storage._offeredHubs {return false}
         return true
       }
       if !storagesAreEqual {return false}

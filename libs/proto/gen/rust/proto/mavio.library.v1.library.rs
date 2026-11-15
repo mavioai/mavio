@@ -613,6 +613,17 @@ pub struct Library {
         ScanProgress,
         ::buffa::Inline<ScanProgress>,
     >,
+    /// The hubs the library shows, for administrators: those of hubs, and the
+    /// defaults of its kind for a list hubs leaves unset.
+    ///
+    /// Field 23: `effective_hubs`
+    pub effective_hubs: ::buffa::MessageField<LibraryHubs, ::buffa::Inline<LibraryHubs>>,
+    /// The hub kinds a library of its kind offers, for administrators, in
+    /// their default order on its Recommended tab; all but continue watching
+    /// can be on Home too.
+    ///
+    /// Field 24: `offered_hubs`
+    pub offered_hubs: ::buffa::MessageField<HubList, ::buffa::Inline<HubList>>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -641,6 +652,8 @@ impl ::core::fmt::Debug for Library {
             .field("effective_storage_classes", &self.effective_storage_classes)
             .field("image_url", &self.image_url)
             .field("scan_progress", &self.scan_progress)
+            .field("effective_hubs", &self.effective_hubs)
+            .field("offered_hubs", &self.offered_hubs)
             .finish()
     }
 }
@@ -879,6 +892,22 @@ impl ::buffa::Message for Library {
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.effective_hubs.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.effective_hubs.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.offered_hubs.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.offered_hubs.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -993,6 +1022,22 @@ impl ::buffa::Message for Library {
                 buf,
             );
             self.scan_progress.write_to(__cache, buf);
+        }
+        if self.effective_hubs.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                23u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.effective_hubs.write_to(__cache, buf);
+        }
+        if self.offered_hubs.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                24u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.offered_hubs.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1236,6 +1281,28 @@ impl ::buffa::Message for Library {
                     ctx,
                 )?;
             }
+            23u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.effective_hubs.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            24u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.offered_hubs.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1266,6 +1333,8 @@ impl ::buffa::Message for Library {
         self.effective_storage_classes.clear();
         self.image_url = ::core::option::Option::None;
         self.scan_progress = ::buffa::MessageField::none();
+        self.effective_hubs = ::buffa::MessageField::none();
+        self.offered_hubs = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }

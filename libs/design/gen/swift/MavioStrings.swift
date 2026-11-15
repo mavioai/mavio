@@ -2290,6 +2290,84 @@ public enum MavioStrings {
     /// Detail of the grace days.
     public static var librariesGraceDaysDetail: String { NSLocalizedString("libraries.graceDaysDetail", bundle: .module, comment: "") }
 
+    /// Group of the providers a library takes metadata from.
+    public static var librariesProvidersMetadata: String { NSLocalizedString("libraries.providersMetadata", bundle: .module, comment: "") }
+
+    /// Group of the providers a library takes artwork from.
+    public static var librariesProvidersImages: String { NSLocalizedString("libraries.providersImages", bundle: .module, comment: "") }
+
+    /// Group of the providers listing a series' episodes.
+    public static var librariesProvidersEpisodes: String { NSLocalizedString("libraries.providersEpisodes", bundle: .module, comment: "") }
+
+    /// Group of the providers a library takes lyrics from.
+    public static var librariesProvidersLyrics: String { NSLocalizedString("libraries.providersLyrics", bundle: .module, comment: "") }
+
+    /// Group of the providers finding intros, recaps and credits.
+    public static var librariesProvidersSegments: String { NSLocalizedString("libraries.providersSegments", bundle: .module, comment: "") }
+
+    /// Explanation under a library's providers.
+    public static var librariesProvidersFooter: String { NSLocalizedString("libraries.providersFooter", bundle: .module, comment: "") }
+
+    /// Shown in a group of providers when no plugin offers them.
+    public static var librariesNoProviders: String { NSLocalizedString("libraries.noProviders", bundle: .module, comment: "") }
+
+    /// Detail of a provider a library lists that is no longer installed.
+    public static var librariesProviderMissing: String { NSLocalizedString("libraries.providerMissing", bundle: .module, comment: "") }
+
+    /// Group of the rows a library shows on Home.
+    public static var librariesHomeHubs: String { NSLocalizedString("libraries.homeHubs", bundle: .module, comment: "") }
+
+    /// Explanation under a library's rows on Home.
+    public static var librariesHomeHubsFooter: String { NSLocalizedString("libraries.homeHubsFooter", bundle: .module, comment: "") }
+
+    /// Group of the rows of a library's Recommended tab.
+    public static var librariesRecommendedHubs: String { NSLocalizedString("libraries.recommendedHubs", bundle: .module, comment: "") }
+
+    /// Explanation under a library's Recommended rows.
+    public static var librariesRecommendedHubsFooter: String { NSLocalizedString("libraries.recommendedHubsFooter", bundle: .module, comment: "") }
+
+    /// Shown in place of a library's rows while its kind is changed.
+    public static var librariesHubsAfterKind: String { NSLocalizedString("libraries.hubsAfterKind", bundle: .module, comment: "") }
+
+    /// Row of items being watched.
+    public static var librariesHubContinueWatching: String { NSLocalizedString("libraries.hubContinueWatching", bundle: .module, comment: "") }
+
+    /// Row of the items added last.
+    public static var librariesHubRecentlyAdded: String { NSLocalizedString("libraries.hubRecentlyAdded", bundle: .module, comment: "") }
+
+    /// Row of the items released last.
+    public static var librariesHubRecentlyReleased: String { NSLocalizedString("libraries.hubRecentlyReleased", bundle: .module, comment: "") }
+
+    /// Row of the episodes aired last.
+    public static var librariesHubRecentlyAired: String { NSLocalizedString("libraries.hubRecentlyAired", bundle: .module, comment: "") }
+
+    /// Row of the best rated items.
+    public static var librariesHubTopRated: String { NSLocalizedString("libraries.hubTopRated", bundle: .module, comment: "") }
+
+    /// Row of the best rated items the user has not played.
+    public static var librariesHubTopUnplayed: String { NSLocalizedString("libraries.hubTopUnplayed", bundle: .module, comment: "") }
+
+    /// Row of the series the user has not begun.
+    public static var librariesHubStartWatching: String { NSLocalizedString("libraries.hubStartWatching", bundle: .module, comment: "") }
+
+    /// Row of what the user played long ago.
+    public static var librariesHubRediscover: String { NSLocalizedString("libraries.hubRediscover", bundle: .module, comment: "") }
+
+    /// Rows of items like one the user played lately.
+    public static var librariesHubBecauseYouWatched: String { NSLocalizedString("libraries.hubBecauseYouWatched", bundle: .module, comment: "") }
+
+    /// Rows of items like a favorite of the user.
+    public static var librariesHubBecauseYouLike: String { NSLocalizedString("libraries.hubBecauseYouLike", bundle: .module, comment: "") }
+
+    /// Rows of a genre the user watches.
+    public static var librariesHubMoreInGenre: String { NSLocalizedString("libraries.hubMoreInGenre", bundle: .module, comment: "") }
+
+    /// Rows of an actor the user watches.
+    public static var librariesHubStarring: String { NSLocalizedString("libraries.hubStarring", bundle: .module, comment: "") }
+
+    /// Rows of a director the user watches.
+    public static var librariesHubDirectedBy: String { NSLocalizedString("libraries.hubDirectedBy", bundle: .module, comment: "") }
+
     /// Title asking to confirm deleting a library.
     public static func librariesDeleteTitle(name: String) -> String {
         String.localizedStringWithFormat(NSLocalizedString("libraries.deleteTitle", bundle: .module, comment: ""), name)

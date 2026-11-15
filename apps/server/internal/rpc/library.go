@@ -143,7 +143,7 @@ func (s *LibraryService) UpdateLibrary(ctx context.Context, req *libraryv1.Updat
 		lib.SaveLocalMetadata, lib.AutoCollections = spec.SaveLocalMetadata, spec.AutoCollections
 		lib.ExtractTrickplay, lib.ExtractChapterImages, lib.AnalyzeLoudness = spec.ExtractTrickplay, spec.ExtractChapterImages, spec.AnalyzeLoudness
 		lib.DownloadLyrics, lib.Providers, lib.VirtualEpisodes = spec.DownloadLyrics, spec.Providers, spec.VirtualEpisodes
-		lib.StorageClasses = spec.StorageClasses
+		lib.Hubs, lib.StorageClasses = spec.Hubs, spec.StorageClasses
 		if err := tx.Libraries().Update(ctx, &lib); err != nil {
 			return err
 		}
@@ -275,12 +275,25 @@ func (s *LibraryService) toProto(ctx context.Context, lib *core.Library, admin b
 		}
 		l.SetEffectiveStorageClasses(storageClassesToProto(classes))
 	}
+	if admin {
+		home, recommended := lib.Hubs.Resolve(lib.Kind)
+		l.SetEffectiveHubs(libraryHubsToProto(&core.LibraryHubs{Home: nonNil(home), Recommended: nonNil(recommended)}))
+		l.SetOfferedHubs(hubListToProto(nonNil(lib.Kind.HubKinds())))
+	}
 	if admin && s.Progress != nil {
 		if p := s.Progress(lib.ID); p != nil {
 			l.SetScanProgress(p)
 		}
 	}
 	return l
+}
+
+// nonNil returns kinds, empty rather than nil, for a list to be set.
+func nonNil(kinds []core.HubKind) []core.HubKind {
+	if kinds == nil {
+		return []core.HubKind{}
+	}
+	return kinds
 }
 
 // storageClasses maps the storage classes to their protobuf values.
@@ -411,15 +424,17 @@ func libraryHubsFromProto(h *libraryv1.LibraryHubs) core.LibraryHubs {
 
 // libraryHubsToProto converts a library's hubs; nil lists stay unset.
 func libraryHubsToProto(h *core.LibraryHubs) *libraryv1.LibraryHubs {
-	list := func(kinds []core.HubKind) *libraryv1.HubList {
-		if kinds == nil {
-			return nil
-		}
-		out := make([]libraryv1.HubKind, len(kinds))
-		for i, k := range kinds {
-			out[i] = hubKinds[k]
-		}
-		return libraryv1.HubList_builder{Kinds: out}.Build()
+	return libraryv1.LibraryHubs_builder{Home: hubListToProto(h.Home), Recommended: hubListToProto(h.Recommended)}.Build()
+}
+
+// hubListToProto converts a list of hub kinds; nil stays unset.
+func hubListToProto(kinds []core.HubKind) *libraryv1.HubList {
+	if kinds == nil {
+		return nil
 	}
-	return libraryv1.LibraryHubs_builder{Home: list(h.Home), Recommended: list(h.Recommended)}.Build()
+	out := make([]libraryv1.HubKind, len(kinds))
+	for i, k := range kinds {
+		out[i] = hubKinds[k]
+	}
+	return libraryv1.HubList_builder{Kinds: out}.Build()
 }

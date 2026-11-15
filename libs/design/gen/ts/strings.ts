@@ -719,6 +719,32 @@ export type MessageKey =
   | 'libraries.missingSpecials'
   | 'libraries.graceDays'
   | 'libraries.graceDaysDetail'
+  | 'libraries.providersMetadata'
+  | 'libraries.providersImages'
+  | 'libraries.providersEpisodes'
+  | 'libraries.providersLyrics'
+  | 'libraries.providersSegments'
+  | 'libraries.providersFooter'
+  | 'libraries.noProviders'
+  | 'libraries.providerMissing'
+  | 'libraries.homeHubs'
+  | 'libraries.homeHubsFooter'
+  | 'libraries.recommendedHubs'
+  | 'libraries.recommendedHubsFooter'
+  | 'libraries.hubsAfterKind'
+  | 'libraries.hubContinueWatching'
+  | 'libraries.hubRecentlyAdded'
+  | 'libraries.hubRecentlyReleased'
+  | 'libraries.hubRecentlyAired'
+  | 'libraries.hubTopRated'
+  | 'libraries.hubTopUnplayed'
+  | 'libraries.hubStartWatching'
+  | 'libraries.hubRediscover'
+  | 'libraries.hubBecauseYouWatched'
+  | 'libraries.hubBecauseYouLike'
+  | 'libraries.hubMoreInGenre'
+  | 'libraries.hubStarring'
+  | 'libraries.hubDirectedBy'
   | 'libraries.deleteTitle'
   | 'libraries.deleteMessage'
   | 'users.message'
@@ -3075,6 +3101,32 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "libraries.missingSpecials": "Include Specials",
     "libraries.graceDays": "Keep for Days",
     "libraries.graceDaysDetail": "Days an aired episode stays listed for its file to arrive.",
+    "libraries.providersMetadata": "Metadata Providers",
+    "libraries.providersImages": "Image Providers",
+    "libraries.providersEpisodes": "Episode List Providers",
+    "libraries.providersLyrics": "Lyrics Providers",
+    "libraries.providersSegments": "Segment Providers",
+    "libraries.providersFooter": "Providers are asked from the top; those turned off are not used. Until changed, every provider is used, those installed later too.",
+    "libraries.noProviders": "No installed plugin provides these.",
+    "libraries.providerMissing": "Not installed",
+    "libraries.homeHubs": "Rows on Home",
+    "libraries.homeHubsFooter": "The library's rows on Home, from the top. Continue Watching spans the libraries.",
+    "libraries.recommendedHubs": "Rows on Recommended",
+    "libraries.recommendedHubsFooter": "The rows of the library's Recommended tab, from the top.",
+    "libraries.hubsAfterKind": "The rows of the new kind can be chosen once it is saved.",
+    "libraries.hubContinueWatching": "Continue Watching",
+    "libraries.hubRecentlyAdded": "Latest",
+    "libraries.hubRecentlyReleased": "Recently Released",
+    "libraries.hubRecentlyAired": "Recently Aired",
+    "libraries.hubTopRated": "Top Rated",
+    "libraries.hubTopUnplayed": "Top Unplayed",
+    "libraries.hubStartWatching": "Start Watching",
+    "libraries.hubRediscover": "Rediscover",
+    "libraries.hubBecauseYouWatched": "Because You Watched",
+    "libraries.hubBecauseYouLike": "Because You Like",
+    "libraries.hubMoreInGenre": "More in a Genre",
+    "libraries.hubStarring": "Starring",
+    "libraries.hubDirectedBy": "Directed By",
     "libraries.deleteTitle": "Delete {name}?",
     "libraries.deleteMessage": "Its items leave the server. The media files stay.",
     "users.message": "The people who use this server. Add members with a password, or managed users for children, chosen from a profile list.",
@@ -5429,6 +5481,32 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "libraries.missingSpecials": "包括特别篇",
     "libraries.graceDays": "保留天数",
     "libraries.graceDaysDetail": "单集播出后继续列出、等待其文件的天数。",
+    "libraries.providersMetadata": "元数据提供者",
+    "libraries.providersImages": "图片提供者",
+    "libraries.providersEpisodes": "单集列表提供者",
+    "libraries.providersLyrics": "歌词提供者",
+    "libraries.providersSegments": "片段提供者",
+    "libraries.providersFooter": "从上往下依次询问提供者；关闭的不使用。更改之前，使用全部提供者，包括以后安装的。",
+    "libraries.noProviders": "没有已安装的插件提供这些。",
+    "libraries.providerMissing": "未安装",
+    "libraries.homeHubs": "首页的行",
+    "libraries.homeHubsFooter": "媒体库在首页的行，从上往下。“继续观看”跨越所有媒体库。",
+    "libraries.recommendedHubs": "“推荐”的行",
+    "libraries.recommendedHubsFooter": "媒体库“推荐”标签页的行，从上往下。",
+    "libraries.hubsAfterKind": "保存后可选择新类型的行。",
+    "libraries.hubContinueWatching": "继续观看",
+    "libraries.hubRecentlyAdded": "最新内容",
+    "libraries.hubRecentlyReleased": "最近发行",
+    "libraries.hubRecentlyAired": "最近播出",
+    "libraries.hubTopRated": "高分内容",
+    "libraries.hubTopUnplayed": "未看高分",
+    "libraries.hubStartWatching": "开始追剧",
+    "libraries.hubRediscover": "重温",
+    "libraries.hubBecauseYouWatched": "因为你看过",
+    "libraries.hubBecauseYouLike": "因为你喜欢",
+    "libraries.hubMoreInGenre": "更多同类型",
+    "libraries.hubStarring": "主演",
+    "libraries.hubDirectedBy": "执导",
     "libraries.deleteTitle": "删除“{name}”？",
     "libraries.deleteMessage": "其条目将从服务器移除，媒体文件保留。",
     "users.message": "使用此服务器的人。可以添加用密码登录的成员，或为孩子添加托管用户，从资料列表中选择。",

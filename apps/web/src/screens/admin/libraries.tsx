@@ -1,22 +1,44 @@
 // The settings' Libraries (docs/clients.md §6.3.4): the libraries of the
 // server chosen, to scan, and a library's page to add, change and delete
 // it: how far each library's scan has come, its name, kind and folders, chosen from the server's file system,
-// with their storage classes, the language of its metadata, how often it
-// is scanned and what scans and refreshes make.
+// with their storage classes, the language of its metadata, its providers
+// in order, how often it is scanned, what scans and refreshes make, and its
+// rows on Home and on its Recommended tab in order.
 import { create } from "@bufbuild/protobuf";
 import { durationFromMs, durationMs } from "@bufbuild/protobuf/wkt";
 import {
+  type Choice,
+  choicesOf,
   errorMessage,
+  moved,
+  orderOf,
   type ServerEntry,
+  toggled,
   useDirectory,
   useRemoteFolders,
   useRemotes,
   useStorageStatus,
   useLibraryActions,
   useLocalization,
+  usePlugins,
   useServerLibraries,
 } from "@mavio/client-ts";
-import { type Library, LibraryKind, LibrarySpecSchema, ScanPhase, type ScanProgress, StorageClass, VirtualEpisodesSchema } from "@mavio/proto/mavio/library/v1/library_pb";
+import {
+  HubKind,
+  HubListSchema,
+  type Library,
+  LibraryHubsSchema,
+  LibraryKind,
+  LibrarySpecSchema,
+  type ProviderList,
+  ProviderListSchema,
+  ProviderOrderSchema,
+  ScanPhase,
+  type ScanProgress,
+  StorageClass,
+  VirtualEpisodesSchema,
+} from "@mavio/proto/mavio/library/v1/library_pb";
+import { Capability } from "@mavio/proto/mavio/plugin/v1/plugin_pb";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
 
@@ -69,6 +91,37 @@ const storageClasses: { value: StorageClass; title: () => string }[] = [
   { value: StorageClass.NETWORK, title: () => t("libraries.storageNetwork") },
   { value: StorageClass.CLOUD, title: () => t("libraries.storageCloud") },
 ];
+
+/** The providers of a library the page orders, by the capability of their plugins and the kinds of library using them. */
+const providerKinds: { key: ProviderKey; capability: Capability; title: () => string; kinds?: Set<LibraryKind> }[] = [
+  { key: "metadata", capability: Capability.METADATA_PROVIDER, title: () => t("libraries.providersMetadata") },
+  { key: "images", capability: Capability.IMAGE_PROVIDER, title: () => t("libraries.providersImages") },
+  { key: "episodes", capability: Capability.EPISODE_LIST_PROVIDER, title: () => t("libraries.providersEpisodes"), kinds: shows },
+  { key: "lyrics", capability: Capability.LYRICS_PROVIDER, title: () => t("libraries.providersLyrics"), kinds: music },
+  { key: "segments", capability: Capability.SEGMENT_PROVIDER, title: () => t("libraries.providersSegments"), kinds: video },
+];
+
+/** The lists of ProviderOrder the page shows; the subtitles' follow the subtitle profiles. */
+type ProviderKey = "metadata" | "images" | "episodes" | "lyrics" | "segments";
+
+/** The names of the hubs a library offers. */
+const hubTitles: Partial<Record<HubKind, () => string>> = {
+  [HubKind.CONTINUE_WATCHING]: () => t("libraries.hubContinueWatching"),
+  [HubKind.RECENTLY_ADDED]: () => t("libraries.hubRecentlyAdded"),
+  [HubKind.RECENTLY_RELEASED]: () => t("libraries.hubRecentlyReleased"),
+  [HubKind.RECENTLY_AIRED]: () => t("libraries.hubRecentlyAired"),
+  [HubKind.TOP_RATED]: () => t("libraries.hubTopRated"),
+  [HubKind.TOP_UNPLAYED]: () => t("libraries.hubTopUnplayed"),
+  [HubKind.START_WATCHING]: () => t("libraries.hubStartWatching"),
+  [HubKind.REDISCOVER]: () => t("libraries.hubRediscover"),
+  [HubKind.BECAUSE_YOU_WATCHED]: () => t("libraries.hubBecauseYouWatched"),
+  [HubKind.BECAUSE_YOU_LIKE]: () => t("libraries.hubBecauseYouLike"),
+  [HubKind.MORE_IN_GENRE]: () => t("libraries.hubMoreInGenre"),
+  [HubKind.STARRING]: () => t("libraries.hubStarring"),
+  [HubKind.DIRECTED_BY]: () => t("libraries.hubDirectedBy"),
+};
+
+const hubTitle = (k: HubKind) => hubTitles[k]?.() ?? HubKind[k];
 
 /** The section of the server chosen in the settings. */
 export function LibrariesSection({ server }: { server: ServerEntry }) {
@@ -188,7 +241,14 @@ interface Draft {
   unaired: boolean;
   specials: boolean;
   graceDays: number;
+  /** The providers of each list in order; null while the library uses every provider. */
+  providers: Record<ProviderKey, string[] | null>;
+  /** The hubs on Home and on the Recommended tab in order; null while they are the kind's defaults. */
+  homeHubs: HubKind[] | null;
+  recommendedHubs: HubKind[] | null;
 }
+
+const idsOf = (l?: ProviderList) => (l ? [...l.pluginIds] : null);
 
 function draftOf(l?: Library): Draft {
   return {
@@ -209,11 +269,25 @@ function draftOf(l?: Library): Draft {
     unaired: l?.virtualEpisodes?.unaired ?? false,
     specials: l?.virtualEpisodes?.specials ?? false,
     graceDays: l?.virtualEpisodes?.graceDays ?? 0,
+    providers: {
+      metadata: idsOf(l?.providerOrder?.metadata),
+      images: idsOf(l?.providerOrder?.images),
+      episodes: idsOf(l?.providerOrder?.episodes),
+      lyrics: idsOf(l?.providerOrder?.lyrics),
+      segments: idsOf(l?.providerOrder?.segments),
+    },
+    homeHubs: l?.hubs?.home ? [...l.hubs.home.kinds] : null,
+    recommendedHubs: l?.hubs?.recommended ? [...l.hubs.recommended.kinds] : null,
   };
 }
 
-/** The spec of a draft, keeping what the page does not show of the library. */
+/**
+ * The spec of a draft, keeping what the page does not show of the library;
+ * a library whose kind changes takes the hubs of its new kind.
+ */
 function specOf(d: Draft, l?: Library) {
+  const list = (ids: string[] | null) => (ids ? create(ProviderListSchema, { pluginIds: ids }) : undefined);
+  const hubs = (kinds: HubKind[] | null) => (kinds ? create(HubListSchema, { kinds }) : undefined);
   const classes = Object.fromEntries(Object.entries(d.storageClasses).filter(([p, c]) => d.paths.includes(p) && c !== StorageClass.UNSPECIFIED));
   return create(LibrarySpecSchema, {
     name: d.name.trim(),
@@ -228,9 +302,16 @@ function specOf(d: Draft, l?: Library) {
     extractChapterImages: d.extractChapterImages,
     analyzeLoudness: d.analyzeLoudness,
     downloadLyrics: d.downloadLyrics,
-    providerOrder: l?.providerOrder,
+    providerOrder: create(ProviderOrderSchema, {
+      metadata: list(d.providers.metadata),
+      images: list(d.providers.images),
+      subtitles: l?.providerOrder?.subtitles,
+      lyrics: list(d.providers.lyrics),
+      segments: list(d.providers.segments),
+      episodes: list(d.providers.episodes),
+    }),
     virtualEpisodes: create(VirtualEpisodesSchema, { missing: d.missing, unaired: d.unaired, specials: d.specials, graceDays: d.graceDays }),
-    hubs: l?.hubs,
+    hubs: l && l.kind !== d.kind ? undefined : create(LibraryHubsSchema, { home: hubs(d.homeHubs), recommended: hubs(d.recommendedHubs) }),
     storageClasses: classes,
   });
 }
@@ -255,6 +336,7 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
   const cur = useSearch({ strict: false }) as SettingsSearch;
   const navigate = useNavigate();
   const actions = useLibraryActions(server);
+  const plugins = usePlugins(server);
   const { languages, countries } = useLocalization(server);
   const [draft, setDraft] = useState(() => draftOf(library));
   const [picking, setPicking] = useState(library === undefined);
@@ -287,6 +369,13 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
     </Row>
   );
   const k = kindOf(draft.kind);
+  const providersOf = (c: Capability) =>
+    (plugins.data ?? [])
+      .filter((p) => p.manifest?.capabilities.includes(c))
+      .map((p) => ({ id: p.manifest?.id ?? "", name: p.manifest?.name || p.manifest?.id || "" }))
+      .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  const offered = library?.offeredHubs?.kinds ?? [];
+  const hubsShown = library !== undefined && library.kind === draft.kind && library.offeredHubs !== undefined;
   return (
     <Page
       back={<BackLink section="libraries" label={t("settings.libraries")} />}
@@ -405,6 +494,32 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
         {movies.has(draft.kind) && toggle("autoCollections", t("libraries.autoCollections"), t("libraries.autoCollectionsDetail"))}
         {music.has(draft.kind) && toggle("downloadLyrics", t("libraries.downloadLyrics"))}
       </Group>
+      {plugins.isSuccess &&
+        providerKinds
+          .filter((p) => !p.kinds || p.kinds.has(draft.kind))
+          .map((p, i) => {
+            const available = providersOf(p.capability);
+            const names = new Map(available.map((a) => [a.id, a.name]));
+            const order = draft.providers[p.key];
+            return (
+              <Group key={p.key} title={p.title()} footer={i === 0 ? t("libraries.providersFooter") : undefined}>
+                {available.length === 0 && !order?.length ? (
+                  <p className="px-4 py-3 type-callout text-text-secondary">{t("libraries.noProviders")}</p>
+                ) : (
+                  <OrderedChoices
+                    choices={choicesOf(
+                      available.map((a) => a.id),
+                      order ?? undefined,
+                    )}
+                    label={(id) => names.get(id) ?? id}
+                    detail={(id) => (names.has(id) ? undefined : t("libraries.providerMissing"))}
+                    onChange={(choices) => set({ providers: { ...draft.providers, [p.key]: orderOf(choices) } })}
+                  />
+                )}
+              </Group>
+            );
+          })}
+      {plugins.isError && <p className="type-callout text-danger">{errorMessage(plugins.error)}</p>}
       <Group title={t("libraries.scanning")}>
         <Row label={t("libraries.scanInterval")}>
           <Select
@@ -440,6 +555,32 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
           )}
         </Group>
       )}
+      {hubsShown && (
+        <>
+          <Group title={t("libraries.homeHubs")} footer={t("libraries.homeHubsFooter")}>
+            <OrderedChoices
+              choices={choicesOf(
+                offered.filter((h) => h !== HubKind.CONTINUE_WATCHING),
+                draft.homeHubs ?? library.effectiveHubs?.home?.kinds,
+              )}
+              label={hubTitle}
+              onChange={(choices) => set({ homeHubs: orderOf(choices) })}
+            />
+          </Group>
+          <Group title={t("libraries.recommendedHubs")} footer={t("libraries.recommendedHubsFooter")}>
+            <OrderedChoices
+              choices={choicesOf(offered, draft.recommendedHubs ?? library.effectiveHubs?.recommended?.kinds)}
+              label={hubTitle}
+              onChange={(choices) => set({ recommendedHubs: orderOf(choices) })}
+            />
+          </Group>
+        </>
+      )}
+      {library && library.kind !== draft.kind && (
+        <Group title={t("libraries.homeHubs")}>
+          <p className="px-4 py-3 type-callout text-text-secondary">{t("libraries.hubsAfterKind")}</p>
+        </Group>
+      )}
       <div className="flex flex-wrap items-center gap-3">
         <Button disabled={!changed || !valid || saving} onClick={save}>
           {saving ? "…" : library ? t("action.save") : t("libraries.create")}
@@ -465,6 +606,49 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
       )}
     </Page>
   );
+}
+
+/** A list of choices, each turned on or off with a switch and moved up or down. */
+function OrderedChoices<T extends string | number>({
+  choices,
+  label,
+  detail,
+  onChange,
+}: {
+  choices: Choice<T>[];
+  label: (value: T) => string;
+  detail?: (value: T) => string | undefined;
+  onChange: (choices: Choice<T>[]) => void;
+}) {
+  return choices.map((c, i) => (
+    <div key={c.value} className="flex min-h-11 items-center gap-3 px-4 py-1.5">
+      <Switch on={c.on} label={label(c.value)} onChange={() => onChange(toggled(choices, i))} />
+      <div className="min-w-0 flex-1">
+        <div className={`truncate type-body ${c.on ? "" : "text-text-secondary"}`}>{label(c.value)}</div>
+        {detail?.(c.value) && <div className="truncate type-footnote text-text-secondary">{detail(c.value)}</div>}
+      </div>
+      <button
+        type="button"
+        aria-label={t("acquisition.moveUp")}
+        title={t("acquisition.moveUp")}
+        disabled={i === 0}
+        onClick={() => onChange(moved(choices, i, -1))}
+        className="rounded-md p-1.5 text-text-secondary hover:bg-fill disabled:opacity-30"
+      >
+        <Icon name="back" size={16} className="rotate-90" />
+      </button>
+      <button
+        type="button"
+        aria-label={t("acquisition.moveDown")}
+        title={t("acquisition.moveDown")}
+        disabled={i === choices.length - 1}
+        onClick={() => onChange(moved(choices, i, 1))}
+        className="rounded-md p-1.5 text-text-secondary hover:bg-fill disabled:opacity-30"
+      >
+        <Icon name="back" size={16} className="-rotate-90" />
+      </button>
+    </div>
+  ));
 }
 
 /** The folders of the server's file system and of its rclone remotes, to walk and choose from. */

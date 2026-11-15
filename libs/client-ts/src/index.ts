@@ -130,6 +130,7 @@ export {
   useUserActions,
   useUsers,
 } from "./admin.ts";
+export { type Choice, choicesOf, moved, orderOf, toggled } from "./order.ts";
 export { type Artwork, artwork, imageOf, imageUrl, libraryImageUrl, thumbOf } from "./images.ts";
 export {
   browserDecoders,

@@ -12871,6 +12871,474 @@
         }
       }
     },
+    "libraries.providersMetadata": {
+      "comment": "Group of the providers a library takes metadata from.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metadata Providers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "元数据提供者"
+          }
+        }
+      }
+    },
+    "libraries.providersImages": {
+      "comment": "Group of the providers a library takes artwork from.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image Providers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "图片提供者"
+          }
+        }
+      }
+    },
+    "libraries.providersEpisodes": {
+      "comment": "Group of the providers listing a series' episodes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Episode List Providers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "单集列表提供者"
+          }
+        }
+      }
+    },
+    "libraries.providersLyrics": {
+      "comment": "Group of the providers a library takes lyrics from.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lyrics Providers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "歌词提供者"
+          }
+        }
+      }
+    },
+    "libraries.providersSegments": {
+      "comment": "Group of the providers finding intros, recaps and credits.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segment Providers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "片段提供者"
+          }
+        }
+      }
+    },
+    "libraries.providersFooter": {
+      "comment": "Explanation under a library's providers.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Providers are asked from the top; those turned off are not used. Until changed, every provider is used, those installed later too."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从上往下依次询问提供者；关闭的不使用。更改之前，使用全部提供者，包括以后安装的。"
+          }
+        }
+      }
+    },
+    "libraries.noProviders": {
+      "comment": "Shown in a group of providers when no plugin offers them.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No installed plugin provides these."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有已安装的插件提供这些。"
+          }
+        }
+      }
+    },
+    "libraries.providerMissing": {
+      "comment": "Detail of a provider a library lists that is no longer installed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not installed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未安装"
+          }
+        }
+      }
+    },
+    "libraries.homeHubs": {
+      "comment": "Group of the rows a library shows on Home.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rows on Home"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "首页的行"
+          }
+        }
+      }
+    },
+    "libraries.homeHubsFooter": {
+      "comment": "Explanation under a library's rows on Home.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The library's rows on Home, from the top. Continue Watching spans the libraries."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "媒体库在首页的行，从上往下。“继续观看”跨越所有媒体库。"
+          }
+        }
+      }
+    },
+    "libraries.recommendedHubs": {
+      "comment": "Group of the rows of a library's Recommended tab.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rows on Recommended"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“推荐”的行"
+          }
+        }
+      }
+    },
+    "libraries.recommendedHubsFooter": {
+      "comment": "Explanation under a library's Recommended rows.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The rows of the library's Recommended tab, from the top."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "媒体库“推荐”标签页的行，从上往下。"
+          }
+        }
+      }
+    },
+    "libraries.hubsAfterKind": {
+      "comment": "Shown in place of a library's rows while its kind is changed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The rows of the new kind can be chosen once it is saved."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存后可选择新类型的行。"
+          }
+        }
+      }
+    },
+    "libraries.hubContinueWatching": {
+      "comment": "Row of items being watched.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue Watching"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续观看"
+          }
+        }
+      }
+    },
+    "libraries.hubRecentlyAdded": {
+      "comment": "Row of the items added last.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latest"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最新内容"
+          }
+        }
+      }
+    },
+    "libraries.hubRecentlyReleased": {
+      "comment": "Row of the items released last.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recently Released"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近发行"
+          }
+        }
+      }
+    },
+    "libraries.hubRecentlyAired": {
+      "comment": "Row of the episodes aired last.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recently Aired"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近播出"
+          }
+        }
+      }
+    },
+    "libraries.hubTopRated": {
+      "comment": "Row of the best rated items.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top Rated"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高分内容"
+          }
+        }
+      }
+    },
+    "libraries.hubTopUnplayed": {
+      "comment": "Row of the best rated items the user has not played.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top Unplayed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未看高分"
+          }
+        }
+      }
+    },
+    "libraries.hubStartWatching": {
+      "comment": "Row of the series the user has not begun.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Watching"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始追剧"
+          }
+        }
+      }
+    },
+    "libraries.hubRediscover": {
+      "comment": "Row of what the user played long ago.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rediscover"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重温"
+          }
+        }
+      }
+    },
+    "libraries.hubBecauseYouWatched": {
+      "comment": "Rows of items like one the user played lately.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Because You Watched"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "因为你看过"
+          }
+        }
+      }
+    },
+    "libraries.hubBecauseYouLike": {
+      "comment": "Rows of items like a favorite of the user.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Because You Like"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "因为你喜欢"
+          }
+        }
+      }
+    },
+    "libraries.hubMoreInGenre": {
+      "comment": "Rows of a genre the user watches.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More in a Genre"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多同类型"
+          }
+        }
+      }
+    },
+    "libraries.hubStarring": {
+      "comment": "Rows of an actor the user watches.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starring"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主演"
+          }
+        }
+      }
+    },
+    "libraries.hubDirectedBy": {
+      "comment": "Rows of a director the user watches.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directed By"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "执导"
+          }
+        }
+      }
+    },
     "libraries.deleteTitle": {
       "comment": "Title asking to confirm deleting a library.",
       "extractionState": "manual",

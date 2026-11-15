@@ -111,6 +111,21 @@ pub struct LibraryView<'a> {
     pub scan_progress: ::buffa::MessageFieldView<
         super::super::__buffa::view::ScanProgressView<'a>,
     >,
+    /// The hubs the library shows, for administrators: those of hubs, and the
+    /// defaults of its kind for a list hubs leaves unset.
+    ///
+    /// Field 23: `effective_hubs`
+    pub effective_hubs: ::buffa::MessageFieldView<
+        super::super::__buffa::view::LibraryHubsView<'a>,
+    >,
+    /// The hub kinds a library of its kind offers, for administrators, in
+    /// their default order on its Recommended tab; all but continue watching
+    /// can be on Home too.
+    ///
+    /// Field 24: `offered_hubs`
+    pub offered_hubs: ::buffa::MessageFieldView<
+        super::super::__buffa::view::HubListView<'a>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for LibraryView<'a> {
@@ -378,6 +393,48 @@ impl<'a> ::buffa::MessageView<'a> for LibraryView<'a> {
                     }
                 }
             }
+            23u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.effective_hubs.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.effective_hubs = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::LibraryHubsView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            24u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.offered_hubs.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.offered_hubs = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::HubListView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
             4u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -583,6 +640,24 @@ impl<'a> ::buffa::MessageView<'a> for LibraryView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            effective_hubs: match self.effective_hubs.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::LibraryHubs,
+                        ::buffa::Inline<super::super::LibraryHubs>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            offered_hubs: match self.offered_hubs.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::HubList,
+                        ::buffa::Inline<super::super::HubList>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -696,6 +771,22 @@ impl<'a> ::buffa::ViewEncode<'a> for LibraryView<'a> {
         if self.scan_progress.is_set() {
             let __slot = __cache.reserve();
             let inner_size = self.scan_progress.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.effective_hubs.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.effective_hubs.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.offered_hubs.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.offered_hubs.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -844,6 +935,22 @@ impl<'a> ::buffa::ViewEncode<'a> for LibraryView<'a> {
                 buf,
             );
             self.scan_progress.write_to(__cache, buf);
+        }
+        if self.effective_hubs.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                23u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.effective_hubs.write_to(__cache, buf);
+        }
+        if self.offered_hubs.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                24u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.offered_hubs.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1112,6 +1219,27 @@ impl LibraryOwnedView {
         &self,
     ) -> &::buffa::MessageFieldView<super::super::__buffa::view::ScanProgressView<'_>> {
         &self.0.reborrow().scan_progress
+    }
+    /// The hubs the library shows, for administrators: those of hubs, and the
+    /// defaults of its kind for a list hubs leaves unset.
+    ///
+    /// Field 23: `effective_hubs`
+    #[must_use]
+    pub fn effective_hubs(
+        &self,
+    ) -> &::buffa::MessageFieldView<super::super::__buffa::view::LibraryHubsView<'_>> {
+        &self.0.reborrow().effective_hubs
+    }
+    /// The hub kinds a library of its kind offers, for administrators, in
+    /// their default order on its Recommended tab; all but continue watching
+    /// can be on Home too.
+    ///
+    /// Field 24: `offered_hubs`
+    #[must_use]
+    pub fn offered_hubs(
+        &self,
+    ) -> &::buffa::MessageFieldView<super::super::__buffa::view::HubListView<'_>> {
+        &self.0.reborrow().offered_hubs
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<LibraryView<'static>>>

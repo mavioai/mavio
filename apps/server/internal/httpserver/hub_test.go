@@ -34,6 +34,36 @@ func TestHomeHubs(t *testing.T) {
 	if got := films.GetHubs().GetHome().GetKinds(); !slices.Equal(got, []libraryv1.HubKind{libraryv1.HubKind_HUB_KIND_TOP_RATED}) || films.GetHubs().HasRecommended() {
 		t.Errorf("hubs = %v, recommended %v; want top rated on Home, the default tab", got, films.GetHubs().HasRecommended())
 	}
+	// Administrators see the hubs shown, the defaults applied, and those offered.
+	effective := films.GetEffectiveHubs()
+	if got := effective.GetHome().GetKinds(); !slices.Equal(got, []libraryv1.HubKind{libraryv1.HubKind_HUB_KIND_TOP_RATED}) {
+		t.Errorf("effective Home hubs = %v, want top rated", got)
+	}
+	offered := films.GetOfferedHubs().GetKinds()
+	if got := effective.GetRecommended().GetKinds(); len(got) == 0 || !slices.Equal(got, offered) {
+		t.Errorf("effective Recommended hubs = %v, want the offered %v", got, offered)
+	}
+	if !slices.Contains(offered, libraryv1.HubKind_HUB_KIND_TOP_UNPLAYED) || slices.Contains(offered, libraryv1.HubKind_HUB_KIND_RECENTLY_AIRED) {
+		t.Errorf("offered hubs = %v, want those of movies", offered)
+	}
+	updated, err := libraries.UpdateLibrary(ctx, libraryv1.UpdateLibraryRequest_builder{Id: new(films.GetId()), Spec: libraryv1.LibrarySpec_builder{
+		Name: new("Films"), Kind: new(libraryv1.LibraryKind_LIBRARY_KIND_MOVIES), Paths: films.GetPaths(),
+		Hubs: libraryv1.LibraryHubs_builder{
+			Home:        libraryv1.HubList_builder{Kinds: []libraryv1.HubKind{libraryv1.HubKind_HUB_KIND_TOP_RATED}}.Build(),
+			Recommended: libraryv1.HubList_builder{Kinds: []libraryv1.HubKind{}}.Build(),
+		}.Build(),
+	}.Build()}.Build())
+	if err != nil {
+		t.Fatalf("UpdateLibrary: %v", err)
+	}
+	if h := updated.GetLibrary().GetEffectiveHubs(); !h.HasRecommended() || len(h.GetRecommended().GetKinds()) != 0 {
+		t.Errorf("effective Recommended hubs = %v, want none", h.GetRecommended())
+	}
+	if _, err := libraries.UpdateLibrary(ctx, libraryv1.UpdateLibraryRequest_builder{Id: new(films.GetId()), Spec: libraryv1.LibrarySpec_builder{
+		Name: new("Films"), Kind: new(libraryv1.LibraryKind_LIBRARY_KIND_MOVIES), Paths: films.GetPaths(), Hubs: films.GetHubs(),
+	}.Build()}.Build()); err != nil {
+		t.Fatalf("UpdateLibrary back: %v", err)
+	}
 	_, err = libraries.CreateLibrary(ctx, libraryv1.CreateLibraryRequest_builder{Spec: libraryv1.LibrarySpec_builder{
 		Name: new("Music"), Kind: new(libraryv1.LibraryKind_LIBRARY_KIND_MUSIC), Paths: []string{t.TempDir()},
 		Hubs: libraryv1.LibraryHubs_builder{

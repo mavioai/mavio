@@ -13557,6 +13557,24 @@
             ],
             "title": "scan_progress",
             "description": "How far the library's scan has come, for administrators; unset while\n the library is not being scanned."
+          },
+          "effectiveHubs": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.LibraryHubs"
+              }
+            ],
+            "title": "effective_hubs",
+            "description": "The hubs the library shows, for administrators: those of hubs, and the\n defaults of its kind for a list hubs leaves unset."
+          },
+          "offeredHubs": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.HubList"
+              }
+            ],
+            "title": "offered_hubs",
+            "description": "The hub kinds a library of its kind offers, for administrators, in\n their default order on its Recommended tab; all but continue watching\n can be on Home too."
           }
         },
         "title": "Library",
