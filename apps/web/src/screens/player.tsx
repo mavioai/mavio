@@ -10,7 +10,8 @@
 // the SyncPlay group playing its item (§6.3.24). A track shows its lyrics
 // (§6.3.27). The assistant controls it (docs/assistant.md §5.2).
 // Administrators search the providers' subtitles from the subtitles' panel
-// and play with the one downloaded (§6.3.21).
+// and play with the one downloaded (§6.3.21), and a track's lyrics from the
+// lyrics providers (§6.3.27).
 import {
   capabilities,
   errorMessage,
@@ -50,7 +51,7 @@ import { prefs, type Quality, qualities, qualityBitrates, setPrefs, usePrefs } f
 import { playQueueAt, usePlayQueue } from "../queue.ts";
 import { useGroupPlayer } from "../syncplay.tsx";
 import { Spinner, StatusView } from "../ui.tsx";
-import { LyricsView } from "./lyrics.tsx";
+import { LyricsSearch, LyricsView } from "./lyrics.tsx";
 import { SubtitleSearchResults, useItemSubtitleSearch } from "./item-subtitles.tsx";
 import { Select } from "../controls/select.tsx";
 import { PictureInPictureControls, usePictureInPicture } from "./pip.tsx";
@@ -194,6 +195,7 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
   const admin = useAdminServers().some((s) => s.id === server.id);
   const searchable = admin && (item.data?.item?.kind === ItemKind.MOVIE || item.data?.item?.kind === ItemKind.EPISODE);
   const [searching, setSearching] = useState(false);
+  const [searchingLyrics, setSearchingLyrics] = useState(false);
   useEffect(() => {
     if (panel !== "subtitles") setSearching(false);
   }, [panel]);
@@ -693,6 +695,8 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
     const onKey = (e: KeyboardEvent) => {
       const target = e.target;
       if (target instanceof HTMLInputElement && target.type !== "range") return;
+      // A dialog over the player, as the lyrics' search, takes its own keys.
+      if (target instanceof Element && target.closest("[role=dialog]")) return;
       const v = video.current;
       if (!v || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === "Escape" || (tv && e.key === "Backspace")) {
@@ -1105,6 +1109,11 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
                   <Icon name="music" fill={showLyrics} />
                 </PlayerButton>
               )}
+              {admin && current?.kind === ItemKind.TRACK && (
+                <PlayerButton label={t("lyrics.search")} onClick={() => setSearchingLyrics(true)} active={searchingLyrics}>
+                  <Icon name="search" />
+                </PlayerButton>
+              )}
               <AssistantButton className="flex size-11 items-center justify-center rounded-full hover:bg-white/15" />
               {rowMenu("speed", t("player.speed"), <Icon name="speed" />, (
                 <>
@@ -1239,6 +1248,18 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
         </div>
       </div>
 
+      {searchingLyrics && current && (
+        <LyricsSearch
+          server={server}
+          item={current}
+          container={shell}
+          onClose={() => setSearchingLyrics(false)}
+          onDownloaded={() => {
+            setShowLyrics(true);
+            setSearchingLyrics(false);
+          }}
+        />
+      )}
       {panel && (
         <aside
           ref={panelRef}

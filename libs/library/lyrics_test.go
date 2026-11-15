@@ -55,6 +55,24 @@ func TestLyrics(t *testing.T) {
 		t.Errorf("Search(album) = %v, want ErrInvalid", err)
 	}
 
+	// A preview saves nothing.
+	if got, err := l.Preview(ctx, f.lib, track.ID, "site", "1"); err != nil || !got.Metadata.Synced || len(got.Lines) != 1 || got.Lines[0].Text != "One" ||
+		exists(f.root, "Band/Album/01 - One.lrc") || !exists(f.root, "Band/Album/01 - One.elrc") {
+		t.Errorf("Preview(synced) = %+v, %v", got, err)
+	}
+	if got, err := l.Preview(ctx, f.lib, track.ID, "site", "2"); err != nil || got.Metadata.Synced || len(got.Lines) == 0 || got.Lines[0].Text != "One" {
+		t.Errorf("Preview(plain) = %+v, %v", got, err)
+	}
+	if _, err := l.Preview(ctx, f.lib, track.ID, "site", "3"); err == nil {
+		t.Error("Preview(garbage) = nil error")
+	}
+	if _, err := l.Preview(ctx, f.lib, track.ID, "nobody", "1"); !errors.Is(err, core.ErrNotFound) {
+		t.Errorf("Preview(unknown provider) = %v, want ErrNotFound", err)
+	}
+	if _, err := l.Preview(ctx, f.lib, album.ID, "site", "1"); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("Preview(album) = %v, want ErrInvalid", err)
+	}
+
 	// Synced lyrics replace the track's other lyric files.
 	if err := l.Download(ctx, f.lib, track.ID, "site", "1"); err != nil {
 		t.Fatalf("Download(synced) = %v", err)

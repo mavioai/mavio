@@ -285,6 +285,22 @@ class SearchRemoteLyricsResponse(_message.Message):
     lyrics: _containers.RepeatedCompositeFieldContainer[RemoteLyrics]
     def __init__(self, lyrics: _Optional[_Iterable[_Union[RemoteLyrics, _Mapping]]] = ...) -> None: ...
 
+class GetRemoteLyricsRequest(_message.Message):
+    __slots__ = ("item_id", "provider", "id")
+    ITEM_ID_FIELD_NUMBER: _ClassVar[int]
+    PROVIDER_FIELD_NUMBER: _ClassVar[int]
+    ID_FIELD_NUMBER: _ClassVar[int]
+    item_id: str
+    provider: str
+    id: str
+    def __init__(self, item_id: _Optional[str] = ..., provider: _Optional[str] = ..., id: _Optional[str] = ...) -> None: ...
+
+class GetRemoteLyricsResponse(_message.Message):
+    __slots__ = ("lyrics",)
+    LYRICS_FIELD_NUMBER: _ClassVar[int]
+    lyrics: _item_pb2.GetLyricsResponse
+    def __init__(self, lyrics: _Optional[_Union[_item_pb2.GetLyricsResponse, _Mapping]] = ...) -> None: ...
+
 class DownloadRemoteLyricsRequest(_message.Message):
     __slots__ = ("item_id", "provider", "id")
     ITEM_ID_FIELD_NUMBER: _ClassVar[int]

@@ -597,6 +597,30 @@
     <string name="player_options">Playback Options</string>
     <!-- Button showing or hiding a track's lyrics in the player, and their accessible label. -->
     <string name="player_lyrics">Lyrics</string>
+    <!-- Button of the player opening the search of the lyrics providers for the track playing, for administrators, and its accessible label. -->
+    <string name="lyrics_search">Search Lyrics</string>
+    <!-- Title of the search of the lyrics providers. -->
+    <string name="lyrics_search_title">Lyrics for %s</string>
+    <!-- Note under the lyrics search's title. -->
+    <string name="lyrics_search_footer">Downloaded lyrics replace the track\'s lyric files.</string>
+    <!-- Shown while the lyrics providers are searched. -->
+    <string name="lyrics_searching">Searching…</string>
+    <!-- The lyrics search found nothing. -->
+    <string name="lyrics_no_results">No lyrics found.</string>
+    <!-- Found lyrics whose lines have times. -->
+    <string name="lyrics_synced">Synced</string>
+    <!-- Found lyrics without times. -->
+    <string name="lyrics_plain">Plain</string>
+    <!-- How well found lyrics match the track. -->
+    <string name="lyrics_score">%s%% match</string>
+    <!-- Shows the text of found lyrics. -->
+    <string name="lyrics_preview">Preview</string>
+    <!-- Hides the text of found lyrics. -->
+    <string name="lyrics_hide_preview">Hide Preview</string>
+    <!-- Saves found lyrics beside the track. -->
+    <string name="lyrics_download">Download</string>
+    <!-- The lyrics were saved beside the track. -->
+    <string name="lyrics_downloaded">Downloaded</string>
     <!-- The accessible name of the player's timeline. -->
     <string name="player_position">Position</string>
     <!-- Shown while content loads. -->

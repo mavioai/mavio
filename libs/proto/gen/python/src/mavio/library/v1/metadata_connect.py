@@ -41,6 +41,9 @@ class MetadataService(Protocol):
     async def search_remote_lyrics(self, request: mavio_dot_library_dot_v1_dot_metadata__pb2.SearchRemoteLyricsRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_metadata__pb2.SearchRemoteLyricsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def get_remote_lyrics(self, request: mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
     async def download_remote_lyrics(self, request: mavio_dot_library_dot_v1_dot_metadata__pb2.DownloadRemoteLyricsRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_metadata__pb2.DownloadRemoteLyricsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
@@ -132,6 +135,16 @@ class MetadataServiceASGIApplication(ConnectASGIApplication[MetadataService]):
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
                     function=svc.search_remote_lyrics,
+                ),
+                "/mavio.library.v1.MetadataService/GetRemoteLyrics": Endpoint.unary(
+                    method=MethodInfo(
+                        name="GetRemoteLyrics",
+                        service_name="mavio.library.v1.MetadataService",
+                        input=mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsRequest,
+                        output=mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=svc.get_remote_lyrics,
                 ),
                 "/mavio.library.v1.MetadataService/DownloadRemoteLyrics": Endpoint.unary(
                     method=MethodInfo(
@@ -332,6 +345,28 @@ class MetadataServiceClient(ConnectClient):
             use_get=use_get,
         )
 
+    async def get_remote_lyrics(
+        self,
+        request: mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetRemoteLyrics",
+                service_name="mavio.library.v1.MetadataService",
+                input=mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsRequest,
+                output=mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
     async def download_remote_lyrics(
         self,
         request: mavio_dot_library_dot_v1_dot_metadata__pb2.DownloadRemoteLyricsRequest,
@@ -391,6 +426,8 @@ class MetadataServiceSync(Protocol):
     def delete_item_image(self, request: mavio_dot_library_dot_v1_dot_metadata__pb2.DeleteItemImageRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_metadata__pb2.DeleteItemImageResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def search_remote_lyrics(self, request: mavio_dot_library_dot_v1_dot_metadata__pb2.SearchRemoteLyricsRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_metadata__pb2.SearchRemoteLyricsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def get_remote_lyrics(self, request: mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def download_remote_lyrics(self, request: mavio_dot_library_dot_v1_dot_metadata__pb2.DownloadRemoteLyricsRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_metadata__pb2.DownloadRemoteLyricsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
@@ -481,6 +518,16 @@ class MetadataServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
                     function=service.search_remote_lyrics,
+                ),
+                "/mavio.library.v1.MetadataService/GetRemoteLyrics": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="GetRemoteLyrics",
+                        service_name="mavio.library.v1.MetadataService",
+                        input=mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsRequest,
+                        output=mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=service.get_remote_lyrics,
                 ),
                 "/mavio.library.v1.MetadataService/DownloadRemoteLyrics": EndpointSync.unary(
                     method=MethodInfo(
@@ -674,6 +721,28 @@ class MetadataServiceClientSync(ConnectClientSync):
                 service_name="mavio.library.v1.MetadataService",
                 input=mavio_dot_library_dot_v1_dot_metadata__pb2.SearchRemoteLyricsRequest,
                 output=mavio_dot_library_dot_v1_dot_metadata__pb2.SearchRemoteLyricsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    def get_remote_lyrics(
+        self,
+        request: mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetRemoteLyrics",
+                service_name="mavio.library.v1.MetadataService",
+                input=mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsRequest,
+                output=mavio_dot_library_dot_v1_dot_metadata__pb2.GetRemoteLyricsResponse,
                 idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
             ),
             headers=headers,

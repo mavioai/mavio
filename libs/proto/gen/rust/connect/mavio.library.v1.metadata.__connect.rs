@@ -68,6 +68,14 @@ pub type OwnedSearchRemoteLyricsResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
+///Shorthand for `OwnedView<GetRemoteLyricsRequestView<'static>>`.
+pub type OwnedGetRemoteLyricsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::library::v1::__buffa::view::GetRemoteLyricsRequestView<'static>,
+>;
+///Shorthand for `OwnedView<GetRemoteLyricsResponseView<'static>>`.
+pub type OwnedGetRemoteLyricsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::library::v1::__buffa::view::GetRemoteLyricsResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<DownloadRemoteLyricsRequestView<'static>>`.
 pub type OwnedDownloadRemoteLyricsRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::library::v1::__buffa::view::DownloadRemoteLyricsRequestView<
@@ -372,6 +380,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::library::v1::GetRemoteLyricsResponse>
+for crate::proto::mavio::library::v1::__buffa::view::GetRemoteLyricsResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::library::v1::GetRemoteLyricsResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::library::v1::__buffa::view::GetRemoteLyricsResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<
     crate::proto::mavio::library::v1::DownloadRemoteLyricsResponse,
 >
@@ -503,6 +545,12 @@ pub const METADATA_SERVICE_DELETE_ITEM_IMAGE_SPEC: ::connectrpc::Spec = ::connec
 /// Static [`Spec`](::connectrpc::Spec) for the `SearchRemoteLyrics` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const METADATA_SERVICE_SEARCH_REMOTE_LYRICS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.library.v1.MetadataService/SearchRemoteLyrics",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetRemoteLyrics` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const METADATA_SERVICE_GET_REMOTE_LYRICS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.library.v1.MetadataService/GetRemoteLyrics",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
@@ -760,6 +808,30 @@ pub trait MetadataService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::library::v1::SearchRemoteLyricsResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// GetRemoteLyrics returns lyrics SearchRemoteLyrics found, as GetLyrics
+    /// reads them, without saving them; administrators only.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_remote_lyrics<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::library::v1::GetRemoteLyricsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::library::v1::GetRemoteLyricsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1076,6 +1148,35 @@ impl<S: MetadataService> MetadataServiceExt for S {
                 },
             )
             .with_spec(METADATA_SERVICE_SEARCH_REMOTE_LYRICS_SPEC)
+            .route_view_idempotent(
+                METADATA_SERVICE_SERVICE_NAME,
+                "GetRemoteLyrics",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::library::v1::__buffa::view::GetRemoteLyricsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::library::v1::GetRemoteLyricsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_remote_lyrics(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::library::v1::GetRemoteLyricsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(METADATA_SERVICE_GET_REMOTE_LYRICS_SPEC)
             .route_view(
                 METADATA_SERVICE_SERVICE_NAME,
                 "DownloadRemoteLyrics",
@@ -1234,6 +1335,12 @@ impl<T: MetadataService> ::connectrpc::Dispatcher for MetadataServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
                         .with_spec(METADATA_SERVICE_SEARCH_REMOTE_LYRICS_SPEC),
+                )
+            }
+            "GetRemoteLyrics" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(METADATA_SERVICE_GET_REMOTE_LYRICS_SPEC),
                 )
             }
             "DownloadRemoteLyrics" => {
@@ -1436,6 +1543,28 @@ impl<T: MetadataService> ::connectrpc::Dispatcher for MetadataServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::library::v1::SearchRemoteLyricsResponse,
+                        >(format)
+                })
+            }
+            "GetRemoteLyrics" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::library::v1::GetRemoteLyricsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::library::v1::__buffa::view::GetRemoteLyricsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::library::v1::GetRemoteLyricsRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_remote_lyrics(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::library::v1::GetRemoteLyricsResponse,
                         >(format)
                 })
             }
@@ -1965,6 +2094,51 @@ where
                 &self.transport,
                 &self.config,
                 METADATA_SERVICE_SEARCH_REMOTE_LYRICS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetRemoteLyrics RPC. Sends a request to /mavio.library.v1.MetadataService/GetRemoteLyrics.
+    pub async fn get_remote_lyrics(
+        &self,
+        request: crate::proto::mavio::library::v1::GetRemoteLyricsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::library::v1::__buffa::view::GetRemoteLyricsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_remote_lyrics_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetRemoteLyrics RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_remote_lyrics_with_options(
+        &self,
+        request: crate::proto::mavio::library::v1::GetRemoteLyricsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::library::v1::__buffa::view::GetRemoteLyricsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                METADATA_SERVICE_GET_REMOTE_LYRICS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

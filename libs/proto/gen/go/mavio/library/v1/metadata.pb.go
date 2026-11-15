@@ -3285,6 +3285,218 @@ func (b0 SearchRemoteLyricsResponse_builder) Build() *SearchRemoteLyricsResponse
 	return m0
 }
 
+type GetRemoteLyricsRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ItemId      *string                `protobuf:"bytes,1,opt,name=item_id,json=itemId"`
+	xxx_hidden_Provider    *string                `protobuf:"bytes,2,opt,name=provider"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,3,opt,name=id"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *GetRemoteLyricsRequest) Reset() {
+	*x = GetRemoteLyricsRequest{}
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetRemoteLyricsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRemoteLyricsRequest) ProtoMessage() {}
+
+func (x *GetRemoteLyricsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetRemoteLyricsRequest) GetItemId() string {
+	if x != nil {
+		if x.xxx_hidden_ItemId != nil {
+			return *x.xxx_hidden_ItemId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetRemoteLyricsRequest) GetProvider() string {
+	if x != nil {
+		if x.xxx_hidden_Provider != nil {
+			return *x.xxx_hidden_Provider
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetRemoteLyricsRequest) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetRemoteLyricsRequest) SetItemId(v string) {
+	x.xxx_hidden_ItemId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *GetRemoteLyricsRequest) SetProvider(v string) {
+	x.xxx_hidden_Provider = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *GetRemoteLyricsRequest) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *GetRemoteLyricsRequest) HasItemId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetRemoteLyricsRequest) HasProvider() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *GetRemoteLyricsRequest) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *GetRemoteLyricsRequest) ClearItemId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_ItemId = nil
+}
+
+func (x *GetRemoteLyricsRequest) ClearProvider() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Provider = nil
+}
+
+func (x *GetRemoteLyricsRequest) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Id = nil
+}
+
+type GetRemoteLyricsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	ItemId   *string
+	Provider *string
+	Id       *string
+}
+
+func (b0 GetRemoteLyricsRequest_builder) Build() *GetRemoteLyricsRequest {
+	m0 := &GetRemoteLyricsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.ItemId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_ItemId = b.ItemId
+	}
+	if b.Provider != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Provider = b.Provider
+	}
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_Id = b.Id
+	}
+	return m0
+}
+
+type GetRemoteLyricsResponse struct {
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Lyrics *GetLyricsResponse     `protobuf:"bytes,1,opt,name=lyrics"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *GetRemoteLyricsResponse) Reset() {
+	*x = GetRemoteLyricsResponse{}
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetRemoteLyricsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRemoteLyricsResponse) ProtoMessage() {}
+
+func (x *GetRemoteLyricsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetRemoteLyricsResponse) GetLyrics() *GetLyricsResponse {
+	if x != nil {
+		return x.xxx_hidden_Lyrics
+	}
+	return nil
+}
+
+func (x *GetRemoteLyricsResponse) SetLyrics(v *GetLyricsResponse) {
+	x.xxx_hidden_Lyrics = v
+}
+
+func (x *GetRemoteLyricsResponse) HasLyrics() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Lyrics != nil
+}
+
+func (x *GetRemoteLyricsResponse) ClearLyrics() {
+	x.xxx_hidden_Lyrics = nil
+}
+
+type GetRemoteLyricsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Lyrics *GetLyricsResponse
+}
+
+func (b0 GetRemoteLyricsResponse_builder) Build() *GetRemoteLyricsResponse {
+	m0 := &GetRemoteLyricsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Lyrics = b.Lyrics
+	return m0
+}
+
 type DownloadRemoteLyricsRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_ItemId      *string                `protobuf:"bytes,1,opt,name=item_id,json=itemId"`
@@ -3298,7 +3510,7 @@ type DownloadRemoteLyricsRequest struct {
 
 func (x *DownloadRemoteLyricsRequest) Reset() {
 	*x = DownloadRemoteLyricsRequest{}
-	mi := &file_mavio_library_v1_metadata_proto_msgTypes[20]
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3310,7 +3522,7 @@ func (x *DownloadRemoteLyricsRequest) String() string {
 func (*DownloadRemoteLyricsRequest) ProtoMessage() {}
 
 func (x *DownloadRemoteLyricsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_metadata_proto_msgTypes[20]
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3437,7 +3649,7 @@ type DownloadRemoteLyricsResponse struct {
 
 func (x *DownloadRemoteLyricsResponse) Reset() {
 	*x = DownloadRemoteLyricsResponse{}
-	mi := &file_mavio_library_v1_metadata_proto_msgTypes[21]
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3449,7 +3661,7 @@ func (x *DownloadRemoteLyricsResponse) String() string {
 func (*DownloadRemoteLyricsResponse) ProtoMessage() {}
 
 func (x *DownloadRemoteLyricsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_metadata_proto_msgTypes[21]
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3483,7 +3695,7 @@ type ListExternalIdKindsRequest struct {
 
 func (x *ListExternalIdKindsRequest) Reset() {
 	*x = ListExternalIdKindsRequest{}
-	mi := &file_mavio_library_v1_metadata_proto_msgTypes[22]
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3495,7 +3707,7 @@ func (x *ListExternalIdKindsRequest) String() string {
 func (*ListExternalIdKindsRequest) ProtoMessage() {}
 
 func (x *ListExternalIdKindsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_metadata_proto_msgTypes[22]
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3566,7 +3778,7 @@ type ExternalIdKind struct {
 
 func (x *ExternalIdKind) Reset() {
 	*x = ExternalIdKind{}
-	mi := &file_mavio_library_v1_metadata_proto_msgTypes[23]
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3578,7 +3790,7 @@ func (x *ExternalIdKind) String() string {
 func (*ExternalIdKind) ProtoMessage() {}
 
 func (x *ExternalIdKind) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_metadata_proto_msgTypes[23]
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3753,7 +3965,7 @@ type ListExternalIdKindsResponse struct {
 
 func (x *ListExternalIdKindsResponse) Reset() {
 	*x = ListExternalIdKindsResponse{}
-	mi := &file_mavio_library_v1_metadata_proto_msgTypes[24]
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3765,7 +3977,7 @@ func (x *ListExternalIdKindsResponse) String() string {
 func (*ListExternalIdKindsResponse) ProtoMessage() {}
 
 func (x *ListExternalIdKindsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_library_v1_metadata_proto_msgTypes[24]
+	mi := &file_mavio_library_v1_metadata_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3929,7 +4141,13 @@ const file_mavio_library_v1_metadata_proto_rawDesc = "" +
 	"\x06synced\x18\a \x01(\bR\x06synced\x12\x14\n" +
 	"\x05score\x18\b \x01(\x01R\x05score\"T\n" +
 	"\x1aSearchRemoteLyricsResponse\x126\n" +
-	"\x06lyrics\x18\x01 \x03(\v2\x1e.mavio.library.v1.RemoteLyricsR\x06lyrics\"\x7f\n" +
+	"\x06lyrics\x18\x01 \x03(\v2\x1e.mavio.library.v1.RemoteLyricsR\x06lyrics\"z\n" +
+	"\x16GetRemoteLyricsRequest\x12$\n" +
+	"\aitem_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06itemId\x12\"\n" +
+	"\bprovider\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\bprovider\x12\x16\n" +
+	"\x02id\x18\x03 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"V\n" +
+	"\x17GetRemoteLyricsResponse\x12;\n" +
+	"\x06lyrics\x18\x01 \x01(\v2#.mavio.library.v1.GetLyricsResponseR\x06lyrics\"\x7f\n" +
 	"\x1bDownloadRemoteLyricsRequest\x12$\n" +
 	"\aitem_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06itemId\x12\"\n" +
 	"\bprovider\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\bprovider\x12\x16\n" +
@@ -3945,7 +4163,7 @@ const file_mavio_library_v1_metadata_proto_rawDesc = "" +
 	"\apersons\x18\x04 \x01(\bR\apersons\x12\x1b\n" +
 	"\tplugin_id\x18\x05 \x01(\tR\bpluginId\"U\n" +
 	"\x1bListExternalIdKindsResponse\x126\n" +
-	"\x05kinds\x18\x01 \x03(\v2 .mavio.library.v1.ExternalIdKindR\x05kinds2\xa6\b\n" +
+	"\x05kinds\x18\x01 \x03(\v2 .mavio.library.v1.ExternalIdKindR\x05kinds2\x93\t\n" +
 	"\x0fMetadataService\x12W\n" +
 	"\n" +
 	"UpdateItem\x12#.mavio.library.v1.UpdateItemRequest\x1a$.mavio.library.v1.UpdateItemResponse\x12Z\n" +
@@ -3955,12 +4173,13 @@ const file_mavio_library_v1_metadata_proto_rawDesc = "" +
 	"\x10ListRemoteImages\x12).mavio.library.v1.ListRemoteImagesRequest\x1a*.mavio.library.v1.ListRemoteImagesResponse\"\x03\x90\x02\x01\x12]\n" +
 	"\fSetItemImage\x12%.mavio.library.v1.SetItemImageRequest\x1a&.mavio.library.v1.SetItemImageResponse\x12f\n" +
 	"\x0fDeleteItemImage\x12(.mavio.library.v1.DeleteItemImageRequest\x1a).mavio.library.v1.DeleteItemImageResponse\x12t\n" +
-	"\x12SearchRemoteLyrics\x12+.mavio.library.v1.SearchRemoteLyricsRequest\x1a,.mavio.library.v1.SearchRemoteLyricsResponse\"\x03\x90\x02\x01\x12u\n" +
+	"\x12SearchRemoteLyrics\x12+.mavio.library.v1.SearchRemoteLyricsRequest\x1a,.mavio.library.v1.SearchRemoteLyricsResponse\"\x03\x90\x02\x01\x12k\n" +
+	"\x0fGetRemoteLyrics\x12(.mavio.library.v1.GetRemoteLyricsRequest\x1a).mavio.library.v1.GetRemoteLyricsResponse\"\x03\x90\x02\x01\x12u\n" +
 	"\x14DownloadRemoteLyrics\x12-.mavio.library.v1.DownloadRemoteLyricsRequest\x1a..mavio.library.v1.DownloadRemoteLyricsResponse\x12w\n" +
 	"\x13ListExternalIdKinds\x12,.mavio.library.v1.ListExternalIdKindsRequest\x1a-.mavio.library.v1.ListExternalIdKindsResponse\"\x03\x90\x02\x01B\xce\x01\n" +
 	"\x14com.mavio.library.v1B\rMetadataProtoP\x01ZEgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1;libraryv1\xa2\x02\x03MLX\xaa\x02\x10Mavio.Library.V1\xca\x02\x10Mavio\\Library\\V1\xe2\x02\x1cMavio\\Library\\V1\\GPBMetadata\xea\x02\x12Mavio::Library::V1b\beditionsp\xe8\a"
 
-var file_mavio_library_v1_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
+var file_mavio_library_v1_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
 var file_mavio_library_v1_metadata_proto_goTypes = []any{
 	(*ItemMetadata)(nil),                 // 0: mavio.library.v1.ItemMetadata
 	(*UpdateItemRequest)(nil),            // 1: mavio.library.v1.UpdateItemRequest
@@ -3982,80 +4201,86 @@ var file_mavio_library_v1_metadata_proto_goTypes = []any{
 	(*SearchRemoteLyricsRequest)(nil),    // 17: mavio.library.v1.SearchRemoteLyricsRequest
 	(*RemoteLyrics)(nil),                 // 18: mavio.library.v1.RemoteLyrics
 	(*SearchRemoteLyricsResponse)(nil),   // 19: mavio.library.v1.SearchRemoteLyricsResponse
-	(*DownloadRemoteLyricsRequest)(nil),  // 20: mavio.library.v1.DownloadRemoteLyricsRequest
-	(*DownloadRemoteLyricsResponse)(nil), // 21: mavio.library.v1.DownloadRemoteLyricsResponse
-	(*ListExternalIdKindsRequest)(nil),   // 22: mavio.library.v1.ListExternalIdKindsRequest
-	(*ExternalIdKind)(nil),               // 23: mavio.library.v1.ExternalIdKind
-	(*ListExternalIdKindsResponse)(nil),  // 24: mavio.library.v1.ListExternalIdKindsResponse
-	nil,                                  // 25: mavio.library.v1.ItemMetadata.ExternalIdsEntry
-	nil,                                  // 26: mavio.library.v1.SearchRemoteRequest.ExternalIdsEntry
-	nil,                                  // 27: mavio.library.v1.RemoteSearchResult.ExternalIdsEntry
-	nil,                                  // 28: mavio.library.v1.IdentifyItemRequest.ExternalIdsEntry
-	(*timestamppb.Timestamp)(nil),        // 29: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),          // 30: google.protobuf.Duration
-	(SeriesStatus)(0),                    // 31: mavio.library.v1.SeriesStatus
-	(MetadataField)(0),                   // 32: mavio.library.v1.MetadataField
-	(SeriesType)(0),                      // 33: mavio.library.v1.SeriesType
-	(DisplayOrder)(0),                    // 34: mavio.library.v1.DisplayOrder
-	(*fieldmaskpb.FieldMask)(nil),        // 35: google.protobuf.FieldMask
-	(*Item)(nil),                         // 36: mavio.library.v1.Item
-	(ImageKind)(0),                       // 37: mavio.library.v1.ImageKind
-	(*Image)(nil),                        // 38: mavio.library.v1.Image
-	(ItemKind)(0),                        // 39: mavio.library.v1.ItemKind
+	(*GetRemoteLyricsRequest)(nil),       // 20: mavio.library.v1.GetRemoteLyricsRequest
+	(*GetRemoteLyricsResponse)(nil),      // 21: mavio.library.v1.GetRemoteLyricsResponse
+	(*DownloadRemoteLyricsRequest)(nil),  // 22: mavio.library.v1.DownloadRemoteLyricsRequest
+	(*DownloadRemoteLyricsResponse)(nil), // 23: mavio.library.v1.DownloadRemoteLyricsResponse
+	(*ListExternalIdKindsRequest)(nil),   // 24: mavio.library.v1.ListExternalIdKindsRequest
+	(*ExternalIdKind)(nil),               // 25: mavio.library.v1.ExternalIdKind
+	(*ListExternalIdKindsResponse)(nil),  // 26: mavio.library.v1.ListExternalIdKindsResponse
+	nil,                                  // 27: mavio.library.v1.ItemMetadata.ExternalIdsEntry
+	nil,                                  // 28: mavio.library.v1.SearchRemoteRequest.ExternalIdsEntry
+	nil,                                  // 29: mavio.library.v1.RemoteSearchResult.ExternalIdsEntry
+	nil,                                  // 30: mavio.library.v1.IdentifyItemRequest.ExternalIdsEntry
+	(*timestamppb.Timestamp)(nil),        // 31: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),          // 32: google.protobuf.Duration
+	(SeriesStatus)(0),                    // 33: mavio.library.v1.SeriesStatus
+	(MetadataField)(0),                   // 34: mavio.library.v1.MetadataField
+	(SeriesType)(0),                      // 35: mavio.library.v1.SeriesType
+	(DisplayOrder)(0),                    // 36: mavio.library.v1.DisplayOrder
+	(*fieldmaskpb.FieldMask)(nil),        // 37: google.protobuf.FieldMask
+	(*Item)(nil),                         // 38: mavio.library.v1.Item
+	(ImageKind)(0),                       // 39: mavio.library.v1.ImageKind
+	(*Image)(nil),                        // 40: mavio.library.v1.Image
+	(*GetLyricsResponse)(nil),            // 41: mavio.library.v1.GetLyricsResponse
+	(ItemKind)(0),                        // 42: mavio.library.v1.ItemKind
 }
 var file_mavio_library_v1_metadata_proto_depIdxs = []int32{
-	29, // 0: mavio.library.v1.ItemMetadata.premiere_date:type_name -> google.protobuf.Timestamp
-	29, // 1: mavio.library.v1.ItemMetadata.end_date:type_name -> google.protobuf.Timestamp
-	30, // 2: mavio.library.v1.ItemMetadata.runtime:type_name -> google.protobuf.Duration
-	25, // 3: mavio.library.v1.ItemMetadata.external_ids:type_name -> mavio.library.v1.ItemMetadata.ExternalIdsEntry
-	31, // 4: mavio.library.v1.ItemMetadata.series_status:type_name -> mavio.library.v1.SeriesStatus
-	32, // 5: mavio.library.v1.ItemMetadata.locked_fields:type_name -> mavio.library.v1.MetadataField
-	33, // 6: mavio.library.v1.ItemMetadata.series_type:type_name -> mavio.library.v1.SeriesType
-	34, // 7: mavio.library.v1.ItemMetadata.display_order:type_name -> mavio.library.v1.DisplayOrder
+	31, // 0: mavio.library.v1.ItemMetadata.premiere_date:type_name -> google.protobuf.Timestamp
+	31, // 1: mavio.library.v1.ItemMetadata.end_date:type_name -> google.protobuf.Timestamp
+	32, // 2: mavio.library.v1.ItemMetadata.runtime:type_name -> google.protobuf.Duration
+	27, // 3: mavio.library.v1.ItemMetadata.external_ids:type_name -> mavio.library.v1.ItemMetadata.ExternalIdsEntry
+	33, // 4: mavio.library.v1.ItemMetadata.series_status:type_name -> mavio.library.v1.SeriesStatus
+	34, // 5: mavio.library.v1.ItemMetadata.locked_fields:type_name -> mavio.library.v1.MetadataField
+	35, // 6: mavio.library.v1.ItemMetadata.series_type:type_name -> mavio.library.v1.SeriesType
+	36, // 7: mavio.library.v1.ItemMetadata.display_order:type_name -> mavio.library.v1.DisplayOrder
 	0,  // 8: mavio.library.v1.UpdateItemRequest.metadata:type_name -> mavio.library.v1.ItemMetadata
-	35, // 9: mavio.library.v1.UpdateItemRequest.update_mask:type_name -> google.protobuf.FieldMask
-	36, // 10: mavio.library.v1.UpdateItemResponse.item:type_name -> mavio.library.v1.Item
-	36, // 11: mavio.library.v1.RefreshItemResponse.item:type_name -> mavio.library.v1.Item
-	26, // 12: mavio.library.v1.SearchRemoteRequest.external_ids:type_name -> mavio.library.v1.SearchRemoteRequest.ExternalIdsEntry
-	27, // 13: mavio.library.v1.RemoteSearchResult.external_ids:type_name -> mavio.library.v1.RemoteSearchResult.ExternalIdsEntry
+	37, // 9: mavio.library.v1.UpdateItemRequest.update_mask:type_name -> google.protobuf.FieldMask
+	38, // 10: mavio.library.v1.UpdateItemResponse.item:type_name -> mavio.library.v1.Item
+	38, // 11: mavio.library.v1.RefreshItemResponse.item:type_name -> mavio.library.v1.Item
+	28, // 12: mavio.library.v1.SearchRemoteRequest.external_ids:type_name -> mavio.library.v1.SearchRemoteRequest.ExternalIdsEntry
+	29, // 13: mavio.library.v1.RemoteSearchResult.external_ids:type_name -> mavio.library.v1.RemoteSearchResult.ExternalIdsEntry
 	6,  // 14: mavio.library.v1.SearchRemoteResponse.results:type_name -> mavio.library.v1.RemoteSearchResult
-	28, // 15: mavio.library.v1.IdentifyItemRequest.external_ids:type_name -> mavio.library.v1.IdentifyItemRequest.ExternalIdsEntry
-	36, // 16: mavio.library.v1.IdentifyItemResponse.item:type_name -> mavio.library.v1.Item
-	37, // 17: mavio.library.v1.ListRemoteImagesRequest.kind:type_name -> mavio.library.v1.ImageKind
-	37, // 18: mavio.library.v1.RemoteImage.kind:type_name -> mavio.library.v1.ImageKind
+	30, // 15: mavio.library.v1.IdentifyItemRequest.external_ids:type_name -> mavio.library.v1.IdentifyItemRequest.ExternalIdsEntry
+	38, // 16: mavio.library.v1.IdentifyItemResponse.item:type_name -> mavio.library.v1.Item
+	39, // 17: mavio.library.v1.ListRemoteImagesRequest.kind:type_name -> mavio.library.v1.ImageKind
+	39, // 18: mavio.library.v1.RemoteImage.kind:type_name -> mavio.library.v1.ImageKind
 	11, // 19: mavio.library.v1.ListRemoteImagesResponse.images:type_name -> mavio.library.v1.RemoteImage
-	37, // 20: mavio.library.v1.SetItemImageRequest.kind:type_name -> mavio.library.v1.ImageKind
-	38, // 21: mavio.library.v1.SetItemImageResponse.image:type_name -> mavio.library.v1.Image
-	30, // 22: mavio.library.v1.RemoteLyrics.duration:type_name -> google.protobuf.Duration
+	39, // 20: mavio.library.v1.SetItemImageRequest.kind:type_name -> mavio.library.v1.ImageKind
+	40, // 21: mavio.library.v1.SetItemImageResponse.image:type_name -> mavio.library.v1.Image
+	32, // 22: mavio.library.v1.RemoteLyrics.duration:type_name -> google.protobuf.Duration
 	18, // 23: mavio.library.v1.SearchRemoteLyricsResponse.lyrics:type_name -> mavio.library.v1.RemoteLyrics
-	39, // 24: mavio.library.v1.ListExternalIdKindsRequest.item_kind:type_name -> mavio.library.v1.ItemKind
-	39, // 25: mavio.library.v1.ExternalIdKind.item_kinds:type_name -> mavio.library.v1.ItemKind
-	23, // 26: mavio.library.v1.ListExternalIdKindsResponse.kinds:type_name -> mavio.library.v1.ExternalIdKind
-	1,  // 27: mavio.library.v1.MetadataService.UpdateItem:input_type -> mavio.library.v1.UpdateItemRequest
-	3,  // 28: mavio.library.v1.MetadataService.RefreshItem:input_type -> mavio.library.v1.RefreshItemRequest
-	5,  // 29: mavio.library.v1.MetadataService.SearchRemote:input_type -> mavio.library.v1.SearchRemoteRequest
-	8,  // 30: mavio.library.v1.MetadataService.IdentifyItem:input_type -> mavio.library.v1.IdentifyItemRequest
-	10, // 31: mavio.library.v1.MetadataService.ListRemoteImages:input_type -> mavio.library.v1.ListRemoteImagesRequest
-	13, // 32: mavio.library.v1.MetadataService.SetItemImage:input_type -> mavio.library.v1.SetItemImageRequest
-	15, // 33: mavio.library.v1.MetadataService.DeleteItemImage:input_type -> mavio.library.v1.DeleteItemImageRequest
-	17, // 34: mavio.library.v1.MetadataService.SearchRemoteLyrics:input_type -> mavio.library.v1.SearchRemoteLyricsRequest
-	20, // 35: mavio.library.v1.MetadataService.DownloadRemoteLyrics:input_type -> mavio.library.v1.DownloadRemoteLyricsRequest
-	22, // 36: mavio.library.v1.MetadataService.ListExternalIdKinds:input_type -> mavio.library.v1.ListExternalIdKindsRequest
-	2,  // 37: mavio.library.v1.MetadataService.UpdateItem:output_type -> mavio.library.v1.UpdateItemResponse
-	4,  // 38: mavio.library.v1.MetadataService.RefreshItem:output_type -> mavio.library.v1.RefreshItemResponse
-	7,  // 39: mavio.library.v1.MetadataService.SearchRemote:output_type -> mavio.library.v1.SearchRemoteResponse
-	9,  // 40: mavio.library.v1.MetadataService.IdentifyItem:output_type -> mavio.library.v1.IdentifyItemResponse
-	12, // 41: mavio.library.v1.MetadataService.ListRemoteImages:output_type -> mavio.library.v1.ListRemoteImagesResponse
-	14, // 42: mavio.library.v1.MetadataService.SetItemImage:output_type -> mavio.library.v1.SetItemImageResponse
-	16, // 43: mavio.library.v1.MetadataService.DeleteItemImage:output_type -> mavio.library.v1.DeleteItemImageResponse
-	19, // 44: mavio.library.v1.MetadataService.SearchRemoteLyrics:output_type -> mavio.library.v1.SearchRemoteLyricsResponse
-	21, // 45: mavio.library.v1.MetadataService.DownloadRemoteLyrics:output_type -> mavio.library.v1.DownloadRemoteLyricsResponse
-	24, // 46: mavio.library.v1.MetadataService.ListExternalIdKinds:output_type -> mavio.library.v1.ListExternalIdKindsResponse
-	37, // [37:47] is the sub-list for method output_type
-	27, // [27:37] is the sub-list for method input_type
-	27, // [27:27] is the sub-list for extension type_name
-	27, // [27:27] is the sub-list for extension extendee
-	0,  // [0:27] is the sub-list for field type_name
+	41, // 24: mavio.library.v1.GetRemoteLyricsResponse.lyrics:type_name -> mavio.library.v1.GetLyricsResponse
+	42, // 25: mavio.library.v1.ListExternalIdKindsRequest.item_kind:type_name -> mavio.library.v1.ItemKind
+	42, // 26: mavio.library.v1.ExternalIdKind.item_kinds:type_name -> mavio.library.v1.ItemKind
+	25, // 27: mavio.library.v1.ListExternalIdKindsResponse.kinds:type_name -> mavio.library.v1.ExternalIdKind
+	1,  // 28: mavio.library.v1.MetadataService.UpdateItem:input_type -> mavio.library.v1.UpdateItemRequest
+	3,  // 29: mavio.library.v1.MetadataService.RefreshItem:input_type -> mavio.library.v1.RefreshItemRequest
+	5,  // 30: mavio.library.v1.MetadataService.SearchRemote:input_type -> mavio.library.v1.SearchRemoteRequest
+	8,  // 31: mavio.library.v1.MetadataService.IdentifyItem:input_type -> mavio.library.v1.IdentifyItemRequest
+	10, // 32: mavio.library.v1.MetadataService.ListRemoteImages:input_type -> mavio.library.v1.ListRemoteImagesRequest
+	13, // 33: mavio.library.v1.MetadataService.SetItemImage:input_type -> mavio.library.v1.SetItemImageRequest
+	15, // 34: mavio.library.v1.MetadataService.DeleteItemImage:input_type -> mavio.library.v1.DeleteItemImageRequest
+	17, // 35: mavio.library.v1.MetadataService.SearchRemoteLyrics:input_type -> mavio.library.v1.SearchRemoteLyricsRequest
+	20, // 36: mavio.library.v1.MetadataService.GetRemoteLyrics:input_type -> mavio.library.v1.GetRemoteLyricsRequest
+	22, // 37: mavio.library.v1.MetadataService.DownloadRemoteLyrics:input_type -> mavio.library.v1.DownloadRemoteLyricsRequest
+	24, // 38: mavio.library.v1.MetadataService.ListExternalIdKinds:input_type -> mavio.library.v1.ListExternalIdKindsRequest
+	2,  // 39: mavio.library.v1.MetadataService.UpdateItem:output_type -> mavio.library.v1.UpdateItemResponse
+	4,  // 40: mavio.library.v1.MetadataService.RefreshItem:output_type -> mavio.library.v1.RefreshItemResponse
+	7,  // 41: mavio.library.v1.MetadataService.SearchRemote:output_type -> mavio.library.v1.SearchRemoteResponse
+	9,  // 42: mavio.library.v1.MetadataService.IdentifyItem:output_type -> mavio.library.v1.IdentifyItemResponse
+	12, // 43: mavio.library.v1.MetadataService.ListRemoteImages:output_type -> mavio.library.v1.ListRemoteImagesResponse
+	14, // 44: mavio.library.v1.MetadataService.SetItemImage:output_type -> mavio.library.v1.SetItemImageResponse
+	16, // 45: mavio.library.v1.MetadataService.DeleteItemImage:output_type -> mavio.library.v1.DeleteItemImageResponse
+	19, // 46: mavio.library.v1.MetadataService.SearchRemoteLyrics:output_type -> mavio.library.v1.SearchRemoteLyricsResponse
+	21, // 47: mavio.library.v1.MetadataService.GetRemoteLyrics:output_type -> mavio.library.v1.GetRemoteLyricsResponse
+	23, // 48: mavio.library.v1.MetadataService.DownloadRemoteLyrics:output_type -> mavio.library.v1.DownloadRemoteLyricsResponse
+	26, // 49: mavio.library.v1.MetadataService.ListExternalIdKinds:output_type -> mavio.library.v1.ListExternalIdKindsResponse
+	39, // [39:50] is the sub-list for method output_type
+	28, // [28:39] is the sub-list for method input_type
+	28, // [28:28] is the sub-list for extension type_name
+	28, // [28:28] is the sub-list for extension extendee
+	0,  // [0:28] is the sub-list for field type_name
 }
 
 func init() { file_mavio_library_v1_metadata_proto_init() }
@@ -4074,7 +4299,7 @@ func file_mavio_library_v1_metadata_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_library_v1_metadata_proto_rawDesc), len(file_mavio_library_v1_metadata_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   29,
+			NumMessages:   31,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

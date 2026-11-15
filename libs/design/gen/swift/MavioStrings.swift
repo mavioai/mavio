@@ -961,6 +961,46 @@ public enum MavioStrings {
     /// Button showing or hiding a track's lyrics in the player, and their accessible label.
     public static var playerLyrics: String { NSLocalizedString("player.lyrics", bundle: .module, comment: "") }
 
+    /// Button of the player opening the search of the lyrics providers for the track playing, for administrators, and its accessible label.
+    public static var lyricsSearch: String { NSLocalizedString("lyrics.search", bundle: .module, comment: "") }
+
+    /// Title of the search of the lyrics providers.
+    public static func lyricsSearchTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("lyrics.searchTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Note under the lyrics search's title.
+    public static var lyricsSearchFooter: String { NSLocalizedString("lyrics.searchFooter", bundle: .module, comment: "") }
+
+    /// Shown while the lyrics providers are searched.
+    public static var lyricsSearching: String { NSLocalizedString("lyrics.searching", bundle: .module, comment: "") }
+
+    /// The lyrics search found nothing.
+    public static var lyricsNoResults: String { NSLocalizedString("lyrics.noResults", bundle: .module, comment: "") }
+
+    /// Found lyrics whose lines have times.
+    public static var lyricsSynced: String { NSLocalizedString("lyrics.synced", bundle: .module, comment: "") }
+
+    /// Found lyrics without times.
+    public static var lyricsPlain: String { NSLocalizedString("lyrics.plain", bundle: .module, comment: "") }
+
+    /// How well found lyrics match the track.
+    public static func lyricsScore(percent: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("lyrics.score", bundle: .module, comment: ""), percent)
+    }
+
+    /// Shows the text of found lyrics.
+    public static var lyricsPreview: String { NSLocalizedString("lyrics.preview", bundle: .module, comment: "") }
+
+    /// Hides the text of found lyrics.
+    public static var lyricsHidePreview: String { NSLocalizedString("lyrics.hidePreview", bundle: .module, comment: "") }
+
+    /// Saves found lyrics beside the track.
+    public static var lyricsDownload: String { NSLocalizedString("lyrics.download", bundle: .module, comment: "") }
+
+    /// The lyrics were saved beside the track.
+    public static var lyricsDownloaded: String { NSLocalizedString("lyrics.downloaded", bundle: .module, comment: "") }
+
     /// The accessible name of the player's timeline.
     public static var playerPosition: String { NSLocalizedString("player.position", bundle: .module, comment: "") }
 

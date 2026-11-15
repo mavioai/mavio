@@ -478,6 +478,30 @@ func (s *MetadataService) SearchRemoteLyrics(ctx context.Context, req *libraryv1
 	return resp, nil
 }
 
+// GetRemoteLyrics returns lyrics a lyrics provider found, without saving
+// them.
+func (s *MetadataService) GetRemoteLyrics(ctx context.Context, req *libraryv1.GetRemoteLyricsRequest) (*libraryv1.GetRemoteLyricsResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	if s.Lyrics == nil {
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("lyrics provider %s: %w", req.GetProvider(), core.ErrNotFound))
+	}
+	it, err := s.store.Items().Get(ctx, core.MustParseID(req.GetItemId()))
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	lib, err := s.store.Libraries().Get(ctx, it.LibraryID)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	l, err := s.Lyrics.Preview(ctx, lib, it.ID, req.GetProvider(), req.GetId())
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return libraryv1.GetRemoteLyricsResponse_builder{Lyrics: lyricsToProto(l)}.Build(), nil
+}
+
 // DownloadRemoteLyrics saves lyrics a lyrics provider found beside the
 // track.
 func (s *MetadataService) DownloadRemoteLyrics(ctx context.Context, req *libraryv1.DownloadRemoteLyricsRequest) (*libraryv1.DownloadRemoteLyricsResponse, error) {

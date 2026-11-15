@@ -57,6 +57,9 @@ const (
 	// MetadataServiceSearchRemoteLyricsProcedure is the fully-qualified name of the MetadataService's
 	// SearchRemoteLyrics RPC.
 	MetadataServiceSearchRemoteLyricsProcedure = "/mavio.library.v1.MetadataService/SearchRemoteLyrics"
+	// MetadataServiceGetRemoteLyricsProcedure is the fully-qualified name of the MetadataService's
+	// GetRemoteLyrics RPC.
+	MetadataServiceGetRemoteLyricsProcedure = "/mavio.library.v1.MetadataService/GetRemoteLyrics"
 	// MetadataServiceDownloadRemoteLyricsProcedure is the fully-qualified name of the MetadataService's
 	// DownloadRemoteLyrics RPC.
 	MetadataServiceDownloadRemoteLyricsProcedure = "/mavio.library.v1.MetadataService/DownloadRemoteLyrics"
@@ -89,6 +92,9 @@ type MetadataServiceClient interface {
 	// SearchRemoteLyrics asks the lyrics providers for lyrics of a track;
 	// administrators only.
 	SearchRemoteLyrics(context.Context, *v1.SearchRemoteLyricsRequest) (*v1.SearchRemoteLyricsResponse, error)
+	// GetRemoteLyrics returns lyrics SearchRemoteLyrics found, as GetLyrics
+	// reads them, without saving them; administrators only.
+	GetRemoteLyrics(context.Context, *v1.GetRemoteLyricsRequest) (*v1.GetRemoteLyricsResponse, error)
 	// DownloadRemoteLyrics saves lyrics SearchRemoteLyrics found beside the
 	// track, as .lrc when synced and .txt otherwise, replacing its other
 	// lyric files; administrators only.
@@ -160,6 +166,13 @@ func NewMetadataServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		getRemoteLyrics: connect.NewClient[v1.GetRemoteLyricsRequest, v1.GetRemoteLyricsResponse](
+			httpClient,
+			baseURL+MetadataServiceGetRemoteLyricsProcedure,
+			connect.WithSchema(metadataServiceMethods.ByName("GetRemoteLyrics")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 		downloadRemoteLyrics: connect.NewClient[v1.DownloadRemoteLyricsRequest, v1.DownloadRemoteLyricsResponse](
 			httpClient,
 			baseURL+MetadataServiceDownloadRemoteLyricsProcedure,
@@ -186,6 +199,7 @@ type metadataServiceClient struct {
 	setItemImage         *connect.Client[v1.SetItemImageRequest, v1.SetItemImageResponse]
 	deleteItemImage      *connect.Client[v1.DeleteItemImageRequest, v1.DeleteItemImageResponse]
 	searchRemoteLyrics   *connect.Client[v1.SearchRemoteLyricsRequest, v1.SearchRemoteLyricsResponse]
+	getRemoteLyrics      *connect.Client[v1.GetRemoteLyricsRequest, v1.GetRemoteLyricsResponse]
 	downloadRemoteLyrics *connect.Client[v1.DownloadRemoteLyricsRequest, v1.DownloadRemoteLyricsResponse]
 	listExternalIdKinds  *connect.Client[v1.ListExternalIdKindsRequest, v1.ListExternalIdKindsResponse]
 }
@@ -262,6 +276,15 @@ func (c *metadataServiceClient) SearchRemoteLyrics(ctx context.Context, req *v1.
 	return nil, err
 }
 
+// GetRemoteLyrics calls mavio.library.v1.MetadataService.GetRemoteLyrics.
+func (c *metadataServiceClient) GetRemoteLyrics(ctx context.Context, req *v1.GetRemoteLyricsRequest) (*v1.GetRemoteLyricsResponse, error) {
+	response, err := c.getRemoteLyrics.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // DownloadRemoteLyrics calls mavio.library.v1.MetadataService.DownloadRemoteLyrics.
 func (c *metadataServiceClient) DownloadRemoteLyrics(ctx context.Context, req *v1.DownloadRemoteLyricsRequest) (*v1.DownloadRemoteLyricsResponse, error) {
 	response, err := c.downloadRemoteLyrics.CallUnary(ctx, connect.NewRequest(req))
@@ -304,6 +327,9 @@ type MetadataServiceHandler interface {
 	// SearchRemoteLyrics asks the lyrics providers for lyrics of a track;
 	// administrators only.
 	SearchRemoteLyrics(context.Context, *v1.SearchRemoteLyricsRequest) (*v1.SearchRemoteLyricsResponse, error)
+	// GetRemoteLyrics returns lyrics SearchRemoteLyrics found, as GetLyrics
+	// reads them, without saving them; administrators only.
+	GetRemoteLyrics(context.Context, *v1.GetRemoteLyricsRequest) (*v1.GetRemoteLyricsResponse, error)
 	// DownloadRemoteLyrics saves lyrics SearchRemoteLyrics found beside the
 	// track, as .lrc when synced and .txt otherwise, replacing its other
 	// lyric files; administrators only.
@@ -371,6 +397,13 @@ func NewMetadataServiceHandler(svc MetadataServiceHandler, opts ...connect.Handl
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	metadataServiceGetRemoteLyricsHandler := connect.NewUnaryHandlerSimple(
+		MetadataServiceGetRemoteLyricsProcedure,
+		svc.GetRemoteLyrics,
+		connect.WithSchema(metadataServiceMethods.ByName("GetRemoteLyrics")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	metadataServiceDownloadRemoteLyricsHandler := connect.NewUnaryHandlerSimple(
 		MetadataServiceDownloadRemoteLyricsProcedure,
 		svc.DownloadRemoteLyrics,
@@ -402,6 +435,8 @@ func NewMetadataServiceHandler(svc MetadataServiceHandler, opts ...connect.Handl
 			metadataServiceDeleteItemImageHandler.ServeHTTP(w, r)
 		case MetadataServiceSearchRemoteLyricsProcedure:
 			metadataServiceSearchRemoteLyricsHandler.ServeHTTP(w, r)
+		case MetadataServiceGetRemoteLyricsProcedure:
+			metadataServiceGetRemoteLyricsHandler.ServeHTTP(w, r)
 		case MetadataServiceDownloadRemoteLyricsProcedure:
 			metadataServiceDownloadRemoteLyricsHandler.ServeHTTP(w, r)
 		case MetadataServiceListExternalIdKindsProcedure:
@@ -445,6 +480,10 @@ func (UnimplementedMetadataServiceHandler) DeleteItemImage(context.Context, *v1.
 
 func (UnimplementedMetadataServiceHandler) SearchRemoteLyrics(context.Context, *v1.SearchRemoteLyricsRequest) (*v1.SearchRemoteLyricsResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.MetadataService.SearchRemoteLyrics is not implemented"))
+}
+
+func (UnimplementedMetadataServiceHandler) GetRemoteLyrics(context.Context, *v1.GetRemoteLyricsRequest) (*v1.GetRemoteLyricsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.MetadataService.GetRemoteLyrics is not implemented"))
 }
 
 func (UnimplementedMetadataServiceHandler) DownloadRemoteLyrics(context.Context, *v1.DownloadRemoteLyricsRequest) (*v1.DownloadRemoteLyricsResponse, error) {

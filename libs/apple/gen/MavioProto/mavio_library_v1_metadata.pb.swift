@@ -976,6 +976,68 @@ public nonisolated struct Mavio_Library_V1_SearchRemoteLyricsResponse: Sendable 
   public init() {}
 }
 
+public nonisolated struct Mavio_Library_V1_GetRemoteLyricsRequest: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var itemID: String {
+    get {_itemID ?? String()}
+    set {_itemID = newValue}
+  }
+  /// Returns true if `itemID` has been explicitly set.
+  public var hasItemID: Bool {self._itemID != nil}
+  /// Clears the value of `itemID`. Subsequent reads from it will return its default value.
+  public mutating func clearItemID() {self._itemID = nil}
+
+  public var provider: String {
+    get {_provider ?? String()}
+    set {_provider = newValue}
+  }
+  /// Returns true if `provider` has been explicitly set.
+  public var hasProvider: Bool {self._provider != nil}
+  /// Clears the value of `provider`. Subsequent reads from it will return its default value.
+  public mutating func clearProvider() {self._provider = nil}
+
+  public var id: String {
+    get {_id ?? String()}
+    set {_id = newValue}
+  }
+  /// Returns true if `id` has been explicitly set.
+  public var hasID: Bool {self._id != nil}
+  /// Clears the value of `id`. Subsequent reads from it will return its default value.
+  public mutating func clearID() {self._id = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _itemID: String? = nil
+  fileprivate var _provider: String? = nil
+  fileprivate var _id: String? = nil
+}
+
+public nonisolated struct Mavio_Library_V1_GetRemoteLyricsResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var lyrics: Mavio_Library_V1_GetLyricsResponse {
+    get {_lyrics ?? Mavio_Library_V1_GetLyricsResponse()}
+    set {_lyrics = newValue}
+  }
+  /// Returns true if `lyrics` has been explicitly set.
+  public var hasLyrics: Bool {self._lyrics != nil}
+  /// Clears the value of `lyrics`. Subsequent reads from it will return its default value.
+  public mutating func clearLyrics() {self._lyrics = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _lyrics: Mavio_Library_V1_GetLyricsResponse? = nil
+}
+
 public nonisolated struct Mavio_Library_V1_DownloadRemoteLyricsRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -2203,6 +2265,84 @@ nonisolated extension Mavio_Library_V1_SearchRemoteLyricsResponse: SwiftProtobuf
 
   public static func ==(lhs: Mavio_Library_V1_SearchRemoteLyricsResponse, rhs: Mavio_Library_V1_SearchRemoteLyricsResponse) -> Bool {
     if lhs.lyrics != rhs.lyrics {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Library_V1_GetRemoteLyricsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetRemoteLyricsRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}item_id\0\u{1}provider\0\u{1}id\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._itemID) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self._provider) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self._id) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._itemID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._provider {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+    } }()
+    try { if let v = self._id {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 3)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Library_V1_GetRemoteLyricsRequest, rhs: Mavio_Library_V1_GetRemoteLyricsRequest) -> Bool {
+    if lhs._itemID != rhs._itemID {return false}
+    if lhs._provider != rhs._provider {return false}
+    if lhs._id != rhs._id {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Mavio_Library_V1_GetRemoteLyricsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetRemoteLyricsResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}lyrics\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._lyrics) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._lyrics {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Mavio_Library_V1_GetRemoteLyricsResponse, rhs: Mavio_Library_V1_GetRemoteLyricsResponse) -> Bool {
+    if lhs._lyrics != rhs._lyrics {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

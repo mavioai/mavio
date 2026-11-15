@@ -252,6 +252,11 @@ func (s *ItemService) GetLyrics(ctx context.Context, req *libraryv1.GetLyricsReq
 	if !ok {
 		return nil, notFound
 	}
+	return lyricsToProto(l), nil
+}
+
+// lyricsToProto converts parsed lyrics.
+func lyricsToProto(l *metadata.Lyrics) *libraryv1.GetLyricsResponse {
 	out := libraryv1.GetLyricsResponse_builder{
 		Artist: &l.Metadata.Artist, Album: &l.Metadata.Album, Title: &l.Metadata.Title, Synced: &l.Metadata.Synced,
 	}.Build()
@@ -271,7 +276,7 @@ func (s *ItemService) GetLyrics(ctx context.Context, req *libraryv1.GetLyricsReq
 		}
 		out.SetLines(append(out.GetLines(), pl))
 	}
-	return out, nil
+	return out
 }
 
 // maxLyrics bounds a lyric file read.

@@ -42,6 +42,11 @@ service MetadataService {
   rpc SearchRemoteLyrics(SearchRemoteLyricsRequest) returns (SearchRemoteLyricsResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // GetRemoteLyrics returns lyrics SearchRemoteLyrics found, as GetLyrics
+  // reads them, without saving them; administrators only.
+  rpc GetRemoteLyrics(GetRemoteLyricsRequest) returns (GetRemoteLyricsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
   // DownloadRemoteLyrics saves lyrics SearchRemoteLyrics found beside the
   // track, as .lrc when synced and .txt otherwise, replacing its other
   // lyric files; administrators only.
@@ -268,6 +273,19 @@ message RemoteLyrics {
 message SearchRemoteLyricsResponse {
   // Each provider's lyrics, best first, in provider order.
   repeated RemoteLyrics lyrics = 1;
+}
+
+message GetRemoteLyricsRequest {
+  string item_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  string provider = 2 [(buf.validate.field).required = true];
+  string id = 3 [(buf.validate.field).required = true];
+}
+
+message GetRemoteLyricsResponse {
+  GetLyricsResponse lyrics = 1;
 }
 
 message DownloadRemoteLyricsRequest {

@@ -291,6 +291,18 @@ export type MessageKey =
   | 'player.method'
   | 'player.options'
   | 'player.lyrics'
+  | 'lyrics.search'
+  | 'lyrics.searchTitle'
+  | 'lyrics.searchFooter'
+  | 'lyrics.searching'
+  | 'lyrics.noResults'
+  | 'lyrics.synced'
+  | 'lyrics.plain'
+  | 'lyrics.score'
+  | 'lyrics.preview'
+  | 'lyrics.hidePreview'
+  | 'lyrics.download'
+  | 'lyrics.downloaded'
   | 'player.position'
   | 'state.loading'
   | 'state.empty'
@@ -2635,6 +2647,18 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.method": "Playback",
     "player.options": "Playback Options",
     "player.lyrics": "Lyrics",
+    "lyrics.search": "Search Lyrics",
+    "lyrics.searchTitle": "Lyrics for {name}",
+    "lyrics.searchFooter": "Downloaded lyrics replace the track's lyric files.",
+    "lyrics.searching": "Searching…",
+    "lyrics.noResults": "No lyrics found.",
+    "lyrics.synced": "Synced",
+    "lyrics.plain": "Plain",
+    "lyrics.score": "{percent}% match",
+    "lyrics.preview": "Preview",
+    "lyrics.hidePreview": "Hide Preview",
+    "lyrics.download": "Download",
+    "lyrics.downloaded": "Downloaded",
     "player.position": "Position",
     "state.loading": "Loading…",
     "state.empty": "Nothing here yet",
@@ -4977,6 +5001,18 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.method": "播放方式",
     "player.options": "播放选项",
     "player.lyrics": "歌词",
+    "lyrics.search": "搜索歌词",
+    "lyrics.searchTitle": "{name} 的歌词",
+    "lyrics.searchFooter": "下载的歌词会替换曲目的歌词文件。",
+    "lyrics.searching": "正在搜索…",
+    "lyrics.noResults": "未找到歌词。",
+    "lyrics.synced": "同步",
+    "lyrics.plain": "纯文本",
+    "lyrics.score": "匹配 {percent}%",
+    "lyrics.preview": "预览",
+    "lyrics.hidePreview": "隐藏预览",
+    "lyrics.download": "下载",
+    "lyrics.downloaded": "已下载",
     "player.position": "进度",
     "state.loading": "正在载入…",
     "state.empty": "这里还没有内容",

@@ -133,22 +133,47 @@ func (l *Lyrics) Download(ctx context.Context, lib core.Library, itemID core.ID,
 	return l.save(ctx, lib, it, providers[i], id)
 }
 
-// save downloads a provider's lyrics and saves them beside a track.
-func (l *Lyrics) save(ctx context.Context, lib core.Library, it core.Item, p LyricsProvider, id string) error {
+// Preview downloads a provider's lyrics of a track, as Download would
+// save them, without saving them.
+func (l *Lyrics) Preview(ctx context.Context, lib core.Library, itemID core.ID, provider, id string) (*metadata.Lyrics, error) {
+	providers := l.providers(lib)
+	i := slices.IndexFunc(providers, func(p LyricsProvider) bool { return p.Name() == provider })
+	if i < 0 {
+		return nil, fmt.Errorf("lyrics provider %s: %w", provider, core.ErrNotFound)
+	}
+	if _, err := l.track(ctx, itemID); err != nil {
+		return nil, err
+	}
+	_, _, parsed, err := download(ctx, providers[i], id)
+	return parsed, err
+}
+
+// download downloads a provider's lyrics and parses them, returning the
+// extension of their file.
+func download(ctx context.Context, p LyricsProvider, id string) (string, string, *metadata.Lyrics, error) {
 	content, synced, err := p.DownloadLyrics(ctx, id)
 	if err != nil {
-		return fmt.Errorf("download lyrics: %w", err)
+		return "", "", nil, fmt.Errorf("download lyrics: %w", err)
 	}
 	ext := ".txt"
 	if synced {
 		ext = ".lrc"
 	}
 	if len(content) > MaxLyricsSize {
-		return fmt.Errorf("download lyrics: %d bytes; at most %d", len(content), MaxLyricsSize)
+		return "", "", nil, fmt.Errorf("download lyrics: %d bytes; at most %d", len(content), MaxLyricsSize)
 	}
-	if parsed, ok := metadata.ParseLyrics("lyrics"+ext, content); !ok || synced && !parsed.Metadata.Synced ||
-		!slices.ContainsFunc(parsed.Lines, func(line metadata.LyricLine) bool { return line.Text != "" }) {
-		return errors.New("download lyrics: no lyrics in what the provider gave")
+	parsed, ok := metadata.ParseLyrics("lyrics"+ext, content)
+	if !ok || synced && !parsed.Metadata.Synced || !slices.ContainsFunc(parsed.Lines, func(line metadata.LyricLine) bool { return line.Text != "" }) {
+		return "", "", nil, errors.New("download lyrics: no lyrics in what the provider gave")
+	}
+	return content, ext, parsed, nil
+}
+
+// save downloads a provider's lyrics and saves them beside a track.
+func (l *Lyrics) save(ctx context.Context, lib core.Library, it core.Item, p LyricsProvider, id string) error {
+	content, ext, _, err := download(ctx, p, id)
+	if err != nil {
+		return err
 	}
 	root, rel, ok := libraryRoot(lib, it.Path)
 	if !ok {

@@ -243,6 +243,14 @@ func TestItemService(t *testing.T) {
 		ItemId: new(c.pilot.ID.String()), Provider: new("nobody"), Id: new("1"),
 	}.Build())
 	wantCode(t, "download lyrics from nobody", err, connect.CodeNotFound)
+	_, err = metadata.GetRemoteLyrics(ctx, libraryv1.GetRemoteLyricsRequest_builder{
+		ItemId: new(c.pilot.ID.String()), Provider: new("nobody"), Id: new("1"),
+	}.Build())
+	wantCode(t, "preview lyrics from nobody", err, connect.CodeNotFound)
+	_, err = kidMetadata.GetRemoteLyrics(ctx, libraryv1.GetRemoteLyricsRequest_builder{
+		ItemId: new(c.pilot.ID.String()), Provider: new("nobody"), Id: new("1"),
+	}.Build())
+	wantCode(t, "kid previews lyrics", err, connect.CodePermissionDenied)
 
 	// Without intro providers nothing plays first; items the kid may not
 	// see have no intros either.

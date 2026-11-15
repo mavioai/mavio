@@ -382,6 +382,14 @@ pub use self::__buffa::view::SearchRemoteLyricsResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SearchRemoteLyricsResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::GetRemoteLyricsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRemoteLyricsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRemoteLyricsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRemoteLyricsResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::DownloadRemoteLyricsRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::DownloadRemoteLyricsRequestOwnedView;

@@ -782,12 +782,12 @@ flowchart TD
     - [x] 手动导入与想要的电影都不匹配的文件，为其选择电影或分集（`apps/web/src/screens/admin/manual-import.tsx`，`libs/client-ts/src/acquisition.ts` 中的 `useImportTargets` 与 `useSeriesEpisodes`）：按名称查找的电影，或将文件夹中的文件导入为想要的剧集的分集，初始选中其文件名包含的分集（`ListManualImportRequest.series_id`、`ManualImportFile.episode_ids`、`ManualImportRequest.series_id` 与 `episode_ids`），如 Sonarr 的手动导入一样导入到剧集的文件夹
     - [x] 从发现的作品将电影与剧集添加到想要（`apps/web/src/screens/discover-wanted.tsx`，`libs/client-ts/src/acquisition.ts` 中的 `useAddWanted` 与 `wantedTarget`），供进行发现的服务器的管理员使用，如 Radarr 与 Sonarr 的“添加新的”：媒体库与质量配置（默认是批准的请求所去之处）、电影的最低可用性、剧集的监视、新季、类型与季文件夹，以及立即搜索（`AddMovie`、`AddSeries`）；服务器已有的作品则显示其状态与“观看”
   - [x] Web UI 中面向管理员的条目操作：编辑元数据、识别、刷新与选择图片（`MetadataService`，§6.3.22）
-  - [ ] Web UI 的播放与媒体库：播放列表与合集（`PlaylistService`、`CollectionService`）；在详情页与播放器中搜索、下载、上传、提取、同步与翻译字幕（`SubtitleService`）；以及音乐的歌词（`GetLyrics`）
+  - [x] Web UI 的播放与媒体库：播放列表与合集（`PlaylistService`、`CollectionService`）；在详情页与播放器中搜索、下载、上传、提取、同步与翻译字幕（`SubtitleService`）；以及音乐的歌词（`GetLyrics`）
     - [x] 通过条目的“更多”菜单使用播放列表与合集，播放列表的条目与合集的成员（§6.3.20）
     - [x] 在详情页管理条目的字幕：搜索、下载、上传、提取、同步、修改、翻译与删除（§6.3.21）
     - [x] 在播放器的字幕面板中搜索与下载字幕（`apps/web/src/screens/player.tsx` 中的 `SubtitleSearchPanel`，使用 `apps/web/src/screens/item-subtitles.tsx` 的 `useItemSubtitleSearch` 与 `SubtitleSearchResults`）：管理员在字幕菜单与侧面板中的“搜索…”，下载的字幕出现在条目的流中后即改用它播放（`SearchItemSubtitles`、`DownloadItemSubtitle`）
     - [x] 播放器中曲目的歌词，同步歌词逐字跟随歌曲（§6.3.27）
-    - [ ] 由管理员搜索与下载歌词（`SearchRemoteLyrics`、`DownloadRemoteLyrics`）
+    - [x] 由管理员搜索与下载歌词（`apps/web/src/screens/lyrics.tsx` 中的 `LyricsSearch`，`libs/client-ts/src/lyrics.ts` 中的 `useRemoteLyrics`、`useRemoteLyricsPreview` 与 `useDownloadLyrics`）：在曲目的播放器中“搜索歌词”，各提供方的歌词标明同步或纯文本、提供方与匹配度，可预览（`GetRemoteLyrics`、`libs/library` 中的 `Lyrics.Preview`）并下载，之后重新读取所显示的歌词（`SearchRemoteLyrics`、`DownloadRemoteLyrics`）
   - [x] Web UI 的共同观看：同步播放组（`SyncPlayService`）、控制其他会话（`SessionService.SendCommand`），以及对作品报告问题并由管理员处理（`IssueService`）
     - [x] 控制用户的其他设备：条目“更多”菜单中的“在…上播放”和“设备”设置中的控制；浏览器执行发给它的命令（§6.3.23）
     - [x] “播放”命令中起始条目之后的条目，在播放器中排队，播放器的下一个与上一个命令在队列中移动（`apps/web/src/screens/remote.tsx`、`apps/web/src/queue.ts`）

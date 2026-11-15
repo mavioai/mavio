@@ -5,7 +5,7 @@
 import { AlertDialog } from "@base-ui/react/alert-dialog";
 import { Dialog } from "@base-ui/react/dialog";
 import { useBlocker } from "@tanstack/react-router";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
 
 import { t } from "../i18n.ts";
 import { prefs, usePrefs } from "../prefs.ts";
@@ -131,13 +131,28 @@ export function Modal({
  * A modal dialog without a title of its own, for content laid out
  * otherwise; label names it for assistive technology.
  */
-export function Sheet({ label, width = "narrow", className, onClose, children }: { label: string; width?: keyof typeof widths; className?: string; onClose: () => void; children: ReactNode }) {
+export function Sheet({
+  label,
+  width = "narrow",
+  className,
+  container,
+  onClose,
+  children,
+}: {
+  label: string;
+  width?: keyof typeof widths;
+  className?: string;
+  /** Where the dialog opens, as an element in full screen; else the page. */
+  container?: RefObject<HTMLElement | null>;
+  onClose: () => void;
+  children: ReactNode;
+}) {
   const opener = useOpener();
   const keys = useDialogKeys();
   useBackCloses(onClose);
   return (
     <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
-      <Dialog.Portal>
+      <Dialog.Portal container={container}>
         <Dialog.Backdrop className={backdrop} />
         <Dialog.Popup aria-modal aria-label={label} finalFocus={opener} onKeyDown={keys} className={`${dialogFrame} ${widths[width]} ${className ?? ""}`}>
           {children}

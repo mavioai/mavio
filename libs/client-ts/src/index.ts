@@ -196,7 +196,7 @@ export {
   useSubtitleSettings,
   useSubtitleTranslators,
 } from "./subtitles.ts";
-export { lyricLineAt, lyricSungLength, useLyrics } from "./lyrics.ts";
+export { lyricLineAt, lyricSungLength, useDownloadLyrics, useLyrics, useRemoteLyrics, useRemoteLyricsPreview } from "./lyrics.ts";
 export { maxQueueItems, type PlayQueue, playQueue, queueFor, queueStep, shuffledQueue } from "./queue.ts";
 export {
   type AiExchange,
