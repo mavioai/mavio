@@ -746,7 +746,7 @@ flowchart TD
       - [ ] 在手机上于扫描期间检验
     - [x] 桌面端与 iOS 一致的“自动”画质（[客户端 §6.5](clients.zh-CN.md)），依据核心 C ABI 由 `is_local_address` 为每个 `ServerRecord` 给出的 `local`
     - [x] Android 手机与电视与 iOS 一致的“自动”画质（[客户端 §6.5](clients.zh-CN.md)），依据核心对服务器地址的 `is_local_address`
-    - [ ] Web UI 与 iOS 一致的“自动”画质（[客户端 §6.5](clients.zh-CN.md)）：局域网中的服务器 100 Mbit/s，其他 40 Mbit/s，依据页面的主机
+    - [x] Web UI 与 iOS 一致的“自动”画质（[客户端 §6.5](clients.zh-CN.md)）：局域网中的服务器 100 Mbit/s，其他 40 Mbit/s，依据浏览器访问服务器所用地址（页面自身的地址，或 app.mavio.dev 所选的连接）的 `isLocalAddress`（`libs/client-ts/src/server.ts`，核心 `is_local_address` 的 TypeScript 版本）判断（`apps/web/src/prefs.ts` 的 `qualityBitrate`）
     - [ ] 媒体库按顺序排列的提供者，以及其在首页与“推荐”中的行（`ProviderOrder`、`LibraryHubs`）
     - [x] 存储（`apps/web/src/screens/admin/storage.tsx`、`libs/client-ts/src/storage.ts`）：rclone 远端及其授权步骤，以及离线客户端（`StorageService`）；在目录选择器中浏览 rclone 远端的文件夹
     - [x] 用户（`apps/web/src/screens/admin/users.tsx`、`sign-in.tsx` 中的 `InviteScreen`）：添加、编辑与删除用户，其登录方式，邀请链接及位于 `/invite` 的邀请页面，用户的媒体库与家长分级（`UserService`、`ListRatings`、`AuthService.GetInvitation`、`AcceptInvitation`）

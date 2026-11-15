@@ -147,7 +147,7 @@ export {
   refreshMessage,
   renewalMessage,
 } from "./device-key.ts";
-export { type Server, type Session, transport, urlOf } from "./server.ts";
+export { isLocalAddress, type Server, type Session, transport, urlOf } from "./server.ts";
 export {
   type Account,
   type LinkCode,

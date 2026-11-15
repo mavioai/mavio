@@ -746,7 +746,7 @@ flowchart TD
       - [ ] Checked on a phone during a scan
     - [x] Auto quality on the desktop as on iOS ([Clients §6.5](clients.md)), by the `local` the core's C ABI gives each `ServerRecord` from `is_local_address`
     - [x] Auto quality on Android's phone and television as on iOS ([Clients §6.5](clients.md)), by the core's `is_local_address` of the server's address
-    - [ ] Auto quality as on iOS ([Clients §6.5](clients.md)) in the web UI: 100 Mbit/s from a server on the local network, 40 otherwise, by the page's host
+    - [x] Auto quality as on iOS ([Clients §6.5](clients.md)) in the web UI: 100 Mbit/s from a server on the local network, 40 otherwise, by `isLocalAddress` (`libs/client-ts/src/server.ts`, the core's `is_local_address` in TypeScript) of the address the browser reaches the server at, the page's own or app.mavio.dev's connection (`qualityBitrate` in `apps/web/src/prefs.ts`)
     - [ ] A library's providers in order and its hubs on Home and Recommended (`ProviderOrder`, `LibraryHubs`)
     - [x] Storage (`apps/web/src/screens/admin/storage.tsx`, `libs/client-ts/src/storage.ts`): rclone remotes with their authorization steps, and the offline clients (`StorageService`); walking the folders of rclone remotes in the folder picker
     - [x] Users (`apps/web/src/screens/admin/users.tsx`, `InviteScreen` in `sign-in.tsx`): adding, editing and removing users, their sign-ins, invitation links and the invitation screen at `/invite`, their libraries and parental ratings (`UserService`, `ListRatings`, `AuthService.GetInvitation`, `AcceptInvitation`)

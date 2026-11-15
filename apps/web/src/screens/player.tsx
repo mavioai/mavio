@@ -48,7 +48,7 @@ import { Tip } from "../controls/tooltip.tsx";
 import { useServerEvents } from "../events.tsx";
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
-import { prefs, type Quality, qualities, qualityBitrates, setPrefs, usePrefs } from "../prefs.ts";
+import { prefs, type Quality, qualities, qualityBitrate, setPrefs, usePrefs } from "../prefs.ts";
 import { playQueueAt, usePlayQueue } from "../queue.ts";
 import { useGroupPlayer } from "../syncplay.tsx";
 import { Spinner, StatusView } from "../ui.tsx";
@@ -276,7 +276,7 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
             audioStreamIndex: selection.audio,
             subtitleStreamIndex: selection.subtitle,
             startMs: startAt.current,
-            capabilities: capabilities(undefined, qualityBitrates[selection.quality], styled),
+            capabilities: capabilities(undefined, qualityBitrate(selection.quality, server.url), styled),
           },
           state,
         );

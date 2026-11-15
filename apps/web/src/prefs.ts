@@ -1,6 +1,7 @@
 // The settings of this browser (docs/clients.md §6.1, §6.3): appearance, TV
 // mode, the sidebar and playback. They are kept in localStorage, which may
 // be unavailable; the defaults apply then.
+import { isLocalAddress } from "@mavio/client-ts";
 import { breakpoints } from "@mavio/design/tokens";
 import { useSyncExternalStore } from "react";
 
@@ -14,7 +15,7 @@ export type Appearance = "system" | "light" | "dark";
 /** The highest bitrate streamed to this browser, by name. */
 export type Quality = "original" | "auto" | "1080p" | "720p" | "480p";
 
-/** The bitrate each quality allows, in bits per second. */
+/** The bitrate each quality allows, in bits per second; Auto's from a server on the internet. */
 export const qualityBitrates: Record<Quality, number> = {
   original: 200_000_000,
   auto: 40_000_000,
@@ -22,6 +23,20 @@ export const qualityBitrates: Record<Quality, number> = {
   "720p": 4_000_000,
   "480p": 1_500_000,
 };
+
+/** Auto's bitrate from a server on the local network, in bits per second. */
+export const localAutoBitrate = 100_000_000;
+
+/**
+ * The bitrate a quality allows from the server at url, the address the
+ * browser reaches it at — the page's own where the server serves the web
+ * UI, the connection chosen on app.mavio.dev: Auto allows 100 Mbit/s from
+ * one on the local network and 40 otherwise, as the apps do
+ * (docs/clients.md §6.5).
+ */
+export function qualityBitrate(quality: Quality, url: string): number {
+  return quality === "auto" && isLocalAddress(url) ? localAutoBitrate : qualityBitrates[quality];
+}
 
 /** The qualities in the order they are offered, with their names. */
 export const qualities: { value: Quality; label: () => string }[] = [
