@@ -27,7 +27,7 @@ import { NumberField, Switch } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
 import { input } from "../../controls/styles.ts";
 import { useUnsavedGuard } from "../../controls/unsaved.tsx";
-import { BackLink, Page, patched } from "./common.tsx";
+import { BackLink, Page, PageLink, patched } from "./common.tsx";
 
 /** The page of the request settings. */
 export function RequestSettingsPage({ server }: { server: ServerEntry }) {
@@ -245,6 +245,7 @@ function BlocklistedTags({
         <p className="px-4 py-3 type-callout text-text-secondary">{t("requestsettings.noProvider")}</p>
       )}
       {children}
+      <PageLink search={{ acquisition: "blocklist" }} label={t("blockedtitles.title")} detail={t("blockedtitles.detail")} />
     </Group>
   );
 }

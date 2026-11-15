@@ -207,7 +207,7 @@ export {
 } from "./ai.ts";
 export { useApiKeys, useBackupDownload, useBackups, useLogs } from "./backups.ts";
 export { systemProxyId, useProxies, useTestProxy } from "./proxies.ts";
-export { useQuota, useRequestActions, useRequests } from "./requests.ts";
+export { useBlockedTitles, useQuota, useRequestActions, useRequests } from "./requests.ts";
 export { usePerson, usePersonItems } from "./people.ts";
 export { useRevokeSession, useSendCommand, useSessions } from "./remote.ts";
 export { useExternalIdKinds, useMetadataActions, useRemoteImages, useRemoteSearch } from "./metadata.ts";

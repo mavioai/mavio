@@ -1210,6 +1210,18 @@ export type MessageKey =
   | 'requestsettings.noProvider'
   | 'requestsettings.tagsLimit'
   | 'requestsettings.tagsLimitDetail'
+  | 'blockedtitles.title'
+  | 'blockedtitles.detail'
+  | 'blockedtitles.message'
+  | 'blockedtitles.search'
+  | 'blockedtitles.source'
+  | 'blockedtitles.sourceAll'
+  | 'blockedtitles.sourceManual'
+  | 'blockedtitles.sourceTags'
+  | 'blockedtitles.byTags'
+  | 'blockedtitles.unknown'
+  | 'blockedtitles.empty'
+  | 'blockedtitles.count'
   | 'options.naming'
   | 'options.replaceIllegal'
   | 'options.replaceIllegalDetail'
@@ -3507,6 +3519,18 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "requestsettings.noProvider": "No discovery provider searches keywords.",
     "requestsettings.tagsLimit": "Pages per Keyword",
     "requestsettings.tagsLimitDetail": "How many pages of each order of a keyword's titles are blocklisted",
+    "blockedtitles.title": "Blocklisted Titles",
+    "blockedtitles.detail": "The movies and shows that can't be requested",
+    "blockedtitles.message": "The movies and shows nobody can request, blocklisted from their pages or for blocklisted tags. A title taken off the blocklist can be requested again.",
+    "blockedtitles.search": "Search titles",
+    "blockedtitles.source": "How blocklisted",
+    "blockedtitles.sourceAll": "All",
+    "blockedtitles.sourceManual": "From Their Pages",
+    "blockedtitles.sourceTags": "For Tags",
+    "blockedtitles.byTags": "For blocklisted tags",
+    "blockedtitles.unknown": "TMDB {id}",
+    "blockedtitles.empty": "No titles are blocklisted.",
+    "blockedtitles.count": "{count, plural, one {# title} other {# titles}}",
     "options.naming": "Naming",
     "options.replaceIllegal": "Replace Illegal Characters",
     "options.replaceIllegalDetail": "Otherwise they are removed",
@@ -5802,6 +5826,18 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "requestsettings.noProvider": "没有可以搜索关键词的发现提供者。",
     "requestsettings.tagsLimit": "每个关键词的页数",
     "requestsettings.tagsLimitDetail": "每个关键词的影片，每种排序屏蔽多少页",
+    "blockedtitles.title": "已屏蔽的作品",
+    "blockedtitles.detail": "不能被请求的电影与剧集",
+    "blockedtitles.message": "任何人都不能请求的电影与剧集：在其页面上屏蔽，或因屏蔽的标签而屏蔽。取消屏蔽的作品可再次被请求。",
+    "blockedtitles.search": "搜索作品",
+    "blockedtitles.source": "屏蔽方式",
+    "blockedtitles.sourceAll": "全部",
+    "blockedtitles.sourceManual": "在其页面上屏蔽",
+    "blockedtitles.sourceTags": "因标签屏蔽",
+    "blockedtitles.byTags": "因屏蔽的标签",
+    "blockedtitles.unknown": "TMDB {id}",
+    "blockedtitles.empty": "没有已屏蔽的作品。",
+    "blockedtitles.count": "{count, plural, other {# 部作品}}",
     "options.naming": "命名",
     "options.replaceIllegal": "替换非法字符",
     "options.replaceIllegalDetail": "否则直接删除",

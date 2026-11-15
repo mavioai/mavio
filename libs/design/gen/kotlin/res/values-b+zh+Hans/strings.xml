@@ -1218,6 +1218,20 @@
     <string name="requestsettings_no_provider">没有可以搜索关键词的发现提供者。</string>
     <string name="requestsettings_tags_limit">每个关键词的页数</string>
     <string name="requestsettings_tags_limit_detail">每个关键词的影片，每种排序屏蔽多少页</string>
+    <string name="blockedtitles_title">已屏蔽的作品</string>
+    <string name="blockedtitles_detail">不能被请求的电影与剧集</string>
+    <string name="blockedtitles_message">任何人都不能请求的电影与剧集：在其页面上屏蔽，或因屏蔽的标签而屏蔽。取消屏蔽的作品可再次被请求。</string>
+    <string name="blockedtitles_search">搜索作品</string>
+    <string name="blockedtitles_source">屏蔽方式</string>
+    <string name="blockedtitles_source_all">全部</string>
+    <string name="blockedtitles_source_manual">在其页面上屏蔽</string>
+    <string name="blockedtitles_source_tags">因标签屏蔽</string>
+    <string name="blockedtitles_by_tags">因屏蔽的标签</string>
+    <string name="blockedtitles_unknown">TMDB %s</string>
+    <string name="blockedtitles_empty">没有已屏蔽的作品。</string>
+    <plurals name="blockedtitles_count">
+        <item quantity="other">%d 部作品</item>
+    </plurals>
     <string name="options_naming">命名</string>
     <string name="options_replace_illegal">替换非法字符</string>
     <string name="options_replace_illegal_detail">否则直接删除</string>

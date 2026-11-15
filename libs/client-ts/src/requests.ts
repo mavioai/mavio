@@ -1,8 +1,8 @@
 // Requests of movies and seasons of series (docs/clients.md §6.3.2): the
 // user's own, or everyone's for administrators, page by page; approving,
-// declining, retrying, changing the seasons of and deleting them; and the
-// user's quotas.
-import { RequestService, type RequestStatus } from "@mavio/proto/mavio/acquisition/v1/request_pb";
+// declining, retrying, changing the seasons of and deleting them; the
+// user's quotas; and the blocklisted titles.
+import { type BlockedTitleSource, RequestService, type RequestStatus } from "@mavio/proto/mavio/acquisition/v1/request_pb";
 import type { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -33,6 +33,21 @@ export function useQuota(server: ServerEntry | undefined) {
     queryKey: serverKey(server?.id ?? "", "requests", "quota"),
     queryFn: () => servers.client(RequestService, server!).getQuota({}),
     enabled: !!server,
+  });
+}
+
+/** The blocklisted titles whose names match search, all when empty, of a source or any, newest first, page by page. Administrators only. */
+export function useBlockedTitles(server: ServerEntry, search: string, source: BlockedTitleSource) {
+  const servers = useServersStore();
+  return useInfiniteQuery({
+    queryKey: serverKey(server.id, "requests", "blocklist", search, source),
+    queryFn: async ({ pageParam }) => {
+      const r = await servers.client(RequestService, server).listBlockedTitles({ search, source, limit: pageSize, offset: pageParam });
+      const n = pageParam + r.blockedTitles.length;
+      return { titles: r.blockedTitles, total: r.total, next: r.blockedTitles.length > 0 && n < r.total ? n : undefined };
+    },
+    initialPageParam: 0,
+    getNextPageParam: (last) => last.next,
   });
 }
 

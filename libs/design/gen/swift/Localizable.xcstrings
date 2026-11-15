@@ -21709,6 +21709,240 @@
         }
       }
     },
+    "blockedtitles.title": {
+      "comment": "Page of the movies and series blocklisted from being requested, in Acquisition.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blocklisted Titles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已屏蔽的作品"
+          }
+        }
+      }
+    },
+    "blockedtitles.detail": {
+      "comment": "Detail of the link to the blocklisted titles.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The movies and shows that can't be requested"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不能被请求的电影与剧集"
+          }
+        }
+      }
+    },
+    "blockedtitles.message": {
+      "comment": "Message of the blocklisted titles page.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The movies and shows nobody can request, blocklisted from their pages or for blocklisted tags. A title taken off the blocklist can be requested again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "任何人都不能请求的电影与剧集：在其页面上屏蔽，或因屏蔽的标签而屏蔽。取消屏蔽的作品可再次被请求。"
+          }
+        }
+      }
+    },
+    "blockedtitles.search": {
+      "comment": "Field filtering the blocklisted titles by name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search titles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索作品"
+          }
+        }
+      }
+    },
+    "blockedtitles.source": {
+      "comment": "Label of the choice of how the titles listed were blocklisted.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How blocklisted"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "屏蔽方式"
+          }
+        }
+      }
+    },
+    "blockedtitles.sourceAll": {
+      "comment": "Choice listing every blocklisted title.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部"
+          }
+        }
+      }
+    },
+    "blockedtitles.sourceManual": {
+      "comment": "Choice listing the titles administrators blocklisted from their pages.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From Their Pages"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在其页面上屏蔽"
+          }
+        }
+      }
+    },
+    "blockedtitles.sourceTags": {
+      "comment": "Choice listing the titles blocklisted for blocklisted tags.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For Tags"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "因标签屏蔽"
+          }
+        }
+      }
+    },
+    "blockedtitles.byTags": {
+      "comment": "Detail of a title the blocklisted tags job blocklisted.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For blocklisted tags"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "因屏蔽的标签"
+          }
+        }
+      }
+    },
+    "blockedtitles.unknown": {
+      "comment": "Name of a blocklisted title whose name is unknown; id is its TMDB ID.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TMDB %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TMDB %@"
+          }
+        }
+      }
+    },
+    "blockedtitles.empty": {
+      "comment": "Shown when no blocklisted title matches.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No titles are blocklisted."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有已屏蔽的作品。"
+          }
+        }
+      }
+    },
+    "blockedtitles.count": {
+      "comment": "Number of blocklisted titles listed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld title"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld titles"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 部作品"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "options.naming": {
       "comment": "Group of the naming options",
       "extractionState": "manual",

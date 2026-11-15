@@ -2,8 +2,8 @@
 // download clients the server's plugins have configured, the quality
 // profiles of movies and series, and the pages of what else decides
 // which releases are grabbed — quality definitions, custom formats, delay
-// and release profiles and the options — and where approved requests go;
-// a download client's page.
+// and release profiles and the options — where approved requests go and
+// the blocklisted titles; a download client's page.
 import { type Timestamp, timestampDate } from "@bufbuild/protobuf/wkt";
 import { errorMessage, type ServerEntry, useDownloadClients, useIndexers, usePlugins, useQualityProfiles } from "@mavio/client-ts";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
@@ -17,6 +17,7 @@ import { fromNow, Page, PageLink } from "./common.tsx";
 import { CustomFormatPage, CustomFormatsPage } from "./formats.tsx";
 import { QualityDefinitionsPage, QualityProfilePage } from "./quality.tsx";
 import { AcquisitionOptionsPage } from "./options.tsx";
+import { BlockedTitlesPage } from "./blocklist.tsx";
 import { RequestSettingsPage } from "./requestsettings.tsx";
 import { DelayProfilesPage, ReleaseProfilesPage } from "./rules.tsx";
 import { DownloadClientPage, offlineProvider } from "./clientpaths.tsx";
@@ -43,6 +44,8 @@ export function AcquisitionSection({ server }: { server: ServerEntry }) {
       return <AcquisitionOptionsPage server={server} />;
     case "requests":
       return <RequestSettingsPage server={server} />;
+    case "blocklist":
+      return <BlockedTitlesPage server={server} />;
   }
   return <AcquisitionList server={server} />;
 }
@@ -148,6 +151,7 @@ function AcquisitionList({ server }: { server: ServerEntry }) {
         <PageLink search={{ acquisition: "delays" }} icon="pending" color="#FF9500" label={t("acquisition.delays")} detail={t("acquisition.delaysDetail")} />
         <PageLink search={{ acquisition: "releases" }} icon="sort" color="#007AFF" label={t("acquisition.releases")} detail={t("acquisition.releasesDetail")} />
         <PageLink search={{ acquisition: "requests" }} icon="discover" color="#5AC8FA" label={t("requestsettings.title")} detail={t("requestsettings.detail")} />
+        <PageLink search={{ acquisition: "blocklist" }} icon="close" color="#FF3B30" label={t("blockedtitles.title")} detail={t("blockedtitles.detail")} />
         <PageLink search={{ acquisition: "options" }} icon="settings" color="#8E8E93" label={t("options.options")} detail={t("options.optionsDetail")} />
       </Group>
     </Page>

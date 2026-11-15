@@ -3815,6 +3815,46 @@ public enum MavioStrings {
     /// Detail of the pages per keyword
     public static var requestsettingsTagsLimitDetail: String { NSLocalizedString("requestsettings.tagsLimitDetail", bundle: .module, comment: "") }
 
+    /// Page of the movies and series blocklisted from being requested, in Acquisition.
+    public static var blockedtitlesTitle: String { NSLocalizedString("blockedtitles.title", bundle: .module, comment: "") }
+
+    /// Detail of the link to the blocklisted titles.
+    public static var blockedtitlesDetail: String { NSLocalizedString("blockedtitles.detail", bundle: .module, comment: "") }
+
+    /// Message of the blocklisted titles page.
+    public static var blockedtitlesMessage: String { NSLocalizedString("blockedtitles.message", bundle: .module, comment: "") }
+
+    /// Field filtering the blocklisted titles by name.
+    public static var blockedtitlesSearch: String { NSLocalizedString("blockedtitles.search", bundle: .module, comment: "") }
+
+    /// Label of the choice of how the titles listed were blocklisted.
+    public static var blockedtitlesSource: String { NSLocalizedString("blockedtitles.source", bundle: .module, comment: "") }
+
+    /// Choice listing every blocklisted title.
+    public static var blockedtitlesSourceAll: String { NSLocalizedString("blockedtitles.sourceAll", bundle: .module, comment: "") }
+
+    /// Choice listing the titles administrators blocklisted from their pages.
+    public static var blockedtitlesSourceManual: String { NSLocalizedString("blockedtitles.sourceManual", bundle: .module, comment: "") }
+
+    /// Choice listing the titles blocklisted for blocklisted tags.
+    public static var blockedtitlesSourceTags: String { NSLocalizedString("blockedtitles.sourceTags", bundle: .module, comment: "") }
+
+    /// Detail of a title the blocklisted tags job blocklisted.
+    public static var blockedtitlesByTags: String { NSLocalizedString("blockedtitles.byTags", bundle: .module, comment: "") }
+
+    /// Name of a blocklisted title whose name is unknown; id is its TMDB ID.
+    public static func blockedtitlesUnknown(id: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("blockedtitles.unknown", bundle: .module, comment: ""), id)
+    }
+
+    /// Shown when no blocklisted title matches.
+    public static var blockedtitlesEmpty: String { NSLocalizedString("blockedtitles.empty", bundle: .module, comment: "") }
+
+    /// Number of blocklisted titles listed.
+    public static func blockedtitlesCount(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("blockedtitles.count", bundle: .module, comment: ""), count)
+    }
+
     /// Group of the naming options
     public static var optionsNaming: String { NSLocalizedString("options.naming", bundle: .module, comment: "") }
 

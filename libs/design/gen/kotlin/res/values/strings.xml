@@ -2424,6 +2424,33 @@
     <string name="requestsettings_tags_limit">Pages per Keyword</string>
     <!-- Detail of the pages per keyword -->
     <string name="requestsettings_tags_limit_detail">How many pages of each order of a keyword\'s titles are blocklisted</string>
+    <!-- Page of the movies and series blocklisted from being requested, in Acquisition. -->
+    <string name="blockedtitles_title">Blocklisted Titles</string>
+    <!-- Detail of the link to the blocklisted titles. -->
+    <string name="blockedtitles_detail">The movies and shows that can\'t be requested</string>
+    <!-- Message of the blocklisted titles page. -->
+    <string name="blockedtitles_message">The movies and shows nobody can request, blocklisted from their pages or for blocklisted tags. A title taken off the blocklist can be requested again.</string>
+    <!-- Field filtering the blocklisted titles by name. -->
+    <string name="blockedtitles_search">Search titles</string>
+    <!-- Label of the choice of how the titles listed were blocklisted. -->
+    <string name="blockedtitles_source">How blocklisted</string>
+    <!-- Choice listing every blocklisted title. -->
+    <string name="blockedtitles_source_all">All</string>
+    <!-- Choice listing the titles administrators blocklisted from their pages. -->
+    <string name="blockedtitles_source_manual">From Their Pages</string>
+    <!-- Choice listing the titles blocklisted for blocklisted tags. -->
+    <string name="blockedtitles_source_tags">For Tags</string>
+    <!-- Detail of a title the blocklisted tags job blocklisted. -->
+    <string name="blockedtitles_by_tags">For blocklisted tags</string>
+    <!-- Name of a blocklisted title whose name is unknown; id is its TMDB ID. -->
+    <string name="blockedtitles_unknown">TMDB %s</string>
+    <!-- Shown when no blocklisted title matches. -->
+    <string name="blockedtitles_empty">No titles are blocklisted.</string>
+    <!-- Number of blocklisted titles listed. -->
+    <plurals name="blockedtitles_count">
+        <item quantity="one">%d title</item>
+        <item quantity="other">%d titles</item>
+    </plurals>
     <!-- Group of the naming options -->
     <string name="options_naming">Naming</string>
     <!-- Option replacing characters file systems do not allow -->
