@@ -296,6 +296,34 @@ pub use self::__buffa::view::LogoutAiResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::LogoutAiResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::AiConversationSettingsView;
+#[doc(inline)]
+pub use self::__buffa::view::AiConversationSettingsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiConversationSettingsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiConversationSettingsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiConversationSettingsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiConversationSettingsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateAiConversationSettingsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateAiConversationSettingsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateAiConversationSettingsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateAiConversationSettingsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiConversationModelsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiConversationModelsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiConversationModelsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiConversationModelsResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::CreateAiConversationRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::CreateAiConversationRequestOwnedView;

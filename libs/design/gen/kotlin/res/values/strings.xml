@@ -1018,7 +1018,7 @@
     <string name="settings_downloads">Downloads</string>
     <!-- Settings section of the problems reported with items. -->
     <string name="settings_issues">Issues</string>
-    <!-- Settings section of the administrators' conversations with AI models. -->
+    <!-- Settings section of the users' conversations with AI models: administrators', in the AI settings, and each other user's own. -->
     <string name="settings_conversations">AI Conversations</string>
     <!-- Setting choosing the UI's language, under Appearance. -->
     <string name="settings_language">Language</string>
@@ -4294,8 +4294,16 @@
     <string name="issues_administrator">Administrator</string>
     <!-- Explains the settings' issues. -->
     <string name="issues_intro">Problems reported with the server\'s movies and shows: your own, or everyone\'s for administrators.</string>
-    <!-- Footer of the AI settings' conversations. -->
-    <string name="conversations_message">Talk with the models of the AI providers. Conversations are kept on the server, the users\' conversations with the assistant among them.</string>
+    <!-- Footer of the AI settings' conversations, which administrators see. -->
+    <string name="conversations_message">Talk with the models of the AI providers. Conversations are kept on the server: yours and every user\'s, their conversations with the assistant among them.</string>
+    <!-- Footer of the conversations of a user who does not administer the server. -->
+    <string name="conversations_mine_message">Talk with the models of the AI providers. Your conversations are kept on the server; only you and the server\'s administrators see them.</string>
+    <!-- Setting: whether users other than administrators keep conversations with the AI models. -->
+    <string name="conversations_all_users">Allow Conversations for All Users</string>
+    <!-- Detail of the setting allowing conversations for all users. -->
+    <string name="conversations_all_users_detail">Each user sees only their own</string>
+    <!-- Footer of the setting allowing conversations for all users. -->
+    <string name="conversations_all_users_footer">Users who do not administer the server find their conversations in the settings, and use the providers signed in to here.</string>
     <!-- Row when no plugin keeping conversations runs on the server. -->
     <string name="conversations_no_plugin">No AI agent plugin</string>
     <!-- Footer explaining why an AI agent plugin is needed. -->
@@ -4342,6 +4350,8 @@
     <string name="conversations_delete_confirm">Delete this conversation?</string>
     <!-- What deleting a conversation does. -->
     <string name="conversations_delete_message">Its messages are deleted for every administrator.</string>
+    <!-- What deleting a conversation does, for a user who does not administer the server. -->
+    <string name="conversations_delete_mine_message">Its messages are deleted.</string>
     <!-- Shown when the conversation chosen no longer exists. -->
     <string name="conversations_gone">This conversation was deleted.</string>
     <!-- Kind of an extra. -->

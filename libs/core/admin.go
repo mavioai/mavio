@@ -39,7 +39,23 @@ type ServerSettings struct {
 	Subtitles SubtitleSettings
 	// Assistant is how the assistant serves users.
 	Assistant AssistantSettings
+	// AI is who may keep conversations with the AI models.
+	AI        AISettings
 	UpdatedAt time.Time
+}
+
+// AISettings are who may keep conversations with the AI providers'
+// models through the plugin keeping them; administrators always may.
+type AISettings struct {
+	// ConversationsForAll lets users other than administrators keep
+	// conversations too, each seeing only their own; off by default.
+	ConversationsForAll bool
+}
+
+// AllowsConversations tells whether u may keep conversations with the
+// models.
+func (a *AISettings) AllowsConversations(u *User) bool {
+	return u.IsAdmin() || a.ConversationsForAll
 }
 
 // MetadataSettings are the server's language and country of metadata

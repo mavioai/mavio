@@ -795,7 +795,7 @@ flowchart TD
     - [x] 编辑同步播放组的队列：“一起看”中的队列，其条目可播放、移动和移除，条目可添加为下一个或添加到末尾，也可从“更多”菜单的“添加到一起看的队列”添加（`SyncPlayService.AddToQueue`、`RemoveFromQueue`、`MoveQueueEntry`、`SetCurrentEntry`；`apps/web/src/screens/syncplay.tsx`，§6.3.24）
     - [x] 问题：从条目的“更多”菜单报告，条目详情中的未解决问题，以及设置中的“问题”及其评论、标记为已解决、重新打开和删除（§6.3.25）
   - [x] Web UI 的 AI 助手会话（`AgentSessionService`）：设置中供管理员使用的“AI 对话”，回答以流式传送（§6.3.26）
-    - [ ] 管理员以外用户的对话，各自独立（需要 `AgentSessionService` 会话的所有者）
+    - [x] 管理员以外用户的对话，各自独立：每个对话属于开始它的用户，服务端按所有者列出插件的会话，并在读取、继续或删除会话之前检查其所有者，把他人的会话当作未找到拒绝（`apps/server/internal/rpc/ai.go`）；AI 设置中的“允许所有用户使用对话”，默认关闭（`ServerSettings` 中的 `AISettings`，`Get`/`UpdateAiConversationSettings`），以及为他们提供的可用提供商的模型（`ListAiConversationModels`）；管理员仍能看到所有人的对话，其中包括此前没有所有者的对话；为获准的用户在 AI 的位置提供设置中的“AI 对话”分区（`apps/web/src/screens/conversations.tsx`）；在 `ai_test.go` 与插件的 `bun test` 中测试
   - [ ] Apple 与 Android 应用，其横向列表也采用[横向列表](../libs/design/components.zh-CN.md#横向列表)的间距，Mac 上还有标题栏末端的箭头
 - [x] 切片：Android 手机与平板应用、Apple TV 与 Android TV 应用、Mac 应用
 - [ ] Android 手机与平板应用（`apps/android`、`libs/android`）

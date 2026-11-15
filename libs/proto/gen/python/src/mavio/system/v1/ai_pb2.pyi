@@ -128,6 +128,55 @@ class LogoutAiResponse(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...
 
+class AiConversationSettings(_message.Message):
+    __slots__ = ("all_users",)
+    ALL_USERS_FIELD_NUMBER: _ClassVar[int]
+    all_users: bool
+    def __init__(self, all_users: _Optional[bool] = ...) -> None: ...
+
+class GetAiConversationSettingsRequest(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class GetAiConversationSettingsResponse(_message.Message):
+    __slots__ = ("settings", "allowed")
+    SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    ALLOWED_FIELD_NUMBER: _ClassVar[int]
+    settings: AiConversationSettings
+    allowed: bool
+    def __init__(self, settings: _Optional[_Union[AiConversationSettings, _Mapping]] = ..., allowed: _Optional[bool] = ...) -> None: ...
+
+class UpdateAiConversationSettingsRequest(_message.Message):
+    __slots__ = ("settings",)
+    SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    settings: AiConversationSettings
+    def __init__(self, settings: _Optional[_Union[AiConversationSettings, _Mapping]] = ...) -> None: ...
+
+class UpdateAiConversationSettingsResponse(_message.Message):
+    __slots__ = ("settings",)
+    SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    settings: AiConversationSettings
+    def __init__(self, settings: _Optional[_Union[AiConversationSettings, _Mapping]] = ...) -> None: ...
+
+class ListAiConversationModelsRequest(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class ListAiConversationModelsResponse(_message.Message):
+    __slots__ = ("models", "provider_names")
+    class ProviderNamesEntry(_message.Message):
+        __slots__ = ("key", "value")
+        KEY_FIELD_NUMBER: _ClassVar[int]
+        VALUE_FIELD_NUMBER: _ClassVar[int]
+        key: str
+        value: str
+        def __init__(self, key: _Optional[str] = ..., value: _Optional[str] = ...) -> None: ...
+    MODELS_FIELD_NUMBER: _ClassVar[int]
+    PROVIDER_NAMES_FIELD_NUMBER: _ClassVar[int]
+    models: _containers.RepeatedCompositeFieldContainer[_ai_pb2.AiModel]
+    provider_names: _containers.ScalarMap[str, str]
+    def __init__(self, models: _Optional[_Iterable[_Union[_ai_pb2.AiModel, _Mapping]]] = ..., provider_names: _Optional[_Mapping[str, str]] = ...) -> None: ...
+
 class CreateAiConversationRequest(_message.Message):
     __slots__ = ("provider", "model", "instructions", "title")
     PROVIDER_FIELD_NUMBER: _ClassVar[int]

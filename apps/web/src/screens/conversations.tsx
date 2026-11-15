@@ -1,6 +1,8 @@
-// The AI settings' conversations (docs/clients.md §6.3.26): the
-// administrators' conversations with the models of the AI providers, a new
-// one started with a model, instructions and its first message, and a
+// The conversations with the models of the AI providers (docs/clients.md
+// §6.3.26): at the end of the AI settings for administrators, who see
+// everyone's and choose whether all users keep conversations, and a section
+// of their own for the other users allowed, who see only theirs; a new one
+// started with a model, instructions and its first message, and a
 // conversation's messages with the answer streamed as the model writes it,
 // each with buttons copying it and, an answer of the assistant's whose speech
 // the server kept, playing that, and its time.
@@ -12,30 +14,32 @@ import {
   useAssistantConversation,
   useAiConversation,
   useAiConversationActions,
+  useAiConversationModels,
   useAiConversations,
-  useAiModels,
-  useAiProviders,
+  useAiConversationSettings,
   useAiSend,
+  useUpdateAiConversationSettings,
   useUsers,
 } from "@mavio/client-ts";
 import { type AgentSession, type AiModel, AiRole, type AiUsage } from "@mavio/proto/mavio/plugin/v1/ai_pb";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { type KeyboardEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import { locale, t } from "../../i18n.ts";
-import { modelDetail } from "../../ai-model.ts";
-import { Button, Group, Row, Spinner } from "../../ui.tsx";
-import { ModelLabel, type ModelOption, ModelPicker } from "../../controls/model-picker.tsx";
-import type { SettingsSearch } from "../settings.tsx";
-import { BackLink, fromNow, Page, PageLink } from "./common.tsx";
-import { input } from "../../controls/styles.ts";
-import { Confirm } from "../../controls/dialog.tsx";
-import { Tip } from "../../controls/tooltip.tsx";
-import { Icon } from "../../icon.tsx";
-import { useDictation } from "../../assistant/dictation.ts";
-import { bubble, MessageBar } from "../../assistant/message-bar.tsx";
-import { useKeptSpeech } from "../../assistant/kept-speech.ts";
+import { locale, t } from "../i18n.ts";
+import { modelDetail } from "../ai-model.ts";
+import { Button, Group, Row, Spinner } from "../ui.tsx";
+import { ModelLabel, type ModelOption, ModelPicker } from "../controls/model-picker.tsx";
+import type { SettingsSearch } from "./settings.tsx";
+import { BackLink, fromNow, Page, PageLink } from "./admin/common.tsx";
+import { input } from "../controls/styles.ts";
+import { Switch } from "../controls/inputs.tsx";
+import { Confirm } from "../controls/dialog.tsx";
+import { Tip } from "../controls/tooltip.tsx";
+import { Icon } from "../icon.tsx";
+import { useDictation } from "../assistant/dictation.ts";
+import { bubble, MessageBar } from "../assistant/message-bar.tsx";
+import { useKeptSpeech } from "../assistant/kept-speech.ts";
 
 /** A message to send once its new conversation shows. */
 export interface First {
@@ -65,11 +69,22 @@ function usageOf(u: AiUsage | undefined): string {
   });
 }
 
-/** The groups of the conversations at the end of the AI settings: a new one, and those kept. */
-export function Conversations({ server, onStarted }: { server: ServerEntry; onStarted: (f: First) => void }) {
+/** The settings section the conversations are in: AI for administrators, their own for the other users. */
+function useSection(): string {
+  const { section } = useParams({ strict: false }) as { section?: string };
+  return section ?? "ai";
+}
+
+/**
+ * The groups of the conversations: for administrators, at the end of the AI
+ * settings, whether all users keep conversations, then for everyone a new
+ * one, and those the user sees — an administrator's everyone's, another
+ * user's only their own.
+ */
+export function Conversations({ server, admin, onStarted }: { server: ServerEntry; admin: boolean; onStarted: (f: First) => void }) {
   const conversations = useAiConversations(server);
   const { options } = useModelOptions(server);
-  const users = useUsers(server);
+  const users = useUsers(server, admin);
   const names = new Map((users.data ?? []).map((u) => [u.id, u.name]));
   if (conversations.isError && isNoAiGateway(conversations.error))
     return (
@@ -79,16 +94,17 @@ export function Conversations({ server, onStarted }: { server: ServerEntry; onSt
     );
   return (
     <>
+      {admin && <AllUsers server={server} />}
       <NewConversation server={server} onStarted={onStarted} />
-      <Group title={t("conversations.list")} footer={t("conversations.message")}>
+      <Group title={t("conversations.list")} footer={admin ? t("conversations.message") : t("conversations.mineMessage")}>
         {(conversations.data ?? []).map((c) => (
           <PageLink
             key={c.id}
             search={{ conversation: c.id }}
             label={titleOf(c)}
             detail={[
-              // An assistant's conversation says whose it is, and where it started.
-              isAssistant(c) && names.get(c.owner),
+              // Another's conversation says whose it is, an assistant's where it started.
+              c.owner !== server.userId && names.get(c.owner),
               isAssistant(c) && c.labels.device,
               modelName(modelOf(options, c)),
               c.updated && fromNow(timestampDate(c.updated)),
@@ -107,6 +123,20 @@ export function Conversations({ server, onStarted }: { server: ServerEntry; onSt
   );
 }
 
+/** Whether users other than administrators keep conversations, each their own; an administrator's choice. */
+function AllUsers({ server }: { server: ServerEntry }) {
+  const settings = useAiConversationSettings(server);
+  const update = useUpdateAiConversationSettings(server);
+  const on = update.isPending ? !!update.variables : (settings.data?.settings?.allUsers ?? false);
+  return (
+    <Group footer={update.isError ? <span className="text-danger">{errorMessage(update.error)}</span> : t("conversations.allUsersFooter")}>
+      <Row label={t("conversations.allUsers")} detail={t("conversations.allUsersDetail")}>
+        <Switch on={on} label={t("conversations.allUsers")} disabled={!settings.isSuccess || update.isPending} onChange={(v) => update.mutate(v)} />
+      </Row>
+    </Group>
+  );
+}
+
 /** Sends a field's text with Enter; Shift+Enter starts a new line. */
 function sendOnEnter(send: () => void) {
   return (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -118,15 +148,14 @@ function sendOnEnter(send: () => void) {
 
 /** The models of a server's providers as the model picker lists them, by `provider/model`. */
 function useModelOptions(server: ServerEntry): { options: ModelOption[]; loaded: boolean } {
-  const models = useAiModels(server, true);
-  const providers = useAiProviders(server);
-  const names = new Map((providers.data ?? []).map((p) => [p.id, p.name]));
-  const options = (models.data ?? []).map((m: AiModel) => ({
+  const models = useAiConversationModels(server);
+  const names = models.data?.providerNames ?? {};
+  const options = (models.data?.models ?? []).map((m: AiModel) => ({
     value: `${m.provider}/${m.id}`,
     label: m.name || m.id,
     detail: modelDetail(m),
     provider: m.provider,
-    providerName: names.get(m.provider) ?? m.provider,
+    providerName: names[m.provider] ?? m.provider,
   }));
   return { options, loaded: models.isSuccess };
 }
@@ -258,6 +287,7 @@ function Voice() {
 function NewConversation({ server, onStarted }: { server: ServerEntry; onStarted: (f: First) => void }) {
   const { options, loaded } = useModelOptions(server);
   const { create } = useAiConversationActions(server);
+  const section = useSection();
   const navigate = useNavigate();
   const cur = useSearch({ strict: false }) as SettingsSearch;
   const [model, setModel] = useState("");
@@ -274,7 +304,7 @@ function NewConversation({ server, onStarted }: { server: ServerEntry; onStarted
       {
         onSuccess: (c) => {
           onStarted({ id: c.id, text: message });
-          void navigate({ replace: true, to: "/settings/$section", params: { section: "ai" }, search: { server: cur.server, conversation: c.id } });
+          void navigate({ replace: true, to: "/settings/$section", params: { section }, search: { server: cur.server, conversation: c.id } });
         },
       },
     );
@@ -445,16 +475,30 @@ function Messages({ server, said, asker }: { server: ServerEntry; said: Said[]; 
   );
 }
 
-/** A conversation's page, below the AI settings. */
-export function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEntry; id: string; first?: string; onFirstSent: () => void }) {
+/** A conversation's page, below the AI settings, or below the conversations of a user who does not administer the server. */
+export function ConversationPage({
+  server,
+  admin,
+  id,
+  first,
+  onFirstSent,
+}: {
+  server: ServerEntry;
+  admin: boolean;
+  id: string;
+  first?: string;
+  onFirstSent: () => void;
+}) {
   const conversation = useAiConversation(server, id);
-  const users = useUsers(server);
-  // An assistant's conversation of the user's has the speech kept of its answers.
-  const assistant = useAssistantConversation(server, id);
+  const users = useUsers(server, admin);
+  // An assistant's conversation of the user's has the speech kept of its
+  // answers; only administrators see those conversations here.
+  const assistant = useAssistantConversation(server, admin ? id : undefined);
   const speech = new Map((assistant.data?.messages ?? []).filter((m) => !m.user && m.speechUrl).map((m) => [m.text, m.speechUrl]));
   const { remove } = useAiConversationActions(server);
   const { exchange, send, retry, sending } = useAiSend(server, id);
   const { options } = useModelOptions(server);
+  const section = useSection();
   const navigate = useNavigate();
   const cur = useSearch({ strict: false }) as SettingsSearch;
   const [text, setText] = useState("");
@@ -475,7 +519,7 @@ export function ConversationPage({ server, id, first, onFirstSent }: { server: S
     end.current?.scrollIntoView({ block: "end" });
   }, [messages.length, exchange?.answer, exchange?.text]);
 
-  const back = <BackLink section="ai" label={t("settings.ai")} />;
+  const back = <BackLink section={section} label={section === "ai" ? t("settings.ai") : t("settings.conversations")} />;
   const c: AgentSession | undefined = conversation.data?.conversation;
   if (!c)
     return (
@@ -505,13 +549,13 @@ export function ConversationPage({ server, id, first, onFirstSent }: { server: S
       {confirming && (
         <Confirm
           title={t("conversations.deleteConfirm")}
-          message={t("conversations.deleteMessage")}
+          message={admin ? t("conversations.deleteMessage") : t("conversations.deleteMineMessage")}
           action={t("conversations.delete")}
           busy={remove.isPending}
           onCancel={() => setConfirming(false)}
           onConfirm={() =>
             remove.mutate(id, {
-              onSuccess: () => void navigate({ replace: true, to: "/settings/$section", params: { section: "ai" }, search: { server: cur.server } }),
+              onSuccess: () => void navigate({ replace: true, to: "/settings/$section", params: { section }, search: { server: cur.server } }),
             })
           }
         />
@@ -555,6 +599,33 @@ export function ConversationPage({ server, id, first, onFirstSent }: { server: S
           {t("conversations.delete")}
         </Button>
       </div>
+    </Page>
+  );
+}
+
+/**
+ * The section of the conversations of a user who does not administer the
+ * server, allowed them by its settings: their own conversations, and a
+ * conversation's page.
+ */
+export function ConversationsSection({ server }: { server: ServerEntry }) {
+  const { conversation } = useSearch({ strict: false }) as SettingsSearch;
+  // The first message of a conversation just started, sent on its page.
+  const [first, setFirst] = useState<First>();
+  if (conversation)
+    return (
+      <ConversationPage
+        key={conversation}
+        server={server}
+        admin={false}
+        id={conversation}
+        first={first?.id === conversation ? first.text : undefined}
+        onFirstSent={() => setFirst(undefined)}
+      />
+    );
+  return (
+    <Page title={t("settings.conversations")}>
+      <Conversations server={server} admin={false} onStarted={setFirst} />
     </Page>
   );
 }

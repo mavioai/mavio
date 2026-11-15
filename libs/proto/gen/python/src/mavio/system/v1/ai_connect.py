@@ -342,6 +342,15 @@ class AiProviderServiceClient(ConnectClient):
 
 
 class AiConversationService(Protocol):
+    async def get_ai_conversation_settings(self, request: mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def update_ai_conversation_settings(self, request: mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def list_ai_conversation_models(self, request: mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
     async def create_ai_conversation(self, request: mavio_dot_system_dot_v1_dot_ai__pb2.CreateAiConversationRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_ai__pb2.CreateAiConversationResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
@@ -363,6 +372,36 @@ class AiConversationServiceASGIApplication(ConnectASGIApplication[AiConversation
         super().__init__(
             service=service,
             endpoints=lambda svc: {
+                "/mavio.system.v1.AiConversationService/GetAiConversationSettings": Endpoint.unary(
+                    method=MethodInfo(
+                        name="GetAiConversationSettings",
+                        service_name="mavio.system.v1.AiConversationService",
+                        input=mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsRequest,
+                        output=mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=svc.get_ai_conversation_settings,
+                ),
+                "/mavio.system.v1.AiConversationService/UpdateAiConversationSettings": Endpoint.unary(
+                    method=MethodInfo(
+                        name="UpdateAiConversationSettings",
+                        service_name="mavio.system.v1.AiConversationService",
+                        input=mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsRequest,
+                        output=mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.update_ai_conversation_settings,
+                ),
+                "/mavio.system.v1.AiConversationService/ListAiConversationModels": Endpoint.unary(
+                    method=MethodInfo(
+                        name="ListAiConversationModels",
+                        service_name="mavio.system.v1.AiConversationService",
+                        input=mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsRequest,
+                        output=mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=svc.list_ai_conversation_models,
+                ),
                 "/mavio.system.v1.AiConversationService/CreateAiConversation": Endpoint.unary(
                     method=MethodInfo(
                         name="CreateAiConversation",
@@ -426,6 +465,70 @@ class AiConversationServiceASGIApplication(ConnectASGIApplication[AiConversation
 
 
 class AiConversationServiceClient(ConnectClient):
+    async def get_ai_conversation_settings(
+        self,
+        request: mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetAiConversationSettings",
+                service_name="mavio.system.v1.AiConversationService",
+                input=mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsRequest,
+                output=mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    async def update_ai_conversation_settings(
+        self,
+        request: mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdateAiConversationSettings",
+                service_name="mavio.system.v1.AiConversationService",
+                input=mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsRequest,
+                output=mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def list_ai_conversation_models(
+        self,
+        request: mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListAiConversationModels",
+                service_name="mavio.system.v1.AiConversationService",
+                input=mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsRequest,
+                output=mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
     async def create_ai_conversation(
         self,
         request: mavio_dot_system_dot_v1_dot_ai__pb2.CreateAiConversationRequest,
@@ -846,6 +949,12 @@ class AiProviderServiceClientSync(ConnectClientSync):
         )
 
 class AiConversationServiceSync(Protocol):
+    def get_ai_conversation_settings(self, request: mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def update_ai_conversation_settings(self, request: mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def list_ai_conversation_models(self, request: mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def create_ai_conversation(self, request: mavio_dot_system_dot_v1_dot_ai__pb2.CreateAiConversationRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_ai__pb2.CreateAiConversationResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def list_ai_conversations(self, request: mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationsRequest, ctx: RequestContext) -> mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationsResponse:
@@ -862,6 +971,36 @@ class AiConversationServiceWSGIApplication(ConnectWSGIApplication):
     def __init__(self, service: AiConversationServiceSync, interceptors: Iterable[InterceptorSync]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
         super().__init__(
             endpoints={
+                "/mavio.system.v1.AiConversationService/GetAiConversationSettings": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="GetAiConversationSettings",
+                        service_name="mavio.system.v1.AiConversationService",
+                        input=mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsRequest,
+                        output=mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=service.get_ai_conversation_settings,
+                ),
+                "/mavio.system.v1.AiConversationService/UpdateAiConversationSettings": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="UpdateAiConversationSettings",
+                        service_name="mavio.system.v1.AiConversationService",
+                        input=mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsRequest,
+                        output=mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.update_ai_conversation_settings,
+                ),
+                "/mavio.system.v1.AiConversationService/ListAiConversationModels": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="ListAiConversationModels",
+                        service_name="mavio.system.v1.AiConversationService",
+                        input=mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsRequest,
+                        output=mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=service.list_ai_conversation_models,
+                ),
                 "/mavio.system.v1.AiConversationService/CreateAiConversation": EndpointSync.unary(
                     method=MethodInfo(
                         name="CreateAiConversation",
@@ -925,6 +1064,70 @@ class AiConversationServiceWSGIApplication(ConnectWSGIApplication):
 
 
 class AiConversationServiceClientSync(ConnectClientSync):
+    def get_ai_conversation_settings(
+        self,
+        request: mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetAiConversationSettings",
+                service_name="mavio.system.v1.AiConversationService",
+                input=mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsRequest,
+                output=mavio_dot_system_dot_v1_dot_ai__pb2.GetAiConversationSettingsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    def update_ai_conversation_settings(
+        self,
+        request: mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdateAiConversationSettings",
+                service_name="mavio.system.v1.AiConversationService",
+                input=mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsRequest,
+                output=mavio_dot_system_dot_v1_dot_ai__pb2.UpdateAiConversationSettingsResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def list_ai_conversation_models(
+        self,
+        request: mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListAiConversationModels",
+                service_name="mavio.system.v1.AiConversationService",
+                input=mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsRequest,
+                output=mavio_dot_system_dot_v1_dot_ai__pb2.ListAiConversationModelsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
     def create_ai_conversation(
         self,
         request: mavio_dot_system_dot_v1_dot_ai__pb2.CreateAiConversationRequest,

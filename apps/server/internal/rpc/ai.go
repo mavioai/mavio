@@ -4,10 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/apps/server/internal/activity"
+	"github.com/mavioai/mavio/apps/server/internal/auth"
+	"github.com/mavioai/mavio/apps/server/internal/settings"
 	"github.com/mavioai/mavio/libs/core"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
@@ -36,11 +39,25 @@ var _ systemv1connect.AiProviderServiceHandler = (*AiProviderService)(nil)
 
 // AiConversationService implements
 // systemv1connect.AiConversationServiceHandler over the plugin keeping
-// conversations with models.
+// conversations with models. A conversation is its owner's, the user who
+// started it: administrators see every conversation, other users, while
+// the settings allow them conversations, only their own.
 type AiConversationService struct {
 	// Sessions finds the plugin keeping conversations; nil finds none.
 	Sessions AgentSessions
+	// Gateway finds the AI gateway plugin, whose models conversations
+	// start with; nil finds none.
+	Gateway AIGateway
+	// Settings keeps who may keep conversations; nil allows only
+	// administrators and changes nothing.
+	Settings *settings.Manager
+	// Activity records changes of the settings; nil records none.
+	Activity *activity.Log
 }
+
+// assistantLabel labels the assistant's conversations, as the assistant
+// starts them.
+const assistantLabel = "mavio.assistant"
 
 var _ systemv1connect.AiConversationServiceHandler = (*AiConversationService)(nil)
 
@@ -214,28 +231,126 @@ func (s *AiProviderService) LogoutAi(ctx context.Context, req *systemv1.LogoutAi
 	return &systemv1.LogoutAiResponse{}, nil
 }
 
-// sessions checks the caller is an administrator and returns the plugin
-// keeping conversations.
-func (s *AiConversationService) sessions(ctx context.Context) (pluginv1connect.AgentSessionServiceClient, error) {
-	if _, err := admin(ctx); err != nil {
-		return nil, err
+// caller checks the caller may keep conversations.
+func (s *AiConversationService) caller(ctx context.Context) (auth.Principal, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return p, err
+	}
+	set := currentSettings(s.Settings)
+	if !set.AI.AllowsConversations(&p.User) {
+		return p, connect.NewError(connect.CodePermissionDenied, errors.New("conversations are for administrators only"))
+	}
+	return p, nil
+}
+
+// sessions checks the caller may keep conversations and returns them with
+// the plugin keeping conversations.
+func (s *AiConversationService) sessions(ctx context.Context) (auth.Principal, pluginv1connect.AgentSessionServiceClient, error) {
+	p, err := s.caller(ctx)
+	if err != nil {
+		return p, nil, err
 	}
 	if s.Sessions != nil {
 		if c, ok := s.Sessions(); ok {
-			return c, nil
+			return p, c, nil
 		}
 	}
-	return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("no AI agent session plugin is running"))
+	return p, nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("no AI agent session plugin is running"))
+}
+
+// sees tells whether p sees a conversation: an administrator every one,
+// those without an owner from before owners were recorded among them;
+// another user only their own, not their conversations with the assistant,
+// which the assistant shows.
+func sees(p *auth.Principal, sess *pluginv1.AgentSession) bool {
+	if p.User.IsAdmin() {
+		return true
+	}
+	return sess.GetOwner() != "" && sess.GetOwner() == p.User.ID.String() && sess.GetLabels()[assistantLabel] == ""
+}
+
+// conversation returns a conversation with its messages, if the caller
+// sees it; NOT_FOUND otherwise, as for one that does not exist.
+func (s *AiConversationService) conversation(ctx context.Context, id string) (pluginv1connect.AgentSessionServiceClient, *pluginv1.GetAgentSessionResponse, error) {
+	p, c, err := s.sessions(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	resp, err := c.GetAgentSession(ctx, pluginv1.GetAgentSessionRequest_builder{Id: &id}.Build())
+	if err != nil {
+		return nil, nil, gatewayError(ctx, err)
+	}
+	if !sees(&p, resp.GetSession()) {
+		return nil, nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("conversation %s not found", id))
+	}
+	return c, resp, nil
+}
+
+func conversationSettingsToProto(a *core.AISettings) *systemv1.AiConversationSettings {
+	return systemv1.AiConversationSettings_builder{AllUsers: &a.ConversationsForAll}.Build()
+}
+
+// GetAiConversationSettings returns who may keep conversations, and
+// whether the caller may.
+func (s *AiConversationService) GetAiConversationSettings(ctx context.Context, _ *systemv1.GetAiConversationSettingsRequest) (*systemv1.GetAiConversationSettingsResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	set := currentSettings(s.Settings)
+	return systemv1.GetAiConversationSettingsResponse_builder{
+		Settings: conversationSettingsToProto(&set.AI), Allowed: new(set.AI.AllowsConversations(&p.User)),
+	}.Build(), nil
+}
+
+// UpdateAiConversationSettings changes who may keep conversations.
+func (s *AiConversationService) UpdateAiConversationSettings(ctx context.Context, req *systemv1.UpdateAiConversationSettingsRequest) (*systemv1.UpdateAiConversationSettingsResponse, error) {
+	set, err := changeSettings(ctx, s.Settings, s.Activity, "the AI conversation settings", func(cur *core.ServerSettings) error {
+		cur.AI.ConversationsForAll = req.GetSettings().GetAllUsers()
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return systemv1.UpdateAiConversationSettingsResponse_builder{Settings: conversationSettingsToProto(&set.AI)}.Build(), nil
+}
+
+// ListAiConversationModels lists the models of the providers that can be
+// used, with their providers' names.
+func (s *AiConversationService) ListAiConversationModels(ctx context.Context, _ *systemv1.ListAiConversationModelsRequest) (*systemv1.ListAiConversationModelsResponse, error) {
+	if _, err := s.caller(ctx); err != nil {
+		return nil, err
+	}
+	var g pluginv1connect.AiGatewayServiceClient
+	if s.Gateway != nil {
+		_, g, _ = s.Gateway()
+	}
+	if g == nil {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("no AI gateway plugin is running"))
+	}
+	models, err := g.ListAiModels(ctx, pluginv1.ListAiModelsRequest_builder{Available: new(true)}.Build())
+	if err != nil {
+		return nil, gatewayError(ctx, err)
+	}
+	providers, err := g.ListAiProviders(ctx, &pluginv1.ListAiProvidersRequest{})
+	if err != nil {
+		return nil, gatewayError(ctx, err)
+	}
+	names := make(map[string]string, len(providers.GetProviders()))
+	for _, pr := range providers.GetProviders() {
+		names[pr.GetId()] = pr.GetName()
+	}
+	return systemv1.ListAiConversationModelsResponse_builder{Models: models.GetModels(), ProviderNames: names}.Build(), nil
 }
 
 // CreateAiConversation starts a conversation with a model.
 func (s *AiConversationService) CreateAiConversation(ctx context.Context, req *systemv1.CreateAiConversationRequest) (*systemv1.CreateAiConversationResponse, error) {
-	c, err := s.sessions(ctx)
+	p, c, err := s.sessions(ctx)
 	if err != nil {
 		return nil, err
 	}
-	// The administrator who starts it owns it; it keeps no memories.
-	p, _ := principal(ctx)
+	// The user who starts it owns it; it keeps no memories.
 	resp, err := c.CreateAgentSession(ctx, pluginv1.CreateAgentSessionRequest_builder{
 		Provider: new(req.GetProvider()), Model: new(req.GetModel()), Instructions: new(req.GetInstructions()), Title: new(req.GetTitle()),
 		Owner: new(p.User.ID.String()),
@@ -246,35 +361,37 @@ func (s *AiConversationService) CreateAiConversation(ctx context.Context, req *s
 	return systemv1.CreateAiConversationResponse_builder{Conversation: resp.GetSession()}.Build(), nil
 }
 
-// ListAiConversations lists the conversations, newest first.
+// ListAiConversations lists the conversations the caller sees, newest
+// first.
 func (s *AiConversationService) ListAiConversations(ctx context.Context, _ *systemv1.ListAiConversationsRequest) (*systemv1.ListAiConversationsResponse, error) {
-	c, err := s.sessions(ctx)
+	p, c, err := s.sessions(ctx)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.ListAgentSessions(ctx, &pluginv1.ListAgentSessionsRequest{})
+	req := &pluginv1.ListAgentSessionsRequest{}
+	if !p.User.IsAdmin() {
+		req.SetOwner(p.User.ID.String())
+	}
+	resp, err := c.ListAgentSessions(ctx, req)
 	if err != nil {
 		return nil, gatewayError(ctx, err)
 	}
-	return systemv1.ListAiConversationsResponse_builder{Conversations: resp.GetSessions()}.Build(), nil
+	seen := slices.DeleteFunc(resp.GetSessions(), func(sess *pluginv1.AgentSession) bool { return !sees(&p, sess) })
+	return systemv1.ListAiConversationsResponse_builder{Conversations: seen}.Build(), nil
 }
 
 // GetAiConversation returns a conversation with its messages.
 func (s *AiConversationService) GetAiConversation(ctx context.Context, req *systemv1.GetAiConversationRequest) (*systemv1.GetAiConversationResponse, error) {
-	c, err := s.sessions(ctx)
+	_, resp, err := s.conversation(ctx, req.GetId())
 	if err != nil {
 		return nil, err
-	}
-	resp, err := c.GetAgentSession(ctx, pluginv1.GetAgentSessionRequest_builder{Id: new(req.GetId())}.Build())
-	if err != nil {
-		return nil, gatewayError(ctx, err)
 	}
 	return systemv1.GetAiConversationResponse_builder{Conversation: resp.GetSession(), Messages: resp.GetMessages()}.Build(), nil
 }
 
 // SendAiMessage sends a message and streams the answer from the plugin.
 func (s *AiConversationService) SendAiMessage(ctx context.Context, req *systemv1.SendAiMessageRequest, stream *connect.ServerStream[systemv1.SendAiMessageResponse]) error {
-	c, err := s.sessions(ctx)
+	c, _, err := s.conversation(ctx, req.GetConversationId())
 	if err != nil {
 		return err
 	}
@@ -307,7 +424,7 @@ func (s *AiConversationService) SendAiMessage(ctx context.Context, req *systemv1
 
 // DeleteAiConversation deletes a conversation.
 func (s *AiConversationService) DeleteAiConversation(ctx context.Context, req *systemv1.DeleteAiConversationRequest) (*systemv1.DeleteAiConversationResponse, error) {
-	c, err := s.sessions(ctx)
+	c, _, err := s.conversation(ctx, req.GetId())
 	if err != nil {
 		return nil, err
 	}

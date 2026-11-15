@@ -1624,7 +1624,7 @@ public enum MavioStrings {
     /// Settings section of the problems reported with items.
     public static var settingsIssues: String { NSLocalizedString("settings.issues", bundle: .module, comment: "") }
 
-    /// Settings section of the administrators' conversations with AI models.
+    /// Settings section of the users' conversations with AI models: administrators', in the AI settings, and each other user's own.
     public static var settingsConversations: String { NSLocalizedString("settings.conversations", bundle: .module, comment: "") }
 
     /// Setting choosing the UI's language, under Appearance.
@@ -6753,8 +6753,20 @@ public enum MavioStrings {
     /// Explains the settings' issues.
     public static var issuesIntro: String { NSLocalizedString("issues.intro", bundle: .module, comment: "") }
 
-    /// Footer of the AI settings' conversations.
+    /// Footer of the AI settings' conversations, which administrators see.
     public static var conversationsMessage: String { NSLocalizedString("conversations.message", bundle: .module, comment: "") }
+
+    /// Footer of the conversations of a user who does not administer the server.
+    public static var conversationsMineMessage: String { NSLocalizedString("conversations.mineMessage", bundle: .module, comment: "") }
+
+    /// Setting: whether users other than administrators keep conversations with the AI models.
+    public static var conversationsAllUsers: String { NSLocalizedString("conversations.allUsers", bundle: .module, comment: "") }
+
+    /// Detail of the setting allowing conversations for all users.
+    public static var conversationsAllUsersDetail: String { NSLocalizedString("conversations.allUsersDetail", bundle: .module, comment: "") }
+
+    /// Footer of the setting allowing conversations for all users.
+    public static var conversationsAllUsersFooter: String { NSLocalizedString("conversations.allUsersFooter", bundle: .module, comment: "") }
 
     /// Row when no plugin keeping conversations runs on the server.
     public static var conversationsNoPlugin: String { NSLocalizedString("conversations.noPlugin", bundle: .module, comment: "") }
@@ -6828,6 +6840,9 @@ public enum MavioStrings {
 
     /// What deleting a conversation does.
     public static var conversationsDeleteMessage: String { NSLocalizedString("conversations.deleteMessage", bundle: .module, comment: "") }
+
+    /// What deleting a conversation does, for a user who does not administer the server.
+    public static var conversationsDeleteMineMessage: String { NSLocalizedString("conversations.deleteMineMessage", bundle: .module, comment: "") }
 
     /// Shown when the conversation chosen no longer exists.
     public static var conversationsGone: String { NSLocalizedString("conversations.gone", bundle: .module, comment: "") }

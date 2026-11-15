@@ -1,7 +1,8 @@
 // The AI gateway of a server (docs/clients.md §6.3.13): its providers,
 // their credentials — API keys, and OAuth logins followed as they run —
-// and their models; and the administrators' conversations with the
-// models (§6.3.26), their answers streamed as the model writes them.
+// and their models; and the users' conversations with the models
+// (§6.3.26), each user's own, their answers streamed as the model writes
+// them, with who may keep them.
 import { Code, ConnectError } from "@connectrpc/connect";
 import { AiConversationService, AiProviderService, type WatchAiLoginResponse } from "@mavio/proto/mavio/system/v1/ai_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -85,7 +86,53 @@ export function useAiLogin(server: ServerEntry, loginId: string | undefined) {
   return state;
 }
 
-/** The conversations with the models, newest first. */
+/**
+ * Who may keep conversations with the models, and whether the user may;
+ * not asked when disabled.
+ */
+export function useAiConversationSettings(server: ServerEntry | undefined) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server?.id ?? "", "ai", "conversationSettings", server?.userId),
+    queryFn: async () => servers.client(AiConversationService, server!).getAiConversationSettings({}),
+    enabled: !!server,
+    staleTime: 60_000,
+    // A server without the conversations' settings allows none.
+    retry: false,
+  });
+}
+
+/** Changing who may keep conversations, an administrator's. */
+export function useUpdateAiConversationSettings(server: ServerEntry) {
+  const servers = useServersStore();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (allUsers: boolean) => servers.client(AiConversationService, server).updateAiConversationSettings({ settings: { allUsers } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: serverKey(server.id, "ai", "conversationSettings") }),
+  });
+}
+
+/**
+ * The models a conversation can be started with, those of the providers
+ * that can be used, with the providers' names; none when no AI gateway
+ * plugin runs.
+ */
+export function useAiConversationModels(server: ServerEntry) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "ai", "models", "conversations"),
+    queryFn: async () => {
+      try {
+        return await servers.client(AiConversationService, server).listAiConversationModels({});
+      } catch (e) {
+        if (isNoAiGateway(e)) return { models: [], providerNames: {} as Record<string, string> };
+        throw e;
+      }
+    },
+  });
+}
+
+/** The conversations with the models the user sees, newest first: an administrator's everyone's, another user's their own. */
 export function useAiConversations(server: ServerEntry) {
   const servers = useServersStore();
   return useQuery({

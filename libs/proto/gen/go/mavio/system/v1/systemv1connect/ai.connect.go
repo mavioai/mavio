@@ -62,6 +62,15 @@ const (
 	// AiProviderServiceLogoutAiProcedure is the fully-qualified name of the AiProviderService's
 	// LogoutAi RPC.
 	AiProviderServiceLogoutAiProcedure = "/mavio.system.v1.AiProviderService/LogoutAi"
+	// AiConversationServiceGetAiConversationSettingsProcedure is the fully-qualified name of the
+	// AiConversationService's GetAiConversationSettings RPC.
+	AiConversationServiceGetAiConversationSettingsProcedure = "/mavio.system.v1.AiConversationService/GetAiConversationSettings"
+	// AiConversationServiceUpdateAiConversationSettingsProcedure is the fully-qualified name of the
+	// AiConversationService's UpdateAiConversationSettings RPC.
+	AiConversationServiceUpdateAiConversationSettingsProcedure = "/mavio.system.v1.AiConversationService/UpdateAiConversationSettings"
+	// AiConversationServiceListAiConversationModelsProcedure is the fully-qualified name of the
+	// AiConversationService's ListAiConversationModels RPC.
+	AiConversationServiceListAiConversationModelsProcedure = "/mavio.system.v1.AiConversationService/ListAiConversationModels"
 	// AiConversationServiceCreateAiConversationProcedure is the fully-qualified name of the
 	// AiConversationService's CreateAiConversation RPC.
 	AiConversationServiceCreateAiConversationProcedure = "/mavio.system.v1.AiConversationService/CreateAiConversation"
@@ -427,9 +436,20 @@ func (UnimplementedAiProviderServiceHandler) LogoutAi(context.Context, *v1.Logou
 
 // AiConversationServiceClient is a client for the mavio.system.v1.AiConversationService service.
 type AiConversationServiceClient interface {
-	// CreateAiConversation starts a conversation with a model.
+	// GetAiConversationSettings returns who may keep conversations, and
+	// whether the caller may; any signed-in user.
+	GetAiConversationSettings(context.Context, *v1.GetAiConversationSettingsRequest) (*v1.GetAiConversationSettingsResponse, error)
+	// UpdateAiConversationSettings changes who may keep conversations;
+	// administrators only.
+	UpdateAiConversationSettings(context.Context, *v1.UpdateAiConversationSettingsRequest) (*v1.UpdateAiConversationSettingsResponse, error)
+	// ListAiConversationModels lists the models a conversation can be
+	// started with: those of the providers that can be used, through the
+	// plugin with the AI_GATEWAY capability.
+	ListAiConversationModels(context.Context, *v1.ListAiConversationModelsRequest) (*v1.ListAiConversationModelsResponse, error)
+	// CreateAiConversation starts a conversation with a model, the caller's.
 	CreateAiConversation(context.Context, *v1.CreateAiConversationRequest) (*v1.CreateAiConversationResponse, error)
-	// ListAiConversations lists the conversations, newest first.
+	// ListAiConversations lists the conversations the caller sees, newest
+	// first.
 	ListAiConversations(context.Context, *v1.ListAiConversationsRequest) (*v1.ListAiConversationsResponse, error)
 	// GetAiConversation returns a conversation with its messages.
 	GetAiConversation(context.Context, *v1.GetAiConversationRequest) (*v1.GetAiConversationResponse, error)
@@ -451,6 +471,26 @@ func NewAiConversationServiceClient(httpClient connect.HTTPClient, baseURL strin
 	baseURL = strings.TrimRight(baseURL, "/")
 	aiConversationServiceMethods := v1.File_mavio_system_v1_ai_proto.Services().ByName("AiConversationService").Methods()
 	return &aiConversationServiceClient{
+		getAiConversationSettings: connect.NewClient[v1.GetAiConversationSettingsRequest, v1.GetAiConversationSettingsResponse](
+			httpClient,
+			baseURL+AiConversationServiceGetAiConversationSettingsProcedure,
+			connect.WithSchema(aiConversationServiceMethods.ByName("GetAiConversationSettings")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		updateAiConversationSettings: connect.NewClient[v1.UpdateAiConversationSettingsRequest, v1.UpdateAiConversationSettingsResponse](
+			httpClient,
+			baseURL+AiConversationServiceUpdateAiConversationSettingsProcedure,
+			connect.WithSchema(aiConversationServiceMethods.ByName("UpdateAiConversationSettings")),
+			connect.WithClientOptions(opts...),
+		),
+		listAiConversationModels: connect.NewClient[v1.ListAiConversationModelsRequest, v1.ListAiConversationModelsResponse](
+			httpClient,
+			baseURL+AiConversationServiceListAiConversationModelsProcedure,
+			connect.WithSchema(aiConversationServiceMethods.ByName("ListAiConversationModels")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 		createAiConversation: connect.NewClient[v1.CreateAiConversationRequest, v1.CreateAiConversationResponse](
 			httpClient,
 			baseURL+AiConversationServiceCreateAiConversationProcedure,
@@ -488,11 +528,42 @@ func NewAiConversationServiceClient(httpClient connect.HTTPClient, baseURL strin
 
 // aiConversationServiceClient implements AiConversationServiceClient.
 type aiConversationServiceClient struct {
-	createAiConversation *connect.Client[v1.CreateAiConversationRequest, v1.CreateAiConversationResponse]
-	listAiConversations  *connect.Client[v1.ListAiConversationsRequest, v1.ListAiConversationsResponse]
-	getAiConversation    *connect.Client[v1.GetAiConversationRequest, v1.GetAiConversationResponse]
-	sendAiMessage        *connect.Client[v1.SendAiMessageRequest, v1.SendAiMessageResponse]
-	deleteAiConversation *connect.Client[v1.DeleteAiConversationRequest, v1.DeleteAiConversationResponse]
+	getAiConversationSettings    *connect.Client[v1.GetAiConversationSettingsRequest, v1.GetAiConversationSettingsResponse]
+	updateAiConversationSettings *connect.Client[v1.UpdateAiConversationSettingsRequest, v1.UpdateAiConversationSettingsResponse]
+	listAiConversationModels     *connect.Client[v1.ListAiConversationModelsRequest, v1.ListAiConversationModelsResponse]
+	createAiConversation         *connect.Client[v1.CreateAiConversationRequest, v1.CreateAiConversationResponse]
+	listAiConversations          *connect.Client[v1.ListAiConversationsRequest, v1.ListAiConversationsResponse]
+	getAiConversation            *connect.Client[v1.GetAiConversationRequest, v1.GetAiConversationResponse]
+	sendAiMessage                *connect.Client[v1.SendAiMessageRequest, v1.SendAiMessageResponse]
+	deleteAiConversation         *connect.Client[v1.DeleteAiConversationRequest, v1.DeleteAiConversationResponse]
+}
+
+// GetAiConversationSettings calls mavio.system.v1.AiConversationService.GetAiConversationSettings.
+func (c *aiConversationServiceClient) GetAiConversationSettings(ctx context.Context, req *v1.GetAiConversationSettingsRequest) (*v1.GetAiConversationSettingsResponse, error) {
+	response, err := c.getAiConversationSettings.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// UpdateAiConversationSettings calls
+// mavio.system.v1.AiConversationService.UpdateAiConversationSettings.
+func (c *aiConversationServiceClient) UpdateAiConversationSettings(ctx context.Context, req *v1.UpdateAiConversationSettingsRequest) (*v1.UpdateAiConversationSettingsResponse, error) {
+	response, err := c.updateAiConversationSettings.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ListAiConversationModels calls mavio.system.v1.AiConversationService.ListAiConversationModels.
+func (c *aiConversationServiceClient) ListAiConversationModels(ctx context.Context, req *v1.ListAiConversationModelsRequest) (*v1.ListAiConversationModelsResponse, error) {
+	response, err := c.listAiConversationModels.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
 }
 
 // CreateAiConversation calls mavio.system.v1.AiConversationService.CreateAiConversation.
@@ -539,9 +610,20 @@ func (c *aiConversationServiceClient) DeleteAiConversation(ctx context.Context, 
 // AiConversationServiceHandler is an implementation of the mavio.system.v1.AiConversationService
 // service.
 type AiConversationServiceHandler interface {
-	// CreateAiConversation starts a conversation with a model.
+	// GetAiConversationSettings returns who may keep conversations, and
+	// whether the caller may; any signed-in user.
+	GetAiConversationSettings(context.Context, *v1.GetAiConversationSettingsRequest) (*v1.GetAiConversationSettingsResponse, error)
+	// UpdateAiConversationSettings changes who may keep conversations;
+	// administrators only.
+	UpdateAiConversationSettings(context.Context, *v1.UpdateAiConversationSettingsRequest) (*v1.UpdateAiConversationSettingsResponse, error)
+	// ListAiConversationModels lists the models a conversation can be
+	// started with: those of the providers that can be used, through the
+	// plugin with the AI_GATEWAY capability.
+	ListAiConversationModels(context.Context, *v1.ListAiConversationModelsRequest) (*v1.ListAiConversationModelsResponse, error)
+	// CreateAiConversation starts a conversation with a model, the caller's.
 	CreateAiConversation(context.Context, *v1.CreateAiConversationRequest) (*v1.CreateAiConversationResponse, error)
-	// ListAiConversations lists the conversations, newest first.
+	// ListAiConversations lists the conversations the caller sees, newest
+	// first.
 	ListAiConversations(context.Context, *v1.ListAiConversationsRequest) (*v1.ListAiConversationsResponse, error)
 	// GetAiConversation returns a conversation with its messages.
 	GetAiConversation(context.Context, *v1.GetAiConversationRequest) (*v1.GetAiConversationResponse, error)
@@ -559,6 +641,26 @@ type AiConversationServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewAiConversationServiceHandler(svc AiConversationServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	aiConversationServiceMethods := v1.File_mavio_system_v1_ai_proto.Services().ByName("AiConversationService").Methods()
+	aiConversationServiceGetAiConversationSettingsHandler := connect.NewUnaryHandlerSimple(
+		AiConversationServiceGetAiConversationSettingsProcedure,
+		svc.GetAiConversationSettings,
+		connect.WithSchema(aiConversationServiceMethods.ByName("GetAiConversationSettings")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	aiConversationServiceUpdateAiConversationSettingsHandler := connect.NewUnaryHandlerSimple(
+		AiConversationServiceUpdateAiConversationSettingsProcedure,
+		svc.UpdateAiConversationSettings,
+		connect.WithSchema(aiConversationServiceMethods.ByName("UpdateAiConversationSettings")),
+		connect.WithHandlerOptions(opts...),
+	)
+	aiConversationServiceListAiConversationModelsHandler := connect.NewUnaryHandlerSimple(
+		AiConversationServiceListAiConversationModelsProcedure,
+		svc.ListAiConversationModels,
+		connect.WithSchema(aiConversationServiceMethods.ByName("ListAiConversationModels")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	aiConversationServiceCreateAiConversationHandler := connect.NewUnaryHandlerSimple(
 		AiConversationServiceCreateAiConversationProcedure,
 		svc.CreateAiConversation,
@@ -593,6 +695,12 @@ func NewAiConversationServiceHandler(svc AiConversationServiceHandler, opts ...c
 	)
 	return "/mavio.system.v1.AiConversationService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case AiConversationServiceGetAiConversationSettingsProcedure:
+			aiConversationServiceGetAiConversationSettingsHandler.ServeHTTP(w, r)
+		case AiConversationServiceUpdateAiConversationSettingsProcedure:
+			aiConversationServiceUpdateAiConversationSettingsHandler.ServeHTTP(w, r)
+		case AiConversationServiceListAiConversationModelsProcedure:
+			aiConversationServiceListAiConversationModelsHandler.ServeHTTP(w, r)
 		case AiConversationServiceCreateAiConversationProcedure:
 			aiConversationServiceCreateAiConversationHandler.ServeHTTP(w, r)
 		case AiConversationServiceListAiConversationsProcedure:
@@ -611,6 +719,18 @@ func NewAiConversationServiceHandler(svc AiConversationServiceHandler, opts ...c
 
 // UnimplementedAiConversationServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedAiConversationServiceHandler struct{}
+
+func (UnimplementedAiConversationServiceHandler) GetAiConversationSettings(context.Context, *v1.GetAiConversationSettingsRequest) (*v1.GetAiConversationSettingsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiConversationService.GetAiConversationSettings is not implemented"))
+}
+
+func (UnimplementedAiConversationServiceHandler) UpdateAiConversationSettings(context.Context, *v1.UpdateAiConversationSettingsRequest) (*v1.UpdateAiConversationSettingsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiConversationService.UpdateAiConversationSettings is not implemented"))
+}
+
+func (UnimplementedAiConversationServiceHandler) ListAiConversationModels(context.Context, *v1.ListAiConversationModelsRequest) (*v1.ListAiConversationModelsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiConversationService.ListAiConversationModels is not implemented"))
+}
 
 func (UnimplementedAiConversationServiceHandler) CreateAiConversation(context.Context, *v1.CreateAiConversationRequest) (*v1.CreateAiConversationResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiConversationService.CreateAiConversation is not implemented"))

@@ -6,7 +6,8 @@
 // devices signed in to it as the user and, for its administrators, its
 // overview, general settings and users, the menus of media and of
 // acquisition and downloads, AI, plugins, proxies, and the menu of
-// monitoring and maintenance. Wide windows show them beside their own sidebar, the menus
+// monitoring and maintenance; and, for the other users the server allows,
+// their own conversations with the AI models in AI's place. Wide windows show them beside their own sidebar, the menus
 // opening in place; phones and televisions list them first, a menu as a
 // list of its own.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
@@ -16,6 +17,7 @@ import {
   serverKey,
   shareableUrl,
   useAdminServers,
+  useAiConversationSettings,
   useServers,
   useRevokeSession,
   useServersStore,
@@ -50,6 +52,7 @@ import { AcquisitionSection } from "./admin/acquisition.tsx";
 import { StorageSection } from "./admin/storage.tsx";
 import { SubtitlesSection } from "./admin/subtitles.tsx";
 import { AiSection } from "./admin/ai.tsx";
+import { ConversationsSection } from "./conversations.tsx";
 import { AssistantPrefs } from "./assistant-settings.tsx";
 import { AboutSection } from "./about.tsx";
 import { DownloadsSection } from "./admin/downloads.tsx";
@@ -69,9 +72,9 @@ import { FriendsGroups, HomeGroups, MavioAccountGroups, SharingGroups, useHasMav
 /** Where the settings are, which the pages of the sections read. */
 export type { SettingsSearch } from "../search-params.ts";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "assistant" | "account" | "home" | "friends" | "sharing" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "plugins" | "tasks" | "backups" | "logs" | "api-keys" | "proxies" | "indexer-search" | "about";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "assistant" | "account" | "home" | "friends" | "sharing" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "conversations" | "plugins" | "tasks" | "backups" | "logs" | "api-keys" | "proxies" | "indexer-search" | "about";
 
-const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean; mavio?: boolean }> = {
+const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean; mavio?: boolean; conversations?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
   playback: { icon: "play", color: "#FF3B30", title: () => t("settings.playback") },
   "subtitles-audio": { icon: "subtitles", color: "#34C759", title: () => t("settings.subtitlesAudio") },
@@ -94,6 +97,8 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   downloads: { icon: "downloads", color: "#34C759", title: () => t("settings.downloads"), admin: true },
   subtitles: { icon: "subtitles", color: "#FF9500", title: () => t("settings.subtitles"), admin: true },
   ai: { icon: "key", color: "#BF5AF2", title: () => t("settings.ai"), admin: true },
+  // A user's own conversations, where they do not administer the server; its administrators have them in AI.
+  conversations: { icon: "send", color: "#BF5AF2", title: () => t("settings.conversations"), conversations: true },
   backups: { icon: "folder", color: "#5856D6", title: () => t("settings.backups"), admin: true },
   logs: { icon: "info", color: "#8E8E93", title: () => t("settings.logs"), admin: true },
   "api-keys": { icon: "lock", color: "#636366", title: () => t("settings.apiKeys"), admin: true },
@@ -132,15 +137,19 @@ const allGroups: { title?: () => string; entries: Entry[]; server?: boolean; too
   { title: () => t("settings.thisDevice"), entries: ["appearance", "playback", "subtitles-audio", "assistant"] },
   // The Mavio account's, at mavio.dev.
   { title: () => t("settings.accountGroup"), entries: ["home", "friends", "sharing"] },
-  { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "media", "acquiring", "ai", "plugins", "proxies", "maintenance"], server: true },
+  { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "media", "acquiring", "ai", "conversations", "plugins", "proxies", "maintenance"], server: true },
   { title: () => t("settings.about"), entries: ["about"] },
 ];
 
-/** The server whose settings are shown, whether the user administers it, and whether that is known yet. */
+/**
+ * The server whose settings are shown, whether the user administers it, and whether that is known yet;
+ * and whether the user, not administering it, keeps conversations with the AI models there.
+ */
 export interface Chosen {
   server: ServerEntry;
   admin: boolean;
   known: boolean;
+  conversations: boolean;
 }
 
 /** The server chosen, else the one serving the web UI, else the first signed in to. */
@@ -159,7 +168,9 @@ function useChosen(): Chosen | undefined {
     staleTime: 5 * 60_000,
     retry: false,
   });
-  return server && { server, admin: admins.some((a) => a.id === server.id), known: me.isFetched };
+  const ai = useAiConversationSettings(server);
+  const admin = !!server && admins.some((a) => a.id === server.id);
+  return server && { server, admin, known: me.isFetched && ai.isFetched, conversations: !admin && !!ai.data?.allowed };
 }
 
 /**
@@ -169,7 +180,8 @@ function useChosen(): Chosen | undefined {
  */
 function useGroups(chosen: Chosen | undefined) {
   const mavio = useHasMavioAccount();
-  const shown = (id: SectionId) => (!sections[id].admin || !!chosen?.admin) && (!sections[id].mavio || mavio);
+  const shown = (id: SectionId) =>
+    (!sections[id].admin || !!chosen?.admin) && (!sections[id].mavio || mavio) && (!sections[id].conversations || !!chosen?.conversations);
   const administers = useAdminServers().length > 0;
   return allGroups
     .filter((g) => (!g.server || chosen) && (!g.tools || administers))
@@ -216,6 +228,12 @@ export function SettingsScreen() {
   // until the servers administered are known.
   if (isSection(section) && sections[section].admin && chosen && !chosen.admin && admins.length > 0) {
     return <Navigate to="/settings/$section" params={{ section: "devices" }} search={{ server: search.server }} replace />;
+  }
+  // An administrator's conversations are in AI; a user the server does not
+  // allow them has none.
+  if (section === "conversations" && chosen?.known && !chosen.conversations) {
+    const to = chosen.admin ? "ai" : "devices";
+    return <Navigate to="/settings/$section" params={{ section: to }} search={{ server: search.server, conversation: chosen.admin ? search.conversation : undefined }} replace />;
   }
   const compact = width === "compact" || prefs.tv;
   if (isMenu(section)) {
@@ -592,6 +610,8 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       return chosen?.admin && <SubtitlesSection key={chosen.server.id} server={chosen.server} />;
     case "ai":
       return chosen?.admin && <AiSection key={chosen.server.id} server={chosen.server} />;
+    case "conversations":
+      return chosen?.conversations && <ConversationsSection key={chosen.server.id} server={chosen.server} />;
     case "backups":
       return chosen?.admin && <BackupsSection key={chosen.server.id} server={chosen.server} />;
     case "logs":

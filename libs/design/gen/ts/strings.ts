@@ -2132,6 +2132,10 @@ export type MessageKey =
   | 'issues.administrator'
   | 'issues.intro'
   | 'conversations.message'
+  | 'conversations.mineMessage'
+  | 'conversations.allUsers'
+  | 'conversations.allUsersDetail'
+  | 'conversations.allUsersFooter'
   | 'conversations.noPlugin'
   | 'conversations.noPluginFooter'
   | 'conversations.new'
@@ -2155,6 +2159,7 @@ export type MessageKey =
   | 'conversations.delete'
   | 'conversations.deleteConfirm'
   | 'conversations.deleteMessage'
+  | 'conversations.deleteMineMessage'
   | 'conversations.gone'
   | 'extra.trailer'
   | 'extra.clip'
@@ -4520,7 +4525,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "issues.reportedBy": "Reported by {name}",
     "issues.administrator": "Administrator",
     "issues.intro": "Problems reported with the server's movies and shows: your own, or everyone's for administrators.",
-    "conversations.message": "Talk with the models of the AI providers. Conversations are kept on the server, the users' conversations with the assistant among them.",
+    "conversations.message": "Talk with the models of the AI providers. Conversations are kept on the server: yours and every user's, their conversations with the assistant among them.",
+    "conversations.mineMessage": "Talk with the models of the AI providers. Your conversations are kept on the server; only you and the server's administrators see them.",
+    "conversations.allUsers": "Allow Conversations for All Users",
+    "conversations.allUsersDetail": "Each user sees only their own",
+    "conversations.allUsersFooter": "Users who do not administer the server find their conversations in the settings, and use the providers signed in to here.",
     "conversations.noPlugin": "No AI agent plugin",
     "conversations.noPluginFooter": "Conversations are kept by an AI agent plugin and use the providers of an AI gateway plugin.",
     "conversations.new": "New Conversation",
@@ -4544,6 +4553,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "conversations.delete": "Delete Conversation",
     "conversations.deleteConfirm": "Delete this conversation?",
     "conversations.deleteMessage": "Its messages are deleted for every administrator.",
+    "conversations.deleteMineMessage": "Its messages are deleted.",
     "conversations.gone": "This conversation was deleted.",
     "extra.trailer": "Trailer",
     "extra.clip": "Clip",
@@ -6907,7 +6917,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "issues.reportedBy": "由 {name} 报告",
     "issues.administrator": "管理员",
     "issues.intro": "对此服务器上的电影和剧集报告的问题：你自己的，管理员则可看到所有人的。",
-    "conversations.message": "与 AI 提供商的模型对话。对话保存在服务器上，其中也包括各用户与助手的对话。",
+    "conversations.message": "与 AI 提供商的模型对话。对话保存在服务器上：你的和每位用户的，其中也包括各用户与助手的对话。",
+    "conversations.mineMessage": "与 AI 提供商的模型对话。你的对话保存在服务器上，只有你和服务器的管理员能看到。",
+    "conversations.allUsers": "允许所有用户使用对话",
+    "conversations.allUsersDetail": "每位用户只能看到自己的对话",
+    "conversations.allUsersFooter": "不管理服务器的用户在设置中找到自己的对话，并使用这里已登录的提供商。",
     "conversations.noPlugin": "没有 AI 助手插件",
     "conversations.noPluginFooter": "对话由 AI 助手插件保存，并使用 AI 网关插件提供的提供商。",
     "conversations.new": "新对话",
@@ -6931,6 +6945,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "conversations.delete": "删除对话",
     "conversations.deleteConfirm": "删除此对话？",
     "conversations.deleteMessage": "其消息将对所有管理员删除。",
+    "conversations.deleteMineMessage": "其消息将被删除。",
     "conversations.gone": "此对话已被删除。",
     "extra.trailer": "预告片",
     "extra.clip": "片段",

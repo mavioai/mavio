@@ -70,6 +70,42 @@ pub type OwnedLogoutAiRequestView = ::buffa::view::OwnedView<
 pub type OwnedLogoutAiResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::LogoutAiResponseView<'static>,
 >;
+///Shorthand for `OwnedView<GetAiConversationSettingsRequestView<'static>>`.
+pub type OwnedGetAiConversationSettingsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::GetAiConversationSettingsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<GetAiConversationSettingsResponseView<'static>>`.
+pub type OwnedGetAiConversationSettingsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::GetAiConversationSettingsResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<UpdateAiConversationSettingsRequestView<'static>>`.
+pub type OwnedUpdateAiConversationSettingsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::UpdateAiConversationSettingsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<UpdateAiConversationSettingsResponseView<'static>>`.
+pub type OwnedUpdateAiConversationSettingsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::UpdateAiConversationSettingsResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<ListAiConversationModelsRequestView<'static>>`.
+pub type OwnedListAiConversationModelsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListAiConversationModelsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<ListAiConversationModelsResponseView<'static>>`.
+pub type OwnedListAiConversationModelsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListAiConversationModelsResponseView<
+        'static,
+    >,
+>;
 ///Shorthand for `OwnedView<CreateAiConversationRequestView<'static>>`.
 pub type OwnedCreateAiConversationRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::CreateAiConversationRequestView<
@@ -408,6 +444,132 @@ for crate::proto::mavio::system::v1::__buffa::view::LogoutAiResponseView<'_> {
 impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::LogoutAiResponse>
 for ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::LogoutAiResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::GetAiConversationSettingsResponse,
+>
+for crate::proto::mavio::system::v1::__buffa::view::GetAiConversationSettingsResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::GetAiConversationSettingsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::GetAiConversationSettingsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::UpdateAiConversationSettingsResponse,
+>
+for crate::proto::mavio::system::v1::__buffa::view::UpdateAiConversationSettingsResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::UpdateAiConversationSettingsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::UpdateAiConversationSettingsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::ListAiConversationModelsResponse,
+>
+for crate::proto::mavio::system::v1::__buffa::view::ListAiConversationModelsResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::ListAiConversationModelsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListAiConversationModelsResponseView<
+        'static,
+    >,
 > {
     fn encode(
         &self,
@@ -2098,6 +2260,24 @@ where
 }
 /// Full service name for this service.
 pub const AI_CONVERSATION_SERVICE_SERVICE_NAME: &str = "mavio.system.v1.AiConversationService";
+/// Static [`Spec`](::connectrpc::Spec) for the `GetAiConversationSettings` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AI_CONVERSATION_SERVICE_GET_AI_CONVERSATION_SETTINGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.AiConversationService/GetAiConversationSettings",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `UpdateAiConversationSettings` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AI_CONVERSATION_SERVICE_UPDATE_AI_CONVERSATION_SETTINGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.AiConversationService/UpdateAiConversationSettings",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `ListAiConversationModels` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AI_CONVERSATION_SERVICE_LIST_AI_CONVERSATION_MODELS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.AiConversationService/ListAiConversationModels",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// Static [`Spec`](::connectrpc::Spec) for the `CreateAiConversation` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AI_CONVERSATION_SERVICE_CREATE_AI_CONVERSATION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.system.v1.AiConversationService/CreateAiConversation",
@@ -2128,10 +2308,15 @@ pub const AI_CONVERSATION_SERVICE_DELETE_AI_CONVERSATION_SPEC: ::connectrpc::Spe
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// AiConversationService keeps the administrators' conversations with the
-/// models, through the plugin with the AGENT_SESSION capability. Every RPC
-/// requires an administrator; without a started plugin with the
-/// AGENT_SESSION capability they fail with FAILED_PRECONDITION.
+/// AiConversationService keeps users' conversations with the models,
+/// through the plugin with the AGENT_SESSION capability. Each conversation
+/// is its owner's, the user who started it. Administrators keep
+/// conversations and see everyone's, the users' conversations with the
+/// assistant among them; other users keep and see only their own, and only
+/// while the settings allow conversations for all users, failing with
+/// PERMISSION_DENIED otherwise and NOT_FOUND for a conversation not theirs.
+/// Without a started plugin with the AGENT_SESSION capability the
+/// conversations' RPCs fail with FAILED_PRECONDITION.
 ///
 /// # Implementing handlers
 ///
@@ -2182,7 +2367,80 @@ pub const AI_CONVERSATION_SERVICE_DELETE_AI_CONVERSATION_SPEC: ::connectrpc::Spe
 /// example` doc.
 #[allow(clippy::type_complexity)]
 pub trait AiConversationService: Send + Sync + 'static {
-    /// CreateAiConversation starts a conversation with a model.
+    /// GetAiConversationSettings returns who may keep conversations, and
+    /// whether the caller may; any signed-in user.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_ai_conversation_settings<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::GetAiConversationSettingsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::GetAiConversationSettingsResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// UpdateAiConversationSettings changes who may keep conversations;
+    /// administrators only.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn update_ai_conversation_settings<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::UpdateAiConversationSettingsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::UpdateAiConversationSettingsResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ListAiConversationModels lists the models a conversation can be
+    /// started with: those of the providers that can be used, through the
+    /// plugin with the AI_GATEWAY capability.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_ai_conversation_models<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::ListAiConversationModelsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::ListAiConversationModelsResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// CreateAiConversation starts a conversation with a model, the caller's.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -2205,7 +2463,8 @@ pub trait AiConversationService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// ListAiConversations lists the conversations, newest first.
+    /// ListAiConversations lists the conversations the caller sees, newest
+    /// first.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -2330,6 +2589,93 @@ impl<S: AiConversationService> AiConversationServiceExt for S {
         router: ::connectrpc::Router,
     ) -> ::connectrpc::Router {
         router
+            .route_view_idempotent(
+                AI_CONVERSATION_SERVICE_SERVICE_NAME,
+                "GetAiConversationSettings",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::GetAiConversationSettingsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::GetAiConversationSettingsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_ai_conversation_settings(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::GetAiConversationSettingsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AI_CONVERSATION_SERVICE_GET_AI_CONVERSATION_SETTINGS_SPEC)
+            .route_view(
+                AI_CONVERSATION_SERVICE_SERVICE_NAME,
+                "UpdateAiConversationSettings",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::UpdateAiConversationSettingsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::UpdateAiConversationSettingsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.update_ai_conversation_settings(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::UpdateAiConversationSettingsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AI_CONVERSATION_SERVICE_UPDATE_AI_CONVERSATION_SETTINGS_SPEC)
+            .route_view_idempotent(
+                AI_CONVERSATION_SERVICE_SERVICE_NAME,
+                "ListAiConversationModels",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::ListAiConversationModelsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::ListAiConversationModelsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_ai_conversation_models(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::ListAiConversationModelsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AI_CONVERSATION_SERVICE_LIST_AI_CONVERSATION_MODELS_SPEC)
             .route_view(
                 AI_CONVERSATION_SERVICE_SERVICE_NAME,
                 "CreateAiConversation",
@@ -2531,6 +2877,30 @@ for AiConversationServiceServer<T> {
     ) -> Option<::connectrpc::dispatcher::codegen::MethodDescriptor> {
         let method = path.strip_prefix("mavio.system.v1.AiConversationService/")?;
         match method {
+            "GetAiConversationSettings" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(
+                            AI_CONVERSATION_SERVICE_GET_AI_CONVERSATION_SETTINGS_SPEC,
+                        ),
+                )
+            }
+            "UpdateAiConversationSettings" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(
+                            AI_CONVERSATION_SERVICE_UPDATE_AI_CONVERSATION_SETTINGS_SPEC,
+                        ),
+                )
+            }
+            "ListAiConversationModels" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(
+                            AI_CONVERSATION_SERVICE_LIST_AI_CONVERSATION_MODELS_SPEC,
+                        ),
+                )
+            }
             "CreateAiConversation" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
@@ -2577,6 +2947,72 @@ for AiConversationServiceServer<T> {
         };
         let _ = (&ctx, &request, &format);
         match method {
+            "GetAiConversationSettings" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::GetAiConversationSettingsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::GetAiConversationSettingsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::GetAiConversationSettingsRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_ai_conversation_settings(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::GetAiConversationSettingsResponse,
+                        >(format)
+                })
+            }
+            "UpdateAiConversationSettings" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::UpdateAiConversationSettingsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::UpdateAiConversationSettingsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::UpdateAiConversationSettingsRequest,
+                    >::from_parts(&req, &body);
+                    svc.update_ai_conversation_settings(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::UpdateAiConversationSettingsResponse,
+                        >(format)
+                })
+            }
+            "ListAiConversationModels" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::ListAiConversationModelsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::ListAiConversationModelsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::ListAiConversationModelsRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_ai_conversation_models(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::ListAiConversationModelsResponse,
+                        >(format)
+                })
+            }
             "CreateAiConversation" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
@@ -2761,7 +3197,7 @@ for AiConversationServiceServer<T> {
 /// let config = ClientConfig::new(uri).with_protocol(Protocol::Grpc);
 ///
 /// let client = AiConversationServiceClient::new(conn, config);
-/// let response = client.create_ai_conversation(request).await?;
+/// let response = client.get_ai_conversation_settings(request).await?;
 /// ```
 ///
 /// # Example (Connect / HTTP/1.1 or ALPN)
@@ -2773,7 +3209,7 @@ for AiConversationServiceServer<T> {
 /// let config = ClientConfig::new("http://localhost:8080".parse()?);
 ///
 /// let client = AiConversationServiceClient::new(http, config);
-/// let response = client.create_ai_conversation(request).await?;
+/// let response = client.get_ai_conversation_settings(request).await?;
 /// ```
 ///
 /// # Working with the response
@@ -2783,7 +3219,7 @@ for AiConversationServiceServer<T> {
 /// message, so field access is zero-copy:
 ///
 /// ```rust,ignore
-/// let resp = client.create_ai_conversation(request).await?;
+/// let resp = client.get_ai_conversation_settings(request).await?;
 /// let name: &str = resp.view().name;  // borrow into the response buffer
 /// ```
 ///
@@ -2791,7 +3227,7 @@ for AiConversationServiceServer<T> {
 /// [`into_owned()`](::connectrpc::client::UnaryResponse::into_owned):
 ///
 /// ```rust,ignore
-/// let owned = client.create_ai_conversation(request).await?.into_owned();
+/// let owned = client.get_ai_conversation_settings(request).await?.into_owned();
 /// ```
 ///
 /// [`into_view()`](::connectrpc::client::UnaryResponse::into_view) keeps the
@@ -2821,6 +3257,141 @@ where
     /// Get a mutable reference to the client configuration.
     pub fn config_mut(&mut self) -> &mut ::connectrpc::client::ClientConfig {
         &mut self.config
+    }
+    /// Call the GetAiConversationSettings RPC. Sends a request to /mavio.system.v1.AiConversationService/GetAiConversationSettings.
+    pub async fn get_ai_conversation_settings(
+        &self,
+        request: crate::proto::mavio::system::v1::GetAiConversationSettingsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::GetAiConversationSettingsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_ai_conversation_settings_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetAiConversationSettings RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_ai_conversation_settings_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::GetAiConversationSettingsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::GetAiConversationSettingsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AI_CONVERSATION_SERVICE_GET_AI_CONVERSATION_SETTINGS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the UpdateAiConversationSettings RPC. Sends a request to /mavio.system.v1.AiConversationService/UpdateAiConversationSettings.
+    pub async fn update_ai_conversation_settings(
+        &self,
+        request: crate::proto::mavio::system::v1::UpdateAiConversationSettingsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::UpdateAiConversationSettingsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.update_ai_conversation_settings_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the UpdateAiConversationSettings RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn update_ai_conversation_settings_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::UpdateAiConversationSettingsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::UpdateAiConversationSettingsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AI_CONVERSATION_SERVICE_UPDATE_AI_CONVERSATION_SETTINGS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ListAiConversationModels RPC. Sends a request to /mavio.system.v1.AiConversationService/ListAiConversationModels.
+    pub async fn list_ai_conversation_models(
+        &self,
+        request: crate::proto::mavio::system::v1::ListAiConversationModelsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::ListAiConversationModelsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_ai_conversation_models_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListAiConversationModels RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_ai_conversation_models_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::ListAiConversationModelsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::ListAiConversationModelsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AI_CONVERSATION_SERVICE_LIST_AI_CONVERSATION_MODELS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
     }
     /// Call the CreateAiConversation RPC. Sends a request to /mavio.system.v1.AiConversationService/CreateAiConversation.
     pub async fn create_ai_conversation(

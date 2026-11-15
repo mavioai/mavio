@@ -9128,7 +9128,7 @@
       }
     },
     "settings.conversations": {
-      "comment": "Settings section of the administrators' conversations with AI models.",
+      "comment": "Settings section of the users' conversations with AI models: administrators', in the AI settings, and each other user's own.",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -38450,19 +38450,91 @@
       }
     },
     "conversations.message": {
-      "comment": "Footer of the AI settings' conversations.",
+      "comment": "Footer of the AI settings' conversations, which administrators see.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Talk with the models of the AI providers. Conversations are kept on the server, the users' conversations with the assistant among them."
+            "value": "Talk with the models of the AI providers. Conversations are kept on the server: yours and every user's, their conversations with the assistant among them."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "与 AI 提供商的模型对话。对话保存在服务器上，其中也包括各用户与助手的对话。"
+            "value": "与 AI 提供商的模型对话。对话保存在服务器上：你的和每位用户的，其中也包括各用户与助手的对话。"
+          }
+        }
+      }
+    },
+    "conversations.mineMessage": {
+      "comment": "Footer of the conversations of a user who does not administer the server.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Talk with the models of the AI providers. Your conversations are kept on the server; only you and the server's administrators see them."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "与 AI 提供商的模型对话。你的对话保存在服务器上，只有你和服务器的管理员能看到。"
+          }
+        }
+      }
+    },
+    "conversations.allUsers": {
+      "comment": "Setting: whether users other than administrators keep conversations with the AI models.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow Conversations for All Users"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许所有用户使用对话"
+          }
+        }
+      }
+    },
+    "conversations.allUsersDetail": {
+      "comment": "Detail of the setting allowing conversations for all users.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each user sees only their own"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每位用户只能看到自己的对话"
+          }
+        }
+      }
+    },
+    "conversations.allUsersFooter": {
+      "comment": "Footer of the setting allowing conversations for all users.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Users who do not administer the server find their conversations in the settings, and use the providers signed in to here."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不管理服务器的用户在设置中找到自己的对话，并使用这里已登录的提供商。"
           }
         }
       }
@@ -38877,6 +38949,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "其消息将对所有管理员删除。"
+          }
+        }
+      }
+    },
+    "conversations.deleteMineMessage": {
+      "comment": "What deleting a conversation does, for a user who does not administer the server.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Its messages are deleted."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其消息将被删除。"
           }
         }
       }

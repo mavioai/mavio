@@ -234,9 +234,10 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(systemv1connect.NewActivityServiceHandler(rpc.NewActivityService(opts.Store), interceptors))
 	mux.Handle(systemv1connect.NewBackupServiceHandler(rpc.NewBackupService(opts.Backups, opts.Activity), interceptors))
 	mux.Handle(systemv1connect.NewLocalizationServiceHandler(rpc.LocalizationService{}, interceptors))
-	aiProviders, aiConversations := &rpc.AiProviderService{Activity: opts.Activity}, &rpc.AiConversationService{}
+	aiProviders, aiConversations := &rpc.AiProviderService{Activity: opts.Activity}, &rpc.AiConversationService{Settings: opts.Settings, Activity: opts.Activity}
 	if opts.Plugins != nil {
 		aiProviders.Gateway = opts.Plugins.AIGateway
+		aiConversations.Gateway = opts.Plugins.AIGateway
 		aiConversations.Sessions = opts.Plugins.AgentSessions
 	}
 	mux.Handle(systemv1connect.NewAiProviderServiceHandler(aiProviders, interceptors))

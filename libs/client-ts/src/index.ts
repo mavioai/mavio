@@ -222,11 +222,14 @@ export {
   useAiActions,
   useAiConversation,
   useAiConversationActions,
+  useAiConversationModels,
   useAiConversations,
+  useAiConversationSettings,
   useAiLogin,
   useAiModels,
   useAiProviders,
   useAiSend,
+  useUpdateAiConversationSettings,
 } from "./ai.ts";
 export { useApiKeys, useBackupDownload, useBackups, useLogs } from "./backups.ts";
 export { systemProxyId, useProxies, useTestProxy } from "./proxies.ts";

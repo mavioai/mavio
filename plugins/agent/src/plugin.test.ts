@@ -313,6 +313,28 @@ describe("sessions", () => {
 		expect(await code(agents.sendAgentMessage({ sessionId: "nope", text: "Hi" }))).toBe(Code.NotFound);
 	});
 
+	test("keep their owners, by which they are listed, across restarts", async () => {
+		// The host shows a user only the conversations they own (docs/plugins.md §8.15).
+		const dir = mkdtempSync(join(tmpdir(), "mavio-agent-"));
+		const faux = fauxProvider();
+		let { plugin, agents } = await start([faux.provider], dir);
+		const a = (await agents.createAgentSession({ provider: "faux", model: "faux-1", owner: "u1", title: "A" })).session!;
+		const b = (await agents.createAgentSession({ provider: "faux", model: "faux-1", owner: "u2", title: "B" })).session!;
+		const none = (await agents.createAgentSession({ provider: "faux", model: "faux-1", title: "None" })).session!;
+		expect([a.owner, b.owner, none.owner]).toEqual(["u1", "u2", ""]);
+		await plugin.close();
+		open.splice(open.indexOf(plugin), 1);
+
+		({ agents } = await start([faux.provider], dir));
+		const ids = async (owner: string) => (await agents.listAgentSessions({ owner })).sessions.map((s) => s.id).sort();
+		expect(await ids("u1")).toEqual([a.id]);
+		expect(await ids("u2")).toEqual([b.id]);
+		expect(await ids("u3")).toEqual([]);
+		expect(await ids("")).toEqual([a.id, b.id, none.id].sort());
+		expect((await agents.getAgentSession({ id: a.id })).session?.owner).toBe("u1");
+		expect((await agents.getAgentSession({ id: none.id })).session?.owner).toBe("");
+	});
+
 	test("stream answers", async () => {
 		const faux = fauxProvider({ tokenSize: { min: 1, max: 1 }, tokensPerSecond: 50 });
 		faux.setResponses([fauxAssistantMessage("The capital of France is Paris.")]);

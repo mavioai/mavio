@@ -2,8 +2,8 @@
 // (docs/assistant.md §10); the providers of the AI gateway plugin added,
 // each with where its credential comes from, and the others to add; a
 // provider's API key, its OAuth login followed step by step, signing out,
-// and its models; and at their end the administrators' conversations with
-// the models (docs/clients.md §6.3.26).
+// and its models; and at their end the conversations with the models
+// (docs/clients.md §6.3.26), everyone's, with whether all users keep them.
 import {
   errorMessage,
   isNoAiGateway,
@@ -21,7 +21,7 @@ import { locale, t } from "../../i18n.ts";
 import { Button, Group, Row } from "../../ui.tsx";
 import { Picker, Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
-import { ConversationPage, Conversations, type First } from "./conversations.tsx";
+import { ConversationPage, Conversations, type First } from "../conversations.tsx";
 import { AssistantServerSettings } from "../assistant-settings.tsx";
 import { BackLink, Page, PageLink } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
@@ -40,6 +40,7 @@ export function AiSection({ server }: { server: ServerEntry }) {
       <ConversationPage
         key={conversation}
         server={server}
+        admin
         id={conversation}
         first={first?.id === conversation ? first.text : undefined}
         onFirstSent={() => setFirst(undefined)}
@@ -116,7 +117,7 @@ function ProvidersList({ server, onStarted }: { server: ServerEntry; onStarted: 
           </Row>
         )}
       </Group>
-      <Conversations server={server} onStarted={onStarted} />
+      <Conversations server={server} admin onStarted={onStarted} />
     </Page>
   );
 }

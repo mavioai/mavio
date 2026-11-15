@@ -44,14 +44,34 @@ service AiProviderService {
   rpc LogoutAi(LogoutAiRequest) returns (LogoutAiResponse);
 }
 
-// AiConversationService keeps the administrators' conversations with the
-// models, through the plugin with the AGENT_SESSION capability. Every RPC
-// requires an administrator; without a started plugin with the
-// AGENT_SESSION capability they fail with FAILED_PRECONDITION.
+// AiConversationService keeps users' conversations with the models,
+// through the plugin with the AGENT_SESSION capability. Each conversation
+// is its owner's, the user who started it. Administrators keep
+// conversations and see everyone's, the users' conversations with the
+// assistant among them; other users keep and see only their own, and only
+// while the settings allow conversations for all users, failing with
+// PERMISSION_DENIED otherwise and NOT_FOUND for a conversation not theirs.
+// Without a started plugin with the AGENT_SESSION capability the
+// conversations' RPCs fail with FAILED_PRECONDITION.
 service AiConversationService {
-  // CreateAiConversation starts a conversation with a model.
+  // GetAiConversationSettings returns who may keep conversations, and
+  // whether the caller may; any signed-in user.
+  rpc GetAiConversationSettings(GetAiConversationSettingsRequest) returns (GetAiConversationSettingsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdateAiConversationSettings changes who may keep conversations;
+  // administrators only.
+  rpc UpdateAiConversationSettings(UpdateAiConversationSettingsRequest) returns (UpdateAiConversationSettingsResponse);
+  // ListAiConversationModels lists the models a conversation can be
+  // started with: those of the providers that can be used, through the
+  // plugin with the AI_GATEWAY capability.
+  rpc ListAiConversationModels(ListAiConversationModelsRequest) returns (ListAiConversationModelsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // CreateAiConversation starts a conversation with a model, the caller's.
   rpc CreateAiConversation(CreateAiConversationRequest) returns (CreateAiConversationResponse);
-  // ListAiConversations lists the conversations, newest first.
+  // ListAiConversations lists the conversations the caller sees, newest
+  // first.
   rpc ListAiConversations(ListAiConversationsRequest) returns (ListAiConversationsResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
@@ -148,6 +168,37 @@ message LogoutAiRequest {
 }
 
 message LogoutAiResponse {}
+
+// AiConversationSettings are who may keep conversations with the models.
+message AiConversationSettings {
+  // Users other than administrators keep conversations too, each their
+  // own; off by default.
+  bool all_users = 1;
+}
+
+message GetAiConversationSettingsRequest {}
+
+message GetAiConversationSettingsResponse {
+  AiConversationSettings settings = 1;
+  // Whether the caller may keep conversations.
+  bool allowed = 2;
+}
+
+message UpdateAiConversationSettingsRequest {
+  AiConversationSettings settings = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateAiConversationSettingsResponse {
+  AiConversationSettings settings = 1;
+}
+
+message ListAiConversationModelsRequest {}
+
+message ListAiConversationModelsResponse {
+  repeated mavio.plugin.v1.AiModel models = 1;
+  // The names of the models' providers, by provider ID.
+  map<string, string> provider_names = 2;
+}
 
 message CreateAiConversationRequest {
   string provider = 1 [(buf.validate.field).required = true];

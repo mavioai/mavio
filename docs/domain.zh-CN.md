@@ -352,7 +352,7 @@ erDiagram
 ## 12. 管理
 
 ### 12.1 服务端设置
-`ServerSettings` 是管理员在服务端运行时修改的设置；命令行参数只提供其中一些的初始值。只保存一组设置，其各分组——`Transcoding`、`Network`、`PluginCatalogs`、`PasswordResetPlugin`、`DisabledPlugins`、`PluginProxies`、`SessionIdleDays`、`Acquisition`、`Requests`、`Metadata`、`Subtitles` 与 `Assistant`——分开保存，读取时以默认值（`DefaultServerSettings`）补全未保存的分组与后来新增的设置。各分组由其所属方修改：字幕设置由字幕服务修改，助手设置由助手服务修改，停用的插件由启用与停用插件修改，插件的代理由设置插件的代理修改，其余各分组由其所属领域服务上各自的设置 RPC 修改；修改作用于当前设置，而不是用先前读取的副本替换它。
+`ServerSettings` 是管理员在服务端运行时修改的设置；命令行参数只提供其中一些的初始值。只保存一组设置，其各分组——`Transcoding`、`Network`、`PluginCatalogs`、`PasswordResetPlugin`、`DisabledPlugins`、`PluginProxies`、`SessionIdleDays`、`Acquisition`、`Requests`、`Metadata`、`Subtitles`、`Assistant` 与 `AI`——分开保存，读取时以默认值（`DefaultServerSettings`）补全未保存的分组与后来新增的设置。各分组由其所属方修改：字幕设置由字幕服务修改，助手设置由助手服务修改，AI 设置由 AI 对话服务修改，停用的插件由启用与停用插件修改，插件的代理由设置插件的代理修改，其余各分组由其所属领域服务上各自的设置 RPC 修改；修改作用于当前设置，而不是用先前读取的副本替换它。
 
 * `Transcoding`：`HardwareAcceleration`（`auto` 使用服务端 ffmpeg 与硬件所支持的加速，`none`，或 `videotoolbox`）、是否允许硬件编码器、软件编码器的 `EncoderPreset`（为空时按片源选择）、`H264CRF` 与 `H265CRF`（0–51）、`Threads`、色调映射（`TonemapAlgorithm`、`TonemapRange`、`TonemapDesat`、`TonemapPeak`）、去隔行（`yadif` 或 `bwdif`，可选倍帧率）、立体声 `DownmixBoost`（0.5–3）、`CropBlackBorders`，以及 `TranscodeDir`（绝对路径；为空时沿用服务端启动时的目录）。
 * `Network`：向客户端显示的 `ServerName`（为空时为主机名）、反向代理下服务端所在的 `BaseURL`（规整的路径，如 `/mavio`）、`HTTPSPort`（默认 8920）及其 PEM 格式的 `CertificatePath` 与 `KeyPath`（两者都设置或都不设置；都不设置时，mavio.dev 模式的服务端使用其 `s.mavio.fyi` 证书）、`LocalDiscovery`，以及 `Relay`：客户端能否经 mavio.dev 的中转访问 mavio.dev 模式的服务端（默认开启），以及服务端自身 HTTP 请求按访问对象使用的代理 `Proxies`（`OutboundProxies`）——`PluginCatalogs`、`Images`、`MavioDev` 与 `ACME`——每项为代理的 ID、`SystemProxyID`（`system`，默认）或空（不使用代理）。
@@ -366,6 +366,7 @@ erDiagram
 * `Metadata`（`MetadataSettings`）：服务端元数据的 `PreferredLanguage`（ISO 639-1）与 `Country`（ISO 3166-1），如 Jellyfin 的 `PreferredMetadataLanguage` 与 `MetadataCountryCode`；未设置自身语言与国家的媒体库与条目按它们取元数据，请求与发现以该语言命名作品，按该国家分级。`PreferredLanguage` 为空（默认，`FollowsClients`）时跟随各客户端的语言：这样的条目以英语刷新，并另外保存客户端读取的各语言（`ItemLocalization`）。默认国家为 `US`。
 * `Subtitles`：如何搜索、选择、保存与同步字幕（§14.3）。
 * `Assistant`（`AssistantSettings`）：助手是否开启；AI 路径的 `Model`（`ai/<提供商>/<模型>`，为空时只有快速路径）、是否使用 `CodeMode`，以及谁可以使用它（`AIAccess`：`all`、`administrators`，或 `selected` 时 `AIUsers` 中的用户，由 `AllowsAI` 判断）；请求开始新对话前对话可闲置的 `IdleTime`（一分钟到一天，30 分钟）与对话保留的 `RetentionDays`（1–3650，30）；`Memory` 是否开启；语音会话按语言的 `Recognizers` 与 `Voices`（`<插件>/<识别器>`、`<插件>/<语音>`，某语言未设置时为第一个就绪的），是否把用户的 `Hints` 交给识别器，一个轮次最长的 `Pause`（0.5–10 秒，3）、延迟执行的效果之前的 `CommitDelay`（0–3 秒，0.7）以及会话的 `SessionIdle` 时间（3–60 秒，8）（[助手 §10](assistant.zh-CN.md#10-设置与隐私)）。
+* `AI`（`AISettings`）：管理员以外的用户是否可以与 AI 模型对话（`ConversationsForAll`，默认关闭），每位用户只能看到自己的对话；管理员总是可以（`AllowsConversations`）（[客户端 §6.3.26](clients.zh-CN.md#6326-ai-对话)）。
 * `Validate` 检查已知取值与范围。
 
 `AccountSettings` 与它们分开保存，位于设置键 `accounts` 下：服务端登录用户的 `Mode`，即 `standalone` 或 `mavio.dev`（[账户 §2](accounts.zh-CN.md#2-服务端模式)），在服务端的安装向导选择之前为空。在 mavio.dev 模式下，`Administrator` 是认领该服务端的 Mavio 账户，未认领时为空（由 `Claimed` 判断），`Cursor` 是服务端已应用的来自 mavio.dev 的最后一项变更；其他模式的服务端两者皆无。

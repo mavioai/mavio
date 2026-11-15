@@ -41,6 +41,7 @@ func settingsGroups(s *core.ServerSettings) []settingsGroup {
 		{"metadata", &s.Metadata},
 		{"subtitles", &s.Subtitles},
 		{"assistant", &s.Assistant},
+		{"ai", &s.AI},
 	}
 }
 

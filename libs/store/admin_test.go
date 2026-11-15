@@ -21,12 +21,13 @@ func TestSettings(t *testing.T) {
 		set.Transcoding.EncoderPreset = "veryfast"
 		set.Network.BaseURL = "/mavio"
 		set.PluginCatalogs = []string{"https://plugins.example/catalog.json"}
+		set.AI.ConversationsForAll = true
 		if err := s.Settings().Put(ctx, &set); err != nil {
 			t.Fatal(err)
 		}
 		got, err = s.Settings().Get(ctx)
 		if err != nil || got.Transcoding.EncoderPreset != "veryfast" || got.Network.BaseURL != "/mavio" ||
-			len(got.PluginCatalogs) != 1 || got.UpdatedAt.IsZero() {
+			len(got.PluginCatalogs) != 1 || !got.AI.ConversationsForAll || got.UpdatedAt.IsZero() {
 			t.Errorf("Get = %+v, %v", got, err)
 		}
 		// Only groups that differ from those stored are written.
