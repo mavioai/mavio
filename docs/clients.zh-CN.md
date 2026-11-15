@@ -100,7 +100,7 @@ flowchart LR
 * **控件**：所有控件都由 Web UI 自己绘制，在各浏览器与操作系统上一致：[Base UI](https://base-ui.com) 为选择框、菜单、对话框、警告框、工具提示、开关、复选框、滑块、数字输入框、带建议的输入框、单选组、标签页、切换按钮、进度条与展开区提供行为与无障碍（焦点保持在内并归还、方向键、键入跳到选项、Escape、点击外部关闭），Tailwind CSS 用设计 tokens 绘制它们；`src/controls` 为各屏幕封装这些控件，屏幕不使用任何浏览器自带外观的控件。弹出层以 portal 置于页面之上；在电视上，菜单是毛玻璃、选项更大，打开时停在已选项上，返回键像 Escape 一样关闭弹出层。
 * **API**：`libs/client-ts`，基于 `connect-es` v2 与 `protobuf-es` v2 以及从 `libs/proto` 生成的代码，用 TanStack Query 做缓存与失效，由事件流驱动：媒体库变更刷新媒体库条目及由其决定之物（如发现的作品是否在媒体库中）的查询，新的事件流刷新服务器的全部查询；用户数据变更写入缓存中的条目，只刷新由它筛选或排序的列表，标记已播放或收藏立即显示，服务器拒绝时还原。同一浏览器的各标签页共用其会话，会话的事件流由前台标签页持有，除非持有它的标签页正在播放；持有者把事件转给其他标签页，它们只用这些事件刷新查询。媒体库的查询五分钟内视为新鲜，因为事件会刷新它们；网格在加载另一种排序或筛选时保留原有条目；指针停在条目卡片上时预先获取该条目。
 * **长列表**：媒体库的网格、一季的剧集、日志与对话由 TanStack Virtual 只绘制滚动到视野内的行，由页面滚动；网格每行的列数为其模板按宽度排出的列数。
-* **播放**：支持 Media Source Extensions 的浏览器用 hls.js，Safari 用原生 HLS 播放器；能力来自 `MediaSource.isTypeSupported` 与 `canPlayType`。ASS 字幕借助 JASSUB（WebAssembly 版 libass）保留样式。对浏览器不转码就无法播放的内容，播放器提供在外部播放器（mpv、VLC、IINA）中打开播放 URL。
+* **播放**：支持 Media Source Extensions 的浏览器用 hls.js，Safari 用原生 HLS 播放器；能力来自 `MediaSource.isTypeSupported` 与 `canPlayType`。ASS 与 SSA 字幕借助 JASSUB（WebAssembly 版 libass）保留样式：浏览器支持 Worker、WebAssembly 与 `OffscreenCanvas` 时，网页界面按其原格式请求单独的字幕文件（`capabilities(…, styled)`），由 JASSUB 绘制在视频上方的画布中，画布随视频进入全屏与画中画窗口，按字幕偏移移动，字体用条目附带的字体，它们缺的字形用 Liberation Sans，含中文或日文的脚本用 Noto Sans SC（`@openfonts/noto-sans-sc_chinese-simplified` 的常规字重）。JASSUB 及其 Worker、WebAssembly 与字体随构建产出，只在播放此类字幕时加载；JASSUB 失败时，条目按服务器交给其他浏览器的方式重新播放字幕。对浏览器不转码就无法播放的内容，播放器提供在外部播放器（mpv、VLC、IINA）中打开播放 URL。
 * **助手**：[助手](assistant.zh-CN.md)最先实现的客户端（见该文档 §9.2）：经由 `libs/client-ts` 以 WASM 运行 `libs/intent` 的语法，只在安全页面使用麦克风，以浏览器的回声消除采集声音，经由服务端送入语音会话，并播放回答流式传来的语音。
 
 ### 4.2 Apple（`apps/ios`、`apps/tvos`、`apps/macos`、`libs/apple`）

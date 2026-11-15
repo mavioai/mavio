@@ -199,6 +199,10 @@ video[data-hide-cues]::cue {
   background: transparent;
   text-shadow: none;
 }
+/* And JASSUB's canvas of styled subtitles, which follows the video. */
+video[data-hide-cues] + canvas {
+  visibility: hidden;
+}
 
 /* The activity indicator's turn (ui.tsx), a spoke a step. */
 @keyframes spinner {

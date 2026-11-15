@@ -1,4 +1,4 @@
-import { MediaKind, Protocol } from "@mavio/proto/mavio/playback/v1/playback_pb";
+import { MediaKind, Protocol, SubtitleMethod } from "@mavio/proto/mavio/playback/v1/playback_pb";
 import { expect, test } from "vitest";
 
 import { capabilities, type Decoders } from "./playback.ts";
@@ -31,4 +31,10 @@ test("native HLS declares what the media element plays", () => {
 test("H.264 and AAC are always declared", () => {
   const mp4 = capabilities(decoders([])).directPlay[0];
   expect([mp4.videoCodec, mp4.audioCodec]).toEqual(["h264", "aac"]);
+});
+
+test("styled subtitles add ASS and SSA files after WebVTT", () => {
+  const formats = (styled: boolean) => capabilities(decoders([]), undefined, styled).subtitles.map((s) => `${s.format} ${s.method}`);
+  expect(formats(false)).toEqual([`vtt ${SubtitleMethod.HLS}`, `vtt ${SubtitleMethod.EXTERNAL}`]);
+  expect(formats(true)).toEqual([`vtt ${SubtitleMethod.HLS}`, `vtt ${SubtitleMethod.EXTERNAL}`, `ass ${SubtitleMethod.EXTERNAL}`, `ssa ${SubtitleMethod.EXTERNAL}`]);
 });

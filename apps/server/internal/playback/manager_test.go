@@ -186,6 +186,73 @@ func TestDirectPlay(t *testing.T) {
 	}
 }
 
+// A client drawing ASS itself, as the web UI with JASSUB, gets an ASS file
+// as it is, styles kept, and WebVTT for the rest.
+func TestStyledSubtitles(t *testing.T) {
+	ctx := t.Context()
+	e := newEnv(t)
+	srcs, err := e.store.MediaSources().ListForItem(ctx, e.movie.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	src := srcs[0]
+	ass := filepath.ToSlash(filepath.Join(filepath.Dir(src.Path), "Film.zh.ass"))
+	script := "[Script Info]\nScriptType: v4.00+\nPlayResX: 640\nPlayResY: 360\n\n" +
+		"[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n" +
+		"Style: Sign,Noto Sans SC,48,&H0000FFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,8,10,10,20,1\n\n" +
+		"[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n" +
+		"Dialogue: 0,0:00:01.00,0:00:02.50,Sign,,0,0,0,,{\\pos(320,40)\\k20}你好\n"
+	if err := os.WriteFile(ass, []byte(script), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	src.Streams = append(src.Streams, core.MediaStream{Index: 5, Kind: core.StreamSubtitle, Codec: "ass", Language: "chi", ExternalPath: ass})
+	if err := e.store.MediaSources().Replace(ctx, e.movie.ID, []core.MediaSource{src}); err != nil {
+		t.Fatal(err)
+	}
+	client := *mp4Client
+	client.Subtitles = []decision.SubtitleProfile{
+		{Format: "vtt", Method: decision.SubtitleExternal},
+		{Format: "ass", Method: decision.SubtitleExternal},
+		{Format: "ssa", Method: decision.SubtitleExternal},
+	}
+	five := 5
+	p := e.start(t, Request{Client: &client, SourceID: src.ID, SubtitleStream: &five})
+	if p.Method != decision.DirectPlay || p.SubtitleStream != 5 {
+		t.Fatalf("got = %s with subtitle %d, want direct play with subtitle 5", p.Method, p.SubtitleStream)
+	}
+	formats := map[int]string{}
+	for i := range p.Subtitles {
+		if s := &p.Subtitles[i]; s.Method == decision.SubtitleExternal {
+			formats[s.Stream.Index] = s.Format
+		}
+	}
+	if formats[4] != "vtt" || formats[5] != "ass" {
+		t.Fatalf("external formats = %v, want 4 as vtt and 5 as ass", formats)
+	}
+	var sub string
+	for i := range p.Subtitles {
+		if p.Subtitles[i].Stream.Index == 5 {
+			sub = p.SubtitleURL(&p.Subtitles[i])
+		}
+	}
+	if sub != "media/"+p.ID+"/subtitles/5.ass" {
+		t.Fatalf("subtitle URL = %q", sub)
+	}
+	srv := httptest.NewServer(e.m.Handler())
+	t.Cleanup(srv.Close)
+	resp, err := http.Get(srv.URL + "/" + sub)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	for _, want := range []string{"Style: Sign,Noto Sans SC,48,", `{\pos(320,40)\k20}你好`, "PlayResX: 640"} {
+		if resp.StatusCode != http.StatusOK || !strings.Contains(string(body), want) {
+			t.Errorf("subtitle = %d %q, want it to hold %q", resp.StatusCode, body, want)
+		}
+	}
+}
+
 func TestProgressAndStop(t *testing.T) {
 	ctx := t.Context()
 	e := newEnv(t)

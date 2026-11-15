@@ -672,7 +672,7 @@ flowchart TD
   - [x] 合集与播放列表（`apps/web/src/screens/lists.tsx`、`libs/client-ts/src/lists.ts`）
     - [x] 从详情的“播放”与“随机播放”或从某一条目起，按顺序或随机播放播放列表或合集，播放器接着播放下一项，也可回到上一项（`apps/web/src/queue.ts`、`libs/client-ts/src/queue.ts`，§6.5）
   - [x] 一集结束时播放下一集
-  - [ ] 借助 JASSUB 保留样式的 ASS 字幕
+  - [x] 借助 JASSUB 保留样式的 ASS 字幕：`capabilities(…, styled)` 按原格式请求 ASS 与 SSA 文件，由 `apps/web/src/screens/styled-subtitles.ts` 用 JASSUB 绘制在视频上方，字体用条目附带的字体与 Liberation Sans 或 Noto Sans SC，均从构建中按需加载；JASSUB 失败时回退到服务器的交付方式
   - [ ] 离线保存查询缓存
   - [ ] 组件的 Storybook
   - [ ] 登录与首页以外页面的快照测试

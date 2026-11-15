@@ -59,9 +59,11 @@ const audioTypes: [codec: string, type: string][] = [
 /**
  * The capabilities of a browser: the codecs it decodes in MP4 and WebM
  * files, and HLS with fMP4 segments for everything else, through hls.js or
- * the native player; subtitles as WebVTT.
+ * the native player; subtitles as WebVTT and, with styled, ASS and SSA as
+ * they are, in files of their own, which JASSUB draws (docs/clients.md
+ * §4.1).
  */
-export function capabilities(d: Decoders = browserDecoders(), maxBitrate = 40_000_000): ClientCapabilities {
+export function capabilities(d: Decoders = browserDecoders(), maxBitrate = 40_000_000, styled = false): ClientCapabilities {
   const native = nativeHls(d);
   const plays = (type: string) => (native ? d.native(type) || d.mse(type) : d.mse(type));
   const video = videoTypes.filter(([, t]) => plays(t)).map(([c]) => c);
@@ -95,6 +97,13 @@ export function capabilities(d: Decoders = browserDecoders(), maxBitrate = 40_00
     subtitles: [
       { format: "vtt", method: SubtitleMethod.HLS },
       { format: "vtt", method: SubtitleMethod.EXTERNAL },
+      // After WebVTT, so that other text is not converted to ASS.
+      ...(styled
+        ? [
+            { format: "ass", method: SubtitleMethod.EXTERNAL },
+            { format: "ssa", method: SubtitleMethod.EXTERNAL },
+          ]
+        : []),
     ],
   });
 }

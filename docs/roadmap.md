@@ -672,7 +672,7 @@ flowchart TD
   - [x] Collections and playlists (`apps/web/src/screens/lists.tsx`, `libs/client-ts/src/lists.ts`)
     - [x] Playing a playlist or collection in order, or shuffled, from its details' Play and Shuffle or from an entry, the player going on to the next entry and back to the previous one (`apps/web/src/queue.ts`, `libs/client-ts/src/queue.ts`, §6.5)
   - [x] Playing the next episode at the end of one
-  - [ ] Styled ASS subtitles with JASSUB
+  - [x] Styled ASS subtitles with JASSUB: `capabilities(…, styled)` asks for ASS and SSA files as they are, which `apps/web/src/screens/styled-subtitles.ts` draws with JASSUB over the video, with the item's font attachments and Liberation Sans or Noto Sans SC, loaded lazily from the build, and falls back to the server's delivery when JASSUB fails
   - [ ] The query cache kept offline
   - [ ] Storybook of the components
   - [ ] Snapshot tests of the screens beyond sign-in and Home

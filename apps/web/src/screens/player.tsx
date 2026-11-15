@@ -11,7 +11,8 @@
 // (§6.3.27). The assistant controls it (docs/assistant.md §5.2).
 // Administrators search the providers' subtitles from the subtitles' panel
 // and play with the one downloaded (§6.3.21), and a track's lyrics from the
-// lyrics providers (§6.3.27).
+// lyrics providers (§6.3.27). ASS and SSA subtitles keep their styles,
+// drawn by JASSUB (styled-subtitles.ts), which loads as one plays.
 import {
   capabilities,
   errorMessage,
@@ -55,6 +56,7 @@ import { LyricsSearch, LyricsView } from "./lyrics.tsx";
 import { SubtitleSearchResults, useItemSubtitleSearch } from "./item-subtitles.tsx";
 import { Select } from "../controls/select.tsx";
 import { PictureInPictureControls, usePictureInPicture } from "./pip.tsx";
+import type { StyledSubtitles } from "./styled-subtitles.ts";
 import { type ChapterMark, clock, SeekBar } from "./seekbar.tsx";
 import { GroupChip } from "./syncplay.tsx";
 
@@ -64,6 +66,20 @@ const speeds = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 /** Whether the browser lets a video's sound go to a device it picks. */
 const sinkable = typeof HTMLMediaElement !== "undefined" && "setSinkId" in HTMLMediaElement.prototype;
+
+/**
+ * Whether this browser runs JASSUB, which draws styled subtitles: workers,
+ * WebAssembly and canvases drawn off the main thread.
+ */
+const styledSupported =
+  typeof Worker !== "undefined" &&
+  typeof WebAssembly !== "undefined" &&
+  typeof OffscreenCanvas !== "undefined" &&
+  typeof HTMLCanvasElement !== "undefined" &&
+  "transferControlToOffscreen" in HTMLCanvasElement.prototype;
+
+/** Whether a subtitle track is ASS or SSA, which JASSUB draws. */
+const isStyled = (format: string) => /^(ass|ssa)$/i.test(format);
 
 /** How long after a click a second one makes it a double click, in milliseconds. */
 const doubleClickMs = 300;
@@ -130,6 +146,9 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
   const [info, setInfo] = useState<Playback>();
   const [error, setError] = useState<string>();
   const [selection, setSelection] = useState<Selection>(() => ({ quality: prefs().quality, audio: search.audio, subtitle: search.subtitle }));
+  // Whether ASS and SSA are asked for as they are, for JASSUB; false once
+  // it fails, which plays them as the server delivers them otherwise.
+  const [styled, setStyled] = useState(styledSupported);
   // Where the next start begins, in milliseconds: the resume position, then where a track change happened.
   const startAt = useRef(search.start ?? 0);
   const [paused, setPaused] = useState(true);
@@ -257,7 +276,7 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
             audioStreamIndex: selection.audio,
             subtitleStreamIndex: selection.subtitle,
             startMs: startAt.current,
-            capabilities: capabilities(undefined, qualityBitrates[selection.quality]),
+            capabilities: capabilities(undefined, qualityBitrates[selection.quality], styled),
           },
           state,
         );
@@ -341,7 +360,7 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
       v.removeAttribute("src");
       v.load();
     };
-  }, [servers, server, itemId, search.source, selection, qc]);
+  }, [servers, server, itemId, search.source, selection, styled, qc]);
 
   // The page going away ends the playback with a request that outlives it.
   useEffect(() => {
@@ -430,6 +449,48 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
     v.addEventListener("timeupdate", apply);
     return () => v.removeEventListener("timeupdate", apply);
   }, [subtitleOffset]);
+
+  // The styled track chosen, drawn by JASSUB over the video, wherever the
+  // video is, from the track's start until another plays.
+  const styledTrack = info?.info.subtitles.find(
+    (s) => s.streamIndex === info.info.subtitleStreamIndex && s.method === SubtitleMethod.EXTERNAL && s.url && isStyled(s.format),
+  );
+  const styledUrl = styledTrack ? urlOf(server, styledTrack.url) : undefined;
+  const styledSubs = useRef<StyledSubtitles>(undefined);
+  const offsetNow = useRef(subtitleOffset);
+  offsetNow.current = subtitleOffset;
+  useEffect(() => {
+    const v = video.current;
+    if (!v || !info || !styledUrl) return;
+    const abort = new AbortController();
+    const attachments = info.info.attachments.map((a) => ({ attachment: a, url: urlOf(server, a.url) }));
+    import("./styled-subtitles.ts")
+      .then((m) => m.styledSubtitles(v, styledUrl, attachments, offsetNow.current, abort.signal))
+      .then(
+        (s) => {
+          if (abort.signal.aborted) s.destroy();
+          else styledSubs.current = s;
+        },
+        (err: unknown) => {
+          if (abort.signal.aborted) return;
+          // Played again without them, as the server delivers ASS to other browsers.
+          console.warn("styled subtitles", err);
+          setStyled(false);
+        },
+      );
+    return () => {
+      abort.abort();
+      styledSubs.current?.destroy();
+      styledSubs.current = undefined;
+    };
+  }, [server, info, styledUrl]);
+  useEffect(() => styledSubs.current?.setOffset(subtitleOffset), [subtitleOffset]);
+  // The canvas goes with the video into Picture in Picture's window and back.
+  useEffect(() => {
+    const c = styledSubs.current?.canvas;
+    if (c && video.current && video.current.nextElementSibling !== c) video.current.after(c);
+  }, [pip.host]);
+
   const offsetSubtitles = (s: number) => {
     const o = Math.round(s * 10) / 10;
     setSubtitleOffset(o);
@@ -779,7 +840,7 @@ function Player({ server, itemId, queue }: { server: ServerEntry; itemId: string
   const source = item.data?.mediaSources.find((m) => m.id === info?.info.mediaSourceId);
   const audioTracks = source?.streams.filter((s) => s.kind === StreamKind.AUDIO) ?? [];
   const subtitleTracks = info?.info.subtitles ?? [];
-  const external = subtitleTracks.filter((s) => s.method === SubtitleMethod.EXTERNAL && s.url);
+  const external = subtitleTracks.filter((s) => s.method === SubtitleMethod.EXTERNAL && s.url && !isStyled(s.format));
   const total = duration || (current?.runtime ? Number(current.runtime.seconds) : 0);
   const episode =
     current?.kind === ItemKind.EPISODE && current.indexNumber > 0

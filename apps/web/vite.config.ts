@@ -33,6 +33,13 @@ function version(): string {
 export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss(), ...(mode === "app" ? [cloudflare()] : [])],
   define: { "import.meta.env.MAVIO_VERSION": JSON.stringify(version()) },
+  // JASSUB's worker, its WebAssembly and its font are emitted with the build,
+  // where the module's new URL(…, import.meta.url) finds them: from the
+  // build's own assets wherever it is served, never a CDN. The worker is an
+  // ES module, which development serves as it is rather than prebundled,
+  // with the CommonJS module it imports prebundled.
+  worker: { format: "es" },
+  optimizeDeps: { exclude: ["jassub"], include: ["jassub > throughput"] },
   build: {
     ...(mode === "app" ? {} : { outDir: "../server/internal/webui/dist", emptyOutDir: true }),
     // The API's generated descriptors and hls.js are large by themselves.

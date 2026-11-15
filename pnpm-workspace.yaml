@@ -5,6 +5,8 @@ packages:
 allowBuilds:
   '@google/genai': false
   esbuild: true
+  # Its postinstall fetches Google Fonts' list; the one it ships is kept.
+  lfa-ponyfill: false
   nx: true
   protobufjs: false
   workerd: true
