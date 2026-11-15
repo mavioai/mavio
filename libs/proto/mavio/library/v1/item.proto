@@ -54,6 +54,19 @@ service ItemService {
   rpc GetLyrics(GetLyricsRequest) returns (GetLyricsResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // RecordSearch records that the caller searched a query and opened what
+  // it found, which ranks the server's popular searches. A query that finds
+  // nothing the caller may access is not recorded. The record names no
+  // user: searching a query again replaces the caller's record of it.
+  rpc RecordSearch(RecordSearchRequest) returns (RecordSearchResponse) {}
+  // ListPopularSearches lists the queries the server's users searched,
+  // best first: each user who searched a query counts, less the longer ago,
+  // halved every 14 days. A query is listed once two users searched it, or
+  // the caller did, and only while it finds something the caller may
+  // access.
+  rpc ListPopularSearches(ListPopularSearchesRequest) returns (ListPopularSearchesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 enum ItemKind {
@@ -644,4 +657,34 @@ message ListNextUpResponse {
   // Each series' next episode: the first unplayed episode after the last
   // played one, with specials placed by where they air.
   repeated Item items = 1;
+}
+
+message RecordSearchRequest {
+  // As ListItemsRequest.search; at most 100 characters once its whitespace
+  // is collapsed.
+  string query = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    }
+  ];
+}
+
+message RecordSearchResponse {
+  // Whether the query was recorded: false when it finds nothing.
+  bool recorded = 1;
+}
+
+message ListPopularSearchesRequest {
+  // 1–30; unset means 10.
+  int32 limit = 1 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 30
+  }];
+}
+
+message ListPopularSearchesResponse {
+  // The queries, best first, as last typed.
+  repeated string queries = 1;
 }

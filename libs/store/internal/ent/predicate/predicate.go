@@ -117,6 +117,9 @@ type ReleaseProfile func(*sql.Selector)
 // Request is the predicate function for request builders.
 type Request func(*sql.Selector)
 
+// SearchRecord is the predicate function for searchrecord builders.
+type SearchRecord func(*sql.Selector)
+
 // Setting is the predicate function for setting builders.
 type Setting func(*sql.Selector)
 

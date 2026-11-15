@@ -6912,6 +6912,296 @@ func (b0 ListNextUpResponse_builder) Build() *ListNextUpResponse {
 	return m0
 }
 
+type RecordSearchRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Query       *string                `protobuf:"bytes,1,opt,name=query"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *RecordSearchRequest) Reset() {
+	*x = RecordSearchRequest{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecordSearchRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecordSearchRequest) ProtoMessage() {}
+
+func (x *RecordSearchRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *RecordSearchRequest) GetQuery() string {
+	if x != nil {
+		if x.xxx_hidden_Query != nil {
+			return *x.xxx_hidden_Query
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *RecordSearchRequest) SetQuery(v string) {
+	x.xxx_hidden_Query = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *RecordSearchRequest) HasQuery() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *RecordSearchRequest) ClearQuery() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Query = nil
+}
+
+type RecordSearchRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// As ListItemsRequest.search; at most 100 characters once its whitespace
+	// is collapsed.
+	Query *string
+}
+
+func (b0 RecordSearchRequest_builder) Build() *RecordSearchRequest {
+	m0 := &RecordSearchRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Query != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Query = b.Query
+	}
+	return m0
+}
+
+type RecordSearchResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Recorded    bool                   `protobuf:"varint,1,opt,name=recorded"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *RecordSearchResponse) Reset() {
+	*x = RecordSearchResponse{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecordSearchResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecordSearchResponse) ProtoMessage() {}
+
+func (x *RecordSearchResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *RecordSearchResponse) GetRecorded() bool {
+	if x != nil {
+		return x.xxx_hidden_Recorded
+	}
+	return false
+}
+
+func (x *RecordSearchResponse) SetRecorded(v bool) {
+	x.xxx_hidden_Recorded = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *RecordSearchResponse) HasRecorded() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *RecordSearchResponse) ClearRecorded() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Recorded = false
+}
+
+type RecordSearchResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Whether the query was recorded: false when it finds nothing.
+	Recorded *bool
+}
+
+func (b0 RecordSearchResponse_builder) Build() *RecordSearchResponse {
+	m0 := &RecordSearchResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Recorded != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Recorded = *b.Recorded
+	}
+	return m0
+}
+
+type ListPopularSearchesRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Limit       int32                  `protobuf:"varint,1,opt,name=limit"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ListPopularSearchesRequest) Reset() {
+	*x = ListPopularSearchesRequest{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPopularSearchesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPopularSearchesRequest) ProtoMessage() {}
+
+func (x *ListPopularSearchesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListPopularSearchesRequest) GetLimit() int32 {
+	if x != nil {
+		return x.xxx_hidden_Limit
+	}
+	return 0
+}
+
+func (x *ListPopularSearchesRequest) SetLimit(v int32) {
+	x.xxx_hidden_Limit = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *ListPopularSearchesRequest) HasLimit() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ListPopularSearchesRequest) ClearLimit() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Limit = 0
+}
+
+type ListPopularSearchesRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// 1–30; unset means 10.
+	Limit *int32
+}
+
+func (b0 ListPopularSearchesRequest_builder) Build() *ListPopularSearchesRequest {
+	m0 := &ListPopularSearchesRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Limit != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Limit = *b.Limit
+	}
+	return m0
+}
+
+type ListPopularSearchesResponse struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Queries []string               `protobuf:"bytes,1,rep,name=queries"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *ListPopularSearchesResponse) Reset() {
+	*x = ListPopularSearchesResponse{}
+	mi := &file_mavio_library_v1_item_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPopularSearchesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPopularSearchesResponse) ProtoMessage() {}
+
+func (x *ListPopularSearchesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_library_v1_item_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListPopularSearchesResponse) GetQueries() []string {
+	if x != nil {
+		return x.xxx_hidden_Queries
+	}
+	return nil
+}
+
+func (x *ListPopularSearchesResponse) SetQueries(v []string) {
+	x.xxx_hidden_Queries = v
+}
+
+type ListPopularSearchesResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The queries, best first, as last typed.
+	Queries []string
+}
+
+func (b0 ListPopularSearchesResponse_builder) Build() *ListPopularSearchesResponse {
+	m0 := &ListPopularSearchesResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Queries = b.Queries
+	return m0
+}
+
 var File_mavio_library_v1_item_proto protoreflect.FileDescriptor
 
 const file_mavio_library_v1_item_proto_rawDesc = "" +
@@ -7169,7 +7459,16 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x05limit\x18\x05 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x00R\x05limit\x12\x1f\n" +
 	"\x06offset\x18\x06 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x06offset\"B\n" +
 	"\x12ListNextUpResponse\x12,\n" +
-	"\x05items\x18\x01 \x03(\v2\x16.mavio.library.v1.ItemR\x05items*\x9e\x03\n" +
+	"\x05items\x18\x01 \x03(\v2\x16.mavio.library.v1.ItemR\x05items\":\n" +
+	"\x13RecordSearchRequest\x12#\n" +
+	"\x05query\x18\x01 \x01(\tB\r\xbaH\n" +
+	"\xc8\x01\x01r\x05\x10\x01\x18\xc8\x01R\x05query\"2\n" +
+	"\x14RecordSearchResponse\x12\x1a\n" +
+	"\brecorded\x18\x01 \x01(\bR\brecorded\"=\n" +
+	"\x1aListPopularSearchesRequest\x12\x1f\n" +
+	"\x05limit\x18\x01 \x01(\x05B\t\xbaH\x06\x1a\x04\x18\x1e(\x00R\x05limit\"7\n" +
+	"\x1bListPopularSearchesResponse\x12\x18\n" +
+	"\aqueries\x18\x01 \x03(\tR\aqueries*\x9e\x03\n" +
 	"\bItemKind\x12\x19\n" +
 	"\x15ITEM_KIND_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fITEM_KIND_MOVIE\x10\x01\x12\x14\n" +
@@ -7290,7 +7589,7 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x12SEGMENT_KIND_OUTRO\x10\x02\x12\x16\n" +
 	"\x12SEGMENT_KIND_RECAP\x10\x03\x12\x18\n" +
 	"\x14SEGMENT_KIND_PREVIEW\x10\x04\x12\x1b\n" +
-	"\x17SEGMENT_KIND_COMMERCIAL\x10\x052\xea\x06\n" +
+	"\x17SEGMENT_KIND_COMMERCIAL\x10\x052\xc4\b\n" +
 	"\vItemService\x12S\n" +
 	"\aGetItem\x12 .mavio.library.v1.GetItemRequest\x1a!.mavio.library.v1.GetItemResponse\"\x03\x90\x02\x01\x12Y\n" +
 	"\tListItems\x12\".mavio.library.v1.ListItemsRequest\x1a#.mavio.library.v1.ListItemsResponse\"\x03\x90\x02\x01\x12Y\n" +
@@ -7303,104 +7602,110 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x10ListSimilarItems\x12).mavio.library.v1.ListSimilarItemsRequest\x1a*.mavio.library.v1.ListSimilarItemsResponse\"\x03\x90\x02\x01\x12\\\n" +
 	"\n" +
 	"ListPeople\x12#.mavio.library.v1.ListPeopleRequest\x1a$.mavio.library.v1.ListPeopleResponse\"\x03\x90\x02\x01\x12Y\n" +
-	"\tGetLyrics\x12\".mavio.library.v1.GetLyricsRequest\x1a#.mavio.library.v1.GetLyricsResponse\"\x03\x90\x02\x01B\xca\x01\n" +
+	"\tGetLyrics\x12\".mavio.library.v1.GetLyricsRequest\x1a#.mavio.library.v1.GetLyricsResponse\"\x03\x90\x02\x01\x12_\n" +
+	"\fRecordSearch\x12%.mavio.library.v1.RecordSearchRequest\x1a&.mavio.library.v1.RecordSearchResponse\"\x00\x12w\n" +
+	"\x13ListPopularSearches\x12,.mavio.library.v1.ListPopularSearchesRequest\x1a-.mavio.library.v1.ListPopularSearchesResponse\"\x03\x90\x02\x01B\xca\x01\n" +
 	"\x14com.mavio.library.v1B\tItemProtoP\x01ZEgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1;libraryv1\xa2\x02\x03MLX\xaa\x02\x10Mavio.Library.V1\xca\x02\x10Mavio\\Library\\V1\xe2\x02\x1cMavio\\Library\\V1\\GPBMetadata\xea\x02\x12Mavio::Library::V1b\beditionsp\xe8\a"
 
 var file_mavio_library_v1_item_proto_enumTypes = make([]protoimpl.EnumInfo, 11)
-var file_mavio_library_v1_item_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
+var file_mavio_library_v1_item_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
 var file_mavio_library_v1_item_proto_goTypes = []any{
-	(ItemKind)(0),                    // 0: mavio.library.v1.ItemKind
-	(ExtraKind)(0),                   // 1: mavio.library.v1.ExtraKind
-	(SeriesStatus)(0),                // 2: mavio.library.v1.SeriesStatus
-	(ImageKind)(0),                   // 3: mavio.library.v1.ImageKind
-	(CreditKind)(0),                  // 4: mavio.library.v1.CreditKind
-	(SortField)(0),                   // 5: mavio.library.v1.SortField
-	(MetadataField)(0),               // 6: mavio.library.v1.MetadataField
-	(ValueKind)(0),                   // 7: mavio.library.v1.ValueKind
-	(SeriesType)(0),                  // 8: mavio.library.v1.SeriesType
-	(DisplayOrder)(0),                // 9: mavio.library.v1.DisplayOrder
-	(SegmentKind)(0),                 // 10: mavio.library.v1.SegmentKind
-	(*Item)(nil),                     // 11: mavio.library.v1.Item
-	(*ExternalUrl)(nil),              // 12: mavio.library.v1.ExternalUrl
-	(*Image)(nil),                    // 13: mavio.library.v1.Image
-	(*Person)(nil),                   // 14: mavio.library.v1.Person
-	(*Credit)(nil),                   // 15: mavio.library.v1.Credit
-	(*GetItemRequest)(nil),           // 16: mavio.library.v1.GetItemRequest
-	(*GetItemResponse)(nil),          // 17: mavio.library.v1.GetItemResponse
-	(*Trickplay)(nil),                // 18: mavio.library.v1.Trickplay
-	(*MediaSegment)(nil),             // 19: mavio.library.v1.MediaSegment
-	(*GetLyricsRequest)(nil),         // 20: mavio.library.v1.GetLyricsRequest
-	(*LyricCue)(nil),                 // 21: mavio.library.v1.LyricCue
-	(*LyricLine)(nil),                // 22: mavio.library.v1.LyricLine
-	(*GetLyricsResponse)(nil),        // 23: mavio.library.v1.GetLyricsResponse
-	(*SortSpec)(nil),                 // 24: mavio.library.v1.SortSpec
-	(*ListItemsRequest)(nil),         // 25: mavio.library.v1.ListItemsRequest
-	(*ListItemsResponse)(nil),        // 26: mavio.library.v1.ListItemsResponse
-	(*GetPersonRequest)(nil),         // 27: mavio.library.v1.GetPersonRequest
-	(*GetPersonResponse)(nil),        // 28: mavio.library.v1.GetPersonResponse
-	(*ListValuesRequest)(nil),        // 29: mavio.library.v1.ListValuesRequest
-	(*ValueCount)(nil),               // 30: mavio.library.v1.ValueCount
-	(*ListValuesResponse)(nil),       // 31: mavio.library.v1.ListValuesResponse
-	(*ListPeopleRequest)(nil),        // 32: mavio.library.v1.ListPeopleRequest
-	(*PersonCount)(nil),              // 33: mavio.library.v1.PersonCount
-	(*ListPeopleResponse)(nil),       // 34: mavio.library.v1.ListPeopleResponse
-	(*ListLatestItemsRequest)(nil),   // 35: mavio.library.v1.ListLatestItemsRequest
-	(*ListLatestItemsResponse)(nil),  // 36: mavio.library.v1.ListLatestItemsResponse
-	(*ListSimilarItemsRequest)(nil),  // 37: mavio.library.v1.ListSimilarItemsRequest
-	(*ListSimilarItemsResponse)(nil), // 38: mavio.library.v1.ListSimilarItemsResponse
-	(*ListNextUpRequest)(nil),        // 39: mavio.library.v1.ListNextUpRequest
-	(*ListNextUpResponse)(nil),       // 40: mavio.library.v1.ListNextUpResponse
-	nil,                              // 41: mavio.library.v1.Item.ExternalIdsEntry
-	nil,                              // 42: mavio.library.v1.Person.ExternalIdsEntry
-	nil,                              // 43: mavio.library.v1.ListItemsRequest.ExternalIdsEntry
-	(*timestamppb.Timestamp)(nil),    // 44: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),      // 45: google.protobuf.Duration
-	(*v1.UserData)(nil),              // 46: mavio.user.v1.UserData
-	(*MediaSource)(nil),              // 47: mavio.library.v1.MediaSource
+	(ItemKind)(0),                       // 0: mavio.library.v1.ItemKind
+	(ExtraKind)(0),                      // 1: mavio.library.v1.ExtraKind
+	(SeriesStatus)(0),                   // 2: mavio.library.v1.SeriesStatus
+	(ImageKind)(0),                      // 3: mavio.library.v1.ImageKind
+	(CreditKind)(0),                     // 4: mavio.library.v1.CreditKind
+	(SortField)(0),                      // 5: mavio.library.v1.SortField
+	(MetadataField)(0),                  // 6: mavio.library.v1.MetadataField
+	(ValueKind)(0),                      // 7: mavio.library.v1.ValueKind
+	(SeriesType)(0),                     // 8: mavio.library.v1.SeriesType
+	(DisplayOrder)(0),                   // 9: mavio.library.v1.DisplayOrder
+	(SegmentKind)(0),                    // 10: mavio.library.v1.SegmentKind
+	(*Item)(nil),                        // 11: mavio.library.v1.Item
+	(*ExternalUrl)(nil),                 // 12: mavio.library.v1.ExternalUrl
+	(*Image)(nil),                       // 13: mavio.library.v1.Image
+	(*Person)(nil),                      // 14: mavio.library.v1.Person
+	(*Credit)(nil),                      // 15: mavio.library.v1.Credit
+	(*GetItemRequest)(nil),              // 16: mavio.library.v1.GetItemRequest
+	(*GetItemResponse)(nil),             // 17: mavio.library.v1.GetItemResponse
+	(*Trickplay)(nil),                   // 18: mavio.library.v1.Trickplay
+	(*MediaSegment)(nil),                // 19: mavio.library.v1.MediaSegment
+	(*GetLyricsRequest)(nil),            // 20: mavio.library.v1.GetLyricsRequest
+	(*LyricCue)(nil),                    // 21: mavio.library.v1.LyricCue
+	(*LyricLine)(nil),                   // 22: mavio.library.v1.LyricLine
+	(*GetLyricsResponse)(nil),           // 23: mavio.library.v1.GetLyricsResponse
+	(*SortSpec)(nil),                    // 24: mavio.library.v1.SortSpec
+	(*ListItemsRequest)(nil),            // 25: mavio.library.v1.ListItemsRequest
+	(*ListItemsResponse)(nil),           // 26: mavio.library.v1.ListItemsResponse
+	(*GetPersonRequest)(nil),            // 27: mavio.library.v1.GetPersonRequest
+	(*GetPersonResponse)(nil),           // 28: mavio.library.v1.GetPersonResponse
+	(*ListValuesRequest)(nil),           // 29: mavio.library.v1.ListValuesRequest
+	(*ValueCount)(nil),                  // 30: mavio.library.v1.ValueCount
+	(*ListValuesResponse)(nil),          // 31: mavio.library.v1.ListValuesResponse
+	(*ListPeopleRequest)(nil),           // 32: mavio.library.v1.ListPeopleRequest
+	(*PersonCount)(nil),                 // 33: mavio.library.v1.PersonCount
+	(*ListPeopleResponse)(nil),          // 34: mavio.library.v1.ListPeopleResponse
+	(*ListLatestItemsRequest)(nil),      // 35: mavio.library.v1.ListLatestItemsRequest
+	(*ListLatestItemsResponse)(nil),     // 36: mavio.library.v1.ListLatestItemsResponse
+	(*ListSimilarItemsRequest)(nil),     // 37: mavio.library.v1.ListSimilarItemsRequest
+	(*ListSimilarItemsResponse)(nil),    // 38: mavio.library.v1.ListSimilarItemsResponse
+	(*ListNextUpRequest)(nil),           // 39: mavio.library.v1.ListNextUpRequest
+	(*ListNextUpResponse)(nil),          // 40: mavio.library.v1.ListNextUpResponse
+	(*RecordSearchRequest)(nil),         // 41: mavio.library.v1.RecordSearchRequest
+	(*RecordSearchResponse)(nil),        // 42: mavio.library.v1.RecordSearchResponse
+	(*ListPopularSearchesRequest)(nil),  // 43: mavio.library.v1.ListPopularSearchesRequest
+	(*ListPopularSearchesResponse)(nil), // 44: mavio.library.v1.ListPopularSearchesResponse
+	nil,                                 // 45: mavio.library.v1.Item.ExternalIdsEntry
+	nil,                                 // 46: mavio.library.v1.Person.ExternalIdsEntry
+	nil,                                 // 47: mavio.library.v1.ListItemsRequest.ExternalIdsEntry
+	(*timestamppb.Timestamp)(nil),       // 48: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),         // 49: google.protobuf.Duration
+	(*v1.UserData)(nil),                 // 50: mavio.user.v1.UserData
+	(*MediaSource)(nil),                 // 51: mavio.library.v1.MediaSource
 }
 var file_mavio_library_v1_item_proto_depIdxs = []int32{
 	0,  // 0: mavio.library.v1.Item.kind:type_name -> mavio.library.v1.ItemKind
-	44, // 1: mavio.library.v1.Item.premiere_date:type_name -> google.protobuf.Timestamp
-	44, // 2: mavio.library.v1.Item.end_date:type_name -> google.protobuf.Timestamp
-	45, // 3: mavio.library.v1.Item.runtime:type_name -> google.protobuf.Duration
-	41, // 4: mavio.library.v1.Item.external_ids:type_name -> mavio.library.v1.Item.ExternalIdsEntry
+	48, // 1: mavio.library.v1.Item.premiere_date:type_name -> google.protobuf.Timestamp
+	48, // 2: mavio.library.v1.Item.end_date:type_name -> google.protobuf.Timestamp
+	49, // 3: mavio.library.v1.Item.runtime:type_name -> google.protobuf.Duration
+	45, // 4: mavio.library.v1.Item.external_ids:type_name -> mavio.library.v1.Item.ExternalIdsEntry
 	2,  // 5: mavio.library.v1.Item.series_status:type_name -> mavio.library.v1.SeriesStatus
 	1,  // 6: mavio.library.v1.Item.extra:type_name -> mavio.library.v1.ExtraKind
-	44, // 7: mavio.library.v1.Item.date_added:type_name -> google.protobuf.Timestamp
+	48, // 7: mavio.library.v1.Item.date_added:type_name -> google.protobuf.Timestamp
 	13, // 8: mavio.library.v1.Item.images:type_name -> mavio.library.v1.Image
 	6,  // 9: mavio.library.v1.Item.locked_fields:type_name -> mavio.library.v1.MetadataField
 	12, // 10: mavio.library.v1.Item.external_urls:type_name -> mavio.library.v1.ExternalUrl
 	8,  // 11: mavio.library.v1.Item.series_type:type_name -> mavio.library.v1.SeriesType
 	9,  // 12: mavio.library.v1.Item.display_order:type_name -> mavio.library.v1.DisplayOrder
-	46, // 13: mavio.library.v1.Item.user_data:type_name -> mavio.user.v1.UserData
-	44, // 14: mavio.library.v1.Item.digital_release_date:type_name -> google.protobuf.Timestamp
-	44, // 15: mavio.library.v1.Item.physical_release_date:type_name -> google.protobuf.Timestamp
+	50, // 13: mavio.library.v1.Item.user_data:type_name -> mavio.user.v1.UserData
+	48, // 14: mavio.library.v1.Item.digital_release_date:type_name -> google.protobuf.Timestamp
+	48, // 15: mavio.library.v1.Item.physical_release_date:type_name -> google.protobuf.Timestamp
 	3,  // 16: mavio.library.v1.Image.kind:type_name -> mavio.library.v1.ImageKind
-	44, // 17: mavio.library.v1.Person.birth_date:type_name -> google.protobuf.Timestamp
-	44, // 18: mavio.library.v1.Person.death_date:type_name -> google.protobuf.Timestamp
-	42, // 19: mavio.library.v1.Person.external_ids:type_name -> mavio.library.v1.Person.ExternalIdsEntry
+	48, // 17: mavio.library.v1.Person.birth_date:type_name -> google.protobuf.Timestamp
+	48, // 18: mavio.library.v1.Person.death_date:type_name -> google.protobuf.Timestamp
+	46, // 19: mavio.library.v1.Person.external_ids:type_name -> mavio.library.v1.Person.ExternalIdsEntry
 	13, // 20: mavio.library.v1.Person.images:type_name -> mavio.library.v1.Image
 	12, // 21: mavio.library.v1.Person.external_urls:type_name -> mavio.library.v1.ExternalUrl
 	14, // 22: mavio.library.v1.Credit.person:type_name -> mavio.library.v1.Person
 	4,  // 23: mavio.library.v1.Credit.kind:type_name -> mavio.library.v1.CreditKind
 	11, // 24: mavio.library.v1.GetItemResponse.item:type_name -> mavio.library.v1.Item
-	47, // 25: mavio.library.v1.GetItemResponse.media_sources:type_name -> mavio.library.v1.MediaSource
+	51, // 25: mavio.library.v1.GetItemResponse.media_sources:type_name -> mavio.library.v1.MediaSource
 	15, // 26: mavio.library.v1.GetItemResponse.credits:type_name -> mavio.library.v1.Credit
 	18, // 27: mavio.library.v1.GetItemResponse.trickplay:type_name -> mavio.library.v1.Trickplay
 	19, // 28: mavio.library.v1.GetItemResponse.segments:type_name -> mavio.library.v1.MediaSegment
-	45, // 29: mavio.library.v1.Trickplay.interval:type_name -> google.protobuf.Duration
+	49, // 29: mavio.library.v1.Trickplay.interval:type_name -> google.protobuf.Duration
 	10, // 30: mavio.library.v1.MediaSegment.kind:type_name -> mavio.library.v1.SegmentKind
-	45, // 31: mavio.library.v1.MediaSegment.start:type_name -> google.protobuf.Duration
-	45, // 32: mavio.library.v1.MediaSegment.end:type_name -> google.protobuf.Duration
-	45, // 33: mavio.library.v1.LyricCue.start:type_name -> google.protobuf.Duration
-	45, // 34: mavio.library.v1.LyricCue.end:type_name -> google.protobuf.Duration
-	45, // 35: mavio.library.v1.LyricLine.start:type_name -> google.protobuf.Duration
+	49, // 31: mavio.library.v1.MediaSegment.start:type_name -> google.protobuf.Duration
+	49, // 32: mavio.library.v1.MediaSegment.end:type_name -> google.protobuf.Duration
+	49, // 33: mavio.library.v1.LyricCue.start:type_name -> google.protobuf.Duration
+	49, // 34: mavio.library.v1.LyricCue.end:type_name -> google.protobuf.Duration
+	49, // 35: mavio.library.v1.LyricLine.start:type_name -> google.protobuf.Duration
 	21, // 36: mavio.library.v1.LyricLine.cues:type_name -> mavio.library.v1.LyricCue
 	22, // 37: mavio.library.v1.GetLyricsResponse.lines:type_name -> mavio.library.v1.LyricLine
 	5,  // 38: mavio.library.v1.SortSpec.field:type_name -> mavio.library.v1.SortField
 	0,  // 39: mavio.library.v1.ListItemsRequest.kinds:type_name -> mavio.library.v1.ItemKind
 	24, // 40: mavio.library.v1.ListItemsRequest.sort:type_name -> mavio.library.v1.SortSpec
-	43, // 41: mavio.library.v1.ListItemsRequest.external_ids:type_name -> mavio.library.v1.ListItemsRequest.ExternalIdsEntry
+	47, // 41: mavio.library.v1.ListItemsRequest.external_ids:type_name -> mavio.library.v1.ListItemsRequest.ExternalIdsEntry
 	11, // 42: mavio.library.v1.ListItemsResponse.items:type_name -> mavio.library.v1.Item
 	14, // 43: mavio.library.v1.GetPersonResponse.person:type_name -> mavio.library.v1.Person
 	7,  // 44: mavio.library.v1.ListValuesRequest.kind:type_name -> mavio.library.v1.ValueKind
@@ -7413,7 +7718,7 @@ var file_mavio_library_v1_item_proto_depIdxs = []int32{
 	0,  // 51: mavio.library.v1.ListLatestItemsRequest.kinds:type_name -> mavio.library.v1.ItemKind
 	11, // 52: mavio.library.v1.ListLatestItemsResponse.items:type_name -> mavio.library.v1.Item
 	11, // 53: mavio.library.v1.ListSimilarItemsResponse.items:type_name -> mavio.library.v1.Item
-	44, // 54: mavio.library.v1.ListNextUpRequest.since:type_name -> google.protobuf.Timestamp
+	48, // 54: mavio.library.v1.ListNextUpRequest.since:type_name -> google.protobuf.Timestamp
 	11, // 55: mavio.library.v1.ListNextUpResponse.items:type_name -> mavio.library.v1.Item
 	16, // 56: mavio.library.v1.ItemService.GetItem:input_type -> mavio.library.v1.GetItemRequest
 	25, // 57: mavio.library.v1.ItemService.ListItems:input_type -> mavio.library.v1.ListItemsRequest
@@ -7424,17 +7729,21 @@ var file_mavio_library_v1_item_proto_depIdxs = []int32{
 	37, // 62: mavio.library.v1.ItemService.ListSimilarItems:input_type -> mavio.library.v1.ListSimilarItemsRequest
 	32, // 63: mavio.library.v1.ItemService.ListPeople:input_type -> mavio.library.v1.ListPeopleRequest
 	20, // 64: mavio.library.v1.ItemService.GetLyrics:input_type -> mavio.library.v1.GetLyricsRequest
-	17, // 65: mavio.library.v1.ItemService.GetItem:output_type -> mavio.library.v1.GetItemResponse
-	26, // 66: mavio.library.v1.ItemService.ListItems:output_type -> mavio.library.v1.ListItemsResponse
-	28, // 67: mavio.library.v1.ItemService.GetPerson:output_type -> mavio.library.v1.GetPersonResponse
-	31, // 68: mavio.library.v1.ItemService.ListValues:output_type -> mavio.library.v1.ListValuesResponse
-	36, // 69: mavio.library.v1.ItemService.ListLatestItems:output_type -> mavio.library.v1.ListLatestItemsResponse
-	40, // 70: mavio.library.v1.ItemService.ListNextUp:output_type -> mavio.library.v1.ListNextUpResponse
-	38, // 71: mavio.library.v1.ItemService.ListSimilarItems:output_type -> mavio.library.v1.ListSimilarItemsResponse
-	34, // 72: mavio.library.v1.ItemService.ListPeople:output_type -> mavio.library.v1.ListPeopleResponse
-	23, // 73: mavio.library.v1.ItemService.GetLyrics:output_type -> mavio.library.v1.GetLyricsResponse
-	65, // [65:74] is the sub-list for method output_type
-	56, // [56:65] is the sub-list for method input_type
+	41, // 65: mavio.library.v1.ItemService.RecordSearch:input_type -> mavio.library.v1.RecordSearchRequest
+	43, // 66: mavio.library.v1.ItemService.ListPopularSearches:input_type -> mavio.library.v1.ListPopularSearchesRequest
+	17, // 67: mavio.library.v1.ItemService.GetItem:output_type -> mavio.library.v1.GetItemResponse
+	26, // 68: mavio.library.v1.ItemService.ListItems:output_type -> mavio.library.v1.ListItemsResponse
+	28, // 69: mavio.library.v1.ItemService.GetPerson:output_type -> mavio.library.v1.GetPersonResponse
+	31, // 70: mavio.library.v1.ItemService.ListValues:output_type -> mavio.library.v1.ListValuesResponse
+	36, // 71: mavio.library.v1.ItemService.ListLatestItems:output_type -> mavio.library.v1.ListLatestItemsResponse
+	40, // 72: mavio.library.v1.ItemService.ListNextUp:output_type -> mavio.library.v1.ListNextUpResponse
+	38, // 73: mavio.library.v1.ItemService.ListSimilarItems:output_type -> mavio.library.v1.ListSimilarItemsResponse
+	34, // 74: mavio.library.v1.ItemService.ListPeople:output_type -> mavio.library.v1.ListPeopleResponse
+	23, // 75: mavio.library.v1.ItemService.GetLyrics:output_type -> mavio.library.v1.GetLyricsResponse
+	42, // 76: mavio.library.v1.ItemService.RecordSearch:output_type -> mavio.library.v1.RecordSearchResponse
+	44, // 77: mavio.library.v1.ItemService.ListPopularSearches:output_type -> mavio.library.v1.ListPopularSearchesResponse
+	67, // [67:78] is the sub-list for method output_type
+	56, // [56:67] is the sub-list for method input_type
 	56, // [56:56] is the sub-list for extension type_name
 	56, // [56:56] is the sub-list for extension extendee
 	0,  // [0:56] is the sub-list for field type_name
@@ -7452,7 +7761,7 @@ func file_mavio_library_v1_item_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_library_v1_item_proto_rawDesc), len(file_mavio_library_v1_item_proto_rawDesc)),
 			NumEnums:      11,
-			NumMessages:   33,
+			NumMessages:   37,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

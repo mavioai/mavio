@@ -72,6 +72,26 @@ pub type OwnedGetLyricsRequestView = ::buffa::view::OwnedView<
 pub type OwnedGetLyricsResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::library::v1::__buffa::view::GetLyricsResponseView<'static>,
 >;
+///Shorthand for `OwnedView<RecordSearchRequestView<'static>>`.
+pub type OwnedRecordSearchRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::library::v1::__buffa::view::RecordSearchRequestView<'static>,
+>;
+///Shorthand for `OwnedView<RecordSearchResponseView<'static>>`.
+pub type OwnedRecordSearchResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::library::v1::__buffa::view::RecordSearchResponseView<'static>,
+>;
+///Shorthand for `OwnedView<ListPopularSearchesRequestView<'static>>`.
+pub type OwnedListPopularSearchesRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::library::v1::__buffa::view::ListPopularSearchesRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<ListPopularSearchesResponseView<'static>>`.
+pub type OwnedListPopularSearchesResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::library::v1::__buffa::view::ListPopularSearchesResponseView<
+        'static,
+    >,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::library::v1::GetItemResponse>
 for crate::proto::mavio::library::v1::__buffa::view::GetItemResponseView<'_> {
     fn encode(
@@ -380,6 +400,82 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::library::v1::RecordSearchResponse>
+for crate::proto::mavio::library::v1::__buffa::view::RecordSearchResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::library::v1::RecordSearchResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::library::v1::__buffa::view::RecordSearchResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::library::v1::ListPopularSearchesResponse,
+>
+for crate::proto::mavio::library::v1::__buffa::view::ListPopularSearchesResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::library::v1::ListPopularSearchesResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::library::v1::__buffa::view::ListPopularSearchesResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const ITEM_SERVICE_SERVICE_NAME: &str = "mavio.library.v1.ItemService";
 /// Static [`Spec`](::connectrpc::Spec) for the `GetItem` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -433,6 +529,18 @@ pub const ITEM_SERVICE_LIST_PEOPLE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec
 /// Static [`Spec`](::connectrpc::Spec) for the `GetLyrics` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const ITEM_SERVICE_GET_LYRICS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.library.v1.ItemService/GetLyrics",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `RecordSearch` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const ITEM_SERVICE_RECORD_SEARCH_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.library.v1.ItemService/RecordSearch",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `ListPopularSearches` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const ITEM_SERVICE_LIST_POPULAR_SEARCHES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.library.v1.ItemService/ListPopularSearches",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
@@ -702,6 +810,59 @@ pub trait ItemService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::library::v1::GetLyricsResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// RecordSearch records that the caller searched a query and opened what
+    /// it found, which ranks the server's popular searches. A query that finds
+    /// nothing the caller may access is not recorded. The record names no
+    /// user: searching a query again replaces the caller's record of it.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn record_search<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::library::v1::RecordSearchRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::library::v1::RecordSearchResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ListPopularSearches lists the queries the server's users searched,
+    /// best first: each user who searched a query counts, less the longer ago,
+    /// halved every 14 days. A query is listed once two users searched it, or
+    /// the caller did, and only while it finds something the caller may
+    /// access.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_popular_searches<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::library::v1::ListPopularSearchesRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::library::v1::ListPopularSearchesResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -998,6 +1159,64 @@ impl<S: ItemService> ItemServiceExt for S {
                 },
             )
             .with_spec(ITEM_SERVICE_GET_LYRICS_SPEC)
+            .route_view(
+                ITEM_SERVICE_SERVICE_NAME,
+                "RecordSearch",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::library::v1::__buffa::view::RecordSearchRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::library::v1::RecordSearchRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.record_search(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::library::v1::RecordSearchResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(ITEM_SERVICE_RECORD_SEARCH_SPEC)
+            .route_view_idempotent(
+                ITEM_SERVICE_SERVICE_NAME,
+                "ListPopularSearches",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::library::v1::__buffa::view::ListPopularSearchesRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::library::v1::ListPopularSearchesRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_popular_searches(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::library::v1::ListPopularSearchesResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(ITEM_SERVICE_LIST_POPULAR_SEARCHES_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -1104,6 +1323,18 @@ impl<T: ItemService> ::connectrpc::Dispatcher for ItemServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
                         .with_spec(ITEM_SERVICE_GET_LYRICS_SPEC),
+                )
+            }
+            "RecordSearch" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(ITEM_SERVICE_RECORD_SEARCH_SPEC),
+                )
+            }
+            "ListPopularSearches" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(ITEM_SERVICE_LIST_POPULAR_SEARCHES_SPEC),
                 )
             }
             _ => None,
@@ -1316,6 +1547,50 @@ impl<T: ItemService> ::connectrpc::Dispatcher for ItemServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::library::v1::GetLyricsResponse,
+                        >(format)
+                })
+            }
+            "RecordSearch" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::library::v1::RecordSearchRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::library::v1::__buffa::view::RecordSearchRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::library::v1::RecordSearchRequest,
+                    >::from_parts(&req, &body);
+                    svc.record_search(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::library::v1::RecordSearchResponse,
+                        >(format)
+                })
+            }
+            "ListPopularSearches" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::library::v1::ListPopularSearchesRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::library::v1::__buffa::view::ListPopularSearchesRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::library::v1::ListPopularSearchesRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_popular_searches(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::library::v1::ListPopularSearchesResponse,
                         >(format)
                 })
             }
@@ -1842,6 +2117,96 @@ where
                 &self.transport,
                 &self.config,
                 ITEM_SERVICE_GET_LYRICS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the RecordSearch RPC. Sends a request to /mavio.library.v1.ItemService/RecordSearch.
+    pub async fn record_search(
+        &self,
+        request: crate::proto::mavio::library::v1::RecordSearchRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::library::v1::__buffa::view::RecordSearchResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.record_search_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the RecordSearch RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn record_search_with_options(
+        &self,
+        request: crate::proto::mavio::library::v1::RecordSearchRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::library::v1::__buffa::view::RecordSearchResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                ITEM_SERVICE_RECORD_SEARCH_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ListPopularSearches RPC. Sends a request to /mavio.library.v1.ItemService/ListPopularSearches.
+    pub async fn list_popular_searches(
+        &self,
+        request: crate::proto::mavio::library::v1::ListPopularSearchesRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::library::v1::__buffa::view::ListPopularSearchesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_popular_searches_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListPopularSearches RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_popular_searches_with_options(
+        &self,
+        request: crate::proto::mavio::library::v1::ListPopularSearchesRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::library::v1::__buffa::view::ListPopularSearchesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                ITEM_SERVICE_LIST_POPULAR_SEARCHES_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

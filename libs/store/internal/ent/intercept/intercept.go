@@ -46,6 +46,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
+	"github.com/mavioai/mavio/libs/store/internal/ent/searchrecord"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleblocklistentry"
@@ -1115,6 +1116,33 @@ func (f TraverseRequest) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.RequestQuery", q)
 }
 
+// The SearchRecordFunc type is an adapter to allow the use of ordinary function as a Querier.
+type SearchRecordFunc func(context.Context, *ent.SearchRecordQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f SearchRecordFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.SearchRecordQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.SearchRecordQuery", q)
+}
+
+// The TraverseSearchRecord type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseSearchRecord func(context.Context, *ent.SearchRecordQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseSearchRecord) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseSearchRecord) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.SearchRecordQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.SearchRecordQuery", q)
+}
+
 // The SettingFunc type is an adapter to allow the use of ordinary function as a Querier.
 type SettingFunc func(context.Context, *ent.SettingQuery) (ent.Value, error)
 
@@ -1516,6 +1544,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.ReleaseProfileQuery, predicate.ReleaseProfile, releaseprofile.OrderOption]{typ: ent.TypeReleaseProfile, tq: q}, nil
 	case *ent.RequestQuery:
 		return &query[*ent.RequestQuery, predicate.Request, request.OrderOption]{typ: ent.TypeRequest, tq: q}, nil
+	case *ent.SearchRecordQuery:
+		return &query[*ent.SearchRecordQuery, predicate.SearchRecord, searchrecord.OrderOption]{typ: ent.TypeSearchRecord, tq: q}, nil
 	case *ent.SettingQuery:
 		return &query[*ent.SettingQuery, predicate.Setting, setting.OrderOption]{typ: ent.TypeSetting, tq: q}, nil
 	case *ent.StorageJobQuery:

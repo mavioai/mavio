@@ -240,7 +240,7 @@ erDiagram
 * `Complete` 保存任务的 `Result`，即其所做之事的摘要（如插件任务下载了哪些模型），随已结束的任务显示；处理器以 `library.SetResult` 设置它，无可报告时为空。
 * 一次尝试失败后，在 `RetryDelay(attempts)` 之后重试——30 秒，此后翻倍（1 分钟、2 分钟……），最长一小时——若其错误说明的需等待时间更长，则在其之后（`RetryAfter`，例如限制调用的存储所说明的），直到达到 `MaxAttempts`，此时任务变为 `failed`。若在其执行期间已有同 key 的任务入队，则由后者代替重试，该任务立即变为 `failed`。
 * 状态流转：`pending` → `running` → `succeeded` / 重试时回到 `pending` / `failed`。
-* `JobQuery` 按类型与状态列出任务，最近创建的在前；已结束的任务在一周后由每日运行的 `jobs.cleanup` 任务清除，该任务还会删除空闲的会话与过期的邀请，以及元数据目录中已不存在的条目的目录（在其最后一次改动一天之后）。
+* `JobQuery` 按类型与状态列出任务，最近创建的在前；已结束的任务在一周后由每日运行的 `jobs.cleanup` 任务清除，该任务还会删除空闲的会话、过期的邀请与旧的搜索记录（§9.2），以及元数据目录中已不存在的条目的目录（在其最后一次改动一天之后）。
 
 ---
 
@@ -292,6 +292,7 @@ erDiagram
 | `SubtitleBlocklistRepository` | `Add`、`List`（分页，最新在前，某条目的或全部）、`Delete`、`Clear` |
 | `SubtitleSearchAttemptRepository` | 按语言 `List` 某条目的记录、`Record` 一次失败搜索（保留首次时间，替换最近时间） |
 | `SubtitleWantedRepository` | `Put` 某条目的行（无缺少时删除）、`Delete`、按媒体库与路径 `List` 现存条目中电影或单集的行 |
+| `SearchRepository` | `Record` 一次搜索（替换该投票者对该搜索词的记录）、`List` 某时间以来的记录（最新在前）、`Prune` 删除某时间之前的记录及最新若干条以外的记录；见 §9.2 |
 | `BlockedTitleRepository` | 按类型与 TMDB ID `Get`、`List`（分页，最新在前，按标题搜索，可只列手动或按标签阻止的作品）、`Add`（已在阻止列表时返回 `ErrConflict`）、`Delete`、`DeleteTagged`（删除按标签阻止的作品）；删除阻止作品的用户不会删除其条目 |
 
 * **事务**：`Store.InTx` 用一个绑定到同一事务的 `Store` 执行函数；函数返回错误时回滚。
@@ -321,6 +322,7 @@ erDiagram
 * **值列表**：`ValueQuery` 列出其 `ItemFilter` 选中的条目上某个 `ValueKind`（`genre`、`tag`、`studio`、包含专辑艺人的 `artist`，或 `year`：十进制的出品年份，从早到晚，不可搜索）的去重值。被选中的是存在且不是附加内容的条目，可限定媒体库与条目类型，并限定内容（`Limits`，与条目查询相同）。每个值附带拥有它的条目数（`ValueCount`）。清洗形式相同的值视为同一个值，以按码点排序最靠前的写法显示，`Genres`、`Tags`、`Studios` 过滤也是如此。
 * **人员列表**：`PersonQuery` 列出在其 `ItemFilter` 选中的条目上有署名的人员，可只限某些 `CreditKinds`，每人附带这些条目的数量（`PersonCount`）；没有这类署名的人员不列出。
 * **分页**：值列表与人员列表接受 `Limit` 与 `Offset`。
+* **热门搜索**：`SearchRecord` 是一个用户对一个搜索词的最近一次搜索：其 `Key`（`SearchKey`：合并空白并转为小写）、最后一次输入的 `Text`（`SearchText`，至多 `MaxSearchLength` = 100 个字符）、`Voter` 与 `SearchedAt`。记录不指明用户：`Voter` 是 `SearchVoter`，即用户 ID 与搜索词键的 SHA-256 哈希，使一个用户的各次搜索无法被归集到一起，再次搜索同一搜索词则替换其记录。`RankSearches` 在某一时刻为搜索词排名：每个搜索过它的用户计 1，此后每过 `SearchHalfLife`（14 天）减半，同分时最近被搜索的在前，其拼写也取自最近一次；一个搜索词在 `MinSearchUsers`（2）个用户搜索过之后，或查看者自己搜索过时，才显示给查看者。记录保留 `SearchRetention`（90 天），至多 `MaxSearchRecords`（10,000）条，保留最新的。
 
 ---
 

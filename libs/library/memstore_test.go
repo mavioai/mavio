@@ -34,12 +34,13 @@ type memStore struct {
 	clock func() time.Time
 }
 
-// memSettings serves the default settings; memSessions and memInvitations
-// are empty.
+// memSettings serves the default settings; memSessions, memInvitations
+// and memSearches are empty.
 type (
 	memSettings    struct{ core.SettingsRepository }
 	memSessions    struct{ core.AuthSessionRepository }
 	memInvitations struct{ core.InvitationRepository }
+	memSearches    struct{ core.SearchRepository }
 )
 
 func (memSettings) Get(context.Context) (core.ServerSettings, error) {
@@ -48,6 +49,8 @@ func (memSettings) Get(context.Context) (core.ServerSettings, error) {
 
 func (memSessions) PurgeIdle(context.Context, time.Time) (int, error)       { return 0, nil }
 func (memInvitations) PurgeExpired(context.Context, time.Time) (int, error) { return 0, nil }
+
+func (memSearches) Prune(context.Context, time.Time, int) (int, error) { return 0, nil }
 
 // memHistory records the items whose history moves.
 type memHistory struct{ m *memStore }
@@ -78,23 +81,25 @@ func newMemStore() *memStore {
 	}
 }
 
-func (m *memStore) Libraries() core.LibraryRepository                        { return memLibs{m} }
-func (m *memStore) Items() core.ItemRepository                               { return memItems{m} }
-func (m *memStore) MediaSources() core.MediaSourceRepository                 { return memSources{m} }
-func (m *memStore) Images() core.ImageRepository                             { return memImages{m} }
-func (m *memStore) People() core.PersonRepository                            { return memPeople{m} }
-func (m *memStore) Users() core.UserRepository                               { panic("unused") }
-func (m *memStore) Credentials() core.CredentialRepository                   { panic("unused") }
-func (m *memStore) UserData() core.UserDataRepository                        { panic("unused") }
-func (m *memStore) Jobs() core.JobQueue                                      { return memJobs{m} }
-func (m *memStore) Scans() core.ScanRepository                               { return memScans{m} }
-func (m *memStore) AuthSessions() core.AuthSessionRepository                 { return memSessions{} }
-func (m *memStore) PluginConfigs() core.PluginConfigRepository               { panic("unused") }
-func (m *memStore) PluginContainers() core.PluginContainerRepository         { panic("unused") }
-func (m *memStore) DisplayPreferences() core.DisplayPreferencesRepository    { panic("unused") }
-func (m *memStore) Settings() core.SettingsRepository                        { return memSettings{} }
-func (m *memStore) APIKeys() core.APIKeyRepository                           { panic("unused") }
-func (m *memStore) Invitations() core.InvitationRepository                   { return memInvitations{} }
+func (m *memStore) Libraries() core.LibraryRepository                     { return memLibs{m} }
+func (m *memStore) Items() core.ItemRepository                            { return memItems{m} }
+func (m *memStore) MediaSources() core.MediaSourceRepository              { return memSources{m} }
+func (m *memStore) Images() core.ImageRepository                          { return memImages{m} }
+func (m *memStore) People() core.PersonRepository                         { return memPeople{m} }
+func (m *memStore) Users() core.UserRepository                            { panic("unused") }
+func (m *memStore) Credentials() core.CredentialRepository                { panic("unused") }
+func (m *memStore) UserData() core.UserDataRepository                     { panic("unused") }
+func (m *memStore) Jobs() core.JobQueue                                   { return memJobs{m} }
+func (m *memStore) Scans() core.ScanRepository                            { return memScans{m} }
+func (m *memStore) AuthSessions() core.AuthSessionRepository              { return memSessions{} }
+func (m *memStore) PluginConfigs() core.PluginConfigRepository            { panic("unused") }
+func (m *memStore) PluginContainers() core.PluginContainerRepository      { panic("unused") }
+func (m *memStore) DisplayPreferences() core.DisplayPreferencesRepository { panic("unused") }
+func (m *memStore) Settings() core.SettingsRepository                     { return memSettings{} }
+func (m *memStore) APIKeys() core.APIKeyRepository                        { panic("unused") }
+func (m *memStore) Invitations() core.InvitationRepository                { return memInvitations{} }
+
+func (m *memStore) Searches() core.SearchRepository                          { return memSearches{} }
 func (m *memStore) Activities() core.ActivityRepository                      { panic("unused") }
 func (m *memStore) Trickplay() core.TrickplayRepository                      { return memTricks{m} }
 func (m *memStore) MediaSegments() core.MediaSegmentRepository               { return memSegs{m} }

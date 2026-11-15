@@ -396,6 +396,7 @@ export type MessageKey =
   | 'search.backspace'
   | 'search.clear'
   | 'search.discover'
+  | 'search.popular'
   | 'search.server'
   | 'menu.manageAccount'
   | 'menu.manageServers'
@@ -2784,6 +2785,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "search.backspace": "Delete",
     "search.clear": "Clear",
     "search.discover": "From Discover",
+    "search.popular": "Popular Searches",
     "search.server": "From the Server",
     "menu.manageAccount": "Manage Account at mavio.dev",
     "menu.manageServers": "Manage Servers",
@@ -5170,6 +5172,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "search.backspace": "删除",
     "search.clear": "清空",
     "search.discover": "来自发现",
+    "search.popular": "热门搜索",
     "search.server": "来自服务器",
     "menu.manageAccount": "在 mavio.dev 管理账户",
     "menu.manageServers": "管理服务器",

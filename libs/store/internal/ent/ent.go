@@ -49,6 +49,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
+	"github.com/mavioai/mavio/libs/store/internal/ent/searchrecord"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleblocklistentry"
@@ -158,6 +159,7 @@ func checkColumn(t, c string) error {
 			qualityprofile.Table:            qualityprofile.ValidColumn,
 			releaseprofile.Table:            releaseprofile.ValidColumn,
 			request.Table:                   request.ValidColumn,
+			searchrecord.Table:              searchrecord.ValidColumn,
 			setting.Table:                   setting.ValidColumn,
 			storagejob.Table:                storagejob.ValidColumn,
 			subtitleblocklistentry.Table:    subtitleblocklistentry.ValidColumn,

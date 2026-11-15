@@ -254,6 +254,53 @@ func TestBrowsing(t *testing.T) {
 	if connect.CodeOf(err) != connect.CodeNotFound {
 		t.Errorf("kid adds Lost: %v, want not_found", err)
 	}
+
+	// Popular searches: a query is recorded only where it finds something
+	// for the user, and listed to others once two users searched it, while
+	// it finds something for them.
+	if _, err := users.CreateUser(ctx, userv1.CreateUserRequest_builder{
+		Name: new("teen"), Password: new("pw"), Policy: userv1.UserPolicy_builder{AllLibraries: new(true)}.Build(),
+	}.Build()); err != nil {
+		t.Fatal(err)
+	}
+	signedIn, err = authv1connect.NewAuthServiceClient(http.DefaultClient, url).Login(ctx, authv1.LoginRequest_builder{
+		Name: new("teen"), Password: new("pw"), Device: device("phone"),
+	}.Build())
+	if err != nil {
+		t.Fatal(err)
+	}
+	teen := libraryv1connect.NewItemServiceClient(http.DefaultClient, url, withToken(signedIn.GetAccessToken()))
+	record := func(c libraryv1connect.ItemServiceClient, query string, want bool) {
+		t.Helper()
+		resp, err := c.RecordSearch(ctx, libraryv1.RecordSearchRequest_builder{Query: &query}.Build())
+		if err != nil || resp.GetRecorded() != want {
+			t.Errorf("RecordSearch(%q) got = %v, %v, want = %v", query, resp.GetRecorded(), err, want)
+		}
+	}
+	popular := func(c libraryv1connect.ItemServiceClient) []string {
+		t.Helper()
+		resp, err := c.ListPopularSearches(ctx, libraryv1.ListPopularSearchesRequest_builder{}.Build())
+		if err != nil {
+			t.Fatalf("ListPopularSearches: %v", err)
+		}
+		return resp.GetQueries()
+	}
+	record(items, "heat", true)
+	record(items, "Up", true)
+	record(items, "nothing like it", false)
+	record(kid, "up", true)
+	record(kid, "Heat", false)
+	record(teen, "lost", true)
+	record(items, "  Lost ", true)
+	if got := popular(items); !slices.Equal(got, []string{"Lost", "up", "heat"}) {
+		t.Errorf("admin's popular searches got = %q, want = [Lost up heat]", got)
+	}
+	if got := popular(kid); !slices.Equal(got, []string{"up"}) {
+		t.Errorf("kid's popular searches got = %q, want = [up]", got)
+	}
+	if got := popular(teen); !slices.Equal(got, []string{"Lost", "up"}) {
+		t.Errorf("teen's popular searches got = %q, want = [Lost up]", got)
+	}
 }
 
 // device returns a test device whose key is derived from its ID.

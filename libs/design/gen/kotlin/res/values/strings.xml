@@ -799,6 +799,8 @@
     <string name="search_clear">Clear</string>
     <!-- Row of the movies and series discovery providers find by name. -->
     <string name="search_discover">From Discover</string>
+    <!-- Heading of the queries the servers' users search most, shown on the television's search while nothing is typed. -->
+    <string name="search_popular">Popular Searches</string>
     <!-- Row of the server's items a search finds, when only one server is signed in; with several, each row is titled by its server's name. -->
     <string name="search_server">From the Server</string>
     <!-- User menu item opening the Mavio account's page at mavio.dev. -->

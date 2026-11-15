@@ -1,11 +1,24 @@
 // Search asks every server at once and lists the results by server
 // (docs/clients.md §5.4), and the server that discovers for titles to
 // request (§6.3.28). A search runs when it is confirmed; on the
-// television it runs as the on-screen keyboard types, beside the results
-// (docs/tv.md §6.4).
-import { type SearchResults, titlesOf, useDiscovery, useHome, useSearch, useSearchAgain, useSearchTitles, useSignedIn } from "@mavio/client-ts";
+// television it runs as the on-screen keyboard types, beside the results,
+// which show the servers' popular searches while nothing is typed
+// (docs/tv.md §6.4). Opening a result records its search on its server.
+import {
+  type SearchResults,
+  type ServerEntry,
+  titlesOf,
+  useDiscovery,
+  useHome,
+  usePopularSearches,
+  useRecordSearch,
+  useSearch,
+  useSearchAgain,
+  useSearchTitles,
+  useSignedIn,
+} from "@mavio/client-ts";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
-import { type CSSProperties, type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { type CSSProperties, type KeyboardEvent, type MouseEvent, useEffect, useRef, useState } from "react";
 
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
@@ -69,8 +82,9 @@ const keys = [..."abcdefghijklmnopqrstuvwxyz1234567890"];
 
 /**
  * The television's search: on the left the query, space, delete and
- * clear, and a keyboard of letters and digits; on the right, Home's rows
- * while the query is empty, and the results as it is typed.
+ * clear, and a keyboard of letters and digits; on the right, the popular
+ * searches while the query is empty, or Home's rows where there are none,
+ * and the results as it is typed.
  */
 function TvSearch() {
   const { q = "" } = route.useSearch();
@@ -92,6 +106,15 @@ function TvSearch() {
     return () => clearTimeout(h);
   }, [text, q, navigate]);
   const results = useSearch(q);
+  const keyboard = useRef<HTMLDivElement>(null);
+  // A popular search runs at once, and focus goes to the keyboard, as its
+  // button gives way to the results.
+  const pick = (query: string) => {
+    setText(query);
+    pushed.current = query;
+    void navigate({ to: "/search", search: { q: query }, replace: true });
+    keyboard.current?.querySelector<HTMLElement>("button")?.focus();
+  };
   const type = (c: string) => setText((s) => s + c);
   const erase = () => setText((s) => [...s].slice(0, -1).join(""));
   // Within the keyboard back deletes a character, and goes back only once
@@ -109,7 +132,7 @@ function TvSearch() {
   const key = "tv-pill flex items-center justify-center rounded-lg bg-fill type-headline";
   return (
     <div className="flex items-start gap-gutter pl-margin">
-      <div role="search" data-focus-region onKeyDown={onKeyDown} className="sticky top-12 flex w-[clamp(300px,30vw,480px)] shrink-0 flex-col gap-4">
+      <div ref={keyboard} role="search" data-focus-region onKeyDown={onKeyDown} className="sticky top-12 flex w-[clamp(300px,30vw,480px)] shrink-0 flex-col gap-4">
         <div aria-live="polite" className="flex min-h-16 items-center gap-3 rounded-lg bg-surface-raised px-5">
           <Icon name="search" className="shrink-0 text-text-secondary" />
           {/* The caret shows where the keyboard types, wherever focus is. */}
@@ -141,14 +164,42 @@ function TvSearch() {
       </div>
       {/* Its rows and grids keep only a little room for a focused card to grow. */}
       <div data-focus-region className="min-w-0 flex-1" style={{ "--mavio-layout-margin": "24px" } as CSSProperties}>
-        {q === "" ? <Suggestions /> : <Results q={q} results={results} grid />}
+        {q === "" ? <Suggestions onPick={pick} /> : <Results q={q} results={results} grid />}
       </div>
     </div>
   );
 }
 
-/** Home's rows, while nothing is searched on the television. */
-function Suggestions() {
+/**
+ * What the television shows while nothing is searched: the servers'
+ * popular searches, or Home's rows while they have none.
+ */
+function Suggestions({ onPick }: { onPick: (query: string) => void }) {
+  const popular = usePopularSearches();
+  if (popular.pending) return null;
+  if (popular.queries.length === 0) return <HomeRows />;
+  return (
+    <section className="px-margin py-3">
+      <h2 className="mb-3 type-title3">{t("search.popular")}</h2>
+      <div className="flex flex-wrap gap-3">
+        {popular.queries.map((query) => (
+          <button
+            key={query}
+            type="button"
+            onClick={() => onPick(query)}
+            className="tv-pill flex h-14 max-w-full items-center gap-2 rounded-full bg-fill px-5 type-headline"
+          >
+            <Icon name="search" size={20} className="shrink-0 text-text-secondary" />
+            <span className="truncate">{query}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Home's rows. */
+function HomeRows() {
   const sections = useHome();
   const several = useSignedIn().length > 1;
   return sections.map((s) => <SectionView key={s.id} section={s} several={several} />);
@@ -161,6 +212,11 @@ function Results({ q, results, grid }: { q: string; results: SearchResults[]; gr
   const discovery = useDiscovery(discoverLanguage);
   const found = useSearchTitles(discovery.catalogs.length > 0 ? discovery.server : undefined, q, discoverLanguage);
   const titles = titlesOf(found.data?.pages);
+  const record = useRecordSearch();
+  // Opening one of a server's results records the search there.
+  const opened = (server: ServerEntry) => (e: MouseEvent) => {
+    if (e.target instanceof Element && e.target.closest("a[href]")) record(server, q);
+  };
   if (q === "") return null;
   const searching = results.some((r) => r.pending) || discovery.pending || found.isLoading;
   const shown = results.some((r) => !r.pending && (r.items.length > 0 || r.error)) || titles.length > 0;
@@ -183,7 +239,7 @@ function Results({ q, results, grid }: { q: string; results: SearchResults[]; gr
         if (items.length === 0) return null;
         if (grid) {
           return (
-            <section key={server.id} className="py-3">
+            <section key={server.id} className="py-3" onClickCapture={opened(server)}>
               {several && <h2 className="mb-2 px-margin type-title3">{server.name}</h2>}
               <Grid>
                 {items.map((item) => (
@@ -194,11 +250,13 @@ function Results({ q, results, grid }: { q: string; results: SearchResults[]; gr
           );
         }
         return (
-          <Shelf key={server.id} title={title}>
-            {items.map((item) => (
-              <ItemCard key={item.id} server={server} serverId={server.id} item={item} />
-            ))}
-          </Shelf>
+          <div key={server.id} className="contents" onClickCapture={opened(server)}>
+            <Shelf title={title}>
+              {items.map((item) => (
+                <ItemCard key={item.id} server={server} serverId={server.id} item={item} />
+              ))}
+            </Shelf>
+          </div>
         );
       })}
       {discovery.server && titles.length > 0 &&

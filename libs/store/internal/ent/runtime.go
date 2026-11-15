@@ -44,6 +44,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
 	"github.com/mavioai/mavio/libs/store/internal/ent/schema"
+	"github.com/mavioai/mavio/libs/store/internal/ent/searchrecord"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleblocklistentry"
@@ -878,6 +879,24 @@ func init() {
 	requestDescID := requestFields[0].Descriptor()
 	// request.DefaultID holds the default value on creation for the id field.
 	request.DefaultID = requestDescID.Default.(func() core.ID)
+	searchrecordFields := schema.SearchRecord{}.Fields()
+	_ = searchrecordFields
+	// searchrecordDescQuery is the schema descriptor for query field.
+	searchrecordDescQuery := searchrecordFields[1].Descriptor()
+	// searchrecord.QueryValidator is a validator for the "query" field. It is called by the builders before save.
+	searchrecord.QueryValidator = searchrecordDescQuery.Validators[0].(func(string) error)
+	// searchrecordDescText is the schema descriptor for text field.
+	searchrecordDescText := searchrecordFields[2].Descriptor()
+	// searchrecord.TextValidator is a validator for the "text" field. It is called by the builders before save.
+	searchrecord.TextValidator = searchrecordDescText.Validators[0].(func(string) error)
+	// searchrecordDescVoter is the schema descriptor for voter field.
+	searchrecordDescVoter := searchrecordFields[3].Descriptor()
+	// searchrecord.VoterValidator is a validator for the "voter" field. It is called by the builders before save.
+	searchrecord.VoterValidator = searchrecordDescVoter.Validators[0].(func(string) error)
+	// searchrecordDescID is the schema descriptor for id field.
+	searchrecordDescID := searchrecordFields[0].Descriptor()
+	// searchrecord.DefaultID holds the default value on creation for the id field.
+	searchrecord.DefaultID = searchrecordDescID.Default.(func() core.ID)
 	settingFields := schema.Setting{}.Fields()
 	_ = settingFields
 	// settingDescUpdatedAt is the schema descriptor for updated_at field.

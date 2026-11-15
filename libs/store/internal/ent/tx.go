@@ -86,6 +86,8 @@ type Tx struct {
 	ReleaseProfile *ReleaseProfileClient
 	// Request is the client for interacting with the Request builders.
 	Request *RequestClient
+	// SearchRecord is the client for interacting with the SearchRecord builders.
+	SearchRecord *SearchRecordClient
 	// Setting is the client for interacting with the Setting builders.
 	Setting *SettingClient
 	// StorageJob is the client for interacting with the StorageJob builders.
@@ -278,6 +280,7 @@ func (tx *Tx) init() {
 	tx.QualityProfile = NewQualityProfileClient(tx.config)
 	tx.ReleaseProfile = NewReleaseProfileClient(tx.config)
 	tx.Request = NewRequestClient(tx.config)
+	tx.SearchRecord = NewSearchRecordClient(tx.config)
 	tx.Setting = NewSettingClient(tx.config)
 	tx.StorageJob = NewStorageJobClient(tx.config)
 	tx.SubtitleBlocklistEntry = NewSubtitleBlocklistEntryClient(tx.config)

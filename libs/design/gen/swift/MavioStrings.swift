@@ -1286,6 +1286,9 @@ public enum MavioStrings {
     /// Row of the movies and series discovery providers find by name.
     public static var searchDiscover: String { NSLocalizedString("search.discover", bundle: .module, comment: "") }
 
+    /// Heading of the queries the servers' users search most, shown on the television's search while nothing is typed.
+    public static var searchPopular: String { NSLocalizedString("search.popular", bundle: .module, comment: "") }
+
     /// Row of the server's items a search finds, when only one server is signed in; with several, each row is titled by its server's name.
     public static var searchServer: String { NSLocalizedString("search.server", bundle: .module, comment: "") }
 

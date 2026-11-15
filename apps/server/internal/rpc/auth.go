@@ -64,6 +64,7 @@ var UserBoundProcedures = []string{
 	userv1connect.DisplayPreferencesServiceName,
 	playbackv1connect.PlaybackServiceName,
 	libraryv1connect.PlaylistServiceName,
+	libraryv1connect.ItemServiceRecordSearchProcedure,
 	acquisitionv1connect.RequestServiceCreateRequestProcedure,
 	acquisitionv1connect.RequestServiceGetQuotaProcedure,
 	acquisitionv1connect.IssueServiceCreateIssueProcedure,

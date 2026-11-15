@@ -7129,6 +7129,24 @@
         }
       }
     },
+    "search.popular": {
+      "comment": "Heading of the queries the servers' users search most, shown on the television's search while nothing is typed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popular Searches"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "热门搜索"
+          }
+        }
+      }
+    },
     "search.server": {
       "comment": "Row of the server's items a search finds, when only one server is signed in; with several, each row is titled by its server's name.",
       "extractionState": "manual",

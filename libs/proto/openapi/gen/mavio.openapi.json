@@ -14237,6 +14237,36 @@
         "title": "ListPlaylistsResponse",
         "additionalProperties": false
       },
+      "mavio.library.v1.ListPopularSearchesRequest": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "limit",
+            "maximum": 30,
+            "minimum": 0,
+            "format": "int32",
+            "description": "1–30; unset means 10."
+          }
+        },
+        "title": "ListPopularSearchesRequest",
+        "additionalProperties": false
+      },
+      "mavio.library.v1.ListPopularSearchesResponse": {
+        "type": "object",
+        "properties": {
+          "queries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "queries",
+            "description": "The queries, best first, as last typed."
+          }
+        },
+        "title": "ListPopularSearchesResponse",
+        "additionalProperties": false
+      },
       "mavio.library.v1.ListRemoteImagesRequest": {
         "type": "object",
         "properties": {
@@ -14985,6 +15015,35 @@
         "title": "Rational",
         "additionalProperties": false,
         "description": "Rational is a fraction such as 24000/1001."
+      },
+      "mavio.library.v1.RecordSearchRequest": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "query",
+            "maxLength": 200,
+            "minLength": 1,
+            "description": "As ListItemsRequest.search; at most 100 characters once its whitespace\n is collapsed."
+          }
+        },
+        "title": "RecordSearchRequest",
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.library.v1.RecordSearchResponse": {
+        "type": "object",
+        "properties": {
+          "recorded": {
+            "type": "boolean",
+            "title": "recorded",
+            "description": "Whether the query was recorded: false when it finds nothing."
+          }
+        },
+        "title": "RecordSearchResponse",
+        "additionalProperties": false
       },
       "mavio.library.v1.RefreshItemRequest": {
         "type": "object",
@@ -25330,14 +25389,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.RequestService/ListBlockedTitles": {
+    "/mavio.playback.v1.PlaybackService/ListMediaSources": {
       "post": {
         "tags": [
-          "RequestService"
+          "PlaybackService"
         ],
-        "summary": "ListBlockedTitles",
-        "description": "ListBlockedTitles lists the blocklist, newest first. Administrators\n only.",
-        "operationId": "mavio.acquisition.v1.RequestService.ListBlockedTitles",
+        "summary": "ListMediaSources",
+        "description": "ListMediaSources returns the media sources an item plays from: its\n files, as GetItem lists them, then those the media source provider\n plugins give, probed. StartPlayback plays one by its ID.",
+        "operationId": "mavio.playback.v1.PlaybackService.ListMediaSources",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -25362,7 +25421,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListBlockedTitlesRequest"
+                "$ref": "#/components/schemas/mavio.playback.v1.ListMediaSourcesRequest"
               }
             }
           },
@@ -25384,7 +25443,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListBlockedTitlesResponse"
+                  "$ref": "#/components/schemas/mavio.playback.v1.ListMediaSourcesResponse"
                 }
               }
             }
@@ -28169,13 +28228,13 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/GetPerson": {
+    "/mavio.acquisition.v1.ProfileService/UpdateReleaseProfile": {
       "post": {
         "tags": [
-          "ItemService"
+          "ProfileService"
         ],
-        "summary": "GetPerson",
-        "operationId": "mavio.library.v1.ItemService.GetPerson",
+        "summary": "UpdateReleaseProfile",
+        "operationId": "mavio.acquisition.v1.ProfileService.UpdateReleaseProfile",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -28200,7 +28259,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetPersonRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateReleaseProfileRequest"
               }
             }
           },
@@ -28222,7 +28281,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetPersonResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateReleaseProfileResponse"
                 }
               }
             }
@@ -28912,13 +28971,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListItems": {
+    "/mavio.acquisition.v1.RequestService/ListBlockedTitles": {
       "post": {
         "tags": [
-          "ItemService"
+          "RequestService"
         ],
-        "summary": "ListItems",
-        "operationId": "mavio.library.v1.ItemService.ListItems",
+        "summary": "ListBlockedTitles",
+        "description": "ListBlockedTitles lists the blocklist, newest first. Administrators\n only.",
+        "operationId": "mavio.acquisition.v1.RequestService.ListBlockedTitles",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -28943,7 +29003,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListItemsRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListBlockedTitlesRequest"
               }
             }
           },
@@ -28965,7 +29025,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListItemsResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListBlockedTitlesResponse"
                 }
               }
             }
@@ -30026,13 +30086,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/ListSubtitleBlocklist": {
+    "/mavio.library.v1.ItemService/ListLatestItems": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "ItemService"
         ],
-        "summary": "ListSubtitleBlocklist",
-        "operationId": "mavio.acquisition.v1.SubtitleService.ListSubtitleBlocklist",
+        "summary": "ListLatestItems",
+        "description": "ListLatestItems lists the items added last to the libraries the caller\n may access, newest first.",
+        "operationId": "mavio.library.v1.ItemService.ListLatestItems",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -30057,7 +30118,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleBlocklistRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsRequest"
               }
             }
           },
@@ -30079,7 +30140,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleBlocklistResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsResponse"
                 }
               }
             }
@@ -31139,14 +31200,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListLatestItems": {
+    "/mavio.acquisition.v1.WantedService/AddSeries": {
       "post": {
         "tags": [
-          "ItemService"
+          "WantedService"
         ],
-        "summary": "ListLatestItems",
-        "description": "ListLatestItems lists the items added last to the libraries the caller\n may access, newest first.",
-        "operationId": "mavio.library.v1.ItemService.ListLatestItems",
+        "summary": "AddSeries",
+        "description": "AddSeries adds a series to a show library by its TVDB ID, as a\n virtual item identified by the library's metadata providers, which\n list its episodes, monitored with a quality profile; it fails with\n ALREADY_EXISTS when the library has the series.",
+        "operationId": "mavio.acquisition.v1.WantedService.AddSeries",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -31171,7 +31232,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.AddSeriesRequest"
               }
             }
           },
@@ -31193,7 +31254,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListLatestItemsResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.AddSeriesResponse"
                 }
               }
             }
@@ -34484,13 +34545,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/UpdateReleaseProfile": {
+    "/mavio.library.v1.MetadataService/SearchRemoteLyrics": {
       "post": {
         "tags": [
-          "ProfileService"
+          "MetadataService"
         ],
-        "summary": "UpdateReleaseProfile",
-        "operationId": "mavio.acquisition.v1.ProfileService.UpdateReleaseProfile",
+        "summary": "SearchRemoteLyrics",
+        "description": "SearchRemoteLyrics asks the lyrics providers for lyrics of a track;\n administrators only.",
+        "operationId": "mavio.library.v1.MetadataService.SearchRemoteLyrics",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -34515,7 +34577,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateReleaseProfileRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.SearchRemoteLyricsRequest"
               }
             }
           },
@@ -34537,7 +34599,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateReleaseProfileResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.SearchRemoteLyricsResponse"
                 }
               }
             }
@@ -34607,14 +34669,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.WantedService/AddSeries": {
+    "/mavio.acquisition.v1.SubtitleService/ListSubtitleBlocklist": {
       "post": {
         "tags": [
-          "WantedService"
+          "SubtitleService"
         ],
-        "summary": "AddSeries",
-        "description": "AddSeries adds a series to a show library by its TVDB ID, as a\n virtual item identified by the library's metadata providers, which\n list its episodes, monitored with a quality profile; it fails with\n ALREADY_EXISTS when the library has the series.",
-        "operationId": "mavio.acquisition.v1.WantedService.AddSeries",
+        "summary": "ListSubtitleBlocklist",
+        "operationId": "mavio.acquisition.v1.SubtitleService.ListSubtitleBlocklist",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -34639,7 +34700,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.AddSeriesRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleBlocklistRequest"
               }
             }
           },
@@ -34661,7 +34722,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.AddSeriesResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleBlocklistResponse"
                 }
               }
             }
@@ -34793,6 +34854,68 @@
         }
       }
     },
+    "/mavio.library.v1.ItemService/ListPopularSearches": {
+      "post": {
+        "tags": [
+          "ItemService"
+        ],
+        "summary": "ListPopularSearches",
+        "description": "ListPopularSearches lists the queries the server's users searched,\n best first: each user who searched a query counts, less the longer ago,\n halved every 14 days. A query is listed once two users searched it, or\n the caller did, and only while it finds something the caller may\n access.",
+        "operationId": "mavio.library.v1.ItemService.ListPopularSearches",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.ListPopularSearchesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.ListPopularSearchesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.library.v1.ItemService/ListSimilarItems": {
       "post": {
         "tags": [
@@ -34910,6 +35033,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.library.v1.ListValuesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.ItemService/RecordSearch": {
+      "post": {
+        "tags": [
+          "ItemService"
+        ],
+        "summary": "RecordSearch",
+        "description": "RecordSearch records that the caller searched a query and opened what\n it found, which ranks the server's popular searches. A query that finds\n nothing the caller may access is not recorded. The record names no\n user: searching a query again replaces the caller's record of it.",
+        "operationId": "mavio.library.v1.ItemService.RecordSearch",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.RecordSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.RecordSearchResponse"
                 }
               }
             }
@@ -35781,14 +35966,13 @@
         }
       }
     },
-    "/mavio.library.v1.MetadataService/SearchRemoteLyrics": {
+    "/mavio.library.v1.ItemService/GetPerson": {
       "post": {
         "tags": [
-          "MetadataService"
+          "ItemService"
         ],
-        "summary": "SearchRemoteLyrics",
-        "description": "SearchRemoteLyrics asks the lyrics providers for lyrics of a track;\n administrators only.",
-        "operationId": "mavio.library.v1.MetadataService.SearchRemoteLyrics",
+        "summary": "GetPerson",
+        "operationId": "mavio.library.v1.ItemService.GetPerson",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -35813,7 +35997,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.SearchRemoteLyricsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.GetPersonRequest"
               }
             }
           },
@@ -35835,7 +36019,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.SearchRemoteLyricsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.GetPersonResponse"
                 }
               }
             }
@@ -36582,14 +36766,13 @@
         }
       }
     },
-    "/mavio.playback.v1.PlaybackService/ListMediaSources": {
+    "/mavio.library.v1.ItemService/ListItems": {
       "post": {
         "tags": [
-          "PlaybackService"
+          "ItemService"
         ],
-        "summary": "ListMediaSources",
-        "description": "ListMediaSources returns the media sources an item plays from: its\n files, as GetItem lists them, then those the media source provider\n plugins give, probed. StartPlayback plays one by its ID.",
-        "operationId": "mavio.playback.v1.PlaybackService.ListMediaSources",
+        "summary": "ListItems",
+        "operationId": "mavio.library.v1.ItemService.ListItems",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -36614,7 +36797,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.playback.v1.ListMediaSourcesRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListItemsRequest"
               }
             }
           },
@@ -36636,7 +36819,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.playback.v1.ListMediaSourcesResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListItemsResponse"
                 }
               }
             }

@@ -59,7 +59,7 @@ A catalog of Discover is a grid alike, under its name, with focus starting on it
 ### 6.4 Search
 * **Without tabs**: the page hides the navigation bar, focus starts on the keyboard, and back leaves the page once the query is empty.
 * **Left**: a column 300–480 pt wide that stays in place while the right scrolls. From the top, it holds the query, whose blinking `color.accent` caret shows whether or not it has focus; keys for a space, deleting a character and clearing; and a keyboard of letters and digits in six columns. A computer's keyboard types into it as well. Within it, back deletes a character, and goes back only once there is none.
-* **Right**: the larger part shows Home's rows while nothing is typed, and the results by server, in grids, as the query is typed. Its margin is 24 pt, enough for a focused card to grow, and its rows' cards align with their titles.
+* **Right**: the larger part shows, while nothing is typed, the popular searches of the servers signed in to as a heading and pills that wrap — each server's queries in turn, each once, at most ten — or Home's rows while the servers have none; selecting one searches it at once, and focus goes to the keyboard. As the query is typed, it shows the results by server, in grids; opening a result records its query on its server, which ranks the queries its users opened results of ([Architecture](architecture.md)). Its margin is 24 pt, enough for a focused card to grow, and its rows' cards align with their titles.
 * **Running**: the search runs as the query is typed, after a pause of 300 ms, and the address follows the query, so that results can be linked to and going back restores the query.
 
 ### 6.5 Signing In

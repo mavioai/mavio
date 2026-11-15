@@ -1015,3 +1015,93 @@ func timestamp(t time.Time) *timestamppb.Timestamp {
 	}
 	return timestamppb.New(t)
 }
+
+// searchKinds are the kinds the clients' searches find: titles, not the
+// seasons and folders inside them.
+var searchKinds = []core.ItemKind{
+	core.KindMovie, core.KindSeries, core.KindEpisode, core.KindVideo, core.KindMusicArtist, core.KindMusicAlbum,
+	core.KindTrack, core.KindMusicVideo, core.KindAudioBook, core.KindBook, core.KindPhotoAlbum, core.KindCollection,
+	core.KindPlaylist,
+}
+
+// Popular searches.
+const (
+	// defaultPopularSearches is how many popular searches are listed when
+	// the request does not say.
+	defaultPopularSearches = 10
+	// popularSearchCandidates is how many ranked queries are tried for
+	// each one listed, those that find nothing for the caller skipped.
+	popularSearchCandidates = 3
+)
+
+// searchFinds reports whether a search for text finds anything u may access.
+func (s *ItemService) searchFinds(ctx context.Context, u *core.User, text string) (bool, error) {
+	access := u.EffectiveAccess()
+	ids, ok := libraryScope(&access, nil)
+	if !ok {
+		return false, nil
+	}
+	page, err := s.store.Items().Query(ctx, core.ItemQuery{
+		LibraryIDs: ids, Kinds: searchKinds, Search: text, Limits: access.ContentLimits, UserID: u.ID, Limit: 1,
+	})
+	if err != nil {
+		return false, err
+	}
+	return len(page.Items) > 0, nil
+}
+
+// RecordSearch records a search that finds something the caller may
+// access, as the caller's record of its query.
+func (s *ItemService) RecordSearch(ctx context.Context, req *libraryv1.RecordSearchRequest) (*libraryv1.RecordSearchResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	text := core.SearchText(req.GetQuery())
+	if text == "" || len([]rune(text)) > core.MaxSearchLength {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("a query of 1 to %d characters is required", core.MaxSearchLength))
+	}
+	found, err := s.searchFinds(ctx, &p.User, text)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	if !found {
+		return &libraryv1.RecordSearchResponse{}, nil
+	}
+	key := core.SearchKey(text)
+	rec := core.SearchRecord{Key: key, Text: text, Voter: core.SearchVoter(p.User.ID, key), SearchedAt: time.Now()}
+	if err := s.store.Searches().Record(ctx, &rec); err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return libraryv1.RecordSearchResponse_builder{Recorded: new(true)}.Build(), nil
+}
+
+// ListPopularSearches lists the server's popular searches that the caller
+// may be shown and that find something the caller may access.
+func (s *ItemService) ListPopularSearches(ctx context.Context, req *libraryv1.ListPopularSearchesRequest) (*libraryv1.ListPopularSearchesResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	limit := cmp.Or(int(req.GetLimit()), defaultPopularSearches)
+	now := time.Now()
+	records, err := s.store.Searches().List(ctx, now.Add(-core.SearchRetention), core.MaxSearchRecords)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	ranked := core.RankSearches(records, now, p.User.ID)
+	queries := make([]string, 0, limit)
+	for i, q := range ranked {
+		if len(queries) == limit || i == limit*popularSearchCandidates {
+			break
+		}
+		found, err := s.searchFinds(ctx, &p.User, q.Text)
+		if err != nil {
+			return nil, connectError(ctx, err)
+		}
+		if found {
+			queries = append(queries, q.Text)
+		}
+	}
+	return libraryv1.ListPopularSearchesResponse_builder{Queries: queries}.Build(), nil
+}

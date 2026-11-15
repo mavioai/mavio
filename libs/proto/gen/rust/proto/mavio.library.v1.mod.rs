@@ -182,6 +182,22 @@ pub use self::__buffa::view::ListNextUpResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListNextUpResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::RecordSearchRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::RecordSearchRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RecordSearchResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::RecordSearchResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPopularSearchesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPopularSearchesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPopularSearchesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPopularSearchesResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::LibraryView;
 #[doc(inline)]
 pub use self::__buffa::view::LibraryOwnedView;

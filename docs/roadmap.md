@@ -676,7 +676,7 @@ flowchart TD
   - [ ] The query cache kept offline
   - [ ] Storybook of the components
   - [ ] Snapshot tests of the screens beyond sign-in and Home
-  - [ ] Popular searches: the queries each server records and ranks, which the television's search shows while nothing is typed, where it shows Home's rows now
+  - [x] Popular searches: the queries each server records and ranks (`ItemService.RecordSearch` when a result is opened, `ListPopularSearches`, `core.SearchRecord` in `search_records`, pruned by the daily cleanup), which the television's search shows while nothing is typed, as pills merged across servers, Home's rows where there are none (`apps/web/src/screens/search.tsx`, `libs/client-ts/src/popular.ts`)
   - [x] The player's seek bar as [Clients §6.5](clients.md): chapter marks, and over the time the pointer is on the trickplay sheets' thumbnail with the chapter's name, below the bar where it does not fit above; dragging pauses and releasing plays on
   - [x] The player's volume beside mute, and a brief notice of the volume, the speed and a seek, shown at once and gone after a second; the wheel and trackpad seeking sideways and setting the volume up and down, the axis taken at the gesture's start
   - [x] The subtitle offset in the player's panel ([Clients §6.5](clients.md)), and the audio's output device where the browser offers `setSinkId`

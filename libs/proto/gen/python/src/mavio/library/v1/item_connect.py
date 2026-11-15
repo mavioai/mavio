@@ -44,6 +44,12 @@ class ItemService(Protocol):
     async def get_lyrics(self, request: mavio_dot_library_dot_v1_dot_item__pb2.GetLyricsRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_item__pb2.GetLyricsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def record_search(self, request: mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def list_popular_searches(self, request: mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
 
 class ItemServiceASGIApplication(ConnectASGIApplication[ItemService]):
     def __init__(self, service: ItemService | AsyncGenerator[ItemService], *, interceptors: Iterable[Interceptor]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
@@ -139,6 +145,26 @@ class ItemServiceASGIApplication(ConnectASGIApplication[ItemService]):
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
                     function=svc.get_lyrics,
+                ),
+                "/mavio.library.v1.ItemService/RecordSearch": Endpoint.unary(
+                    method=MethodInfo(
+                        name="RecordSearch",
+                        service_name="mavio.library.v1.ItemService",
+                        input=mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchRequest,
+                        output=mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.record_search,
+                ),
+                "/mavio.library.v1.ItemService/ListPopularSearches": Endpoint.unary(
+                    method=MethodInfo(
+                        name="ListPopularSearches",
+                        service_name="mavio.library.v1.ItemService",
+                        input=mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesRequest,
+                        output=mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=svc.list_popular_searches,
                 ),
             },
             interceptors=interceptors,
@@ -351,6 +377,48 @@ class ItemServiceClient(ConnectClient):
             use_get=use_get,
         )
 
+    async def record_search(
+        self,
+        request: mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="RecordSearch",
+                service_name="mavio.library.v1.ItemService",
+                input=mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchRequest,
+                output=mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def list_popular_searches(
+        self,
+        request: mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListPopularSearches",
+                service_name="mavio.library.v1.ItemService",
+                input=mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesRequest,
+                output=mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
 
 class ItemServiceSync(Protocol):
     def get_item(self, request: mavio_dot_library_dot_v1_dot_item__pb2.GetItemRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_item__pb2.GetItemResponse:
@@ -370,6 +438,10 @@ class ItemServiceSync(Protocol):
     def list_people(self, request: mavio_dot_library_dot_v1_dot_item__pb2.ListPeopleRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_item__pb2.ListPeopleResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def get_lyrics(self, request: mavio_dot_library_dot_v1_dot_item__pb2.GetLyricsRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_item__pb2.GetLyricsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def record_search(self, request: mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def list_popular_searches(self, request: mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesRequest, ctx: RequestContext) -> mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -466,6 +538,26 @@ class ItemServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
                     function=service.get_lyrics,
+                ),
+                "/mavio.library.v1.ItemService/RecordSearch": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="RecordSearch",
+                        service_name="mavio.library.v1.ItemService",
+                        input=mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchRequest,
+                        output=mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.record_search,
+                ),
+                "/mavio.library.v1.ItemService/ListPopularSearches": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="ListPopularSearches",
+                        service_name="mavio.library.v1.ItemService",
+                        input=mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesRequest,
+                        output=mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=service.list_popular_searches,
                 ),
             },
             interceptors=interceptors,
@@ -671,6 +763,48 @@ class ItemServiceClientSync(ConnectClientSync):
                 service_name="mavio.library.v1.ItemService",
                 input=mavio_dot_library_dot_v1_dot_item__pb2.GetLyricsRequest,
                 output=mavio_dot_library_dot_v1_dot_item__pb2.GetLyricsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    def record_search(
+        self,
+        request: mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="RecordSearch",
+                service_name="mavio.library.v1.ItemService",
+                input=mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchRequest,
+                output=mavio_dot_library_dot_v1_dot_item__pb2.RecordSearchResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def list_popular_searches(
+        self,
+        request: mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListPopularSearches",
+                service_name="mavio.library.v1.ItemService",
+                input=mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesRequest,
+                output=mavio_dot_library_dot_v1_dot_item__pb2.ListPopularSearchesResponse,
                 idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
             ),
             headers=headers,

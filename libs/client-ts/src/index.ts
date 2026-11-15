@@ -93,6 +93,7 @@ export {
   useSimilar,
   useUserData,
 } from "./hooks.ts";
+export { mergePopularSearches, popularSearchLimit, usePopularSearches, useRecordSearch } from "./popular.ts";
 export {
   useAdminServers,
   useCatalogPlugins,

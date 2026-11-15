@@ -53,6 +53,12 @@ const (
 	ItemServiceListPeopleProcedure = "/mavio.library.v1.ItemService/ListPeople"
 	// ItemServiceGetLyricsProcedure is the fully-qualified name of the ItemService's GetLyrics RPC.
 	ItemServiceGetLyricsProcedure = "/mavio.library.v1.ItemService/GetLyrics"
+	// ItemServiceRecordSearchProcedure is the fully-qualified name of the ItemService's RecordSearch
+	// RPC.
+	ItemServiceRecordSearchProcedure = "/mavio.library.v1.ItemService/RecordSearch"
+	// ItemServiceListPopularSearchesProcedure is the fully-qualified name of the ItemService's
+	// ListPopularSearches RPC.
+	ItemServiceListPopularSearchesProcedure = "/mavio.library.v1.ItemService/ListPopularSearches"
 )
 
 // ItemServiceClient is a client for the mavio.library.v1.ItemService service.
@@ -83,6 +89,17 @@ type ItemServiceClient interface {
 	// GetLyrics returns the lyrics of a track, read from the lyric file
 	// beside it (.elrc, .lrc or .txt).
 	GetLyrics(context.Context, *v1.GetLyricsRequest) (*v1.GetLyricsResponse, error)
+	// RecordSearch records that the caller searched a query and opened what
+	// it found, which ranks the server's popular searches. A query that finds
+	// nothing the caller may access is not recorded. The record names no
+	// user: searching a query again replaces the caller's record of it.
+	RecordSearch(context.Context, *v1.RecordSearchRequest) (*v1.RecordSearchResponse, error)
+	// ListPopularSearches lists the queries the server's users searched,
+	// best first: each user who searched a query counts, less the longer ago,
+	// halved every 14 days. A query is listed once two users searched it, or
+	// the caller did, and only while it finds something the caller may
+	// access.
+	ListPopularSearches(context.Context, *v1.ListPopularSearchesRequest) (*v1.ListPopularSearchesResponse, error)
 }
 
 // NewItemServiceClient constructs a client for the mavio.library.v1.ItemService service. By
@@ -159,20 +176,35 @@ func NewItemServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		recordSearch: connect.NewClient[v1.RecordSearchRequest, v1.RecordSearchResponse](
+			httpClient,
+			baseURL+ItemServiceRecordSearchProcedure,
+			connect.WithSchema(itemServiceMethods.ByName("RecordSearch")),
+			connect.WithClientOptions(opts...),
+		),
+		listPopularSearches: connect.NewClient[v1.ListPopularSearchesRequest, v1.ListPopularSearchesResponse](
+			httpClient,
+			baseURL+ItemServiceListPopularSearchesProcedure,
+			connect.WithSchema(itemServiceMethods.ByName("ListPopularSearches")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // itemServiceClient implements ItemServiceClient.
 type itemServiceClient struct {
-	getItem          *connect.Client[v1.GetItemRequest, v1.GetItemResponse]
-	listItems        *connect.Client[v1.ListItemsRequest, v1.ListItemsResponse]
-	getPerson        *connect.Client[v1.GetPersonRequest, v1.GetPersonResponse]
-	listValues       *connect.Client[v1.ListValuesRequest, v1.ListValuesResponse]
-	listLatestItems  *connect.Client[v1.ListLatestItemsRequest, v1.ListLatestItemsResponse]
-	listNextUp       *connect.Client[v1.ListNextUpRequest, v1.ListNextUpResponse]
-	listSimilarItems *connect.Client[v1.ListSimilarItemsRequest, v1.ListSimilarItemsResponse]
-	listPeople       *connect.Client[v1.ListPeopleRequest, v1.ListPeopleResponse]
-	getLyrics        *connect.Client[v1.GetLyricsRequest, v1.GetLyricsResponse]
+	getItem             *connect.Client[v1.GetItemRequest, v1.GetItemResponse]
+	listItems           *connect.Client[v1.ListItemsRequest, v1.ListItemsResponse]
+	getPerson           *connect.Client[v1.GetPersonRequest, v1.GetPersonResponse]
+	listValues          *connect.Client[v1.ListValuesRequest, v1.ListValuesResponse]
+	listLatestItems     *connect.Client[v1.ListLatestItemsRequest, v1.ListLatestItemsResponse]
+	listNextUp          *connect.Client[v1.ListNextUpRequest, v1.ListNextUpResponse]
+	listSimilarItems    *connect.Client[v1.ListSimilarItemsRequest, v1.ListSimilarItemsResponse]
+	listPeople          *connect.Client[v1.ListPeopleRequest, v1.ListPeopleResponse]
+	getLyrics           *connect.Client[v1.GetLyricsRequest, v1.GetLyricsResponse]
+	recordSearch        *connect.Client[v1.RecordSearchRequest, v1.RecordSearchResponse]
+	listPopularSearches *connect.Client[v1.ListPopularSearchesRequest, v1.ListPopularSearchesResponse]
 }
 
 // GetItem calls mavio.library.v1.ItemService.GetItem.
@@ -256,6 +288,24 @@ func (c *itemServiceClient) GetLyrics(ctx context.Context, req *v1.GetLyricsRequ
 	return nil, err
 }
 
+// RecordSearch calls mavio.library.v1.ItemService.RecordSearch.
+func (c *itemServiceClient) RecordSearch(ctx context.Context, req *v1.RecordSearchRequest) (*v1.RecordSearchResponse, error) {
+	response, err := c.recordSearch.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ListPopularSearches calls mavio.library.v1.ItemService.ListPopularSearches.
+func (c *itemServiceClient) ListPopularSearches(ctx context.Context, req *v1.ListPopularSearchesRequest) (*v1.ListPopularSearchesResponse, error) {
+	response, err := c.listPopularSearches.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ItemServiceHandler is an implementation of the mavio.library.v1.ItemService service.
 type ItemServiceHandler interface {
 	GetItem(context.Context, *v1.GetItemRequest) (*v1.GetItemResponse, error)
@@ -284,6 +334,17 @@ type ItemServiceHandler interface {
 	// GetLyrics returns the lyrics of a track, read from the lyric file
 	// beside it (.elrc, .lrc or .txt).
 	GetLyrics(context.Context, *v1.GetLyricsRequest) (*v1.GetLyricsResponse, error)
+	// RecordSearch records that the caller searched a query and opened what
+	// it found, which ranks the server's popular searches. A query that finds
+	// nothing the caller may access is not recorded. The record names no
+	// user: searching a query again replaces the caller's record of it.
+	RecordSearch(context.Context, *v1.RecordSearchRequest) (*v1.RecordSearchResponse, error)
+	// ListPopularSearches lists the queries the server's users searched,
+	// best first: each user who searched a query counts, less the longer ago,
+	// halved every 14 days. A query is listed once two users searched it, or
+	// the caller did, and only while it finds something the caller may
+	// access.
+	ListPopularSearches(context.Context, *v1.ListPopularSearchesRequest) (*v1.ListPopularSearchesResponse, error)
 }
 
 // NewItemServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -356,6 +417,19 @@ func NewItemServiceHandler(svc ItemServiceHandler, opts ...connect.HandlerOption
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	itemServiceRecordSearchHandler := connect.NewUnaryHandlerSimple(
+		ItemServiceRecordSearchProcedure,
+		svc.RecordSearch,
+		connect.WithSchema(itemServiceMethods.ByName("RecordSearch")),
+		connect.WithHandlerOptions(opts...),
+	)
+	itemServiceListPopularSearchesHandler := connect.NewUnaryHandlerSimple(
+		ItemServiceListPopularSearchesProcedure,
+		svc.ListPopularSearches,
+		connect.WithSchema(itemServiceMethods.ByName("ListPopularSearches")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.library.v1.ItemService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ItemServiceGetItemProcedure:
@@ -376,6 +450,10 @@ func NewItemServiceHandler(svc ItemServiceHandler, opts ...connect.HandlerOption
 			itemServiceListPeopleHandler.ServeHTTP(w, r)
 		case ItemServiceGetLyricsProcedure:
 			itemServiceGetLyricsHandler.ServeHTTP(w, r)
+		case ItemServiceRecordSearchProcedure:
+			itemServiceRecordSearchHandler.ServeHTTP(w, r)
+		case ItemServiceListPopularSearchesProcedure:
+			itemServiceListPopularSearchesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -419,4 +497,12 @@ func (UnimplementedItemServiceHandler) ListPeople(context.Context, *v1.ListPeopl
 
 func (UnimplementedItemServiceHandler) GetLyrics(context.Context, *v1.GetLyricsRequest) (*v1.GetLyricsResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.GetLyrics is not implemented"))
+}
+
+func (UnimplementedItemServiceHandler) RecordSearch(context.Context, *v1.RecordSearchRequest) (*v1.RecordSearchResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.RecordSearch is not implemented"))
+}
+
+func (UnimplementedItemServiceHandler) ListPopularSearches(context.Context, *v1.ListPopularSearchesRequest) (*v1.ListPopularSearchesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.ItemService.ListPopularSearches is not implemented"))
 }

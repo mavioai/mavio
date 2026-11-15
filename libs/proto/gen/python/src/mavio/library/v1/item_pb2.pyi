@@ -747,3 +747,27 @@ class ListNextUpResponse(_message.Message):
     ITEMS_FIELD_NUMBER: _ClassVar[int]
     items: _containers.RepeatedCompositeFieldContainer[Item]
     def __init__(self, items: _Optional[_Iterable[_Union[Item, _Mapping]]] = ...) -> None: ...
+
+class RecordSearchRequest(_message.Message):
+    __slots__ = ("query",)
+    QUERY_FIELD_NUMBER: _ClassVar[int]
+    query: str
+    def __init__(self, query: _Optional[str] = ...) -> None: ...
+
+class RecordSearchResponse(_message.Message):
+    __slots__ = ("recorded",)
+    RECORDED_FIELD_NUMBER: _ClassVar[int]
+    recorded: bool
+    def __init__(self, recorded: _Optional[bool] = ...) -> None: ...
+
+class ListPopularSearchesRequest(_message.Message):
+    __slots__ = ("limit",)
+    LIMIT_FIELD_NUMBER: _ClassVar[int]
+    limit: int
+    def __init__(self, limit: _Optional[int] = ...) -> None: ...
+
+class ListPopularSearchesResponse(_message.Message):
+    __slots__ = ("queries",)
+    QUERIES_FIELD_NUMBER: _ClassVar[int]
+    queries: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, queries: _Optional[_Iterable[str]] = ...) -> None: ...

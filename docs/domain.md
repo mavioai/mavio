@@ -240,7 +240,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 * `Complete` stores the job's `Result`, a summary of what it did (e.g. the models a plugin's task downloaded), shown with the finished job; a handler sets it with `library.SetResult`, and it is empty when there is nothing to tell.
 * A failed attempt is retried after `RetryDelay(attempts)` — 30 s, then doubling (1 min, 2 min, …) up to one hour — or after what its error tells to wait when that is longer (`RetryAfter`, as a storage limiting its calls tells), until `MaxAttempts` is reached; then the job is `failed`. A job queued with the same key while it ran stands for its retry, so it is `failed` at once.
 * States: `pending` → `running` → `succeeded` / back to `pending` for a retry / `failed`.
-* `JobQuery` lists jobs by kind and state, most recently created first; finished jobs are purged after a week by the `jobs.cleanup` job, which runs daily and also deletes idle sessions and expired invitations and removes the folders in the metadata folder of items that no longer exist (left a day after they last changed).
+* `JobQuery` lists jobs by kind and state, most recently created first; finished jobs are purged after a week by the `jobs.cleanup` job, which runs daily and also deletes idle sessions, expired invitations and old search records (§9.2) and removes the folders in the metadata folder of items that no longer exist (left a day after they last changed).
 
 ---
 
@@ -292,6 +292,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `SubtitleBlocklistRepository` | `Add`, `List` (paged, newest first, an item's or all), `Delete`, `Clear` |
 | `SubtitleSearchAttemptRepository` | `List` an item's by language, `Record` a failed search (keeping the first time, replacing the latest) |
 | `SubtitleWantedRepository` | `Put` an item's row (deleting it when nothing is missing), `Delete`, `List` the movies' or episodes' of present items by library and path |
+| `SearchRepository` | `Record` a search (replacing the voter's record of its query), `List` the records since a time (newest first), `Prune` those before a time and all but the newest; see §9.2 |
 | `BlockedTitleRepository` | `Get` by kind and TMDB ID, `List` (paged, newest first, searched by title, of the titles blocklisted by hand or by tags), `Add` (`ErrConflict` when blocklisted already), `Delete`, `DeleteTagged` (the titles blocklisted by tags); deleting the user who blocklisted a title keeps it |
 
 * **Transactions**: `Store.InTx` runs a function with a `Store` bound to one transaction; returning an error rolls it back.
@@ -321,6 +322,7 @@ Item search (`ItemQuery.Search`), person search (`PersonRepository.Search`, by n
 * **Value lists**: `ValueQuery` lists the distinct values of one `ValueKind` (`genre`, `tag`, `studio`, `artist`, which includes album artists, or `year`, the production years in decimal, oldest first and not searchable) across the items its `ItemFilter` selects: present items that are not extras, optionally of some libraries and item kinds and within content limits (`Limits`, as for item queries). Each value comes with the number of those items having it (`ValueCount`). Values with the same clean form are one value, shown in the spelling that sorts first by code point, as they are for the `Genres`, `Tags` and `Studios` filters.
 * **Person lists**: `PersonQuery` lists the people credited on the items its `ItemFilter` selects, optionally only in some `CreditKinds`, each with the number of those items (`PersonCount`); people without such a credit are not listed.
 * **Paging**: value and person lists take `Limit` and `Offset`.
+* **Popular searches**: a `SearchRecord` is one user's latest search for a query: its `Key` (`SearchKey`: whitespace collapsed, lower case), its `Text` as last typed (`SearchText`, at most `MaxSearchLength` = 100 characters), its `Voter` and `SearchedAt`. The record names no user: `Voter` is `SearchVoter`, a SHA-256 hash of the user's ID and the key, so that one user's searches cannot be gathered, and searching a query again replaces its record. `RankSearches` ranks the queries at a time: each user who searched one adds 1, halved for every `SearchHalfLife` (14 days) since, ties going to the query searched last, which also gives its spelling; a query is shown to a viewer once `MinSearchUsers` (2) users searched it, or the viewer did. Records are kept for `SearchRetention` (90 days), at most `MaxSearchRecords` (10,000), the newest.
 
 ---
 

@@ -57,6 +57,7 @@ type Store interface {
 	Issues() IssueRepository
 	BlockedTitles() BlockedTitleRepository
 	StorageJobs() StorageJobRepository
+	Searches() SearchRepository
 
 	// InTx runs fn in a transaction. The Store passed to fn is bound to the
 	// transaction; fn's error rolls it back.
@@ -294,6 +295,19 @@ type APIKeyRepository interface {
 	// Touch records a use.
 	Touch(ctx context.Context, id ID, at time.Time) error
 	Delete(ctx context.Context, id ID) error
+}
+
+// SearchRepository stores the searches that rank a server's popular
+// searches (SearchRecord).
+type SearchRepository interface {
+	// Record stores a search, replacing the voter's record of its key.
+	Record(ctx context.Context, r *SearchRecord) error
+	// List lists the records searched at or after since, newest first, at
+	// most limit (0 meaning MaxSearchRecords).
+	List(ctx context.Context, since time.Time, limit int) ([]SearchRecord, error)
+	// Prune deletes the records searched before before and all but the
+	// newest keep, and reports how many it deleted.
+	Prune(ctx context.Context, before time.Time, keep int) (int, error)
 }
 
 // InvitationRepository stores invitation links.

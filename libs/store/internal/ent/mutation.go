@@ -50,6 +50,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
+	"github.com/mavioai/mavio/libs/store/internal/ent/searchrecord"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleblocklistentry"
@@ -110,6 +111,7 @@ const (
 	TypeQualityProfile            = "QualityProfile"
 	TypeReleaseProfile            = "ReleaseProfile"
 	TypeRequest                   = "Request"
+	TypeSearchRecord              = "SearchRecord"
 	TypeSetting                   = "Setting"
 	TypeStorageJob                = "StorageJob"
 	TypeSubtitleBlocklistEntry    = "SubtitleBlocklistEntry"
@@ -38750,6 +38752,500 @@ func (m *RequestMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Request edge %s", name)
+}
+
+// SearchRecordMutation represents an operation that mutates the SearchRecord nodes in the graph.
+type SearchRecordMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *core.ID
+	query         *string
+	text          *string
+	voter         *string
+	searched_at   *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*SearchRecord, error)
+	predicates    []predicate.SearchRecord
+}
+
+var _ ent.Mutation = (*SearchRecordMutation)(nil)
+
+// searchrecordOption allows management of the mutation configuration using functional options.
+type searchrecordOption func(*SearchRecordMutation)
+
+// newSearchRecordMutation creates new mutation for the SearchRecord entity.
+func newSearchRecordMutation(c config, op Op, opts ...searchrecordOption) *SearchRecordMutation {
+	m := &SearchRecordMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSearchRecord,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSearchRecordID sets the ID field of the mutation.
+func withSearchRecordID(id core.ID) searchrecordOption {
+	return func(m *SearchRecordMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SearchRecord
+		)
+		m.oldValue = func(ctx context.Context) (*SearchRecord, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SearchRecord.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSearchRecord sets the old SearchRecord of the mutation.
+func withSearchRecord(node *SearchRecord) searchrecordOption {
+	return func(m *SearchRecordMutation) {
+		m.oldValue = func(context.Context) (*SearchRecord, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SearchRecordMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SearchRecordMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SearchRecord entities.
+func (m *SearchRecordMutation) SetID(id core.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SearchRecordMutation) ID() (id core.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SearchRecordMutation) IDs(ctx context.Context) ([]core.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []core.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SearchRecord.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetQuery sets the "query" field.
+func (m *SearchRecordMutation) SetQuery(s string) {
+	m.query = &s
+}
+
+// Query returns the value of the "query" field in the mutation.
+func (m *SearchRecordMutation) Query() (r string, exists bool) {
+	v := m.query
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQuery returns the old "query" field's value of the SearchRecord entity.
+// If the SearchRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SearchRecordMutation) OldQuery(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQuery is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQuery requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQuery: %w", err)
+	}
+	return oldValue.Query, nil
+}
+
+// ResetQuery resets all changes to the "query" field.
+func (m *SearchRecordMutation) ResetQuery() {
+	m.query = nil
+}
+
+// SetText sets the "text" field.
+func (m *SearchRecordMutation) SetText(s string) {
+	m.text = &s
+}
+
+// Text returns the value of the "text" field in the mutation.
+func (m *SearchRecordMutation) Text() (r string, exists bool) {
+	v := m.text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldText returns the old "text" field's value of the SearchRecord entity.
+// If the SearchRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SearchRecordMutation) OldText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldText: %w", err)
+	}
+	return oldValue.Text, nil
+}
+
+// ResetText resets all changes to the "text" field.
+func (m *SearchRecordMutation) ResetText() {
+	m.text = nil
+}
+
+// SetVoter sets the "voter" field.
+func (m *SearchRecordMutation) SetVoter(s string) {
+	m.voter = &s
+}
+
+// Voter returns the value of the "voter" field in the mutation.
+func (m *SearchRecordMutation) Voter() (r string, exists bool) {
+	v := m.voter
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVoter returns the old "voter" field's value of the SearchRecord entity.
+// If the SearchRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SearchRecordMutation) OldVoter(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVoter is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVoter requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVoter: %w", err)
+	}
+	return oldValue.Voter, nil
+}
+
+// ResetVoter resets all changes to the "voter" field.
+func (m *SearchRecordMutation) ResetVoter() {
+	m.voter = nil
+}
+
+// SetSearchedAt sets the "searched_at" field.
+func (m *SearchRecordMutation) SetSearchedAt(t time.Time) {
+	m.searched_at = &t
+}
+
+// SearchedAt returns the value of the "searched_at" field in the mutation.
+func (m *SearchRecordMutation) SearchedAt() (r time.Time, exists bool) {
+	v := m.searched_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSearchedAt returns the old "searched_at" field's value of the SearchRecord entity.
+// If the SearchRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SearchRecordMutation) OldSearchedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSearchedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSearchedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSearchedAt: %w", err)
+	}
+	return oldValue.SearchedAt, nil
+}
+
+// ResetSearchedAt resets all changes to the "searched_at" field.
+func (m *SearchRecordMutation) ResetSearchedAt() {
+	m.searched_at = nil
+}
+
+// Where appends a list predicates to the SearchRecordMutation builder.
+func (m *SearchRecordMutation) Where(ps ...predicate.SearchRecord) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SearchRecordMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SearchRecordMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SearchRecord, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SearchRecordMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SearchRecordMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SearchRecord).
+func (m *SearchRecordMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SearchRecordMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.query != nil {
+		fields = append(fields, searchrecord.FieldQuery)
+	}
+	if m.text != nil {
+		fields = append(fields, searchrecord.FieldText)
+	}
+	if m.voter != nil {
+		fields = append(fields, searchrecord.FieldVoter)
+	}
+	if m.searched_at != nil {
+		fields = append(fields, searchrecord.FieldSearchedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SearchRecordMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case searchrecord.FieldQuery:
+		return m.Query()
+	case searchrecord.FieldText:
+		return m.Text()
+	case searchrecord.FieldVoter:
+		return m.Voter()
+	case searchrecord.FieldSearchedAt:
+		return m.SearchedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SearchRecordMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case searchrecord.FieldQuery:
+		return m.OldQuery(ctx)
+	case searchrecord.FieldText:
+		return m.OldText(ctx)
+	case searchrecord.FieldVoter:
+		return m.OldVoter(ctx)
+	case searchrecord.FieldSearchedAt:
+		return m.OldSearchedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown SearchRecord field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SearchRecordMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case searchrecord.FieldQuery:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQuery(v)
+		return nil
+	case searchrecord.FieldText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetText(v)
+		return nil
+	case searchrecord.FieldVoter:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVoter(v)
+		return nil
+	case searchrecord.FieldSearchedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSearchedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SearchRecord field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SearchRecordMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SearchRecordMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SearchRecordMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SearchRecord numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SearchRecordMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SearchRecordMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SearchRecordMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown SearchRecord nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SearchRecordMutation) ResetField(name string) error {
+	switch name {
+	case searchrecord.FieldQuery:
+		m.ResetQuery()
+		return nil
+	case searchrecord.FieldText:
+		m.ResetText()
+		return nil
+	case searchrecord.FieldVoter:
+		m.ResetVoter()
+		return nil
+	case searchrecord.FieldSearchedAt:
+		m.ResetSearchedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown SearchRecord field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SearchRecordMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SearchRecordMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SearchRecordMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SearchRecordMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SearchRecordMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SearchRecordMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SearchRecordMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown SearchRecord unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SearchRecordMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown SearchRecord edge %s", name)
 }
 
 // SettingMutation represents an operation that mutates the Setting nodes in the graph.

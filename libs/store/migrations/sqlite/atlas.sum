@@ -1,4 +1,4 @@
-h1:r8uldn7FSnmh31QiAJUdi9QCxKGCedETWZ4OdUeLKTo=
+h1:c/XobbHXuLk2cO7FBfH6Yjaomgsz3+ge3EDe5gJAR1s=
 20261015150610_init.sql h1:ZWckeu33J1aJsQOafEqBX7TX3Ngsic31TvlpvQy+nGs=
 20261016082144_user_home_layout.sql h1:OJEgL6GKDl6o4bqHhEU+QkRt9sCXuySNuapFoIcsuZs=
 20261017070834_plugin_containers.sql h1:mCf1B0BzKqtmcGIxbxtemIJqbX/mkqLdInLDzLC47IM=
@@ -9,3 +9,4 @@ h1:r8uldn7FSnmh31QiAJUdi9QCxKGCedETWZ4OdUeLKTo=
 20261022031228_plugin_container_folders.sql h1:z4IKY+/HUwSrnUnWrWBziTiIWCd//nkRiVioRPxyIOQ=
 20261022125156_item_localizations.sql h1:k+/S3qJ2OIhOSULVIWMyWxJ5ACCYPoiW1uzuYT+Y5Q8=
 20261022141949_person_details_fetched_at.sql h1:kA6m33JIiBhNkAA9UW/a0pSp2DabvMvSaXxSYCyjLp0=
+20261115135833_search_records.sql h1:y1cGxItbqy4lfmwoc98ZH50aqrTCu8GnOuJIWhwTUxA=

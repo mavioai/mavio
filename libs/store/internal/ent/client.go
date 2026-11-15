@@ -53,6 +53,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/request"
+	"github.com/mavioai/mavio/libs/store/internal/ent/searchrecord"
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 	"github.com/mavioai/mavio/libs/store/internal/ent/storagejob"
 	"github.com/mavioai/mavio/libs/store/internal/ent/subtitleblocklistentry"
@@ -146,6 +147,8 @@ type Client struct {
 	ReleaseProfile *ReleaseProfileClient
 	// Request is the client for interacting with the Request builders.
 	Request *RequestClient
+	// SearchRecord is the client for interacting with the SearchRecord builders.
+	SearchRecord *SearchRecordClient
 	// Setting is the client for interacting with the Setting builders.
 	Setting *SettingClient
 	// StorageJob is the client for interacting with the StorageJob builders.
@@ -218,6 +221,7 @@ func (c *Client) init() {
 	c.QualityProfile = NewQualityProfileClient(c.config)
 	c.ReleaseProfile = NewReleaseProfileClient(c.config)
 	c.Request = NewRequestClient(c.config)
+	c.SearchRecord = NewSearchRecordClient(c.config)
 	c.Setting = NewSettingClient(c.config)
 	c.StorageJob = NewStorageJobClient(c.config)
 	c.SubtitleBlocklistEntry = NewSubtitleBlocklistEntryClient(c.config)
@@ -359,6 +363,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		QualityProfile:            NewQualityProfileClient(cfg),
 		ReleaseProfile:            NewReleaseProfileClient(cfg),
 		Request:                   NewRequestClient(cfg),
+		SearchRecord:              NewSearchRecordClient(cfg),
 		Setting:                   NewSettingClient(cfg),
 		StorageJob:                NewStorageJobClient(cfg),
 		SubtitleBlocklistEntry:    NewSubtitleBlocklistEntryClient(cfg),
@@ -427,6 +432,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		QualityProfile:            NewQualityProfileClient(cfg),
 		ReleaseProfile:            NewReleaseProfileClient(cfg),
 		Request:                   NewRequestClient(cfg),
+		SearchRecord:              NewSearchRecordClient(cfg),
 		Setting:                   NewSettingClient(cfg),
 		StorageJob:                NewStorageJobClient(cfg),
 		SubtitleBlocklistEntry:    NewSubtitleBlocklistEntryClient(cfg),
@@ -475,9 +481,10 @@ func (c *Client) Use(hooks ...Hook) {
 		c.ItemLink, c.ItemLocalization, c.ItemValue, c.Job, c.Library, c.MediaSegment,
 		c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig, c.PluginContainer,
 		c.Proxy, c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.Request,
-		c.Setting, c.StorageJob, c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent,
-		c.SubtitleProfile, c.SubtitleProfileAssignment, c.SubtitleSearchAttempt,
-		c.SubtitleWanted, c.Trickplay, c.User, c.UserData, c.Wanted,
+		c.SearchRecord, c.Setting, c.StorageJob, c.SubtitleBlocklistEntry,
+		c.SubtitleHistoryEvent, c.SubtitleProfile, c.SubtitleProfileAssignment,
+		c.SubtitleSearchAttempt, c.SubtitleWanted, c.Trickplay, c.User, c.UserData,
+		c.Wanted,
 	} {
 		n.Use(hooks...)
 	}
@@ -494,9 +501,10 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.ItemLink, c.ItemLocalization, c.ItemValue, c.Job, c.Library, c.MediaSegment,
 		c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig, c.PluginContainer,
 		c.Proxy, c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.Request,
-		c.Setting, c.StorageJob, c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent,
-		c.SubtitleProfile, c.SubtitleProfileAssignment, c.SubtitleSearchAttempt,
-		c.SubtitleWanted, c.Trickplay, c.User, c.UserData, c.Wanted,
+		c.SearchRecord, c.Setting, c.StorageJob, c.SubtitleBlocklistEntry,
+		c.SubtitleHistoryEvent, c.SubtitleProfile, c.SubtitleProfileAssignment,
+		c.SubtitleSearchAttempt, c.SubtitleWanted, c.Trickplay, c.User, c.UserData,
+		c.Wanted,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -579,6 +587,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ReleaseProfile.mutate(ctx, m)
 	case *RequestMutation:
 		return c.Request.mutate(ctx, m)
+	case *SearchRecordMutation:
+		return c.SearchRecord.mutate(ctx, m)
 	case *SettingMutation:
 		return c.Setting.mutate(ctx, m)
 	case *StorageJobMutation:
@@ -6553,6 +6563,139 @@ func (c *RequestClient) mutate(ctx context.Context, m *RequestMutation) (Value, 
 	}
 }
 
+// SearchRecordClient is a client for the SearchRecord schema.
+type SearchRecordClient struct {
+	config
+}
+
+// NewSearchRecordClient returns a client for the SearchRecord from the given config.
+func NewSearchRecordClient(c config) *SearchRecordClient {
+	return &SearchRecordClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `searchrecord.Hooks(f(g(h())))`.
+func (c *SearchRecordClient) Use(hooks ...Hook) {
+	c.hooks.SearchRecord = append(c.hooks.SearchRecord, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `searchrecord.Intercept(f(g(h())))`.
+func (c *SearchRecordClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SearchRecord = append(c.inters.SearchRecord, interceptors...)
+}
+
+// Create returns a builder for creating a SearchRecord entity.
+func (c *SearchRecordClient) Create() *SearchRecordCreate {
+	mutation := newSearchRecordMutation(c.config, OpCreate)
+	return &SearchRecordCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SearchRecord entities.
+func (c *SearchRecordClient) CreateBulk(builders ...*SearchRecordCreate) *SearchRecordCreateBulk {
+	return &SearchRecordCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SearchRecordClient) MapCreateBulk(slice any, setFunc func(*SearchRecordCreate, int)) *SearchRecordCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SearchRecordCreateBulk{err: fmt.Errorf("calling to SearchRecordClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SearchRecordCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SearchRecordCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SearchRecord.
+func (c *SearchRecordClient) Update() *SearchRecordUpdate {
+	mutation := newSearchRecordMutation(c.config, OpUpdate)
+	return &SearchRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SearchRecordClient) UpdateOne(_m *SearchRecord) *SearchRecordUpdateOne {
+	mutation := newSearchRecordMutation(c.config, OpUpdateOne, withSearchRecord(_m))
+	return &SearchRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SearchRecordClient) UpdateOneID(id core.ID) *SearchRecordUpdateOne {
+	mutation := newSearchRecordMutation(c.config, OpUpdateOne, withSearchRecordID(id))
+	return &SearchRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SearchRecord.
+func (c *SearchRecordClient) Delete() *SearchRecordDelete {
+	mutation := newSearchRecordMutation(c.config, OpDelete)
+	return &SearchRecordDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SearchRecordClient) DeleteOne(_m *SearchRecord) *SearchRecordDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SearchRecordClient) DeleteOneID(id core.ID) *SearchRecordDeleteOne {
+	builder := c.Delete().Where(searchrecord.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SearchRecordDeleteOne{builder}
+}
+
+// Query returns a query builder for SearchRecord.
+func (c *SearchRecordClient) Query() *SearchRecordQuery {
+	return &SearchRecordQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSearchRecord},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SearchRecord entity by its id.
+func (c *SearchRecordClient) Get(ctx context.Context, id core.ID) (*SearchRecord, error) {
+	return c.Query().Where(searchrecord.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SearchRecordClient) GetX(ctx context.Context, id core.ID) *SearchRecord {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SearchRecordClient) Hooks() []Hook {
+	return c.hooks.SearchRecord
+}
+
+// Interceptors returns the client interceptors.
+func (c *SearchRecordClient) Interceptors() []Interceptor {
+	return c.inters.SearchRecord
+}
+
+func (c *SearchRecordClient) mutate(ctx context.Context, m *SearchRecordMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SearchRecordCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SearchRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SearchRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SearchRecordDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SearchRecord mutation op: %q", m.Op())
+	}
+}
+
 // SettingClient is a client for the Setting schema.
 type SettingClient struct {
 	config
@@ -8542,9 +8685,10 @@ type (
 		IssueComment, Item, ItemLink, ItemLocalization, ItemValue, Job, Library,
 		MediaSegment, MediaSource, PendingRelease, Person, PluginConfig,
 		PluginContainer, Proxy, QualityDefinition, QualityProfile, ReleaseProfile,
-		Request, Setting, StorageJob, SubtitleBlocklistEntry, SubtitleHistoryEvent,
-		SubtitleProfile, SubtitleProfileAssignment, SubtitleSearchAttempt,
-		SubtitleWanted, Trickplay, User, UserData, Wanted []ent.Hook
+		Request, SearchRecord, Setting, StorageJob, SubtitleBlocklistEntry,
+		SubtitleHistoryEvent, SubtitleProfile, SubtitleProfileAssignment,
+		SubtitleSearchAttempt, SubtitleWanted, Trickplay, User, UserData,
+		Wanted []ent.Hook
 	}
 	inters struct {
 		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credential, Credit,
@@ -8553,8 +8697,9 @@ type (
 		IssueComment, Item, ItemLink, ItemLocalization, ItemValue, Job, Library,
 		MediaSegment, MediaSource, PendingRelease, Person, PluginConfig,
 		PluginContainer, Proxy, QualityDefinition, QualityProfile, ReleaseProfile,
-		Request, Setting, StorageJob, SubtitleBlocklistEntry, SubtitleHistoryEvent,
-		SubtitleProfile, SubtitleProfileAssignment, SubtitleSearchAttempt,
-		SubtitleWanted, Trickplay, User, UserData, Wanted []ent.Interceptor
+		Request, SearchRecord, Setting, StorageJob, SubtitleBlocklistEntry,
+		SubtitleHistoryEvent, SubtitleProfile, SubtitleProfileAssignment,
+		SubtitleSearchAttempt, SubtitleWanted, Trickplay, User, UserData,
+		Wanted []ent.Interceptor
 	}
 )

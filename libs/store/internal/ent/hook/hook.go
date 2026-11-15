@@ -453,6 +453,18 @@ func (f RequestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RequestMutation", m)
 }
 
+// The SearchRecordFunc type is an adapter to allow the use of ordinary
+// function as SearchRecord mutator.
+type SearchRecordFunc func(context.Context, *ent.SearchRecordMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SearchRecordFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SearchRecordMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SearchRecordMutation", m)
+}
+
 // The SettingFunc type is an adapter to allow the use of ordinary
 // function as Setting mutator.
 type SettingFunc func(context.Context, *ent.SettingMutation) (ent.Value, error)

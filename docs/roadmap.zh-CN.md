@@ -676,7 +676,7 @@ flowchart TD
   - [ ] 离线保存查询缓存
   - [ ] 组件的 Storybook
   - [ ] 登录与首页以外页面的快照测试
-  - [ ] 热门搜索：各服务器记录并排名的搜索词，电视的搜索在未输入时显示它们，目前那里显示首页的各行
+  - [x] 热门搜索：各服务器记录并排名的搜索词（打开结果时调用 `ItemService.RecordSearch`，`ListPopularSearches`，`core.SearchRecord` 存于 `search_records`，由每日清理修剪），电视的搜索在未输入时以合并各服务器的药丸按钮显示它们，没有时显示首页的各行（`apps/web/src/screens/search.tsx`、`libs/client-ts/src/popular.ts`）
   - [x] 播放器的进度条按 [客户端 §6.5](clients.zh-CN.md)：章节标记，指针所在时间上方显示 trickplay 拼图的缩略图与章节名，上方放不下时放到进度条下方；拖动时暂停，松开后继续播放
   - [x] 播放器在静音旁加音量，以及音量、倍速与跳转的简短提示，立即出现、一秒后消失；滚轮与触控板横向跳转、纵向调音量，轴向在手势开始时确定
   - [x] 播放器面板中的字幕偏移（[客户端 §6.5](clients.zh-CN.md)），以及浏览器提供 `setSinkId` 时的音频输出设备

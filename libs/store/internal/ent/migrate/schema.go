@@ -1353,6 +1353,32 @@ var (
 			},
 		},
 	}
+	// SearchRecordsColumns holds the columns for the "search_records" table.
+	SearchRecordsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "query", Type: field.TypeString, Size: 400},
+		{Name: "text", Type: field.TypeString, Size: 400},
+		{Name: "voter", Type: field.TypeString, Size: 64},
+		{Name: "searched_at", Type: field.TypeTime},
+	}
+	// SearchRecordsTable holds the schema information for the "search_records" table.
+	SearchRecordsTable = &schema.Table{
+		Name:       "search_records",
+		Columns:    SearchRecordsColumns,
+		PrimaryKey: []*schema.Column{SearchRecordsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "searchrecord_query_voter",
+				Unique:  true,
+				Columns: []*schema.Column{SearchRecordsColumns[1], SearchRecordsColumns[3]},
+			},
+			{
+				Name:    "searchrecord_searched_at",
+				Unique:  false,
+				Columns: []*schema.Column{SearchRecordsColumns[4]},
+			},
+		},
+	}
 	// SettingsColumns holds the columns for the "settings" table.
 	SettingsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -1775,6 +1801,7 @@ var (
 		QualityProfilesTable,
 		ReleaseProfilesTable,
 		RequestsTable,
+		SearchRecordsTable,
 		SettingsTable,
 		StorageJobsTable,
 		SubtitleBlocklistTable,
@@ -1933,6 +1960,9 @@ func init() {
 	RequestsTable.ForeignKeys[0].RefTable = UsersTable
 	RequestsTable.Annotation = &entsql.Annotation{
 		Table: "requests",
+	}
+	SearchRecordsTable.Annotation = &entsql.Annotation{
+		Table: "search_records",
 	}
 	SettingsTable.Annotation = &entsql.Annotation{
 		Table: "settings",
