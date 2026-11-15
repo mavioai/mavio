@@ -34309,6 +34309,60 @@
         }
       }
     },
+    "itemsubs.seriesProfileFooter": {
+      "comment": "Footer of a series' subtitle profile on its details.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The profile decides which languages the series' episodes should have; assigning one searches for the subtitles they lack."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配置决定该剧集的各集应有哪些语言；分配后会为它们搜索缺少的字幕。"
+          }
+        }
+      }
+    },
+    "itemsubs.inherited": {
+      "comment": "Choice of a movie's or series' subtitle profile that assigns none of its own and uses its library's, named in the parentheses.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Library's (%@)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "媒体库的（%@）"
+          }
+        }
+      }
+    },
+    "itemsubs.byTag": {
+      "comment": "Detail of an item's subtitle profile when its tags decide the profile in effect.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Its tags give it %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其标签使其使用 %@。"
+          }
+        }
+      }
+    },
     "itemsubs.missing": {
       "comment": "Languages the item's profile wants but it lacks.",
       "extractionState": "manual",

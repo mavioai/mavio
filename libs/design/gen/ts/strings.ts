@@ -1902,6 +1902,9 @@ export type MessageKey =
   | 'itemsubs.profile'
   | 'itemsubs.noProfile'
   | 'itemsubs.profileFooter'
+  | 'itemsubs.seriesProfileFooter'
+  | 'itemsubs.inherited'
+  | 'itemsubs.byTag'
   | 'itemsubs.missing'
   | 'itemsubs.search'
   | 'itemsubs.upload'
@@ -4242,6 +4245,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "itemsubs.profile": "Subtitle Profile",
     "itemsubs.noProfile": "None",
     "itemsubs.profileFooter": "The profile decides which languages the item should have; subtitles are searched for the missing ones automatically.",
+    "itemsubs.seriesProfileFooter": "The profile decides which languages the series' episodes should have; assigning one searches for the subtitles they lack.",
+    "itemsubs.inherited": "Library's ({profile})",
+    "itemsubs.byTag": "Its tags give it {profile}.",
     "itemsubs.missing": "Missing",
     "itemsubs.search": "Search",
     "itemsubs.upload": "Upload",
@@ -6580,6 +6586,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "itemsubs.profile": "字幕配置",
     "itemsubs.noProfile": "无",
     "itemsubs.profileFooter": "配置决定该条目应有哪些语言；缺少的语言会自动搜索字幕。",
+    "itemsubs.seriesProfileFooter": "配置决定该剧集的各集应有哪些语言；分配后会为它们搜索缺少的字幕。",
+    "itemsubs.inherited": "媒体库的（{profile}）",
+    "itemsubs.byTag": "其标签使其使用 {profile}。",
     "itemsubs.missing": "缺少",
     "itemsubs.search": "搜索",
     "itemsubs.upload": "上传",

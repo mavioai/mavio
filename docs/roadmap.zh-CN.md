@@ -758,7 +758,7 @@ flowchart TD
     - [x] Apple 应用与 Android 应用改用远端页面上的离线下载（`GetOfflineDownloads`、`UpdateOfflineDownloads`，每个远端一个，带下载文件夹），取代离线下载客户端（`ListOfflineClients`、`SetOfflineClients`），远端的文件夹写作 `remote:<remote>:<path>` 而非 `rclone:`
     - [x] Mac 应用中下载客户端的页面及其文件夹（`GetDownloadClientPaths`、`UpdateDownloadClientPaths`），取代 `ProfileService` 的远程路径映射
     - [x] 字幕（`apps/web/src/screens/admin/{subtitles,subtitle-settings}.tsx`、`libs/client-ts/src/subtitles.ts`）：字幕配置及其适用的媒体库、提供商与翻译器，以及搜索与保存、同步和翻译的设置（`SubtitleService`、`ListSubtitleProfileAssignments`）
-      - [ ] 在详情页为电影或剧集分配其自己的字幕配置（`AssignSubtitleProfile`）
+      - [x] 在详情页为电影或剧集分配其自己的字幕配置（`apps/web/src/screens/item-subtitles.tsx` 中的 `ProfileRow`，`libs/client-ts/src/subtitles.ts` 中的 `useItemSubtitleProfile` 与 `itemSubtitleProfile`）：它自己的或其媒体库的配置，以及其标签改为给它的配置（`AssignSubtitleProfile`、针对条目及其媒体库的 `ListSubtitleProfileAssignments`）
     - [x] AI（`apps/web/src/screens/admin/ai.tsx`、`libs/client-ts/src/ai.ts`）：AI 网关插件的提供商及其凭据、API 密钥、跟随显示并就地回答问题的登录、退出登录，以及模型（`AiProviderService`）
     - [x] 计划任务（`apps/web/src/screens/admin/tasks.tsx`）：计划任务、立即运行与作业（`TaskService`）
     - [x] 备份与日志（`apps/web/src/screens/admin/backups.tsx`、`libs/client-ts/src/backups.ts`）：创建、下载与删除备份，以及按级别、时间段与词筛选的最近日志记录（`BackupService`、`ListLogs`）

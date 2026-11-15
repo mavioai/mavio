@@ -51,6 +51,72 @@ export function useSubtitleAssignments(server: ServerEntry) {
   };
 }
 
+/** The profile a movie or series has: its own, its library's, and the one in effect once tags apply. */
+export interface ItemSubtitleProfile {
+  own?: SubtitleProfile;
+  library?: SubtitleProfile;
+  effective?: SubtitleProfile;
+  /** Whether the item's tags decided the profile in effect. */
+  byTag: boolean;
+}
+
+/**
+ * The profile in effect for a movie or series, as the server resolves it:
+ * the one assigned to it, else to its library, overridden, when the
+ * settings let tags assign profiles, by the first profile whose tag it has
+ * and removed by a no-profile tag.
+ */
+export function itemSubtitleProfile(
+  profiles: SubtitleProfile[],
+  assignments: ReadonlyMap<string, string>,
+  item: { id: string; libraryId: string; tags: string[] },
+  settings: Pick<SubtitleSettings, "movieProfileTags" | "seriesProfileTags" | "noProfileTags"> | undefined,
+  series: boolean,
+): ItemSubtitleProfile {
+  const find = (id?: string) => (id ? profiles.find((p) => p.id === id) : undefined);
+  const own = find(assignments.get(item.id));
+  const library = find(assignments.get(item.libraryId));
+  const assigned = assignments.has(item.id) ? own : library;
+  const hasTag = (tag: string) => tag !== "" && item.tags.some((x) => x.toLowerCase() === tag.toLowerCase());
+  if (!(series ? settings?.seriesProfileTags : settings?.movieProfileTags)) return { own, library, effective: assigned, byTag: false };
+  if (settings?.noProfileTags.some(hasTag)) return { own, library, effective: undefined, byTag: true };
+  const tagged = profiles.find((p) => hasTag(p.tag));
+  return tagged ? { own, library, effective: tagged, byTag: tagged.id !== assigned?.id } : { own, library, effective: assigned, byTag: false };
+}
+
+/**
+ * A movie's or series' subtitle profile (§6.3.21): the profiles, the
+ * assignments of it and its library, and assigning it one, or none to
+ * inherit its library's; assigning refreshes the subtitles of what it covers.
+ */
+export function useItemSubtitleProfile(server: ServerEntry, item: { id: string; libraryId: string; tags: string[] }, series: boolean) {
+  const servers = useServersStore();
+  const qc = useQueryClient();
+  const c = () => servers.client(SubtitleService, server);
+  const profiles = useSubtitleProfiles(server).list;
+  const settings = useSubtitleSettings(server).get;
+  const targets = [item.id, item.libraryId].filter(Boolean);
+  const assignments = useQuery({
+    queryKey: serverKey(server.id, "acquisition", "subtitle-assignments", targets),
+    queryFn: async () => new Map((await c().listSubtitleProfileAssignments({ targetIds: targets })).assignments.map((a) => [a.targetId, a.profileId])),
+  });
+  const assign = useMutation({
+    mutationFn: (profileId: string) => c().assignSubtitleProfile({ targetId: item.id, profileId }),
+    onSettled: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: serverKey(server.id, "acquisition", "subtitle-assignments") }),
+        qc.invalidateQueries({ queryKey: serverKey(server.id, "acquisition", "item-subtitles") }),
+      ]),
+  });
+  const ready = profiles.data && assignments.data && settings.data;
+  return {
+    profiles: profiles.data ?? [],
+    profile: ready ? itemSubtitleProfile(profiles.data!, assignments.data!, item, settings.data, series) : undefined,
+    error: profiles.error ?? assignments.error ?? settings.error ?? assign.error,
+    assign,
+  };
+}
+
 /** The subtitle settings and their replacement. */
 export function useSubtitleSettings(server: ServerEntry) {
   const servers = useServersStore();

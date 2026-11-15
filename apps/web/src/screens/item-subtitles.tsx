@@ -1,6 +1,6 @@
 // A movie's or episode's subtitles on its details, for administrators
-// (docs/clients.md §6.3.21): its subtitle profile and the languages it
-// lacks; the subtitles it has, each synchronized, modified, translated,
+// (docs/clients.md §6.3.21): its subtitle profile, a movie's or series'
+// own assigned in place, and the languages it lacks; the subtitles it has, each synchronized, modified, translated,
 // extracted or deleted; the providers' subtitles searched and downloaded;
 // and a subtitle file uploaded.
 import type { MessageInitShape } from "@bufbuild/protobuf";
@@ -10,6 +10,7 @@ import {
   useAdminServers,
   useAiModels,
   useItemSubtitleActions,
+  useItemSubtitleProfile,
   useItemSubtitles,
   useSubtitleSearch,
   useSubtitleTranslators,
@@ -41,11 +42,53 @@ function specLabel(s?: Spec | SubtitleLanguageSpec): string {
 
 const fileName = (path: string) => path.slice(path.lastIndexOf("/") + 1);
 
-/** The item's subtitles, when the user administers its server and it is a movie or an episode. */
+/** The item's subtitles, when the user administers its server and it is a movie or an episode; a series' subtitle profile. */
 export function ItemSubtitles({ server, item }: { server: ServerEntry; item: Item }) {
   const admin = useAdminServers().some((s) => s.id === server.id);
-  if (!admin || (item.kind !== ItemKind.MOVIE && item.kind !== ItemKind.EPISODE)) return null;
+  if (!admin) return null;
+  if (item.kind === ItemKind.SERIES)
+    return (
+      <section className="flex flex-col gap-4 px-margin pt-8">
+        <h2 className="type-title3">{t("itemsubs.title")}</h2>
+        <div className="flex max-w-3xl flex-col gap-6">
+          <Group footer={t("itemsubs.seriesProfileFooter")}>
+            <ProfileRow server={server} item={item} />
+          </Group>
+        </div>
+      </section>
+    );
+  if (item.kind !== ItemKind.MOVIE && item.kind !== ItemKind.EPISODE) return null;
   return <SubtitlesPanel server={server} item={item} />;
+}
+
+/**
+ * A movie's or series' subtitle profile, chosen in place: its own, or its
+ * library's when it has none, with the one its tags give it instead.
+ */
+function ProfileRow({ server, item }: { server: ServerEntry; item: Item }) {
+  const { profiles, profile, error, assign } = useItemSubtitleProfile(server, item, item.kind === ItemKind.SERIES);
+  const name = (p?: { name: string }) => p?.name || t("itemsubs.noProfile");
+  const options = [
+    { value: "", label: t("itemsubs.inherited", { profile: name(profile?.library) }) },
+    ...profiles.toSorted((a, b) => a.name.localeCompare(b.name, locale)).map((p) => ({ value: p.id, label: p.name })),
+  ];
+  return (
+    <div className="flex flex-col gap-1 px-4 py-2">
+      <div className="flex min-h-10 flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <span className="type-body">{t("itemsubs.profile")}</span>
+        <Select
+          value={(assign.isPending ? assign.variables : undefined) ?? profile?.own?.id ?? ""}
+          label={t("itemsubs.profile")}
+          className="w-56"
+          options={options}
+          disabled={!profile || assign.isPending}
+          onChange={(profileId) => assign.mutate(profileId)}
+        />
+      </div>
+      {profile?.byTag && <p className="type-footnote text-text-secondary">{t("itemsubs.byTag", { profile: name(profile.effective) })}</p>}
+      {error && <p className="type-footnote break-words text-danger">{errorMessage(error)}</p>}
+    </div>
+  );
 }
 
 function SubtitlesPanel({ server, item }: { server: ServerEntry; item: Item }) {
@@ -61,10 +104,14 @@ function SubtitlesPanel({ server, item }: { server: ServerEntry; item: Item }) {
         {subs.isError && <p className="type-callout break-words text-danger">{errorMessage(subs.error)}</p>}
         {data && (
           <Group footer={t("itemsubs.profileFooter")}>
-            <div className="flex min-h-12 flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 py-2">
-              <span className="type-body">{t("itemsubs.profile")}</span>
-              <span className="type-callout text-text-secondary">{data.profile?.name || t("itemsubs.noProfile")}</span>
-            </div>
+            {item.kind === ItemKind.MOVIE ? (
+              <ProfileRow server={server} item={item} />
+            ) : (
+              <div className="flex min-h-12 flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 py-2">
+                <span className="type-body">{t("itemsubs.profile")}</span>
+                <span className="type-callout text-text-secondary">{data.profile?.name || t("itemsubs.noProfile")}</span>
+              </div>
+            )}
             {data.missing.length > 0 && (
               <div className="flex min-h-12 flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 py-2">
                 <span className="type-body">{t("itemsubs.missing")}</span>

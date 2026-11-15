@@ -184,7 +184,10 @@ export {
   useUpdateDownloadClientPaths,
 } from "./profiles.ts";
 export {
+  type ItemSubtitleProfile,
+  itemSubtitleProfile,
   useItemSubtitleActions,
+  useItemSubtitleProfile,
   useItemSubtitles,
   useSubtitleAssignments,
   useSubtitleProfiles,

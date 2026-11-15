@@ -6010,6 +6010,19 @@ public enum MavioStrings {
     /// Footer of the item's subtitle profile.
     public static var itemsubsProfileFooter: String { NSLocalizedString("itemsubs.profileFooter", bundle: .module, comment: "") }
 
+    /// Footer of a series' subtitle profile on its details.
+    public static var itemsubsSeriesProfileFooter: String { NSLocalizedString("itemsubs.seriesProfileFooter", bundle: .module, comment: "") }
+
+    /// Choice of a movie's or series' subtitle profile that assigns none of its own and uses its library's, named in the parentheses.
+    public static func itemsubsInherited(profile: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("itemsubs.inherited", bundle: .module, comment: ""), profile)
+    }
+
+    /// Detail of an item's subtitle profile when its tags decide the profile in effect.
+    public static func itemsubsByTag(profile: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("itemsubs.byTag", bundle: .module, comment: ""), profile)
+    }
+
     /// Languages the item's profile wants but it lacks.
     public static var itemsubsMissing: String { NSLocalizedString("itemsubs.missing", bundle: .module, comment: "") }
 

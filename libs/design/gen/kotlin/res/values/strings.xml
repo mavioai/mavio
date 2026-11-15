@@ -3833,6 +3833,12 @@
     <string name="itemsubs_no_profile">None</string>
     <!-- Footer of the item's subtitle profile. -->
     <string name="itemsubs_profile_footer">The profile decides which languages the item should have; subtitles are searched for the missing ones automatically.</string>
+    <!-- Footer of a series' subtitle profile on its details. -->
+    <string name="itemsubs_series_profile_footer">The profile decides which languages the series\' episodes should have; assigning one searches for the subtitles they lack.</string>
+    <!-- Choice of a movie's or series' subtitle profile that assigns none of its own and uses its library's, named in the parentheses. -->
+    <string name="itemsubs_inherited">Library\'s (%s)</string>
+    <!-- Detail of an item's subtitle profile when its tags decide the profile in effect. -->
+    <string name="itemsubs_by_tag">Its tags give it %s.</string>
     <!-- Languages the item's profile wants but it lacks. -->
     <string name="itemsubs_missing">Missing</string>
     <!-- Searches the providers for the item's subtitles. -->

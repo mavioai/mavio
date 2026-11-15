@@ -1927,6 +1927,9 @@
     <string name="itemsubs_profile">字幕配置</string>
     <string name="itemsubs_no_profile">无</string>
     <string name="itemsubs_profile_footer">配置决定该条目应有哪些语言；缺少的语言会自动搜索字幕。</string>
+    <string name="itemsubs_series_profile_footer">配置决定该剧集的各集应有哪些语言；分配后会为它们搜索缺少的字幕。</string>
+    <string name="itemsubs_inherited">媒体库的（%s）</string>
+    <string name="itemsubs_by_tag">其标签使其使用 %s。</string>
     <string name="itemsubs_missing">缺少</string>
     <string name="itemsubs_search">搜索</string>
     <string name="itemsubs_upload">上传</string>
