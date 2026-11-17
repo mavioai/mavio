@@ -1,5 +1,5 @@
 // A mavio.dev for tests: the API over PGlite, called in process.
-import { fileURLToPath } from "node:url";
+import { readFile } from "node:fs/promises";
 
 import { PGlite } from "@electric-sql/pglite";
 import type { DescService } from "@bufbuild/protobuf";
@@ -9,7 +9,7 @@ import { AccountService } from "@mavio/proto/mavio/cloud/v1/account_pb";
 import { ServerService } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/pglite";
-import { migrate } from "drizzle-orm/pglite/migrator";
+import { inject } from "vitest";
 
 import { handleApi } from "../src/server/api.ts";
 import type { Stripe } from "../src/server/billing.ts";
@@ -27,17 +27,11 @@ export const relaySecret = new TextEncoder().encode("0123456789abcdef0123456789a
 let migrated: Promise<Blob> | undefined;
 
 /**
- * emptyDatabase returns the data directory of an empty database, migrated once for the test file: starting PGlite
- * from it is several times faster than starting it empty and migrating, which slow machines need.
+ * emptyDatabase returns the data directory of an empty database, migrated once for the run by setup.ts: starting
+ * PGlite from it is several times faster than starting it empty and migrating, which slow machines need.
  */
 function emptyDatabase() {
-  migrated ??= (async () => {
-    const pg = new PGlite();
-    await migrate(drizzle(pg), { migrationsFolder: fileURLToPath(new URL("../drizzle", import.meta.url)) });
-    const dir = await pg.dumpDataDir("none");
-    await pg.close();
-    return dir;
-  })();
+  migrated ??= readFile(inject("database")).then((bytes) => new Blob([bytes]));
   return migrated;
 }
 
